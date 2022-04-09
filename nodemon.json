@@ -4,9 +4,8 @@
         ".git"
     ],
     "watch": [
-        "templates/*",
         "static/*",
-        "app/*"
+        "main.go"
     ],
     "ext": "go,js,json,html,css"
 }
