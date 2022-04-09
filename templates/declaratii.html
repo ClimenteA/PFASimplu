@@ -1,0 +1,39 @@
+<main class="container">
+
+    <hgroup class="container">
+        <h1>Adauga declaratii</h1>
+        <h2>
+            Adauga declaratiile depuse la ANAF si dovezile de plata impozite.
+        </h2>
+    </hgroup>
+
+
+    <form action="/adauga-declaratii" method="POST" enctype="multipart/form-data">
+
+        <article>
+
+            <h5 style="color: var(--secondary);">Adauga declaratii</h5>
+
+
+            <div class="grid">
+
+                <label for="file">
+                    Incarca declaratie/dovada plata impozite
+                    <input type="file" id="file" name="fisier" required>
+                </label>
+
+                <label for="data">
+                    Data document
+                    <input type="date" id="data" name="data" required>
+                </label>
+
+            </div>
+
+            <button type="submit">ADAUGA</button>
+
+        </article>
+
+    </form>
+
+
+</main>

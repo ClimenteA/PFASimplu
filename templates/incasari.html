@@ -1,0 +1,60 @@
+<main class="container">
+
+    <hgroup class="container">
+        <h1>Adauga incasari</h1>
+        <h2>
+            Adauga documentele justificative pentru incasarile primite <strong>in format pdf/png/jpg</strong>.
+        </h2>
+    </hgroup>
+
+
+    <form action="/adauga-incasari" method="POST" enctype="multipart/form-data">
+
+        <article>
+
+            <h5 style="color: var(--secondary);">Adauga incasare</h5>
+
+
+            <div class="grid">
+
+                <label for="serie">
+                    Serie factura
+                    <input style="text-transform:uppercase" type="text" id="serie" name="serie" value=""
+                        placeholder="INV" required>
+                </label>
+
+                <label for="numar">
+                    Numar factura
+                    <input type="number" id="numar" min=0 name="numar" value="" placeholder="123" required>
+                </label>
+
+            </div>
+
+
+            <div class="grid">
+
+                <label for="suma_incasata">
+                    Suma incasata (RON)
+                    <input type="number" id="suma_incasata" step=any name="suma_incasata" placeholder="5000" required>
+                </label>
+
+                <label for="data">
+                    Data factura
+                    <input type="date" id="data" name="data" required>
+                </label>
+
+            </div>
+
+            <label for="file">
+                Incarca factura
+                <input type="file" id="file" name="fisier" required>
+            </label>
+
+            <button type="submit">ADAUGA</button>
+
+
+        </article>
+    </form>
+
+
+</main>

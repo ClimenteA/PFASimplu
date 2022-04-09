@@ -25,9 +25,36 @@ func main() {
 	app.Static("/", "./static")
 
 	app.Get("/", func(c *fiber.Ctx) error {
-		return c.Render("index", fiber.Map{
-			"Title": "Hello, World!",
-		}, "base")
+		return c.Render("index", fiber.Map{}, "base")
+	})
+
+	// INCASARI
+	app.Get("/adauga-incasari", func(c *fiber.Ctx) error {
+		return c.Render("incasari", fiber.Map{}, "base")
+	})
+
+	app.Post("/adauga-incasari", func(c *fiber.Ctx) error {
+		return c.Render("incasari", fiber.Map{}, "base")
+	})
+
+	// CHELTUIELI
+
+	app.Get("/adauga-cheltuieli", func(c *fiber.Ctx) error {
+		return c.Render("cheltuieli", fiber.Map{}, "base")
+	})
+
+	app.Post("/adauga-cheltuieli", func(c *fiber.Ctx) error {
+		return c.Render("cheltuieli", fiber.Map{}, "base")
+	})
+
+	// DECLARATII
+
+	app.Get("/adauga-declaratii", func(c *fiber.Ctx) error {
+		return c.Render("declaratii", fiber.Map{}, "base")
+	})
+
+	app.Post("/adauga-declaratii", func(c *fiber.Ctx) error {
+		return c.Render("declaratii", fiber.Map{}, "base")
 	})
 
 	log.Fatal(app.Listen(":3000"))

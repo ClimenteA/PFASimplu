@@ -1,13 +1,26 @@
-
 button {
     margin-top: 2rem;
 }
 
+form {
+    margin-top: 4rem;
+}
+
 .btn-add {
-    all:unset;
-    cursor:pointer;
-    padding:0.5rem;
-    background-color:lightgreen;
-    height:40px;
-    align-self:center;
+    all: unset;
+    cursor: pointer;
+    padding: 0.5rem;
+    background-color: lightgreen;
+    height: 40px;
+    align-self: center;
+}
+
+
+.article-grid {
+    padding-left: 40px;
+    padding-right: 40px;
+    padding-top: 40px;
+    padding-bottom: 40px;
+    margin-top: 20px;
+    margin-bottom: 20px;
 }
