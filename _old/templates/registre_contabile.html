@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/pico.min.css">
+  <link rel="stylesheet" href="/custom.css">
+  <style>
+    article {
+      margin-bottom: 1rem;
+      margin-top: 4rem;
+      padding: 1rem;
+      max-height: 600px;
+      overflow: auto;
+    }
+
+    .download {
+      display: flex;
+      gap: 2rem;
+      float: right;
+    }
+
+    tr td {
+      width: 1%;
+      white-space: nowrap;
+    }
+
+    .bg-whitesmoke {
+      background: whitesmoke;
+    }
+  </style>
+  <title>Bilipa</title>
+</head>
+
+<body>
+
+  <nav class="container-fluid">
+    <ul>
+      <a href="/">
+        <li><button><strong>Bilipa</strong></button></li>
+      </a>
+    </ul>
+    <ul>
+      <a href="/">
+        <li><a href="/logout">
+            Iesi din cont
+            <svg xmlns="http://www.w3.org/2000/svg" style="width:16px;height:16px" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+          </a></li>
+      </a>
+    </ul>
+  </nav>
+
+
+  <main class="container-fluid">
+
+    <hgroup class="container">
+      <h1>Registre contabile</h1>
+      <h2>
+        Vezi registrele contabile generate automat din actiunile facute de tine in aplicatie.
+      </h2>
+    </hgroup>
+
+
+    <div class="container-fluid">
+
+      <article>
+        <h4 style="color: var(--secondary);">Registru jurnal</h4>
+        <table>
+
+          <thead>
+            <tr class="bg-whitesmoke">
+              <% for (let th of registruJurnal[0]) { %>
+                <th scope="col">
+                  <% th %>
+                </th>
+                <% } %>
+                  <th>Download fisier</th>
+                  <th>Sterge fisier</th>
+            </tr>
+
+          </thead>
+
+          <tbody>
+            <% for (let tr of registruJurnal.splice(1,)) { %>
+              <% if (tr[0]=='-' ) {%>
+                <tr class="bg-whitesmoke">
+                  <%}%>
+                    <% if (tr[0] !='-' ) {%>
+                <tr>
+                  <%}%>
+
+                    <% for (let td of tr) { %>
+                      <td>
+                        <% td %>
+                      </td>
+                      <% } %>
+
+                        <% if (tr[2].startsWith("../ANAF")) { %>
+
+                          <td>
+                            <form action="/download-fisier" method="POST" style="margin:0;">
+                              <input type="hidden" name="filePath" value="<% tr[2] %>">
+                              <button
+                                style="margin:0;text-align:left;background:lightgreen;height:40px;width:40px;padding:0;border:none;"
+                                type="submit">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                  stroke="currentColor" stroke-width="2">
+                                  <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                              </button>
+                            </form>
+                          </td>
+
+                          <td>
+                            <form action="/sterge-fisier" method="POST" style="margin:0;">
+                              <input type="hidden" name="filePath" value="<% tr[2] %>">
+                              <button
+                                style="margin:0;text-align:left;background:indianred;height:40px;width:40px;padding:0;border:none;"
+                                type="submit">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                  stroke="currentColor" stroke-width="2">
+                                  <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                              </button>
+                            </form>
+                          </td>
+
+                          <% } %>
+
+                </tr>
+                <% } %>
+          </tbody>
+        </table>
+
+
+      </article>
+
+      <div class="download">
+        <a href="/download-registru-csv/jurnal">Download CSV</a>
+        <a href="/download-registru-xlsx/jurnal">Download EXCEL</a>
+      </div>
+
+
+
+      <article>
+        <h4 style="color: var(--secondary);">Registru inventar</h4>
+        <table>
+
+          <thead>
+            <tr class="bg-whitesmoke">
+              <% for (let th of registruInventar[0]) { %>
+                <th scope="col">
+                  <% th %>
+                </th>
+                <% } %>
+            </tr>
+
+          </thead>
+
+          <tbody>
+            <% for (let tr of registruInventar.splice(1,)) { %>
+              <tr>
+                <% for (let td of tr) { %>
+                  <td>
+                    <% td %>
+                  </td>
+                  <% } %>
+              </tr>
+              <% } %>
+          </tbody>
+        </table>
+      </article>
+
+      <div class="download">
+        <a href="/download-registru-csv/inventar">Download CSV</a>
+        <a href="/download-registru-xlsx/inventar">Download EXCEL</a>
+      </div>
+
+
+
+
+      <article>
+        <h4 style="color: var(--secondary);">Registru fiscal</h4>
+        <table>
+
+          <thead>
+            <tr class="bg-whitesmoke">
+              <% for (let th of registruFiscal[0]) { %>
+                <th scope="col">
+                  <% th %>
+                </th>
+                <% } %>
+            </tr>
+
+          </thead>
+
+          <tbody>
+            <% for (let tr of registruFiscal.splice(1,)) { %>
+              <tr>
+                <% for (let td of tr) { %>
+                  <td>
+                    <% td %>
+                  </td>
+                  <% } %>
+              </tr>
+              <% } %>
+          </tbody>
+        </table>
+      </article>
+
+      <div class="download">
+        <a href="/download-registru-csv/fiscal">Download CSV</a>
+        <a href="/download-registru-xlsx/fiscal">Download EXCEL</a>
+      </div>
+
+
+    </div>
+
+
+  </main>
+
+</body>
+
+</html>

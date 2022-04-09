@@ -1,0 +1,12 @@
+{
+    "restartable": "rs",
+    "ignore": [
+        ".git"
+    ],
+    "watch": [
+        "templates/*",
+        "static/*",
+        "app/*"
+    ],
+    "ext": "go,js,json,html,css"
+}
