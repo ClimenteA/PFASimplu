@@ -1,0 +1,78 @@
+<main class="container">
+
+
+    <form action="/register" method="POST" enctype="multipart/form-data">
+        <article>
+
+            <h1>Authentificare</h1>
+
+            <label for="email">
+                Email
+                <input style="text-transform:lowercase" type="text" id="email" name="email"
+                    placeholder="rpetru@gmail.com" required>
+            </label>
+
+            <label for="parola">
+                Parola
+                <input type="password" id="parola" name="parola" placeholder="********" required>
+                <small id="parolaHelper"></small>
+            </label>
+
+            <label for="confirmaParola">
+                Confirma Parola
+                <input type="password" id="confirmaParola" name="confirmaParola" placeholder="********" required>
+                <small id="confirmaParolaHelper"></small>
+            </label>
+
+            <button id="creeaza-cont" type="submit">CREEAZA UN CONT</button>
+
+            <a href="/login"><small>Am deja un cont creat</small></a>
+
+        </article>
+
+    </form>
+
+</main>
+
+
+<script>
+    window.addEventListener('load', (event) => {
+
+        let parola = document.getElementById("parola");
+        let confirmaParola = document.getElementById("confirmaParola");
+        let parolaHelper = document.getElementById("parolaHelper");
+        let confirmaParolaHelper = document.getElementById("confirmaParolaHelper");
+
+        parola.addEventListener("input", () => {
+            if (parola.value.length < 6) {
+                parola.setAttribute("aria-invalid", "true");
+                parolaHelper.innerText = "Parola trebuie sa aiba minim 6 caractere";
+            } else {
+                parola.setAttribute("aria-invalid", "false");
+                parolaHelper.innerText = "";
+            }
+        }, false)
+
+        confirmaParola.addEventListener("input", () => {
+
+            if (parola.value && confirmaParola.value) {
+
+                if (parola.value != confirmaParola.value) {
+                    parola.setAttribute("aria-invalid", "true");
+                    confirmaParola.setAttribute("aria-invalid", "true");
+                    confirmaParolaHelper.innerText = "Parolele introduse nu corespund";
+                } else {
+                    parola.setAttribute("aria-invalid", "false");
+                    confirmaParola.setAttribute("aria-invalid", "false");
+                    confirmaParolaHelper.innerText = "";
+                }
+
+            } else {
+                parola.removeAttribute("aria-invalid");
+                confirmaParola.removeAttribute("aria-invalid");
+            }
+        }, false)
+
+    })
+
+</script>

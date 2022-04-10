@@ -1,0 +1,24 @@
+<main class="container">
+
+
+    <form action="/reset-password" method="POST" enctype="multipart/form-data">
+        <article>
+
+            <h1>Vrei sa resetezi parola?</h1>
+
+            <label for="email">
+                Email
+                <input style="text-transform:lowercase" type="text" id="email" name="email"
+                    placeholder="rpetru@gmail.com" required>
+                <small>Contul pe care l-ai introdus anterior exista deja</small>
+            </label>
+
+            <button type="submit">TRIMITE EMAIL DE RESETARE</button>
+
+            <a href="/login"><small>Am deja un cont creat</small></a>
+
+        </article>
+
+    </form>
+
+</main>

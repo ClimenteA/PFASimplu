@@ -4,8 +4,9 @@
         ".git"
     ],
     "watch": [
-        "static/*",
-        "main.go"
+        "assets/*",
+        "main.go",
+        "auth/"
     ],
     "ext": "go,js,json,html,css"
 }
