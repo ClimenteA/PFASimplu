@@ -9,6 +9,7 @@ import (
 	"log"
 
 	"github.com/ClimenteA/pfasimplu-go/auth"
+	"github.com/ClimenteA/pfasimplu-go/incasari"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/session"
@@ -28,17 +29,8 @@ func main() {
 	app.Use(logger.New())
 	app.Static("/", "./assets/public")
 
-	// AUTH
-	auth.Handle(*app, *store)
-
-	// INCASARI
-	app.Get("/adauga-incasari", func(c *fiber.Ctx) error {
-		return c.Render("incasari", fiber.Map{}, "base")
-	})
-
-	app.Post("/adauga-incasari", func(c *fiber.Ctx) error {
-		return c.Render("incasari", fiber.Map{}, "base")
-	})
+	auth.HandleAuth(*app, *store)
+	incasari.HandleIncasari(*app, *store)
 
 	// CHELTUIELI
 

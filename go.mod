@@ -6,6 +6,7 @@ require (
 	github.com/gofiber/fiber/v2 v2.31.0
 	github.com/gofiber/template v1.6.26
 	github.com/lithammer/shortuuid/v4 v4.0.0
+	golang.org/x/text v0.3.7
 )
 
 require (

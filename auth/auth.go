@@ -14,7 +14,7 @@ import (
 	"github.com/lithammer/shortuuid/v4"
 )
 
-func Handle(app fiber.App, store session.Store) {
+func HandleAuth(app fiber.App, store session.Store) {
 
 	handleIndex(app, store)
 	handleLogin(app, store)
