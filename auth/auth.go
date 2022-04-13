@@ -25,8 +25,9 @@ func HandleAuth(app fiber.App, store session.Store) {
 }
 
 type Account struct {
-	Email  string `json:"email"`
-	Parola string `json:"parola"`
+	Email   string `json:"email"`
+	Parola  string `json:"parola"`
+	Stocare string `json:"stocare"`
 }
 
 func encryptData(dataStr string) string {
@@ -41,13 +42,29 @@ func encryptData(dataStr string) string {
 }
 
 func getAccountPath(accountName string) string {
-	return filepath.Join("storage", "accounts", accountName+".json")
+	dirPath := filepath.Join("stocare", "conturi")
+	accountPath := filepath.Join("stocare", accountName)
+	if _, err := os.Stat(dirPath); err == nil || os.IsExist(err) {
+		return filepath.Join(dirPath, accountName+".json")
+	} else {
+		os.MkdirAll(dirPath, 0750)
+		os.MkdirAll(accountPath, 0750)
+		return filepath.Join(dirPath, accountName+".json")
+	}
 }
 
-func setAccountData(accountFilePath, email, parola string) Account {
-	data := Account{Email: email, Parola: parola}
+func setAccountData(accountFilePath, email, parola, stocare string) Account {
+
+	if _, err := os.Stat(stocare); err != nil || !os.IsExist(err) {
+		os.MkdirAll(stocare, 0750)
+	}
+
+	data := Account{Email: email, Parola: parola, Stocare: stocare}
 	file, _ := json.MarshalIndent(data, "", " ")
-	_ = ioutil.WriteFile(accountFilePath, file, 0644)
+	err := ioutil.WriteFile(accountFilePath, file, 0644)
+	if err != nil {
+		panic(err)
+	}
 	return data
 }
 
@@ -57,7 +74,7 @@ func getAccountData(accountFilePath string) Account {
 
 	jsonFile, err := os.Open(accountFilePath)
 	if err != nil {
-		log.Println(err)
+		log.Panic(err)
 	}
 	defer jsonFile.Close()
 
@@ -82,7 +99,7 @@ func handleResetPassword(app fiber.App, store session.Store) {
 			accountFilePath := getAccountPath(accountName)
 
 			if _, err := os.Stat(accountFilePath); err == nil || os.IsExist(err) {
-				setAccountData(accountFilePath, email, "reset")
+				setAccountData(accountFilePath, email, "reset", filepath.Join("stocare", accountName))
 			} else {
 				return c.Redirect("/register")
 			}
@@ -121,7 +138,7 @@ func handleRegister(app fiber.App, store session.Store) {
 				return c.Redirect("/reset-password")
 			} else {
 				log.Printf("Creating account: %s", email)
-				setAccountData(accountFilePath, email, accountPassword)
+				setAccountData(accountFilePath, email, accountPassword, filepath.Join("stocare", accountName))
 			}
 		}
 
@@ -157,11 +174,13 @@ func handleLogin(app fiber.App, store session.Store) {
 				log.Printf("Account exists: %s", email)
 				accountData := getAccountData(accountFilePath)
 				if accountData.Parola == accountPassword {
-					sess.Set("authToken", shortuuid.New())
+					sess.Set("currentUser", accountFilePath)
 					if err := sess.Save(); err != nil {
 						panic(err)
 					}
 				}
+			} else {
+				return c.Redirect("/register")
 			}
 		}
 
@@ -174,14 +193,11 @@ func handleLogin(app fiber.App, store session.Store) {
 func handleLogout(app fiber.App, store session.Store) {
 
 	app.Get("/logout", func(c *fiber.Ctx) error {
-
 		sess, err := store.Get(c)
 		if err != nil {
 			panic(err)
 		}
-
 		sess.Destroy()
-
 		return c.Redirect("/")
 	})
 }
@@ -189,19 +205,15 @@ func handleLogout(app fiber.App, store session.Store) {
 func handleIndex(app fiber.App, store session.Store) {
 
 	app.Get("/", func(c *fiber.Ctx) error {
-
 		sess, err := store.Get(c)
 		if err != nil {
 			panic(err)
 		}
-
-		authToken := sess.Get("authToken")
-
-		if authToken == nil {
+		currentUser := sess.Get("currentUser")
+		log.Println(currentUser)
+		if currentUser == nil {
 			return c.Redirect("/login")
 		}
-
 		return c.Render("index", fiber.Map{}, "base")
-
 	})
 }
