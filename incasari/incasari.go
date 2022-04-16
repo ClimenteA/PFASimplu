@@ -31,17 +31,14 @@ type Factura struct {
 	SumaIncasata float64 `json:"suma_incasata"`
 }
 
-func getInvoiceJsonPath(dirName string) string {
-
-	dirPath := filepath.Join("facturi", dirName)
+func getInvoiceJsonPath(dirPath string) string {
 
 	if _, err := os.Stat(dirPath); err == nil || os.IsExist(err) {
-		return filepath.Join(dirPath, dirName, dirName+".json")
+		return filepath.Join(dirPath, "metadata.json")
 	} else {
 		os.MkdirAll(dirPath, 0750)
-		return filepath.Join(dirPath, dirName, dirName+".json")
+		return filepath.Join(dirPath, "metadata.json")
 	}
-
 }
 
 func getInvoicePath(dirPath string) string {
@@ -57,7 +54,10 @@ func getInvoicePath(dirPath string) string {
 
 func setInvoiceData(invoiceData Factura, filePath string) {
 	file, _ := json.MarshalIndent(invoiceData, "", " ")
-	_ = ioutil.WriteFile(filePath, file, 0644)
+	err := ioutil.WriteFile(filePath, file, 0644)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func getCurrentUser(currentUserPath string) Account {
@@ -126,7 +126,7 @@ func handleIncasari(app fiber.App, store session.Store) {
 				panic(err)
 			}
 
-			dirName := filepath.Join(user.Stocare, data+"-"+serie+"-"+strconv.Itoa(numar))
+			dirName := filepath.Join(user.Stocare, "facturi", data+"-"+serie+"-"+strconv.Itoa(numar))
 
 			invoiceData := Factura{
 				Serie:        serie,
@@ -140,11 +140,6 @@ func handleIncasari(app fiber.App, store session.Store) {
 
 			invoicePath := getInvoicePath(dirName)
 			c.SaveFile(fisier, filepath.Join(invoicePath, fisier.Filename))
-
-			log.Println(dirName)
-			log.Println(fisier.Filename)
-			log.Println(invoiceData)
-			log.Println(data)
 
 		}
 
