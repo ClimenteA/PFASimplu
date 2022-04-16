@@ -126,7 +126,7 @@ func handleIncasari(app fiber.App, store session.Store) {
 				panic(err)
 			}
 
-			dirName := filepath.Join(user.Stocare, "facturi", data+"-"+serie+"-"+strconv.Itoa(numar))
+			dirName := filepath.Join(user.Stocare, "incasari", data+"-"+serie+"-"+strconv.Itoa(numar))
 
 			invoiceData := Factura{
 				Serie:        serie,

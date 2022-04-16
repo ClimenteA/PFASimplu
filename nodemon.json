@@ -1,12 +1,12 @@
 {
     "restartable": "rs",
     "ignore": [
-        ".git"
+        ".git",
+        "_old",
+        "README.md"
     ],
     "watch": [
-        "assets/*",
-        "main.go",
-        "auth/"
+        "./*"
     ],
     "ext": "go,js,json,html,css"
 }
