@@ -25,14 +25,20 @@ type Account struct {
 	Stocare string `json:"stocare"`
 }
 
+type DetaliiMijlocFix struct {
+	AniAmortizare          int64  `json:"ani_amortizare"`
+	DataPuneriiInFunctiune string `json:"data_punerii_in_functiune"`
+	CodClasificare         string `json:"cod_clasificare"`
+}
+
 type Cheltuiala struct {
-	NumeCheltuiala string `json:"nume_cheltuiala"`
-	SumaCheltuita  string `json:"suma_cheltuita"`
-	TipTranzactie  string `json:"tip_tranzactie"`
-	NumeCheltuiala string `json:"nume_cheltuiala"`
-	NumeCheltuiala string `json:"nume_cheltuiala"`
-	NumeCheltuiala string `json:"nume_cheltuiala"`
-	NumeCheltuiala string `json:"nume_cheltuiala"`
+	NumeCheltuiala   string           `json:"nume_cheltuiala"`
+	SumaCheltuita    float64          `json:"suma_cheltuita"`
+	TipTranzactie    string           `json:"tip_tranzactie"`
+	Data             string           `json:"data"`
+	ObiectInventar   bool             `json:"obiect_inventar"`
+	MijlocFix        bool             `json:"mijloc_fix"`
+	DetaliiMijlocFix DetaliiMijlocFix `json:"detalii_mijloc_fix"`
 }
 
 func getExpenseJsonPath(dirPath string) string {
@@ -139,60 +145,58 @@ func handleCheltuieli(app fiber.App, store session.Store) {
 				log.Panic(err)
 			}
 
-			obiectDeInventar := false
+			obiect_inventar := false
 			inv, keyExists := form.Value["inventar"]
 			if keyExists {
-				obiectDeInventar = true
+				obiect_inventar = true
 			}
 
-			if obiectDeInventar {
+			if keyExists {
 				log.Println("Obiect de inventar")
+				log.Println(inv)
 			}
 
-			mijlocFix := false
+			mijloc_fix := false
 			mfix, keyExists := form.Value["mijlocfix"]
 			if keyExists {
-				mijlocFix = true
+				mijloc_fix = true
+				log.Println(mfix)
 			}
 
-			if mijlocFix {
-				log.Println("Mijloc Fix")
+			amortizare_in_ani := 0
+			data_punerii_in_functiune := ""
+			cod_clasificare := ""
+			if mijloc_fix {
 
-				amortizare_in_ani, err := strconv.Atoi(form.Value["amortizare_in_ani"][0])
+				ani, err := strconv.Atoi(form.Value["amortizare_in_ani"][0])
 				if err != nil {
 					log.Panicln(err)
 				}
-
-				data_punerii_in_functiune := form.Value["data_punerii_in_functiune"][0]
-				cod_clasificare := form.Value["cod_clasificare"][0]
-
-				log.Println("amortizare_in_ani: ", amortizare_in_ani)
-				log.Println(data_punerii_in_functiune)
-				log.Println(cod_clasificare)
+				amortizare_in_ani = ani
+				data_punerii_in_functiune = form.Value["data_punerii_in_functiune"][0]
+				cod_clasificare = form.Value["cod_clasificare"][0]
 
 			}
 
-			log.Println(nume_cheltuiala)
-			log.Println(suma_cheltuita)
-			log.Println(tip_tranzactie)
-			log.Println(data)
-			log.Println(fisier.Filename)
-			log.Println(inv)
-			log.Println(mfix)
-			log.Panicln(dirName)
+			expenseData := Cheltuiala{
+				NumeCheltuiala: nume_cheltuiala,
+				SumaCheltuita:  suma_cheltuita,
+				Data:           data,
+				TipTranzactie:  tip_tranzactie,
+				ObiectInventar: obiect_inventar,
+				MijlocFix:      mijloc_fix,
+				DetaliiMijlocFix: DetaliiMijlocFix{
+					AniAmortizare:          int64(amortizare_in_ani),
+					DataPuneriiInFunctiune: data_punerii_in_functiune,
+					CodClasificare:         cod_clasificare,
+				},
+			}
 
-			// expenseData := Cheltuiala{
-			// 	Serie:         serie,
-			// 	Numar:         numar,
-			// 	Data:          data,
-			// 	SumaCheltuita: suma_incasata,
-			// }
+			expenseJsonPath := getExpenseJsonPath(dirName)
+			setExpenseData(expenseData, expenseJsonPath)
 
-			// expenseJsonPath := getExpenseJsonPath(dirName)
-			// setExpenseData(expenseData, expenseJsonPath)
-
-			// expensePath := getExpensePath(dirName)
-			// c.SaveFile(fisier, filepath.Join(expensePath, fisier.Filename))
+			expensePath := getExpensePath(dirName)
+			c.SaveFile(fisier, filepath.Join(expensePath, fisier.Filename))
 
 		}
 
