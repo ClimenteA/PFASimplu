@@ -11,6 +11,7 @@ import (
 	"github.com/ClimenteA/pfasimplu-go/auth"
 	"github.com/ClimenteA/pfasimplu-go/cheltuieli"
 	"github.com/ClimenteA/pfasimplu-go/incasari"
+	"github.com/ClimenteA/pfasimplu-go/mijloacefixe"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/session"
@@ -20,6 +21,7 @@ import (
 func main() {
 
 	htmlEngine := html.New("./assets/templates", ".html")
+	coduriMijloaceFixe := mijloacefixe.LoadMijloaceFixe()
 
 	store := session.New()
 
@@ -32,7 +34,7 @@ func main() {
 
 	auth.HandleAuth(*app, *store)
 	incasari.HandleIncasari(*app, *store)
-	cheltuieli.HandleCheltuieli(*app, *store)
+	cheltuieli.HandleCheltuieli(*app, *store, coduriMijloaceFixe)
 
 	// DECLARATII
 	app.Get("/adauga-declaratii", func(c *fiber.Ctx) error {

@@ -10,13 +10,14 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/ClimenteA/pfasimplu-go/mijloacefixe"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/session"
 	"github.com/lithammer/shortuuid"
 )
 
-func HandleCheltuieli(app fiber.App, store session.Store) {
-	handleCheltuieli(app, store)
+func HandleCheltuieli(app fiber.App, store session.Store, coduriMijloaceFixe mijloacefixe.CodMijloaceFixe) {
+	handleCheltuieli(app, store, coduriMijloaceFixe)
 }
 
 type Account struct {
@@ -86,7 +87,7 @@ func getCurrentUser(currentUserPath string) Account {
 	return data
 }
 
-func handleCheltuieli(app fiber.App, store session.Store) {
+func handleCheltuieli(app fiber.App, store session.Store, coduriMijloaceFixe mijloacefixe.CodMijloaceFixe) {
 
 	app.Get("/adauga-cheltuieli", func(c *fiber.Ctx) error {
 
@@ -117,16 +118,6 @@ func handleCheltuieli(app fiber.App, store session.Store) {
 		user := getCurrentUser(fmt.Sprint(currentUserPath))
 
 		if form, err := c.MultipartForm(); err == nil {
-
-			// let tip_tranzactie = request.bodyParam("tip_tranzactie")
-			// let inventar = request.bodyParam("inventar")
-			// let data = request.bodyParam("data")
-			// let fisier = request.bodyParam("fisier")
-
-			// let mijlocfix = request.bodyParam("mijlocfix")
-			// let amortizare_in_ani = request.bodyParam("amortizare_in_ani")
-			// let data_punerii_in_functiune = request.bodyParam("data_punerii_in_functiune")
-			// let cod_clasificare = request.bodyParam("cod_clasificare")
 
 			data := form.Value["data"][0]
 
