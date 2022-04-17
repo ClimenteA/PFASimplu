@@ -10,6 +10,7 @@ import (
 
 	"github.com/ClimenteA/pfasimplu-go/auth"
 	"github.com/ClimenteA/pfasimplu-go/cheltuieli"
+	"github.com/ClimenteA/pfasimplu-go/declaratii"
 	"github.com/ClimenteA/pfasimplu-go/incasari"
 	"github.com/ClimenteA/pfasimplu-go/mijloacefixe"
 	"github.com/gofiber/fiber/v2"
@@ -35,15 +36,7 @@ func main() {
 	auth.HandleAuth(*app, *store)
 	incasari.HandleIncasari(*app, *store)
 	cheltuieli.HandleCheltuieli(*app, *store, coduriMijloaceFixe)
-
-	// DECLARATII
-	app.Get("/adauga-declaratii", func(c *fiber.Ctx) error {
-		return c.Render("declaratii", fiber.Map{}, "base")
-	})
-
-	app.Post("/adauga-declaratii", func(c *fiber.Ctx) error {
-		return c.Render("declaratii", fiber.Map{}, "base")
-	})
+	declaratii.HandleDeclaratii(*app, *store)
 
 	log.Fatal(app.Listen(":3000"))
 

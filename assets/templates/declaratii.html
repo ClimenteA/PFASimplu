@@ -1,7 +1,7 @@
 <main class="container">
 
     <hgroup class="container">
-        <h1>Adauga declaratii</h1>
+        <h1>Adauga declaratii/documente</h1>
         <h2>
             Adauga declaratiile depuse la ANAF si dovezile de plata impozite.
         </h2>
@@ -12,14 +12,30 @@
 
         <article>
 
-            <h5 style="color: var(--secondary);">Adauga declaratii</h5>
-
+            <h5 style="color: var(--secondary);">Adauga declaratii/documente</h5>
 
             <div class="grid">
 
-                <label for="file">
-                    Incarca declaratie/dovada plata impozite
-                    <input type="file" id="file" name="fisier" required>
+                <label for="data">
+                    Tip Document
+                    <input list="tipdoc" type="text" id="tip_document" name="tip_document" required>
+
+                    <datalist id="tipdoc">
+                        <option value="Declaratie unica (212)"></option>
+                        <option value="Dovada plata impozite"></option>
+                        <option value="C168"></option>
+                        <option value="D112Contrib"></option>
+                        <option value="Duplicat Recipisa"></option>
+                        <option value="Duplicat declaratie unica"></option>
+                        <option value="InterogariBanci"></option>
+                        <option value="Istoric Spatiu Virtual"></option>
+                        <option value="Istoric declaratii PF"></option>
+                        <option value="Nota obligatiilor de plata"></option>
+                        <option value="Obligatii de plata"></option>
+                        <option value="Registru intrari-iesiri"></option>
+                        <option value="Venituri Formular Banca"></option>
+                    </datalist>
+
                 </label>
 
                 <label for="data">
@@ -28,6 +44,11 @@
                 </label>
 
             </div>
+
+            <label for="file">
+                Incarca declaratie/dovada plata impozite
+                <input type="file" id="file" name="fisier" required>
+            </label>
 
             <button type="submit">ADAUGA</button>
 
