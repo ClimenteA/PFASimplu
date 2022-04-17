@@ -14,6 +14,10 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/session"
 )
 
+// TODO
+// - la post salveaza ultima incasare in json in folderul incasari
+// - la get ia ultima serie si numar din folderul incasari
+
 func HandleIncasari(app fiber.App, store session.Store) {
 	handleIncasari(app, store)
 }
