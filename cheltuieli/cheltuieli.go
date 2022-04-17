@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"mime/multipart"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/ClimenteA/pfasimplu-go/mijloacefixe"
 	"github.com/gofiber/fiber/v2"
@@ -16,7 +18,7 @@ import (
 	"github.com/lithammer/shortuuid"
 )
 
-func HandleCheltuieli(app fiber.App, store session.Store, coduriMijloaceFixe mijloacefixe.CodMijloaceFixe) {
+func HandleCheltuieli(app fiber.App, store session.Store, coduriMijloaceFixe []mijloacefixe.CodMijloaceFixe) {
 	handleCheltuieli(app, store, coduriMijloaceFixe)
 }
 
@@ -27,9 +29,22 @@ type Account struct {
 }
 
 type DetaliiMijlocFix struct {
-	AniAmortizare          int64  `json:"ani_amortizare"`
-	DataPuneriiInFunctiune string `json:"data_punerii_in_functiune"`
-	CodClasificare         string `json:"cod_clasificare"`
+	AniAmortizare              int     `json:"ani_amortizare"`
+	DataPuneriiInFunctiune     string  `json:"data_punerii_in_functiune"`
+	CodClasificare             string  `json:"cod_clasificare"`
+	NrInventar                 int     `json:"nr_inventar"`
+	FelSerieNumarDataDocument  string  `json:"fel_serie_numar_data_document"`
+	ValoareInventar            float64 `json:"valoare_inventar"`
+	AmortizareLunara           float64 `json:"amortizare_lunara"`
+	DenumireSiCaracteristici   string  `json:"denumire_si_caracteristici"`
+	Accesorii                  string  `json:"accesorii"`
+	Grupa                      string  `json:"grupa"`
+	AnulDariiInFolosinta       int     `json:"anul_darii_in_folosinta"`
+	LunaDariiInFolosinta       int     `json:"luna_darii_in_folosinta"`
+	AnulAmortizariiComplete    int     `json:"anul_amortizarii_complete"`
+	LunaAmortizariiComplete    int     `json:"luna_amortizarii_complete"`
+	DurataNormalaDeFunctionare string  `json:"durata_normala_de_functionare"`
+	CotaDeAmortizare           float64 `json:"cota_de_amortizare"`
 }
 
 type Cheltuiala struct {
@@ -87,7 +102,141 @@ func getCurrentUser(currentUserPath string) Account {
 	return data
 }
 
-func handleCheltuieli(app fiber.App, store session.Store, coduriMijloaceFixe mijloacefixe.CodMijloaceFixe) {
+func getDetaliiMijlocFixFromCodCasificare(cod_clasificare string, coduriMijloaceFixe []mijloacefixe.CodMijloaceFixe) mijloacefixe.CodMijloaceFixe {
+
+	detaliiMijlocFix := mijloacefixe.CodMijloaceFixe{}
+	for _, item := range coduriMijloaceFixe {
+		if cod_clasificare == item.CodClasificare {
+			detaliiMijlocFix = item
+			break
+		}
+	}
+	return detaliiMijlocFix
+}
+
+func getDetaliiMijlocFix(mijloc_fix bool, form *multipart.Form, filename string, suma_cheltuita float64, coduriMijloaceFixe []mijloacefixe.CodMijloaceFixe) DetaliiMijlocFix {
+
+	nr_inventar := 0
+	fel_serie_numar_data_document := ""
+	valoare_inventar := 0.0
+	amortizare_lunara := 0.0
+	amortizare_in_ani := 0
+	accesorii := ""
+	grupa := ""
+	anul_darii_in_folosinta := 0
+	luna_darii_in_folosinta := 0
+	anul_amortizarii_complete := 0
+	luna_amortizarii_complete := 0
+	durata_normala_de_functionare := ""
+	cota_de_amortizare := 0.0
+	denumire_si_caracteristici := ""
+	data_punerii_in_functiune := ""
+	cod_clasificare := ""
+
+	if mijloc_fix {
+
+		ani, err := strconv.Atoi(form.Value["amortizare_in_ani"][0])
+		if err != nil {
+			log.Panicln(err)
+		}
+		amortizare_in_ani = ani
+		data_punerii_in_functiune = form.Value["data_punerii_in_functiune"][0]
+		cod_clasificare = form.Value["cod_clasificare"][0]
+		fel_serie_numar_data_document = "Factura/Bon " + filename
+		valoare_inventar = suma_cheltuita
+		amortizare_lunara = suma_cheltuita / (float64(amortizare_in_ani) * 12)
+		denumire_si_caracteristici = "Sunt detaliate in factura/bon"
+		accesorii = "Sunt detaliate in factura/bon"
+
+		mijdetalii := getDetaliiMijlocFixFromCodCasificare(cod_clasificare, coduriMijloaceFixe)
+
+		grupa = mijdetalii.Grupa
+		durata_normala_de_functionare = mijdetalii.DurataAmortizareInAni
+		t, err := time.Parse(time.RFC3339, data_punerii_in_functiune+"T00:00:00Z")
+		if err != nil {
+			log.Panic(err)
+		}
+
+		anul_darii_in_folosinta = t.Year()
+		luna_darii_in_folosinta = int(t.Month())
+
+		incepereAmortizareDate := t.AddDate(0, 1, 0)
+		amortizareDate := incepereAmortizareDate.AddDate(amortizare_in_ani, 0, 0)
+		anul_amortizarii_complete = amortizareDate.Year()
+		luna_amortizarii_complete = int(amortizareDate.Month())
+		cota_de_amortizare = amortizare_lunara / (suma_cheltuita * 100)
+
+	}
+
+	detaliiMijlocFix := DetaliiMijlocFix{
+		AniAmortizare:              amortizare_in_ani,
+		DataPuneriiInFunctiune:     data_punerii_in_functiune,
+		CodClasificare:             cod_clasificare,
+		NrInventar:                 nr_inventar,
+		FelSerieNumarDataDocument:  fel_serie_numar_data_document,
+		ValoareInventar:            valoare_inventar,
+		AmortizareLunara:           amortizare_lunara,
+		DenumireSiCaracteristici:   denumire_si_caracteristici,
+		Accesorii:                  accesorii,
+		Grupa:                      grupa,
+		AnulDariiInFolosinta:       anul_darii_in_folosinta,
+		LunaDariiInFolosinta:       luna_darii_in_folosinta,
+		AnulAmortizariiComplete:    anul_amortizarii_complete,
+		LunaAmortizariiComplete:    luna_amortizarii_complete,
+		DurataNormalaDeFunctionare: durata_normala_de_functionare,
+		CotaDeAmortizare:           cota_de_amortizare,
+	}
+
+	return detaliiMijlocFix
+
+}
+
+func getExpenseData(c *fiber.Ctx, user Account, form *multipart.Form, filename string, coduriMijloaceFixe []mijloacefixe.CodMijloaceFixe) Cheltuiala {
+
+	data := form.Value["data"][0]
+
+	nume_cheltuiala := strings.Trim(form.Value["nume_cheltuiala"][0], " ")
+	suma_cheltuita, err := strconv.ParseFloat(form.Value["suma_cheltuita"][0], 64)
+	if err != nil {
+		log.Panic(err)
+	}
+	tip_tranzactie := form.Value["tip_tranzactie"][0]
+
+	obiect_inventar := false
+	inv, keyExists := form.Value["inventar"]
+	if keyExists {
+		obiect_inventar = true
+	}
+
+	if keyExists {
+		log.Println("Obiect de inventar")
+		log.Println(inv)
+	}
+
+	mijloc_fix := false
+	mfix, keyExists := form.Value["mijlocfix"]
+	if keyExists {
+		mijloc_fix = true
+		log.Println(mfix)
+	}
+
+	detaliiMijlocFix := getDetaliiMijlocFix(mijloc_fix, form, filename, suma_cheltuita, coduriMijloaceFixe)
+
+	expenseData := Cheltuiala{
+		NumeCheltuiala:   nume_cheltuiala,
+		SumaCheltuita:    suma_cheltuita,
+		Data:             data,
+		TipTranzactie:    tip_tranzactie,
+		ObiectInventar:   obiect_inventar,
+		MijlocFix:        mijloc_fix,
+		DetaliiMijlocFix: detaliiMijlocFix,
+	}
+
+	return expenseData
+
+}
+
+func handleCheltuieli(app fiber.App, store session.Store, coduriMijloaceFixe []mijloacefixe.CodMijloaceFixe) {
 
 	app.Get("/adauga-cheltuieli", func(c *fiber.Ctx) error {
 
@@ -119,69 +268,15 @@ func handleCheltuieli(app fiber.App, store session.Store, coduriMijloaceFixe mij
 
 		if form, err := c.MultipartForm(); err == nil {
 
-			data := form.Value["data"][0]
-
-			uid := shortuuid.New()
-			dirName := filepath.Join(user.Stocare, "cheltuieli", data, uid)
-
-			nume_cheltuiala := strings.Trim(form.Value["nume_cheltuiala"][0], " ")
-			suma_cheltuita, err := strconv.ParseFloat(form.Value["suma_cheltuita"][0], 64)
-			if err != nil {
-				log.Panic(err)
-			}
-			tip_tranzactie := form.Value["tip_tranzactie"][0]
-
 			fisier, err := c.FormFile("fisier")
 			if err != nil {
 				log.Panic(err)
 			}
 
-			obiect_inventar := false
-			inv, keyExists := form.Value["inventar"]
-			if keyExists {
-				obiect_inventar = true
-			}
+			expenseData := getExpenseData(c, user, form, fisier.Filename, coduriMijloaceFixe)
 
-			if keyExists {
-				log.Println("Obiect de inventar")
-				log.Println(inv)
-			}
-
-			mijloc_fix := false
-			mfix, keyExists := form.Value["mijlocfix"]
-			if keyExists {
-				mijloc_fix = true
-				log.Println(mfix)
-			}
-
-			amortizare_in_ani := 0
-			data_punerii_in_functiune := ""
-			cod_clasificare := ""
-			if mijloc_fix {
-
-				ani, err := strconv.Atoi(form.Value["amortizare_in_ani"][0])
-				if err != nil {
-					log.Panicln(err)
-				}
-				amortizare_in_ani = ani
-				data_punerii_in_functiune = form.Value["data_punerii_in_functiune"][0]
-				cod_clasificare = form.Value["cod_clasificare"][0]
-
-			}
-
-			expenseData := Cheltuiala{
-				NumeCheltuiala: nume_cheltuiala,
-				SumaCheltuita:  suma_cheltuita,
-				Data:           data,
-				TipTranzactie:  tip_tranzactie,
-				ObiectInventar: obiect_inventar,
-				MijlocFix:      mijloc_fix,
-				DetaliiMijlocFix: DetaliiMijlocFix{
-					AniAmortizare:          int64(amortizare_in_ani),
-					DataPuneriiInFunctiune: data_punerii_in_functiune,
-					CodClasificare:         cod_clasificare,
-				},
-			}
+			uid := shortuuid.New()
+			dirName := filepath.Join(user.Stocare, "cheltuieli", expenseData.Data, uid)
 
 			expenseJsonPath := getExpenseJsonPath(dirName)
 			setExpenseData(expenseData, expenseJsonPath)

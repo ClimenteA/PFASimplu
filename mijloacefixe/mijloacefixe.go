@@ -6,22 +6,18 @@ import (
 	"log"
 )
 
-type dateIdentificareMijlocFix struct {
+type CodMijloaceFixe struct {
 	Grupa                 string `json:"grupa"`
 	CodClasificare        string `json:"cod_clasificare"`
 	DenumireActiveFixe    string `json:"denumire_active_fixe"`
 	DurataAmortizareInAni string `json:"durata_amortizare_in_ani"`
 }
 
-type CodMijloaceFixe struct {
-	Cod dateIdentificareMijlocFix `json:"cod"`
-}
+func LoadMijloaceFixe() []CodMijloaceFixe {
 
-func LoadMijloaceFixe() CodMijloaceFixe {
+	file, _ := ioutil.ReadFile("./assets/public/lista_coduri_mijloace_fixe_2022.json")
 
-	file, _ := ioutil.ReadFile("./assets/public/coduri_mijloace_fixe_2022.json")
-
-	data := CodMijloaceFixe{}
+	data := []CodMijloaceFixe{}
 
 	err := json.Unmarshal([]byte(file), &data)
 	if err != nil {
