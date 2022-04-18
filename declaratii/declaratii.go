@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/ClimenteA/pfasimplu-go/auth"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/session"
 	"github.com/lithammer/shortuuid"
@@ -17,15 +18,10 @@ func HandleDeclaratii(app fiber.App, store session.Store) {
 	handleDeclaratii(app, store)
 }
 
-type Account struct {
-	Email   string `json:"email"`
-	Parola  string `json:"parola"`
-	Stocare string `json:"stocare"`
-}
-
 type Declaratie struct {
-	Data        string `json:"data"`
-	TipDocument string `json:"tip_document"`
+	Data         string `json:"data"`
+	TipDocument  string `json:"tip_document"`
+	CaleDocument string `json:"cale_document"`
 }
 
 func getDocJsonPath(dirPath string) string {
@@ -57,9 +53,9 @@ func setDocData(docData Declaratie, filePath string) {
 	}
 }
 
-func getCurrentUser(currentUserPath string) Account {
+func getCurrentUser(currentUserPath string) auth.Account {
 
-	var data Account
+	var data auth.Account
 
 	jsonFile, err := os.Open(currentUserPath)
 	if err != nil {
@@ -114,18 +110,20 @@ func handleDeclaratii(app fiber.App, store session.Store) {
 			}
 
 			uid := shortuuid.New()
-			dirName := filepath.Join(user.Stocare, "declaratii", data, uid)
+			dirName := filepath.Join(user.StocareDeclaratii, data, uid)
+
+			docPath := getDocPath(dirName)
+			caleDocument := filepath.Join(docPath, fisier.Filename)
+			c.SaveFile(fisier, caleDocument)
 
 			docData := Declaratie{
-				Data:        data,
-				TipDocument: tip_document,
+				Data:         data,
+				TipDocument:  tip_document,
+				CaleDocument: caleDocument,
 			}
 
 			docJsonPath := getDocJsonPath(dirName)
 			setDocData(docData, docJsonPath)
-
-			docPath := getDocPath(dirName)
-			c.SaveFile(fisier, filepath.Join(docPath, fisier.Filename))
 
 		}
 

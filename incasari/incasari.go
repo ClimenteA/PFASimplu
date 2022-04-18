@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/ClimenteA/pfasimplu-go/auth"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/session"
 )
@@ -20,12 +21,6 @@ import (
 
 func HandleIncasari(app fiber.App, store session.Store) {
 	handleIncasari(app, store)
-}
-
-type Account struct {
-	Email   string `json:"email"`
-	Parola  string `json:"parola"`
-	Stocare string `json:"stocare"`
 }
 
 type Factura struct {
@@ -65,9 +60,9 @@ func setInvoiceData(invoiceData Factura, filePath string) {
 	}
 }
 
-func getCurrentUser(currentUserPath string) Account {
+func getCurrentUser(currentUserPath string) auth.Account {
 
-	var data Account
+	var data auth.Account
 
 	jsonFile, err := os.Open(currentUserPath)
 	if err != nil {
@@ -131,7 +126,7 @@ func handleIncasari(app fiber.App, store session.Store) {
 				panic(err)
 			}
 
-			dirName := filepath.Join(user.Stocare, "incasari", data+"-"+serie+"-"+strconv.Itoa(numar))
+			dirName := filepath.Join(user.StocareIncasari, data+"-"+serie+"-"+strconv.Itoa(numar))
 			invoicePath := getInvoicePath(dirName)
 			invoiceJsonPath := getInvoiceJsonPath(dirName)
 			caleFactura := filepath.Join(invoicePath, fisier.Filename)

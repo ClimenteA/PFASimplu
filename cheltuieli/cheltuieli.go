@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ClimenteA/pfasimplu-go/auth"
 	"github.com/ClimenteA/pfasimplu-go/mijloacefixe"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/session"
@@ -20,12 +21,6 @@ import (
 
 func HandleCheltuieli(app fiber.App, store session.Store, coduriMijloaceFixe []mijloacefixe.CodMijloaceFixe) {
 	handleCheltuieli(app, store, coduriMijloaceFixe)
-}
-
-type Account struct {
-	Email   string `json:"email"`
-	Parola  string `json:"parola"`
-	Stocare string `json:"stocare"`
 }
 
 type DetaliiMijlocFix struct {
@@ -54,6 +49,7 @@ type Cheltuiala struct {
 	Data             string           `json:"data"`
 	ObiectInventar   bool             `json:"obiect_inventar"`
 	MijlocFix        bool             `json:"mijloc_fix"`
+	CaleCheltuiala   string           `json:"cale_cheltuiala"`
 	DetaliiMijlocFix DetaliiMijlocFix `json:"detalii_mijloc_fix"`
 }
 
@@ -86,9 +82,9 @@ func setExpenseData(expenseData Cheltuiala, filePath string) {
 	}
 }
 
-func getCurrentUser(currentUserPath string) Account {
+func getCurrentUser(currentUserPath string) auth.Account {
 
-	var data Account
+	var data auth.Account
 
 	jsonFile, err := os.Open(currentUserPath)
 	if err != nil {
@@ -191,7 +187,7 @@ func getDetaliiMijlocFix(mijloc_fix bool, form *multipart.Form, filename string,
 
 }
 
-func getExpenseData(c *fiber.Ctx, user Account, form *multipart.Form, filename string, coduriMijloaceFixe []mijloacefixe.CodMijloaceFixe) Cheltuiala {
+func getExpenseData(c *fiber.Ctx, user auth.Account, form *multipart.Form, filename, cale_cheltuiala string, coduriMijloaceFixe []mijloacefixe.CodMijloaceFixe) Cheltuiala {
 
 	data := form.Value["data"][0]
 
@@ -229,6 +225,7 @@ func getExpenseData(c *fiber.Ctx, user Account, form *multipart.Form, filename s
 		TipTranzactie:    tip_tranzactie,
 		ObiectInventar:   obiect_inventar,
 		MijlocFix:        mijloc_fix,
+		CaleCheltuiala:   cale_cheltuiala,
 		DetaliiMijlocFix: detaliiMijlocFix,
 	}
 
@@ -273,16 +270,17 @@ func handleCheltuieli(app fiber.App, store session.Store, coduriMijloaceFixe []m
 				log.Panic(err)
 			}
 
-			expenseData := getExpenseData(c, user, form, fisier.Filename, coduriMijloaceFixe)
+			data := form.Value["data"][0]
 
 			uid := shortuuid.New()
-			dirName := filepath.Join(user.Stocare, "cheltuieli", expenseData.Data, uid)
+			dirName := filepath.Join(user.StocareCheltuieli, data, uid)
+			expensePath := getExpensePath(dirName)
+			cale_cheltuiala := filepath.Join(expensePath, fisier.Filename)
+			c.SaveFile(fisier, cale_cheltuiala)
 
+			expenseData := getExpenseData(c, user, form, fisier.Filename, cale_cheltuiala, coduriMijloaceFixe)
 			expenseJsonPath := getExpenseJsonPath(dirName)
 			setExpenseData(expenseData, expenseJsonPath)
-
-			expensePath := getExpensePath(dirName)
-			c.SaveFile(fisier, filepath.Join(expensePath, fisier.Filename))
 
 		}
 

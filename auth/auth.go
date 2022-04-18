@@ -153,7 +153,7 @@ func handleRegister(app fiber.App, store session.Store) {
 			confirmaParola := form.Value["confirmaParola"][0]
 
 			if parola != confirmaParola || len(parola) < 6 {
-				return c.Redirect("/register")
+				return c.Redirect("/register?title=Parolele nu corespund&content=Parolele trebuie sa corespunda si sa fie de minim 6 caractere.")
 			}
 
 			accountName := shortuuid.NewWithNamespace(email)
@@ -161,15 +161,13 @@ func handleRegister(app fiber.App, store session.Store) {
 			accountFilePath := getAccountPath(accountName)
 
 			if _, err := os.Stat(accountFilePath); err == nil || os.IsExist(err) {
-				log.Printf("Account exists: %s", email)
 				return c.Redirect("/reset-password")
 			} else {
-				log.Printf("Creating account: %s", email)
 				setAccountData(accountFilePath, email, accountPassword, filepath.Join("stocare", accountName))
 			}
 		}
 
-		return c.Redirect("/login")
+		return c.Redirect("/login?title=Contul a fost creat&content=Intra cu credentialele contului")
 
 	})
 
