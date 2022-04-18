@@ -1,31 +1,82 @@
 package registre
 
 import (
-	"fmt"
+	"encoding/json"
+	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
+	"sort"
+	"strings"
+
+	"github.com/ClimenteA/pfasimplu-go/auth"
+	"github.com/ClimenteA/pfasimplu-go/incasari"
 )
 
-func AdunaIncasari(user Account) (Account, error) {
+func getIncasariJsonPaths(user auth.Account) ([]string, error) {
 
-	
+	incasariMetadataJson := []string{}
 
-
-	err := filepath.Walk(filepath.Join(user.Stocare, "incasari"),
+	err := filepath.Walk(user.StocareIncasari,
 		func(path string, _ os.FileInfo, err error) error {
 			if err != nil {
 				return err
 			}
 
-			fmt.Println(path)
+			if strings.Contains(path, "metadata.json") {
+				incasariMetadataJson = append(incasariMetadataJson, path)
+			}
 
 			return nil
 		})
-
 	if err != nil {
 		log.Println(err)
 	}
 
-	return user, err
+	return incasariMetadataJson, err
+
+}
+
+func getInvoiceMetadata(path string) incasari.Factura {
+
+	var data incasari.Factura
+
+	jsonFile, err := os.Open(path)
+	if err != nil {
+		log.Panicln(err)
+	}
+	defer jsonFile.Close()
+
+	byteValue, _ := ioutil.ReadAll(jsonFile)
+	json.Unmarshal(byteValue, &data)
+
+	return data
+}
+
+func getInvoicesDataSlice(incasariMetadataJson []string) []incasari.Factura {
+
+	invoices := []incasari.Factura{}
+
+	for _, path := range incasariMetadataJson {
+		invoices = append(invoices, getInvoiceMetadata(path))
+	}
+
+	sort.Slice(invoices, func(i, j int) bool {
+		return invoices[i].Numar > invoices[j].Numar
+	})
+
+	return invoices
+
+}
+
+func AdunaIncasari(user auth.Account) []incasari.Factura {
+
+	incasariMetadataJson, err := getIncasariJsonPaths(user)
+	if err != nil {
+		panic(err)
+	}
+
+	invoices := getInvoicesDataSlice(incasariMetadataJson)
+
+	return invoices
 }

@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/ClimenteA/pfasimplu-go/auth"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/session"
 	"github.com/lithammer/shortuuid"
@@ -15,12 +16,6 @@ import (
 
 func HandleRegistre(app fiber.App, store session.Store) {
 	handleRegistre(app, store)
-}
-
-type Account struct {
-	Email   string `json:"email"`
-	Parola  string `json:"parola"`
-	Stocare string `json:"stocare"`
 }
 
 type Declaratie struct {
@@ -57,9 +52,9 @@ func setDocData(docData Declaratie, filePath string) {
 	}
 }
 
-func getCurrentUser(currentUserPath string) Account {
+func getCurrentUser(currentUserPath string) auth.Account {
 
-	var data Account
+	var data auth.Account
 
 	jsonFile, err := os.Open(currentUserPath)
 	if err != nil {
@@ -89,13 +84,12 @@ func handleRegistre(app fiber.App, store session.Store) {
 
 		user := getCurrentUser(fmt.Sprint(currentUserPath))
 
-		incasari, err := AdunaIncasari(user)
-		if err != nil {
-			log.Panicln(err)
-		}
+		incasari := AdunaIncasari(user)
+		cheltuieli := AdunaCheltuieli(user)
 
 		return c.Render("registre", fiber.Map{
-			"Incasari": incasari,
+			"Incasari":   incasari,
+			"Cheltuieli": cheltuieli,
 		}, "base")
 	})
 
