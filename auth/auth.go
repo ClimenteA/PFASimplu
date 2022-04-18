@@ -25,9 +25,12 @@ func HandleAuth(app fiber.App, store session.Store) {
 }
 
 type Account struct {
-	Email   string `json:"email"`
-	Parola  string `json:"parola"`
-	Stocare string `json:"stocare"`
+	Email             string `json:"email"`
+	Parola            string `json:"parola"`
+	Stocare           string `json:"stocare"`
+	StocareIncasari   string `json:"stocare_incasari"`
+	StocareCheltuieli string `json:"stocare_cheltuieli"`
+	StocareDeclaratii string `json:"stocare_declaratii"`
 }
 
 func encryptData(dataStr string) string {
@@ -55,11 +58,35 @@ func getAccountPath(accountName string) string {
 
 func setAccountData(accountFilePath, email, parola, stocare string) Account {
 
+	stocareIncasari := filepath.Join(stocare, "incasari")
+	stocareCheltuieli := filepath.Join(stocare, "cheltuieli")
+	stocareDeclaratii := filepath.Join(stocare, "declaratii")
+
 	if _, err := os.Stat(stocare); err != nil || !os.IsExist(err) {
 		os.MkdirAll(stocare, 0750)
 	}
 
-	data := Account{Email: email, Parola: parola, Stocare: stocare}
+	if _, err := os.Stat(stocareIncasari); err != nil || !os.IsExist(err) {
+		os.MkdirAll(stocareIncasari, 0750)
+	}
+
+	if _, err := os.Stat(stocareCheltuieli); err != nil || !os.IsExist(err) {
+		os.MkdirAll(stocareCheltuieli, 0750)
+	}
+
+	if _, err := os.Stat(stocareDeclaratii); err != nil || !os.IsExist(err) {
+		os.MkdirAll(stocareDeclaratii, 0750)
+	}
+
+	data := Account{
+		Email:             email,
+		Parola:            parola,
+		Stocare:           stocare,
+		StocareIncasari:   stocareIncasari,
+		StocareCheltuieli: stocareCheltuieli,
+		StocareDeclaratii: stocareDeclaratii,
+	}
+
 	file, _ := json.MarshalIndent(data, "", " ")
 	err := ioutil.WriteFile(accountFilePath, file, 0644)
 	if err != nil {
@@ -171,7 +198,6 @@ func handleLogin(app fiber.App, store session.Store) {
 			accountFilePath := getAccountPath(accountName)
 
 			if _, err := os.Stat(accountFilePath); err == nil || os.IsExist(err) {
-				log.Printf("Account exists: %s", email)
 				accountData := getAccountData(accountFilePath)
 				if accountData.Parola == accountPassword {
 					sess.Set("currentUser", accountFilePath)
@@ -180,7 +206,7 @@ func handleLogin(app fiber.App, store session.Store) {
 					}
 				}
 			} else {
-				return c.Redirect("/register")
+				return c.Redirect("/login?title=Date autentificare gresite&content=Parola sau emailul nu corespund sau contul nu exista")
 			}
 		}
 
@@ -210,7 +236,6 @@ func handleIndex(app fiber.App, store session.Store) {
 			panic(err)
 		}
 		currentUser := sess.Get("currentUser")
-		log.Println(currentUser)
 		if currentUser == nil {
 			return c.Redirect("/login")
 		}

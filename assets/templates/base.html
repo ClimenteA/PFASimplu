@@ -15,7 +15,7 @@
     <nav class="container-fluid">
         <ul>
             <a href="/">
-                <li><button><strong>Bilipa</strong></button></li>
+                <li><button><strong>PFASimplu</strong></button></li>
             </a>
         </ul>
         <ul>
@@ -35,6 +35,46 @@
 
     {{ embed }}
 
+
+    <dialog id="msg">
+        <article>
+            <header>
+                <a id="msg-close" href="#close" aria-label="Close" class="close"></a>
+                <strong id="msg-title"></strong>
+            </header>
+            <p id="msg-content">
+            </p>
+        </article>
+    </dialog>
+
 </body>
+
+<script>
+
+    document.addEventListener('DOMContentLoaded', (event) => {
+
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+
+        if (queryString) {
+            console.log(queryString)
+            let msg = document.getElementById("msg");
+            let closeBtn = document.getElementById("msg-close");
+            let msgTitle = document.getElementById("msg-title");
+            let msgContent = document.getElementById("msg-content");
+
+            msg.setAttribute("open", "");
+
+            msgTitle.innerText = urlParams.get("title");
+            msgContent.innerText = urlParams.get("content");
+
+            closeBtn.addEventListener("click", event => {
+                msg.removeAttribute("open");
+                window.location.href = window.location.href.split("?")[0];
+            })
+
+        }
+    })
+</script>
 
 </html>

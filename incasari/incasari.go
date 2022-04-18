@@ -33,6 +33,7 @@ type Factura struct {
 	Numar        int     `json:"numar"`
 	Data         string  `json:"data"`
 	SumaIncasata float64 `json:"suma_incasata"`
+	CaleFactura  string  `json:"cale_factura"`
 }
 
 func getInvoiceJsonPath(dirPath string) string {
@@ -131,19 +132,20 @@ func handleIncasari(app fiber.App, store session.Store) {
 			}
 
 			dirName := filepath.Join(user.Stocare, "incasari", data+"-"+serie+"-"+strconv.Itoa(numar))
+			invoicePath := getInvoicePath(dirName)
+			invoiceJsonPath := getInvoiceJsonPath(dirName)
+			caleFactura := filepath.Join(invoicePath, fisier.Filename)
 
 			invoiceData := Factura{
 				Serie:        serie,
 				Numar:        numar,
 				Data:         data,
 				SumaIncasata: suma_incasata,
+				CaleFactura:  caleFactura,
 			}
 
-			invoiceJsonPath := getInvoiceJsonPath(dirName)
 			setInvoiceData(invoiceData, invoiceJsonPath)
-
-			invoicePath := getInvoicePath(dirName)
-			c.SaveFile(fisier, filepath.Join(invoicePath, fisier.Filename))
+			c.SaveFile(fisier, caleFactura)
 
 		}
 
