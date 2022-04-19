@@ -14,13 +14,17 @@ import (
 	"github.com/lithammer/shortuuid"
 )
 
-func HandleRegistre(app fiber.App, store session.Store) {
-	handleRegistre(app, store)
+type Filepath struct {
+	Path string `query:"path"`
 }
 
 type Declaratie struct {
 	Data        string `json:"data"`
 	TipDocument string `json:"tip_document"`
+}
+
+func HandleRegistre(app fiber.App, store session.Store) {
+	handleRegistre(app, store)
 }
 
 func getDocJsonPath(dirPath string) string {
@@ -69,6 +73,61 @@ func getCurrentUser(currentUserPath string) auth.Account {
 }
 
 func handleRegistre(app fiber.App, store session.Store) {
+
+	app.Get("/download-factura", func(c *fiber.Ctx) error {
+
+		sess, err := store.Get(c)
+		if err != nil {
+			panic(err)
+		}
+
+		currentUserPath := sess.Get("currentUser")
+		if currentUserPath == nil {
+			return c.Redirect("/login")
+		}
+
+		f := new(Filepath)
+
+		if err := c.QueryParser(f); err != nil {
+			return c.Redirect("/registre-contabile?title=Calea catre fisier gresita&content=Fisierul dorit nu a fost gasit.")
+		}
+
+		return c.Download(f.Path)
+
+	})
+
+	app.Get("/sterge-factura", func(c *fiber.Ctx) error {
+
+		sess, err := store.Get(c)
+		if err != nil {
+			panic(err)
+		}
+
+		currentUserPath := sess.Get("currentUser")
+		if currentUserPath == nil {
+			return c.Redirect("/login")
+		}
+
+		f := new(Filepath)
+
+		if err := c.QueryParser(f); err != nil {
+			return c.Redirect("/registre-contabile?title=Calea catre fisier gresita&content=Fisierul dorit nu a fost gasit.")
+		}
+
+		if _, err := os.Stat(f.Path); err == nil || os.IsExist(err) {
+
+			err := os.RemoveAll(filepath.Dir(f.Path))
+			if err != nil {
+				return c.Redirect("/registre-contabile?title=Calea catre fisier gresita&content=Fisierul dorit nu a fost gasit.")
+			}
+
+		} else {
+			return c.Redirect("/registre-contabile?title=Calea catre fisier gresita&content=Fisierul dorit nu a fost gasit.")
+		}
+
+		return c.Redirect("/registre-contabile?title=Fisierul sters&content=Fisierul dorit a fost sters.")
+
+	})
 
 	app.Get("/registre-contabile", func(c *fiber.Ctx) error {
 
