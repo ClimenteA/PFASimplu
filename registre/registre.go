@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/ClimenteA/pfasimplu-go/auth"
 	"github.com/gofiber/fiber/v2"
@@ -74,7 +75,7 @@ func getCurrentUser(currentUserPath string) auth.Account {
 
 func handleRegistre(app fiber.App, store session.Store) {
 
-	app.Get("/download-factura", func(c *fiber.Ctx) error {
+	app.Get("/download-fisier", func(c *fiber.Ctx) error {
 
 		sess, err := store.Get(c)
 		if err != nil {
@@ -96,7 +97,7 @@ func handleRegistre(app fiber.App, store session.Store) {
 
 	})
 
-	app.Get("/sterge-factura", func(c *fiber.Ctx) error {
+	app.Get("/sterge-fisier", func(c *fiber.Ctx) error {
 
 		sess, err := store.Get(c)
 		if err != nil {
@@ -116,7 +117,13 @@ func handleRegistre(app fiber.App, store session.Store) {
 
 		if _, err := os.Stat(f.Path); err == nil || os.IsExist(err) {
 
-			err := os.RemoveAll(filepath.Dir(f.Path))
+			delPath := filepath.Dir(f.Path)
+
+			if strings.Contains(f.Path, "cheltuieli") || strings.Contains(f.Path, "declaratii") {
+				delPath, _ = filepath.Split(delPath)
+			}
+
+			err := os.RemoveAll(delPath)
 			if err != nil {
 				return c.Redirect("/registre-contabile?title=Calea catre fisier gresita&content=Fisierul dorit nu a fost gasit.")
 			}
@@ -145,10 +152,12 @@ func handleRegistre(app fiber.App, store session.Store) {
 
 		incasari := AdunaIncasari(user)
 		cheltuieli := AdunaCheltuieli(user)
+		declaratii := AdunaDeclaratii(user)
 
 		return c.Render("registre", fiber.Map{
 			"Incasari":   incasari,
 			"Cheltuieli": cheltuieli,
+			"Declaratii": declaratii,
 		}, "base")
 	})
 

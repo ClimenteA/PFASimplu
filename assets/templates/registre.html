@@ -80,10 +80,10 @@
               {{.SumaIncasata}}
             </td>
             <td>
-              <a href="/download-factura?path={{.CaleFactura}}">Download</a>
+              <a href="/download-fisier?path={{.CaleFactura}}">Download</a>
             </td>
             <td>
-              <a style="color:var(--del-color);" href="/sterge-factura?path={{.CaleFactura}}">Sterge</a>
+              <a style="color:var(--del-color);" href="/sterge-fisier?path={{.CaleFactura}}">Sterge</a>
             </td>
           </tr>
           {{end}}
@@ -122,7 +122,10 @@
               Mijloc Fix
             </th>
             <th scope="col">
-              Cale Cheltuiala
+              Download Fisier
+            </th>
+            <th scope="col">
+              Sterge Fisier
             </th>
             <th scope="col">
               Ani Amortizare
@@ -205,7 +208,10 @@
               {{end}}
             </td>
             <td>
-              {{.CaleCheltuiala}}
+              <a href="/download-fisier?path={{.CaleCheltuiala}}">Download</a>
+            </td>
+            <td>
+              <a style="color:var(--del-color);" href="/sterge-fisier?path={{.CaleCheltuiala}}">Sterge</a>
             </td>
             <td>
               {{.DetaliiMijlocFix.AniAmortizare}}
@@ -266,6 +272,53 @@
       <a href="/#todo">Download EXCEL</a>
     </div>
 
+
+    <article>
+      <h4 style="color: var(--secondary);">Tabel Declaratii</h4>
+      <table>
+
+        <thead>
+          <tr class="bg-whitesmoke">
+            <th scope="col">
+              Data
+            </th>
+            <th scope="col">
+              Tip Document
+            </th>
+            <th scope="col">
+              Download Fisier
+            </th>
+            <th scope="col">
+              Sterge Fisier
+            </th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {{range .Declaratii}}
+          <tr>
+            <td>
+              {{.Data}}
+            </td>
+            <td>
+              {{.TipDocument}}
+            </td>
+            <td>
+              <a href="/download-fisier?path={{.CaleDocument}}">Download</a>
+            </td>
+            <td>
+              <a style="color:var(--del-color);" href="/sterge-fisier?path={{.CaleDocument}}">Sterge</a>
+            </td>
+          </tr>
+          {{end}}
+        </tbody>
+      </table>
+    </article>
+
+    <div class="download">
+      <a href="/#todo">Download CSV</a>
+      <a href="/#todo">Download EXCEL</a>
+    </div>
 
 
 
