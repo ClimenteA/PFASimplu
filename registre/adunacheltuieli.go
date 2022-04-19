@@ -54,12 +54,15 @@ func getExpenseMetadata(path string) cheltuieli.Cheltuiala {
 	return data
 }
 
-func getExpensesDataSlice(cheltuieliMetadataJson []string) []cheltuieli.Cheltuiala {
+func getExpensesDataSlice(cheltuieliMetadataJson []string, anul string) []cheltuieli.Cheltuiala {
 
 	expenses := []cheltuieli.Cheltuiala{}
 
 	for _, path := range cheltuieliMetadataJson {
-		expenses = append(expenses, getExpenseMetadata(path))
+		expense := getExpenseMetadata(path)
+		if strings.HasPrefix(anul, expense.Data) {
+			expenses = append(expenses, expense)
+		}
 	}
 
 	sort.Slice(expenses, func(i, j int) bool {
@@ -81,14 +84,14 @@ func getExpensesDataSlice(cheltuieliMetadataJson []string) []cheltuieli.Cheltuia
 
 }
 
-func AdunaCheltuieli(user auth.Account) []cheltuieli.Cheltuiala {
+func AdunaCheltuieli(user auth.Account, anul string) []cheltuieli.Cheltuiala {
 
 	cheltuieliMetadataJson, err := getCheltuieliJsonPaths(user)
 	if err != nil {
 		panic(err)
 	}
 
-	expenses := getExpensesDataSlice(cheltuieliMetadataJson)
+	expenses := getExpensesDataSlice(cheltuieliMetadataJson, anul)
 
 	return expenses
 }

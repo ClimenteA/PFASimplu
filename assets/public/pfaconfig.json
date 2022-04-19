@@ -1,0 +1,28 @@
+{
+    "prag_mijloc_fix": [
+        {
+            "an": 2022,
+            "valoare": 2500
+        }
+    ],
+    "euro_to_ron": [
+        {
+            "an": 2022,
+            "valoare": 4.97
+        }
+    ],
+    "salarii_minime": [
+        {
+            "an": 2020,
+            "valoare": 2230
+        },
+        {
+            "an": 2021,
+            "valoare": 2300
+        },
+        {
+            "an": 2022,
+            "valoare": 2550
+        }
+    ]
+}

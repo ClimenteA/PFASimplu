@@ -13,13 +13,13 @@ import (
 	"time"
 
 	"github.com/ClimenteA/pfasimplu-go/auth"
-	"github.com/ClimenteA/pfasimplu-go/mijloacefixe"
+	"github.com/ClimenteA/pfasimplu-go/staticdata"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/session"
 	"github.com/lithammer/shortuuid"
 )
 
-func HandleCheltuieli(app fiber.App, store session.Store, coduriMijloaceFixe []mijloacefixe.CodMijloaceFixe) {
+func HandleCheltuieli(app fiber.App, store session.Store, coduriMijloaceFixe []staticdata.CodMijloaceFixe) {
 	handleCheltuieli(app, store, coduriMijloaceFixe)
 }
 
@@ -98,9 +98,9 @@ func getCurrentUser(currentUserPath string) auth.Account {
 	return data
 }
 
-func getDetaliiMijlocFixFromCodCasificare(cod_clasificare string, coduriMijloaceFixe []mijloacefixe.CodMijloaceFixe) mijloacefixe.CodMijloaceFixe {
+func getDetaliiMijlocFixFromCodCasificare(cod_clasificare string, coduriMijloaceFixe []staticdata.CodMijloaceFixe) staticdata.CodMijloaceFixe {
 
-	detaliiMijlocFix := mijloacefixe.CodMijloaceFixe{}
+	detaliiMijlocFix := staticdata.CodMijloaceFixe{}
 	for _, item := range coduriMijloaceFixe {
 		if cod_clasificare == item.CodClasificare {
 			detaliiMijlocFix = item
@@ -110,7 +110,7 @@ func getDetaliiMijlocFixFromCodCasificare(cod_clasificare string, coduriMijloace
 	return detaliiMijlocFix
 }
 
-func getDetaliiMijlocFix(mijloc_fix bool, form *multipart.Form, filename string, suma_cheltuita float64, coduriMijloaceFixe []mijloacefixe.CodMijloaceFixe) DetaliiMijlocFix {
+func getDetaliiMijlocFix(mijloc_fix bool, form *multipart.Form, filename string, suma_cheltuita float64, coduriMijloaceFixe []staticdata.CodMijloaceFixe) DetaliiMijlocFix {
 
 	nr_inventar := 0
 	fel_serie_numar_data_document := ""
@@ -187,7 +187,7 @@ func getDetaliiMijlocFix(mijloc_fix bool, form *multipart.Form, filename string,
 
 }
 
-func getExpenseData(c *fiber.Ctx, user auth.Account, form *multipart.Form, filename, cale_cheltuiala string, coduriMijloaceFixe []mijloacefixe.CodMijloaceFixe) Cheltuiala {
+func getExpenseData(c *fiber.Ctx, user auth.Account, form *multipart.Form, filename, cale_cheltuiala string, coduriMijloaceFixe []staticdata.CodMijloaceFixe) Cheltuiala {
 
 	data := form.Value["data"][0]
 
@@ -233,7 +233,7 @@ func getExpenseData(c *fiber.Ctx, user auth.Account, form *multipart.Form, filen
 
 }
 
-func handleCheltuieli(app fiber.App, store session.Store, coduriMijloaceFixe []mijloacefixe.CodMijloaceFixe) {
+func handleCheltuieli(app fiber.App, store session.Store, coduriMijloaceFixe []staticdata.CodMijloaceFixe) {
 
 	app.Get("/adauga-cheltuieli", func(c *fiber.Ctx) error {
 

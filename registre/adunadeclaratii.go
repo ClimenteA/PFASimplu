@@ -54,12 +54,15 @@ func getDocMetadata(path string) declaratii.Declaratie {
 	return data
 }
 
-func getDocsDataSlice(docMetadataJson []string) []declaratii.Declaratie {
+func getDocsDataSlice(docMetadataJson []string, anul string) []declaratii.Declaratie {
 
 	declaratii := []declaratii.Declaratie{}
 
 	for _, path := range docMetadataJson {
-		declaratii = append(declaratii, getDocMetadata(path))
+		declaratie := getDocMetadata(path)
+		if strings.HasPrefix(anul, declaratie.Data) {
+			declaratii = append(declaratii, declaratie)
+		}
 	}
 
 	sort.Slice(declaratii, func(i, j int) bool {
@@ -81,14 +84,14 @@ func getDocsDataSlice(docMetadataJson []string) []declaratii.Declaratie {
 
 }
 
-func AdunaDeclaratii(user auth.Account) []declaratii.Declaratie {
+func AdunaDeclaratii(user auth.Account, anul string) []declaratii.Declaratie {
 
 	docMetadataJson, err := getDeclaratiiJsonPaths(user)
 	if err != nil {
 		panic(err)
 	}
 
-	declaratii := getDocsDataSlice(docMetadataJson)
+	declaratii := getDocsDataSlice(docMetadataJson, anul)
 
 	return declaratii
 }

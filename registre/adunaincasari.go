@@ -53,12 +53,15 @@ func getInvoiceMetadata(path string) incasari.Factura {
 	return data
 }
 
-func getInvoicesDataSlice(incasariMetadataJson []string) []incasari.Factura {
+func getInvoicesDataSlice(incasariMetadataJson []string, anul string) []incasari.Factura {
 
 	invoices := []incasari.Factura{}
 
 	for _, path := range incasariMetadataJson {
-		invoices = append(invoices, getInvoiceMetadata(path))
+		invoice := getInvoiceMetadata(path)
+		if strings.HasPrefix(anul, invoice.Data) {
+			invoices = append(invoices, invoice)
+		}
 	}
 
 	sort.Slice(invoices, func(i, j int) bool {
@@ -69,14 +72,14 @@ func getInvoicesDataSlice(incasariMetadataJson []string) []incasari.Factura {
 
 }
 
-func AdunaIncasari(user auth.Account) []incasari.Factura {
+func AdunaIncasari(user auth.Account, anul string) []incasari.Factura {
 
 	incasariMetadataJson, err := getIncasariJsonPaths(user)
 	if err != nil {
 		panic(err)
 	}
 
-	invoices := getInvoicesDataSlice(incasariMetadataJson)
+	invoices := getInvoicesDataSlice(incasariMetadataJson, anul)
 
 	return invoices
 }

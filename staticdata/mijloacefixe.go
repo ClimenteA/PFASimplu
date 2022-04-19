@@ -1,4 +1,4 @@
-package mijloacefixe
+package staticdata
 
 import (
 	"encoding/json"
@@ -15,7 +15,7 @@ type CodMijloaceFixe struct {
 
 func LoadMijloaceFixe() []CodMijloaceFixe {
 
-	file, _ := ioutil.ReadFile("./assets/public/lista_coduri_mijloace_fixe_2022.json")
+	file, _ := ioutil.ReadFile("./assets/public/lista_coduri_mijloace_fixe.json")
 
 	data := []CodMijloaceFixe{}
 

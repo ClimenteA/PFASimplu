@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/ClimenteA/pfasimplu-go/auth"
+	"github.com/ClimenteA/pfasimplu-go/declaratii"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/session"
 	"github.com/lithammer/shortuuid"
@@ -19,9 +20,8 @@ type Filepath struct {
 	Path string `query:"path"`
 }
 
-type Declaratie struct {
-	Data        string `json:"data"`
-	TipDocument string `json:"tip_document"`
+type ReportYear struct {
+	Anul string `query:"anul"`
 }
 
 func HandleRegistre(app fiber.App, store session.Store) {
@@ -49,7 +49,7 @@ func getDocPath(dirPath string) string {
 
 }
 
-func setDocData(docData Declaratie, filePath string) {
+func setDocData(docData declaratii.Declaratie, filePath string) {
 	file, _ := json.MarshalIndent(docData, "", " ")
 	err := ioutil.WriteFile(filePath, file, 0644)
 	if err != nil {
@@ -148,15 +148,21 @@ func handleRegistre(app fiber.App, store session.Store) {
 			return c.Redirect("/login")
 		}
 
+		r := new(ReportYear)
+
+		if err := c.QueryParser(r); err != nil {
+			return c.Redirect("/registre-contabile?title=Anul fara date&content=Nu au fost gasite date pentru anul cerut.")
+		}
+
 		user := getCurrentUser(fmt.Sprint(currentUserPath))
 
-		incasari := AdunaIncasari(user)
-		cheltuieli := AdunaCheltuieli(user)
-		declaratii := AdunaDeclaratii(user)
+		incasari := AdunaIncasari(user, r.Anul)
+		cheltuieli := AdunaCheltuieli(user, r.Anul)
+		declaratii := AdunaDeclaratii(user, r.Anul)
 		totalIncasariBrut := CalculeazaIncasariBrut(incasari)
 		totalCheltuieliDeductibile := CalculeazaCheltuieliDeductibile(cheltuieli)
 		totalIncasariNet := totalIncasariBrut - totalCheltuieliDeductibile
-		totalPlatiCatreStat := CalculeazaPlatiCatreStat(totalIncasariNet)
+		totalPlatiCatreStat := CalculeazaPlatiCatreStat(totalIncasariNet, r.Anul)
 
 		return c.Render("registre", fiber.Map{
 			"Incasari":                   incasari,
@@ -196,7 +202,7 @@ func handleRegistre(app fiber.App, store session.Store) {
 			uid := shortuuid.New()
 			dirName := filepath.Join(user.Stocare, "registre", data, uid)
 
-			docData := Declaratie{
+			docData := declaratii.Declaratie{
 				Data:        data,
 				TipDocument: tip_document,
 			}
