@@ -153,11 +153,19 @@ func handleRegistre(app fiber.App, store session.Store) {
 		incasari := AdunaIncasari(user)
 		cheltuieli := AdunaCheltuieli(user)
 		declaratii := AdunaDeclaratii(user)
+		totalIncasariBrut := CalculeazaIncasariBrut(incasari)
+		totalCheltuieliDeductibile := CalculeazaCheltuieliDeductibile(cheltuieli)
+		totalIncasariNet := totalIncasariBrut - totalCheltuieliDeductibile
+		totalPlatiCatreStat := CalculeazaPlatiCatreStat(totalIncasariNet)
 
 		return c.Render("registre", fiber.Map{
-			"Incasari":   incasari,
-			"Cheltuieli": cheltuieli,
-			"Declaratii": declaratii,
+			"Incasari":                   incasari,
+			"Cheltuieli":                 cheltuieli,
+			"Declaratii":                 declaratii,
+			"TotalIncasariBrut":          totalIncasariBrut,
+			"TotalIncasariNet":           totalIncasariNet,
+			"TotalCheltuieliDeductibile": totalCheltuieliDeductibile,
+			"TotalPlatiCatreStat":        totalPlatiCatreStat,
 		}, "base")
 	})
 

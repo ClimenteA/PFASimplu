@@ -4,7 +4,8 @@
         ".git",
         "_old",
         "README.md",
-        "stocare"
+        "stocare",
+        "assets"
     ],
     "watch": [
         "./*"
