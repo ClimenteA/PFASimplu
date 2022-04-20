@@ -58,8 +58,10 @@ func getInvoicesDataSlice(incasariMetadataJson []string, anul string) []incasari
 	invoices := []incasari.Factura{}
 
 	for _, path := range incasariMetadataJson {
+
 		invoice := getInvoiceMetadata(path)
-		if strings.HasPrefix(anul, invoice.Data) {
+
+		if strings.HasPrefix(invoice.Data, anul) {
 			invoices = append(invoices, invoice)
 		}
 	}

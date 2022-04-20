@@ -60,7 +60,7 @@ func getDocsDataSlice(docMetadataJson []string, anul string) []declaratii.Declar
 
 	for _, path := range docMetadataJson {
 		declaratie := getDocMetadata(path)
-		if strings.HasPrefix(anul, declaratie.Data) {
+		if strings.HasPrefix(declaratie.Data, anul) {
 			declaratii = append(declaratii, declaratie)
 		}
 	}

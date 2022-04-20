@@ -55,8 +55,10 @@
 
         const queryString = window.location.search;
         const urlParams = new URLSearchParams(queryString);
+        const title = urlParams.get("title");
+        const content = urlParams.get("content");
 
-        if (queryString) {
+        if (title && content) {
             console.log(queryString)
             let msg = document.getElementById("msg");
             let closeBtn = document.getElementById("msg-close");
@@ -65,8 +67,8 @@
 
             msg.setAttribute("open", "");
 
-            msgTitle.innerText = urlParams.get("title");
-            msgContent.innerText = urlParams.get("content");
+            msgTitle.innerText = title;
+            msgContent.innerText = content;
 
             closeBtn.addEventListener("click", event => {
                 msg.removeAttribute("open");

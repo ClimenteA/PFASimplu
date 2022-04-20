@@ -7,7 +7,10 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"reflect"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/ClimenteA/pfasimplu-go/auth"
 	"github.com/ClimenteA/pfasimplu-go/declaratii"
@@ -154,15 +157,22 @@ func handleRegistre(app fiber.App, store session.Store) {
 			return c.Redirect("/registre-contabile?title=Anul fara date&content=Nu au fost gasite date pentru anul cerut.")
 		}
 
+		filterYear := strconv.Itoa(time.Now().Year())
+		if r.Anul != "" {
+			filterYear = r.Anul
+		}
+
 		user := getCurrentUser(fmt.Sprint(currentUserPath))
 
-		incasari := AdunaIncasari(user, r.Anul)
-		cheltuieli := AdunaCheltuieli(user, r.Anul)
-		declaratii := AdunaDeclaratii(user, r.Anul)
+		log.Println("Filtreaza datale pentru anul: ", filterYear, reflect.TypeOf(filterYear))
+
+		incasari := AdunaIncasari(user, filterYear)
+		cheltuieli := AdunaCheltuieli(user, filterYear)
+		declaratii := AdunaDeclaratii(user, filterYear)
 		totalIncasariBrut := CalculeazaIncasariBrut(incasari)
 		totalCheltuieliDeductibile := CalculeazaCheltuieliDeductibile(cheltuieli)
 		totalIncasariNet := totalIncasariBrut - totalCheltuieliDeductibile
-		totalPlatiCatreStat := CalculeazaPlatiCatreStat(totalIncasariNet, r.Anul)
+		totalPlatiCatreStat := CalculeazaPlatiCatreStat(totalIncasariNet, filterYear)
 
 		return c.Render("registre", fiber.Map{
 			"Incasari":                   incasari,
