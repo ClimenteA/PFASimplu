@@ -14,9 +14,10 @@ import (
 
 	"github.com/ClimenteA/pfasimplu-go/auth"
 	"github.com/ClimenteA/pfasimplu-go/declaratii"
+	"github.com/ClimenteA/pfasimplu-go/utils"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/session"
-	"github.com/lithammer/shortuuid"
 )
 
 type Filepath struct {
@@ -163,7 +164,9 @@ func handleRegistre(app fiber.App, store session.Store) {
 		}
 
 		user := getCurrentUser(fmt.Sprint(currentUserPath))
+		yearsRegisterd := utils.GetYearsRegistered(user)
 
+		log.Println(yearsRegisterd)
 		log.Println("Filtreaza datale pentru anul: ", filterYear, reflect.TypeOf(filterYear))
 
 		incasari := AdunaIncasari(user, filterYear)
@@ -175,6 +178,7 @@ func handleRegistre(app fiber.App, store session.Store) {
 		totalPlatiCatreStat := CalculeazaPlatiCatreStat(totalIncasariNet, filterYear)
 
 		return c.Render("registre", fiber.Map{
+			"AniInregistrati":            yearsRegisterd,
 			"Incasari":                   incasari,
 			"Cheltuieli":                 cheltuieli,
 			"Declaratii":                 declaratii,
@@ -185,48 +189,48 @@ func handleRegistre(app fiber.App, store session.Store) {
 		}, "base")
 	})
 
-	app.Post("/registre-contabile", func(c *fiber.Ctx) error {
+	// app.Post("/registre-contabile", func(c *fiber.Ctx) error {
 
-		sess, err := store.Get(c)
-		if err != nil {
-			panic(err)
-		}
+	// 	sess, err := store.Get(c)
+	// 	if err != nil {
+	// 		panic(err)
+	// 	}
 
-		currentUserPath := sess.Get("currentUser")
-		if currentUserPath == nil {
-			return c.Redirect("/login")
-		}
+	// 	currentUserPath := sess.Get("currentUser")
+	// 	if currentUserPath == nil {
+	// 		return c.Redirect("/login")
+	// 	}
 
-		user := getCurrentUser(fmt.Sprint(currentUserPath))
+	// 	user := getCurrentUser(fmt.Sprint(currentUserPath))
 
-		if form, err := c.MultipartForm(); err == nil {
+	// 	if form, err := c.MultipartForm(); err == nil {
 
-			tip_document := form.Value["tip_document"][0]
-			data := form.Value["data"][0]
+	// 		tip_document := form.Value["tip_document"][0]
+	// 		data := form.Value["data"][0]
 
-			fisier, err := c.FormFile("fisier")
-			if err != nil {
-				panic(err)
-			}
+	// 		fisier, err := c.FormFile("fisier")
+	// 		if err != nil {
+	// 			panic(err)
+	// 		}
 
-			uid := shortuuid.New()
-			dirName := filepath.Join(user.Stocare, "registre", data, uid)
+	// 		uid := shortuuid.New()
+	// 		dirName := filepath.Join(user.Stocare, "registre", data, uid)
 
-			docData := declaratii.Declaratie{
-				Data:        data,
-				TipDocument: tip_document,
-			}
+	// 		docData := declaratii.Declaratie{
+	// 			Data:        data,
+	// 			TipDocument: tip_document,
+	// 		}
 
-			docJsonPath := getDocJsonPath(dirName)
-			setDocData(docData, docJsonPath)
+	// 		docJsonPath := getDocJsonPath(dirName)
+	// 		setDocData(docData, docJsonPath)
 
-			docPath := getDocPath(dirName)
-			c.SaveFile(fisier, filepath.Join(docPath, fisier.Filename))
+	// 		docPath := getDocPath(dirName)
+	// 		c.SaveFile(fisier, filepath.Join(docPath, fisier.Filename))
 
-		}
+	// 	}
 
-		return c.Redirect("/registre-contabile")
+	// 	return c.Redirect("/registre-contabile")
 
-	})
+	// })
 
 }

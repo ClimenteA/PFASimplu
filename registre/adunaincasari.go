@@ -30,7 +30,7 @@ func getIncasariJsonPaths(user auth.Account) ([]string, error) {
 			return nil
 		})
 	if err != nil {
-		log.Println(err)
+		log.Panicln(err)
 	}
 
 	return incasariMetadataJson, err

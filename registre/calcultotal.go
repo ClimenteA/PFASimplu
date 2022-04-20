@@ -34,7 +34,7 @@ func CalculeazaPlatiCatreStat(totalIncasariNet float64, anul string) float64 {
 
 	anualVars := staticdata.LoadVariabileAnuale()
 
-	log.Println(anualVars)
+	log.Println("CalculeazaPlatiCatreStat", anualVars)
 
 	// https://static.anaf.ro/static/10/Anaf/formulare/Instructiuni_D_212_OPANAF_14_2021.pdf
 

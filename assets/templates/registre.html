@@ -21,6 +21,11 @@
   .bg-whitesmoke {
     background: whitesmoke;
   }
+
+
+  .none {
+    display: none;
+  }
 </style>
 
 
@@ -37,20 +42,20 @@
 
     <div class="grid">
 
-      <select>
-        <option selected>Rapoarte pentru anul 2022</option>
-        <option>Rapoarte pentru anul 2021</option>
+      <select id="selected-year">
+        {{range .AniInregistrati}}
+        <option id="{{.}}" value="?anul={{.}}">Rapoarte pentru anul {{.}}</option>
+        {{end}}
       </select>
 
-      <select>
-        <option selected>Arata toate rapoartele</option>
+      <select id="display-reports">
+        <option>Arata toate rapoartele</option>
         <option>Arata doar registrele contabile</option>
       </select>
 
     </div>
 
-
-    <div class="grid">
+    <div id="total-incasari" class="grid">
 
       <article class="article-grid">
         <h4 style="color: var(--secondary)">Total Incasari (Brut)</h4>
@@ -64,7 +69,7 @@
 
     </div>
 
-    <div class="grid">
+    <div id="total-cheltuieli" class="grid">
 
       <article class="article-grid">
         <h4 style="color: var(--secondary)">Total Cheltuieli Deductibile</h4>
@@ -78,7 +83,6 @@
 
     </div>
 
-
   </div>
 
 
@@ -86,8 +90,7 @@
 
   <div id="tables" class="container-fluid">
 
-
-    <article>
+    <article id="tabel-incasari">
       <h4 style="color: var(--secondary);">Tabel Incasari</h4>
       <table>
 
@@ -141,13 +144,13 @@
       </table>
     </article>
 
-    <div class="download">
+    <div id="tabel-incasari-download" class="download">
       <a href="/#todo">Download CSV</a>
       <a href="/#todo">Download EXCEL</a>
     </div>
 
 
-    <article>
+    <article id="tabel-cheltuieli">
       <h4 style="color: var(--secondary);">Tabel Cheltuieli</h4>
       <table>
 
@@ -317,13 +320,13 @@
       </table>
     </article>
 
-    <div class="download">
+    <div id="tabel-cheltuieli-download" class="download">
       <a href="/#todo">Download CSV</a>
       <a href="/#todo">Download EXCEL</a>
     </div>
 
 
-    <article>
+    <article id="tabel-declaratii">
       <h4 style="color: var(--secondary);">Tabel Declaratii</h4>
       <table>
 
@@ -365,11 +368,10 @@
       </table>
     </article>
 
-    <div class="download">
+    <div id="tabel-declaratii-download" class="download">
       <a href="/#todo">Download CSV</a>
       <a href="/#todo">Download EXCEL</a>
     </div>
-
 
 
     <article>
@@ -529,6 +531,65 @@
 
 
 </main>
+
+
+<script>
+
+
+  window.addEventListener("DOMContentLoaded", (event) => {
+
+    let elemsToHide = [
+      "total-incasari",
+      "total-cheltuieli",
+      "tabel-incasari",
+      "tabel-cheltuieli",
+      "tabel-declaratii",
+      "tabel-incasari-download",
+      "tabel-cheltuieli-download",
+      "tabel-declaratii-download",
+    ]
+
+    let summary = document.getElementById("total-incasari")
+    let extraTables = document.getElementById("total-cheltuieli")
+
+    let showAllReports = true
+    document.getElementById("display-reports").addEventListener("change", event => {
+      showAllReports = !showAllReports
+      if (!showAllReports) {
+        elemsToHide.forEach(elId => {
+          document.getElementById(elId).classList.add("none")
+        })
+      } else {
+        elemsToHide.forEach(elId => {
+          document.getElementById(elId).classList.remove("none")
+        })
+      }
+
+    }, false)
+
+
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const anul = urlParams.get("anul");
+
+    let selectedYear = document.getElementById("selected-year")
+
+    if (anul) {
+      document.getElementById(anul).setAttribute("selected", "")
+    }
+
+    selectedYear.addEventListener("click", event => {
+      let url = String(document.location).split("?")[0] + selectedYear.value;
+      const link = document.createElement('a');
+      link.href = url;
+      link.click();
+    }, false)
+
+  })
+
+
+
+</script>
 
 </body>
 
