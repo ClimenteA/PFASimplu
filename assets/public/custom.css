@@ -28,3 +28,7 @@ form {
 .p-article>hgroup {
     padding: 2rem;
 }
+
+.none {
+    display: none;
+}

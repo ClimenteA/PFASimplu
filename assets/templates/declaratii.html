@@ -1,3 +1,10 @@
+<style>
+    .none {
+        display: none;
+    }
+</style>
+
+
 <main class="container">
 
     <hgroup class="container">
@@ -41,12 +48,31 @@
                 <label for="data">
                     Data document
                     <input type="date" id="data" name="data" required>
+                    <small></small>
+                </label>
+            </div>
+
+            <div class="grid">
+
+                <label class="none" id="plata_anaf_label_sum" for="plata_anaf">
+                    Suma Platita catre ANAF
+                    <input type="number" id="plata_anaf" name="plata_anaf" value="0" required>
+                </label>
+
+                <label class="none" id="plata_anaf_label_year" for="plata_pentru_anul">
+                    Plata pentru anul
+                    <select name="plata_pentru_anul" id="plata_pentru_anul">
+                        {{range .AniInregistrati}}
+                        <option value="{{.}}">{{.}}</option>
+                        {{end}}
+                    </select>
                 </label>
 
             </div>
 
+
             <label for="file">
-                Incarca declaratie/dovada plata impozite
+                Incarca document
                 <input type="file" id="file" name="fisier" required>
             </label>
 
@@ -56,5 +82,26 @@
 
     </form>
 
-
 </main>
+
+
+<script>
+
+    window.onload = event => {
+        let tipDoc = document.getElementById("tip_document");
+        let plata_anaf_label_sum = document.getElementById("plata_anaf_label_sum");
+        let plata_anaf_label_year = document.getElementById("plata_anaf_label_year");
+
+        tipDoc.addEventListener("change", event => {
+            if (event.target.value == "Dovada plata impozite") {
+                plata_anaf_label_sum.classList.remove("none");
+                plata_anaf_label_year.classList.remove("none");
+            } else {
+                plata_anaf_label_sum.classList.add("none");
+                plata_anaf_label_year.classList.add("none");
+            }
+        }, false);
+
+    }
+
+</script>

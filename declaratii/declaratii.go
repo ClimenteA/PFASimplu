@@ -7,8 +7,10 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strconv"
 
 	"github.com/ClimenteA/pfasimplu-go/auth"
+	"github.com/ClimenteA/pfasimplu-go/utils"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/session"
 	"github.com/lithammer/shortuuid"
@@ -19,9 +21,11 @@ func HandleDeclaratii(app fiber.App, store session.Store) {
 }
 
 type Declaratie struct {
-	Data         string `json:"data"`
-	TipDocument  string `json:"tip_document"`
-	CaleDocument string `json:"cale_document"`
+	Data         string  `json:"data"`
+	TipDocument  string  `json:"tip_document"`
+	PlataAnaf    float64 `json:"plata_anaf"`
+	PlataPtAnul  int     `json:"plata_pentru_anul"`
+	CaleDocument string  `json:"cale_document"`
 }
 
 func getDocJsonPath(dirPath string) string {
@@ -78,11 +82,17 @@ func handleDeclaratii(app fiber.App, store session.Store) {
 			panic(err)
 		}
 
-		if sess.Get("currentUser") == nil {
+		currentUserPath := sess.Get("currentUser")
+		if currentUserPath == nil {
 			return c.Redirect("/login")
 		}
 
-		return c.Render("declaratii", fiber.Map{}, "base")
+		user := getCurrentUser(fmt.Sprint(currentUserPath))
+		yearsRegisterd := utils.GetYearsRegistered(user)
+
+		return c.Render("declaratii", fiber.Map{
+			"AniInregistrati": yearsRegisterd,
+		}, "base")
 	})
 
 	app.Post("/adauga-declaratii", func(c *fiber.Ctx) error {
@@ -104,6 +114,25 @@ func handleDeclaratii(app fiber.App, store session.Store) {
 			tip_document := form.Value["tip_document"][0]
 			data := form.Value["data"][0]
 
+			plata_anaf := form.Value["plata_anaf"][0]
+			plata_pentru_anul := form.Value["plata_pentru_anul"][0]
+
+			if tip_document == "Dovada plata impozite" {
+				if plata_anaf == "0" {
+					return c.Redirect("/adauga-declaratii?title=Plata incorecta&content=Suma platita trebuie sa fie diferita de 0")
+				}
+			}
+
+			plata_pentru_anul_int, err := strconv.Atoi(plata_pentru_anul)
+			if err != nil {
+				return c.Redirect("/adauga-declaratii?title=An incorect&content=Anul nu este valid")
+			}
+
+			plata_anaf_float, err := strconv.ParseFloat(plata_anaf, 64)
+			if err != nil {
+				return c.Redirect("/adauga-declaratii?title=Numar incorect&content=Suma trebuie sa fie un numar ex 12 sau 12.5")
+			}
+
 			fisier, err := c.FormFile("fisier")
 			if err != nil {
 				panic(err)
@@ -119,6 +148,8 @@ func handleDeclaratii(app fiber.App, store session.Store) {
 			docData := Declaratie{
 				Data:         data,
 				TipDocument:  tip_document,
+				PlataAnaf:    plata_anaf_float,
+				PlataPtAnul:  plata_pentru_anul_int,
 				CaleDocument: caleDocument,
 			}
 

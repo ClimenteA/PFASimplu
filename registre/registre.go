@@ -150,10 +150,10 @@ func handleRegistre(app fiber.App, store session.Store) {
 			"Incasari":                   incasari,
 			"Cheltuieli":                 cheltuieli,
 			"Declaratii":                 declaratii,
-			"TotalIncasariBrut":          totalIncasariBrut,
-			"TotalIncasariNet":           totalIncasariNet,
-			"TotalCheltuieliDeductibile": totalCheltuieliDeductibile,
-			"TotalPlatiCatreStat":        totalPlatiCatreStat,
+			"TotalIncasariBrut":          fmt.Sprintf("%.2f", totalIncasariBrut),
+			"TotalIncasariNet":           fmt.Sprintf("%.2f", totalIncasariNet),
+			"TotalCheltuieliDeductibile": fmt.Sprintf("%.2f", totalCheltuieliDeductibile),
+			"TotalPlatiCatreStat":        fmt.Sprintf("%.2f", totalPlatiCatreStat),
 		}, "base")
 	})
 }

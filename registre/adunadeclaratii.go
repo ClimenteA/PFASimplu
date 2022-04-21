@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -59,10 +60,18 @@ func getDocsDataSlice(docMetadataJson []string, anul string) []declaratii.Declar
 	declaratii := []declaratii.Declaratie{}
 
 	for _, path := range docMetadataJson {
+
 		declaratie := getDocMetadata(path)
-		if strings.HasPrefix(declaratie.Data, anul) {
+
+		if declaratie.PlataAnaf != 0.0 && anul == strconv.Itoa(declaratie.PlataPtAnul) {
+			declaratii = append(declaratii, declaratie)
+			continue
+		}
+
+		if strings.HasPrefix(declaratie.Data, anul) && declaratie.PlataAnaf == 0.0 {
 			declaratii = append(declaratii, declaratie)
 		}
+
 	}
 
 	sort.Slice(declaratii, func(i, j int) bool {
@@ -79,6 +88,8 @@ func getDocsDataSlice(docMetadataJson []string, anul string) []declaratii.Declar
 
 		return ti.After(tj)
 	})
+
+	log.Println(declaratii)
 
 	return declaratii
 
