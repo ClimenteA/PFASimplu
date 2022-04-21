@@ -89,8 +89,6 @@ func getDocsDataSlice(docMetadataJson []string, anul string) []declaratii.Declar
 		return ti.After(tj)
 	})
 
-	log.Println(declaratii)
-
 	return declaratii
 
 }

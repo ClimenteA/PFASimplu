@@ -24,11 +24,12 @@ func HandleIncasari(app fiber.App, store session.Store) {
 }
 
 type Factura struct {
-	Serie        string  `json:"serie"`
-	Numar        int     `json:"numar"`
-	Data         string  `json:"data"`
-	SumaIncasata float64 `json:"suma_incasata"`
-	CaleFactura  string  `json:"cale_factura"`
+	Serie         string  `json:"serie"`
+	Numar         int     `json:"numar"`
+	Data          string  `json:"data"`
+	TipTranzactie string  `json:"tip_tranzactie"`
+	SumaIncasata  float64 `json:"suma_incasata"`
+	CaleFactura   string  `json:"cale_factura"`
 }
 
 func getInvoiceJsonPath(dirPath string) string {
@@ -108,6 +109,8 @@ func handleIncasari(app fiber.App, store session.Store) {
 
 		if form, err := c.MultipartForm(); err == nil {
 
+			tip_tranzactie := form.Value["tip_tranzactie"][0]
+
 			serie := strings.ToUpper(form.Value["serie"][0])
 			data := form.Value["data"][0]
 
@@ -132,11 +135,12 @@ func handleIncasari(app fiber.App, store session.Store) {
 			caleFactura := filepath.Join(invoicePath, fisier.Filename)
 
 			invoiceData := Factura{
-				Serie:        serie,
-				Numar:        numar,
-				Data:         data,
-				SumaIncasata: suma_incasata,
-				CaleFactura:  caleFactura,
+				Serie:         serie,
+				Numar:         numar,
+				Data:          data,
+				TipTranzactie: tip_tranzactie,
+				SumaIncasata:  suma_incasata,
+				CaleFactura:   caleFactura,
 			}
 
 			setInvoiceData(invoiceData, invoiceJsonPath)
