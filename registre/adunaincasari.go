@@ -61,6 +61,10 @@ func getInvoicesDataSlice(incasariMetadataJson []string, anul string) []incasari
 
 		invoice := getInvoiceMetadata(path)
 
+		if invoice.TipTranzactie == "" {
+			invoice.TipTranzactie = "BANCAR"
+		}
+
 		if strings.HasPrefix(invoice.Data, anul) {
 			invoices = append(invoices, invoice)
 		}

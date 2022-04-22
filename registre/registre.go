@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/ClimenteA/pfasimplu-go/auth"
+	"github.com/ClimenteA/pfasimplu-go/tabelcsv"
 	"github.com/ClimenteA/pfasimplu-go/utils"
 
 	"github.com/gofiber/fiber/v2"
@@ -146,6 +147,9 @@ func handleRegistre(app fiber.App, store session.Store) {
 		totalIncasariNet := totalIncasariBrut - totalCheltuieliDeductibile - platiAnaf
 		totalPlatiCatreStat := CalculeazaPlatiCatreStat(totalIncasariNet, platiAnaf, filterYear)
 
+		tabelcsv.CreeazaIncasariCSV(user.Stocare, incasari)
+		tabelcsv.CreeazaCheltuieliCSV(user.Stocare, cheltuieli)
+
 		return c.Render("registre", fiber.Map{
 			"AniInregistrati":            yearsRegisterd,
 			"Incasari":                   incasari,
@@ -155,6 +159,8 @@ func handleRegistre(app fiber.App, store session.Store) {
 			"TotalIncasariNet":           fmt.Sprintf("%.2f", totalIncasariNet),
 			"TotalCheltuieliDeductibile": fmt.Sprintf("%.2f", totalCheltuieliDeductibile),
 			"TotalPlatiCatreStat":        fmt.Sprintf("%.2f", totalPlatiCatreStat),
+			"CaleIncasariCSV":            filepath.Join(user.Stocare, "incasari.csv"),
+			"CaleCheltuieliCSV":          filepath.Join(user.Stocare, "cheltuieli.csv"),
 		}, "base")
 	})
 }

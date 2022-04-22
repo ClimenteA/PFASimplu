@@ -109,6 +109,9 @@
               Suma Incasata
             </th>
             <th scope="col">
+              Tip Tranzactie
+            </th>
+            <th scope="col">
               Download Fisier
             </th>
             <th scope="col">
@@ -133,6 +136,9 @@
               {{.SumaIncasata}}
             </td>
             <td>
+              {{.TipTranzactie}}
+            </td>
+            <td>
               <a href="/download-fisier?path={{.CaleFactura}}">Download</a>
             </td>
             <td>
@@ -145,8 +151,7 @@
     </article>
 
     <div id="tabel-incasari-download" class="download">
-      <a href="/#todo">Download CSV</a>
-      <a href="/#todo">Download EXCEL</a>
+      <a href="/download-fisier?path={{.CaleIncasariCSV}}">Download CSV</a>
     </div>
 
 
@@ -321,8 +326,7 @@
     </article>
 
     <div id="tabel-cheltuieli-download" class="download">
-      <a href="/#todo">Download CSV</a>
-      <a href="/#todo">Download EXCEL</a>
+      <a href="/download-fisier?path={{.CaleCheltuieliCSV}}">Download CSV</a>
     </div>
 
 
@@ -369,8 +373,8 @@
     </article>
 
     <div id="tabel-declaratii-download" class="download">
-      <a href="/#todo">Download CSV</a>
-      <a href="/#todo">Download EXCEL</a>
+      <!-- <a href="/#todo">Download CSV</a>
+      <a href="/#todo">Download EXCEL</a> -->
     </div>
 
 
@@ -531,8 +535,6 @@
 </main>
 
 
-<script defer src="/tablefilter/tablefilter.js"></script>
-
 <script>
 
   window.addEventListener("DOMContentLoaded", (event) => {
@@ -545,7 +547,7 @@
       "tabel-declaratii",
       "tabel-incasari-download",
       "tabel-cheltuieli-download",
-      "tabel-declaratii-download",
+      //"tabel-declaratii-download",
     ]
 
     let summary = document.getElementById("total-incasari")
