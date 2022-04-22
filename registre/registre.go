@@ -147,6 +147,8 @@ func handleRegistre(app fiber.App, store session.Store) {
 		totalIncasariNet := totalIncasariBrut - totalCheltuieliDeductibile - platiAnaf
 		totalPlatiCatreStat := CalculeazaPlatiCatreStat(totalIncasariNet, platiAnaf, filterYear)
 
+		registruJurnal := CreeazaRegistruJurnal(incasari, cheltuieli)
+
 		tabelcsv.CreeazaIncasariCSV(user.Stocare, incasari)
 		tabelcsv.CreeazaCheltuieliCSV(user.Stocare, cheltuieli)
 
@@ -155,6 +157,7 @@ func handleRegistre(app fiber.App, store session.Store) {
 			"Incasari":                   incasari,
 			"Cheltuieli":                 cheltuieli,
 			"Declaratii":                 declaratii,
+			"RegistruJurnal":             registruJurnal,
 			"TotalIncasariBrut":          fmt.Sprintf("%.2f", totalIncasariBrut),
 			"TotalIncasariNet":           fmt.Sprintf("%.2f", totalIncasariNet),
 			"TotalCheltuieliDeductibile": fmt.Sprintf("%.2f", totalCheltuieliDeductibile),
