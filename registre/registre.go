@@ -140,12 +140,21 @@ func handleRegistre(app fiber.App, store session.Store) {
 
 		incasari := AdunaIncasari(user, filterYear)
 		cheltuieli := AdunaCheltuieli(user, filterYear)
+		comisioaneBancare := AdunaComisioaneBancare(user, filterYear)
 		declaratii := AdunaDeclaratii(user, filterYear)
 		platiAnaf := CalculPlatiAnaf(declaratii)
 		totalIncasariBrut := CalculeazaIncasariBrut(incasari)
-		totalCheltuieliDeductibile := CalculeazaCheltuieliDeductibile(cheltuieli)
+		totalCheltuieliDeductibile := CalculeazaCheltuieliDeductibile(cheltuieli) + comisioaneBancare
 		totalIncasariNet := totalIncasariBrut - totalCheltuieliDeductibile - platiAnaf
 		totalPlatiCatreStat := CalculeazaPlatiCatreStat(totalIncasariNet, platiAnaf, filterYear)
+		profitAnual := CalculeazaProfitAnual(user, filterYear)
+		profitAnualProcent := 0.0
+		showProfitAnual := false
+		if profitAnual > 0 {
+			profitAnual = profitAnual - totalPlatiCatreStat
+			profitAnualProcent = (profitAnual / totalIncasariBrut) * 100
+			showProfitAnual = true
+		}
 
 		registruJurnal := CreeazaRegistruJurnal(incasari, cheltuieli)
 
@@ -156,6 +165,9 @@ func handleRegistre(app fiber.App, store session.Store) {
 			"AniInregistrati":            yearsRegisterd,
 			"Incasari":                   incasari,
 			"Cheltuieli":                 cheltuieli,
+			"ProfitAnual":                fmt.Sprintf("%.2f", profitAnual),
+			"ProfitAnualProcent":         fmt.Sprintf("%.2f", profitAnualProcent),
+			"ShowProfitAnual":            showProfitAnual,
 			"Declaratii":                 declaratii,
 			"RegistruJurnal":             registruJurnal,
 			"TotalIncasariBrut":          fmt.Sprintf("%.2f", totalIncasariBrut),

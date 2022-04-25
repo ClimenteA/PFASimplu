@@ -55,11 +55,36 @@
 
     </div>
 
+    {{if .ShowProfitAnual}}
+    <div id="total-profit" class="grid">
+
+      <article class="article-grid">
+        <h4 style="color: var(--secondary)">Total Profit Anual</h4>
+        <h1 style="color: green">{{.ProfitAnual}} RON</h1>
+      </article>
+
+      <article class="article-grid">
+        <h4 style="color: var(--secondary)">Procent Profit Anual</h4>
+        <h1 style="color: green">{{.ProfitAnualProcent}} %</h1>
+      </article>
+
+    </div>
+
+    {{else}}
+
+    <div id="total-profit" class="grid">
+      <small style="color: var(--secondary)">
+        Adauga extrasul bancar pentru anul incheiat pentru a vedea profitul total
+      </small>
+    </div>
+
+    {{end}}
+
     <div id="total-incasari" class="grid">
 
       <article class="article-grid">
         <h4 style="color: var(--secondary)">Total Incasari (Brut)</h4>
-        <h1 style="color: darkblue">{{.TotalIncasariBrut}} RON</h1>
+        <h1 style="color: green">{{.TotalIncasariBrut}} RON</h1>
       </article>
 
       <article class="article-grid">
@@ -73,7 +98,9 @@
 
       <article class="article-grid">
         <h4 style="color: var(--secondary)">Total Cheltuieli Deductibile</h4>
-        <h1 style="color: darkgoldenrod;">{{.TotalCheltuieliDeductibile}} RON</h1>
+        <h1 style="color: indianred;">
+          {{.TotalCheltuieliDeductibile}} RON
+        </h1>
       </article>
 
       <article class="article-grid">
