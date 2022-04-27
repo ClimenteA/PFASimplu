@@ -485,32 +485,39 @@
 
         <thead>
           <tr class="bg-whitesmoke">
-            <% for (let th of registruInventar[0]) { %>
-              <th scope="col">
-                <% th %>
-              </th>
-              <% } %>
+            <th scope="col">
+              Nr.Crt.
+            </th>
+            <th scope="col">
+              Denumirea elementelor inventariate
+            </th>
+            <th scope="col">
+              Valoarea de inventar (RON)
+            </th>
           </tr>
 
         </thead>
 
         <tbody>
-          <% for (let tr of registruInventar.splice(1,)) { %>
-            <tr>
-              <% for (let td of tr) { %>
-                <td>
-                  <% td %>
-                </td>
-                <% } %>
-            </tr>
-            <% } %>
+          {{range .RegistruInventar}}
+          <tr>
+            <td>
+              {{.NrCrt}}
+            </td>
+            <td>
+              {{.DenumireaElemInv}}
+            </td>
+            <td>
+              {{.ValInvRon}}
+            </td>
+          </tr>
+          {{end}}
         </tbody>
       </table>
     </article>
 
     <div class="download">
       <a href="/download-registru-csv/inventar">Download CSV</a>
-      <a href="/download-registru-xlsx/inventar">Download EXCEL</a>
     </div>
 
 
@@ -520,34 +527,43 @@
 
         <thead>
           <tr class="bg-whitesmoke">
-            <% for (let th of registruFiscal[0]) { %>
-              <th scope="col">
-                <% th %>
-              </th>
-              <% } %>
+            <th scope="col">
+              Nr.Crt.
+            </th>
+            <th scope="col">
+              Valoare (RON)
+            </th>
+            <th scope="col">
+              Anul
+            </th>
           </tr>
 
         </thead>
 
         <tbody>
-          <% for (let tr of registruFiscal.splice(1,)) { %>
-            <tr>
-              <% for (let td of tr) { %>
-                <td>
-                  <% td %>
-                </td>
-                <% } %>
-            </tr>
-            <% } %>
+          {{range .RegistruFiscal}}
+          <tr>
+            <td>
+              {{.NrCrt}}
+            </td>
+            <td>
+              {{.ElemDeCalculVenit}}
+            </td>
+            <td>
+              {{.ValoareRon}}
+            </td>
+            <td>
+              {{.Anul}}
+            </td>
+          </tr>
+          {{end}}
         </tbody>
       </table>
     </article>
 
     <div class="download">
       <a href="/download-registru-csv/fiscal">Download CSV</a>
-      <a href="/download-registru-xlsx/fiscal">Download EXCEL</a>
     </div>
-
 
   </div>
 
