@@ -29,7 +29,7 @@ func CreeazaIncasariCSV(path string, incasari []incasari.Factura) {
 			incasare.Serie,
 			strconv.Itoa(incasare.Numar),
 			incasare.Data,
-			fmt.Sprintf("%f", incasare.SumaIncasata),
+			fmt.Sprintf("%.2f", incasare.SumaIncasata),
 			incasare.TipTranzactie,
 			incasare.CaleFactura,
 		})

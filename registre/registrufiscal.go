@@ -62,7 +62,7 @@ func addNrCrtRegFiscal(registruFiscal []types.RegistruFiscal) []types.RegistruFi
 
 }
 
-func CreeazaRegistruFiscal(aniInregistrati []string, incasari []incasari.Factura, cheltuieli []cheltuieli.Cheltuiala) []types.RegistruFiscal {
+func CreeazaRegistruFiscal(aniInregistrati []string, incasari []incasari.Factura, cheltuieli []cheltuieli.Cheltuiala, filterYear string) []types.RegistruFiscal {
 
 	calculIncasari := calculIncasariAn(incasari)
 	calculCheltuieli := calculCheltuieliAn(cheltuieli)
@@ -70,23 +70,25 @@ func CreeazaRegistruFiscal(aniInregistrati []string, incasari []incasari.Factura
 	registruFiscal := []types.RegistruFiscal{}
 	for _, anul := range aniInregistrati {
 
-		anulInt, _ := strconv.Atoi(anul)
+		if filterYear == anul {
+			anulInt, _ := strconv.Atoi(anul)
 
-		dateIncasariAn := types.RegistruFiscal{
-			ElemDeCalculVenit: "Total incasari",
-			ValoareRon:        calculIncasari[anul],
-			Anul:              anulInt,
+			dateIncasariAn := types.RegistruFiscal{
+				ElemDeCalculVenit: "Total incasari",
+				ValoareRon:        calculIncasari[anul],
+				Anul:              anulInt,
+			}
+
+			dateCheltuieliAn := types.RegistruFiscal{
+				ElemDeCalculVenit: "Total cheltuieli",
+				ValoareRon:        calculCheltuieli[anul],
+				Anul:              anulInt,
+			}
+
+			registruFiscal = append(registruFiscal, dateIncasariAn)
+			registruFiscal = append(registruFiscal, dateCheltuieliAn)
+
 		}
-
-		dateCheltuieliAn := types.RegistruFiscal{
-			ElemDeCalculVenit: "Total cheltuieli",
-			ValoareRon:        calculCheltuieli[anul],
-			Anul:              anulInt,
-		}
-
-		registruFiscal = append(registruFiscal, dateIncasariAn)
-		registruFiscal = append(registruFiscal, dateCheltuieliAn)
-
 	}
 
 	sort.Slice(registruFiscal, func(i, j int) bool {
