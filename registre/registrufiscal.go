@@ -54,34 +54,41 @@ func calculCheltuieliAn(cheltuieli []cheltuieli.Cheltuiala) map[string]float64 {
 
 }
 
+func addNrCrtRegFiscal(registruFiscal []RegistruFiscal) []RegistruFiscal {
+
+	count := 1
+	dataslice := []RegistruFiscal{}
+	for _, data := range registruFiscal {
+		data.NrCrt = count
+		count = count + 1
+		dataslice = append(dataslice, data)
+	}
+
+	return dataslice
+
+}
+
 func CreeazaRegistruFiscal(aniInregistrati []string, incasari []incasari.Factura, cheltuieli []cheltuieli.Cheltuiala) []RegistruFiscal {
 
 	calculIncasari := calculIncasariAn(incasari)
 	calculCheltuieli := calculCheltuieliAn(cheltuieli)
 
-	count := 1
 	registruFiscal := []RegistruFiscal{}
 	for _, anul := range aniInregistrati {
 
 		anulInt, _ := strconv.Atoi(anul)
 
 		dateIncasariAn := RegistruFiscal{
-			NrCrt:             count,
 			ElemDeCalculVenit: "Total incasari",
 			ValoareRon:        calculIncasari[anul],
 			Anul:              anulInt,
 		}
 
-		count += 1
-
 		dateCheltuieliAn := RegistruFiscal{
-			NrCrt:             count,
 			ElemDeCalculVenit: "Total cheltuieli",
 			ValoareRon:        calculCheltuieli[anul],
 			Anul:              anulInt,
 		}
-
-		count += 1
 
 		registruFiscal = append(registruFiscal, dateIncasariAn)
 		registruFiscal = append(registruFiscal, dateCheltuieliAn)
@@ -89,8 +96,10 @@ func CreeazaRegistruFiscal(aniInregistrati []string, incasari []incasari.Factura
 	}
 
 	sort.Slice(registruFiscal, func(i, j int) bool {
-		return registruFiscal[i].Anul > registruFiscal[j].Anul
+		return registruFiscal[i].Anul < registruFiscal[j].Anul
 	})
+
+	registruFiscal = addNrCrtRegFiscal(registruFiscal)
 
 	return registruFiscal
 
