@@ -1,0 +1,42 @@
+<main class="container">
+
+    <hgroup class="container">
+        <h1>Adauga sold intermediar</h1>
+        <h2>
+            Adauga suma cu care ai incheiat un an fiscal.
+            Poti vedea acea suma in aplicatia bancara pe care o folosesti.
+        </h2>
+    </hgroup>
+
+
+    <form action="/adauga-sold-intermediar" method="POST" enctype="multipart/form-data">
+
+        <article>
+
+            <h5 style="color: var(--secondary);">Adauga sold</h5>
+
+            <div class="grid">
+
+                <label for="sold_intermediar">
+                    Suma ramasa la sfarsit de an pe card
+                    <input type="number" id="sold_intermediar" step=any name="sold_intermediar" placeholder="50000"
+                        required>
+                </label>
+
+                <label for="sold_intermediar">
+                    Selecteaza anul
+                    <select id="anul" name="anul">
+                        {{range .AniInregistrati}}
+                        <option id="{{.}}" value="{{.}}">{{.}}</option>
+                        {{end}}
+                    </select>
+                </label>
+
+            </div>
+
+            <button type="submit">ADAUGA</button>
+
+        </article>
+    </form>
+
+</main>

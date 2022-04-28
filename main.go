@@ -14,6 +14,7 @@ import (
 	"github.com/ClimenteA/pfasimplu-go/incasari"
 	"github.com/ClimenteA/pfasimplu-go/registre"
 	"github.com/ClimenteA/pfasimplu-go/staticdata"
+	"github.com/ClimenteA/pfasimplu-go/sold"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/session"
@@ -39,6 +40,7 @@ func main() {
 	cheltuieli.HandleCheltuieli(*app, *store, coduriMijloaceFixe)
 	declaratii.HandleDeclaratii(*app, *store)
 	registre.HandleRegistre(*app, *store)
+	sold.HandleSoldIntermediar(*app, *store)
 
 	log.Fatal(app.Listen(":3000"))
 
