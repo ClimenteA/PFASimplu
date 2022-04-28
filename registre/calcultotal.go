@@ -79,6 +79,10 @@ func CalculeazaPlatiCatreStat(totalIncasariNet, platiAnaf float64, anul string) 
 	allTaxes := impozitPeVenit + pensie + sanatate
 	remainingTaxes := allTaxes - platiAnaf
 
+	if remainingTaxes < 0 {
+		remainingTaxes = 0
+	}
+
 	return remainingTaxes
 
 }

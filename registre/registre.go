@@ -138,13 +138,12 @@ func handleRegistre(app fiber.App, store session.Store) {
 
 		log.Println("Filtreaza datale pentru anul: ", filterYear, aniInregistrati)
 
+		declaratii := AdunaDeclaratii(user, filterYear)
 		incasari := AdunaIncasari(user, filterYear)
 		cheltuieli := AdunaCheltuieli(user, filterYear)
-		comisioaneBancare := AdunaComisioaneBancare(user, filterYear)
-		declaratii := AdunaDeclaratii(user, filterYear)
 		platiAnaf := CalculPlatiAnaf(declaratii)
 		totalIncasariBrut := CalculeazaIncasariBrut(incasari)
-		totalCheltuieliDeductibile := CalculeazaCheltuieliDeductibile(cheltuieli) + comisioaneBancare
+		totalCheltuieliDeductibile := CalculeazaCheltuieliDeductibile(cheltuieli) 
 		totalIncasariNet := totalIncasariBrut - totalCheltuieliDeductibile - platiAnaf
 		totalPlatiCatreStat := CalculeazaPlatiCatreStat(totalIncasariNet, platiAnaf, filterYear)
 		profitAnual := CalculeazaProfitAnual(user, filterYear)

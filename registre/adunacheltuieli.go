@@ -20,6 +20,7 @@ func getCheltuieliJsonPaths(user auth.Account) ([]string, error) {
 
 	err := filepath.Walk(user.StocareCheltuieli,
 		func(path string, _ os.FileInfo, err error) error {
+
 			if err != nil {
 				return err
 			}
@@ -85,6 +86,8 @@ func getExpensesDataSlice(cheltuieliMetadataJson []string, anul string) []cheltu
 }
 
 func AdunaCheltuieli(user auth.Account, anul string) []cheltuieli.Cheltuiala {
+
+	// comisioaneBancare := AdunaComisioaneBancare(user, anul)
 
 	cheltuieliMetadataJson, err := getCheltuieliJsonPaths(user)
 	if err != nil {
