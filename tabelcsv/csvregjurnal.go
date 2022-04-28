@@ -2,12 +2,16 @@ package tabelcsv
 
 import (
 	"encoding/csv"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
+	"strconv"
+
+	"github.com/ClimenteA/pfasimplu-go/types"
 )
 
-func CreeazaRegistruJurnalCSV(path string) {
+func CreeazaRegistruJurnalCSV(path string, registruJurnal []types.RegistruJurnal) {
 
 	rows := [][]string{
 		{
@@ -22,13 +26,21 @@ func CreeazaRegistruJurnalCSV(path string) {
 		},
 	}
 
-	for _, incasare := range []string{} {
+	for _, incasare := range registruJurnal {
+
 		rows = append(rows, []string{
-			incasare,
+			strconv.Itoa(incasare.NrCrt),
+			incasare.Data,
+			incasare.DocumentFelNr,
+			incasare.FelulOperatiuniiExplicatii,
+			fmt.Sprintf("%.2f", incasare.IncasariNumerar),
+			fmt.Sprintf("%.2f", incasare.IncasariBanca),
+			fmt.Sprintf("%.2f", incasare.PlatiNumerar),
+			fmt.Sprintf("%.2f", incasare.PlatiBanca),
 		})
 	}
 
-	csvfile, err := os.Create(filepath.Join(path, ".csv"))
+	csvfile, err := os.Create(filepath.Join(path, "registru_jurnal.csv"))
 
 	if err != nil {
 		log.Fatalf("failed creating file: %s", err)

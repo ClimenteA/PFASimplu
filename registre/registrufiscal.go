@@ -8,14 +8,8 @@ import (
 
 	"github.com/ClimenteA/pfasimplu-go/cheltuieli"
 	"github.com/ClimenteA/pfasimplu-go/incasari"
+	"github.com/ClimenteA/pfasimplu-go/types"
 )
-
-type RegistruFiscal struct {
-	NrCrt             int     `json:"nr_crt"`
-	ElemDeCalculVenit string  `json:"elemente_de_calcul_pentru_stabilirea_venitului_net_anual_pierderi_nete_anuale"`
-	ValoareRon        float64 `json:"valoarea_ron"`
-	Anul              int     `json:"anul"`
-}
 
 func calculIncasariAn(incasari []incasari.Factura) map[string]float64 {
 
@@ -54,10 +48,10 @@ func calculCheltuieliAn(cheltuieli []cheltuieli.Cheltuiala) map[string]float64 {
 
 }
 
-func addNrCrtRegFiscal(registruFiscal []RegistruFiscal) []RegistruFiscal {
+func addNrCrtRegFiscal(registruFiscal []types.RegistruFiscal) []types.RegistruFiscal {
 
 	count := 1
-	dataslice := []RegistruFiscal{}
+	dataslice := []types.RegistruFiscal{}
 	for _, data := range registruFiscal {
 		data.NrCrt = count
 		count = count + 1
@@ -68,23 +62,23 @@ func addNrCrtRegFiscal(registruFiscal []RegistruFiscal) []RegistruFiscal {
 
 }
 
-func CreeazaRegistruFiscal(aniInregistrati []string, incasari []incasari.Factura, cheltuieli []cheltuieli.Cheltuiala) []RegistruFiscal {
+func CreeazaRegistruFiscal(aniInregistrati []string, incasari []incasari.Factura, cheltuieli []cheltuieli.Cheltuiala) []types.RegistruFiscal {
 
 	calculIncasari := calculIncasariAn(incasari)
 	calculCheltuieli := calculCheltuieliAn(cheltuieli)
 
-	registruFiscal := []RegistruFiscal{}
+	registruFiscal := []types.RegistruFiscal{}
 	for _, anul := range aniInregistrati {
 
 		anulInt, _ := strconv.Atoi(anul)
 
-		dateIncasariAn := RegistruFiscal{
+		dateIncasariAn := types.RegistruFiscal{
 			ElemDeCalculVenit: "Total incasari",
 			ValoareRon:        calculIncasari[anul],
 			Anul:              anulInt,
 		}
 
-		dateCheltuieliAn := RegistruFiscal{
+		dateCheltuieliAn := types.RegistruFiscal{
 			ElemDeCalculVenit: "Total cheltuieli",
 			ValoareRon:        calculCheltuieli[anul],
 			Anul:              anulInt,

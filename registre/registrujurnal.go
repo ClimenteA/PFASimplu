@@ -8,23 +8,13 @@ import (
 
 	"github.com/ClimenteA/pfasimplu-go/cheltuieli"
 	"github.com/ClimenteA/pfasimplu-go/incasari"
+	"github.com/ClimenteA/pfasimplu-go/types"
 )
 
-type RegistruJurnal struct {
-	NrCrt                      int     `json:"nr_crt"`
-	Data                       string  `json:"data"`
-	DocumentFelNr              string  `json:"document_fel_numar"`
-	FelulOperatiuniiExplicatii string  `json:"felul_operatiunii_explicatii"`
-	IncasariNumerar            float64 `json:"incasari_numerar"`
-	IncasariBanca              float64 `json:"incasari_banca"`
-	PlatiNumerar               float64 `json:"plati_numerar"`
-	PlatiBanca                 float64 `json:"PlatiBanca"`
-}
-
-func processIncasari(sliceJurnal []RegistruJurnal, incasari []incasari.Factura) []RegistruJurnal {
+func processIncasari(sliceJurnal []types.RegistruJurnal, incasari []incasari.Factura) []types.RegistruJurnal {
 
 	for _, incasare := range incasari {
-		registruJurnal := RegistruJurnal{
+		registruJurnal := types.RegistruJurnal{
 			Data:                       incasare.Data,
 			DocumentFelNr:              incasare.CaleFactura,
 			FelulOperatiuniiExplicatii: "Incasare " + incasare.Serie + strconv.Itoa(incasare.Numar),
@@ -43,10 +33,10 @@ func processIncasari(sliceJurnal []RegistruJurnal, incasari []incasari.Factura) 
 
 }
 
-func processCheltuieli(sliceJurnal []RegistruJurnal, cheltuieli []cheltuieli.Cheltuiala) []RegistruJurnal {
+func processCheltuieli(sliceJurnal []types.RegistruJurnal, cheltuieli []cheltuieli.Cheltuiala) []types.RegistruJurnal {
 
 	for _, cheltuiala := range cheltuieli {
-		registruJurnal := RegistruJurnal{
+		registruJurnal := types.RegistruJurnal{
 			Data:                       cheltuiala.Data,
 			DocumentFelNr:              cheltuiala.CaleCheltuiala,
 			FelulOperatiuniiExplicatii: "Cheltuiala " + cheltuiala.NumeCheltuiala,
@@ -64,10 +54,10 @@ func processCheltuieli(sliceJurnal []RegistruJurnal, cheltuieli []cheltuieli.Che
 	return sliceJurnal
 }
 
-func addNrCrt(sliceJurnal []RegistruJurnal) []RegistruJurnal {
+func addNrCrt(sliceJurnal []types.RegistruJurnal) []types.RegistruJurnal {
 
 	count := 1
-	sliceJurnalNrCrt := []RegistruJurnal{}
+	sliceJurnalNrCrt := []types.RegistruJurnal{}
 	for _, data := range sliceJurnal {
 		data.NrCrt = count
 		count = count + 1
@@ -78,7 +68,7 @@ func addNrCrt(sliceJurnal []RegistruJurnal) []RegistruJurnal {
 
 }
 
-func sortByDate(sliceJurnal []RegistruJurnal) []RegistruJurnal {
+func sortByDate(sliceJurnal []types.RegistruJurnal) []types.RegistruJurnal {
 
 	sort.Slice(sliceJurnal, func(i, j int) bool {
 
@@ -99,9 +89,9 @@ func sortByDate(sliceJurnal []RegistruJurnal) []RegistruJurnal {
 
 }
 
-func CreeazaRegistruJurnal(incasari []incasari.Factura, cheltuieli []cheltuieli.Cheltuiala) []RegistruJurnal {
+func CreeazaRegistruJurnal(incasari []incasari.Factura, cheltuieli []cheltuieli.Cheltuiala) []types.RegistruJurnal {
 
-	sliceJurnal := []RegistruJurnal{}
+	sliceJurnal := []types.RegistruJurnal{}
 	sliceJurnal = processIncasari(sliceJurnal, incasari)
 	sliceJurnal = processCheltuieli(sliceJurnal, cheltuieli)
 	sliceJurnal = sortByDate(sliceJurnal)

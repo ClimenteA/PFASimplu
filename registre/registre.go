@@ -162,6 +162,9 @@ func handleRegistre(app fiber.App, store session.Store) {
 
 		tabelcsv.CreeazaIncasariCSV(user.Stocare, incasari)
 		tabelcsv.CreeazaCheltuieliCSV(user.Stocare, cheltuieli)
+		tabelcsv.CreeazaRegistruJurnalCSV(user.Stocare, registruJurnal)
+		tabelcsv.CreeazaRegistruInventarCSV(user.Stocare, registruInventar)
+		tabelcsv.CreeazaRegistruFiscalCSV(user.Stocare, registruFiscal)
 
 		return c.Render("registre", fiber.Map{
 			"AniInregistrati":            aniInregistrati,
@@ -180,6 +183,9 @@ func handleRegistre(app fiber.App, store session.Store) {
 			"TotalPlatiCatreStat":        fmt.Sprintf("%.2f", totalPlatiCatreStat),
 			"CaleIncasariCSV":            filepath.Join(user.Stocare, "incasari.csv"),
 			"CaleCheltuieliCSV":          filepath.Join(user.Stocare, "cheltuieli.csv"),
+			"CaleRegistruJurnalCSV":      filepath.Join(user.Stocare, "registru_jurnal.csv"),
+			"CaleRegistruInventarCSV":    filepath.Join(user.Stocare, "registru_inventar.csv"),
+			"CaleRegistruFiscalCSV":      filepath.Join(user.Stocare, "registru_fiscal.csv"),
 		}, "base")
 	})
 }

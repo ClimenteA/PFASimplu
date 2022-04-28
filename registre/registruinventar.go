@@ -1,20 +1,17 @@
 package registre
 
-import "github.com/ClimenteA/pfasimplu-go/cheltuieli"
+import (
+	"github.com/ClimenteA/pfasimplu-go/cheltuieli"
+	"github.com/ClimenteA/pfasimplu-go/types"
+)
 
-type RegistruInventar struct {
-	NrCrt            int     `json:"nr_crt"`
-	DenumireaElemInv string  `json:"denumirea_elementelor_inventariate"`
-	ValInvRon        float64 `json:"valoarea_de_inventar_ron"`
-}
+func CreeazaRegistruInventar(cheltuieli []cheltuieli.Cheltuiala) []types.RegistruInventar {
 
-func CreeazaRegistruInventar(cheltuieli []cheltuieli.Cheltuiala) []RegistruInventar {
-
-	inventar := []RegistruInventar{}
+	inventar := []types.RegistruInventar{}
 	count := 1
 	for _, data := range cheltuieli {
 		if data.ObiectInventar || data.MijlocFix {
-			obiect := RegistruInventar{
+			obiect := types.RegistruInventar{
 				NrCrt:            count,
 				DenumireaElemInv: data.NumeCheltuiala,
 				ValInvRon:        data.SumaCheltuita,
