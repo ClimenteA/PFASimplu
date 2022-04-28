@@ -134,9 +134,9 @@ func handleRegistre(app fiber.App, store session.Store) {
 		}
 
 		user := getCurrentUser(fmt.Sprint(currentUserPath))
-		yearsRegisterd := utils.GetYearsRegistered(user)
+		aniInregistrati := utils.GetAniInregistrati(user)
 
-		log.Println("Filtreaza datale pentru anul: ", filterYear, yearsRegisterd)
+		log.Println("Filtreaza datale pentru anul: ", filterYear, aniInregistrati)
 
 		incasari := AdunaIncasari(user, filterYear)
 		cheltuieli := AdunaCheltuieli(user, filterYear)
@@ -158,13 +158,13 @@ func handleRegistre(app fiber.App, store session.Store) {
 
 		registruJurnal := CreeazaRegistruJurnal(incasari, cheltuieli)
 		registruInventar := CreeazaRegistruInventar(cheltuieli)
-		registruFiscal := CreeazaRegistruFiscal(incasari, cheltuieli)
+		registruFiscal := CreeazaRegistruFiscal(aniInregistrati, incasari, cheltuieli)
 
 		tabelcsv.CreeazaIncasariCSV(user.Stocare, incasari)
 		tabelcsv.CreeazaCheltuieliCSV(user.Stocare, cheltuieli)
 
 		return c.Render("registre", fiber.Map{
-			"AniInregistrati":            yearsRegisterd,
+			"AniInregistrati":            aniInregistrati,
 			"Incasari":                   incasari,
 			"Cheltuieli":                 cheltuieli,
 			"ProfitAnual":                fmt.Sprintf("%.2f", profitAnual),

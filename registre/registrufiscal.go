@@ -2,6 +2,8 @@ package registre
 
 import (
 	"log"
+	"sort"
+	"strconv"
 	"time"
 
 	"github.com/ClimenteA/pfasimplu-go/cheltuieli"
@@ -15,65 +17,81 @@ type RegistruFiscal struct {
 	Anul              int     `json:"anul"`
 }
 
-func CreeazaRegistruFiscal(incasari []incasari.Factura, cheltuieli []cheltuieli.Cheltuiala) []RegistruFiscal {
+func calculIncasariAn(incasari []incasari.Factura) map[string]float64 {
 
-	calculIncasari := map[int]float64{}
+	calculIncasari := map[string]float64{}
 	for _, data := range incasari {
 
 		ti, err := time.Parse(time.RFC3339, data.Data+"T00:00:00Z")
 		if err != nil {
 			log.Panic(err)
 		}
+		anul := strconv.Itoa(ti.Year())
 
-		calculIncasari[ti.Year()] = calculIncasari[ti.Year()] + data.SumaIncasata
+		calculIncasari[anul] = calculIncasari[anul] + data.SumaIncasata
 
 	}
 
-	calculCheltuieli := map[int]float64{}
+	return calculIncasari
+}
+
+func calculCheltuieliAn(cheltuieli []cheltuieli.Cheltuiala) map[string]float64 {
+
+	calculCheltuieli := map[string]float64{}
 	for _, data := range cheltuieli {
 
 		ti, err := time.Parse(time.RFC3339, data.Data+"T00:00:00Z")
 		if err != nil {
 			log.Panic(err)
 		}
+		anul := strconv.Itoa(ti.Year())
 
-		calculCheltuieli[ti.Year()] = calculCheltuieli[ti.Year()] + data.SumaCheltuita
+		calculCheltuieli[anul] = calculCheltuieli[anul] + data.SumaCheltuita
 
 	}
 
+	return calculCheltuieli
 
-	
+}
 
-	// fiscal := []RegistruFiscal{}
-	// count := 1
-	// for _, data := range cheltuieli {
-	// 	if data.ObiectInventar || data.MijlocFix {
-	// 		obiect := RegistruFiscal{
-	// 			NrCrt:             count,
-	// 			ElemDeCalculVenit: data.NumeCheltuiala,
-	// 			ValoareRon:        data.SumaCheltuita,
-	// 			Anul:              data.SumaCheltuita,
-	// 		}
-	// 		fiscal = append(fiscal, obiect)
-	// 		count += 1
-	// 	}
-	// }
+func CreeazaRegistruFiscal(aniInregistrati []string, incasari []incasari.Factura, cheltuieli []cheltuieli.Cheltuiala) []RegistruFiscal {
 
-	// return fiscal
+	calculIncasari := calculIncasariAn(incasari)
+	calculCheltuieli := calculCheltuieliAn(cheltuieli)
 
-	// sort.Slice(sliceJurnal, func(i, j int) bool {
+	count := 1
+	registruFiscal := []RegistruFiscal{}
+	for _, anul := range aniInregistrati {
 
-	// 	ti, err := time.Parse(time.RFC3339, sliceJurnal[i].Data+"T00:00:00Z")
-	// 	if err != nil {
-	// 		log.Panic(err)
-	// 	}
+		anulInt, _ := strconv.Atoi(anul)
 
-	// 	tj, err := time.Parse(time.RFC3339, sliceJurnal[j].Data+"T00:00:00Z")
-	// 	if err != nil {
-	// 		log.Panic(err)
-	// 	}
+		dateIncasariAn := RegistruFiscal{
+			NrCrt:             count,
+			ElemDeCalculVenit: "Total incasari",
+			ValoareRon:        calculIncasari[anul],
+			Anul:              anulInt,
+		}
 
-	// 	return ti.Before(tj)
-	// })
+		count += 1
+
+		dateCheltuieliAn := RegistruFiscal{
+			NrCrt:             count,
+			ElemDeCalculVenit: "Total cheltuieli",
+			ValoareRon:        calculCheltuieli[anul],
+			Anul:              anulInt,
+		}
+
+		count += 1
+
+		registruFiscal = append(registruFiscal, dateIncasariAn)
+		registruFiscal = append(registruFiscal, dateCheltuieliAn)
+
+	}
+
+	sort.Slice(registruFiscal, func(i, j int) bool {
+		return registruFiscal[i].Anul > registruFiscal[j].Anul
+	})
+
+	return registruFiscal
 
 }

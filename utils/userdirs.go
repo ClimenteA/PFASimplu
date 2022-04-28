@@ -53,7 +53,7 @@ func SliceContains(s []string, e string) bool {
 	return false
 }
 
-func GetYearsRegistered(user auth.Account) []string {
+func GetAniInregistrati(user auth.Account) []string {
 
 	allDirs := getAllDirs(user)
 	yearsUnique := []string{}

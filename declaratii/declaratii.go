@@ -88,7 +88,7 @@ func handleDeclaratii(app fiber.App, store session.Store) {
 		}
 
 		user := getCurrentUser(fmt.Sprint(currentUserPath))
-		yearsRegisterd := utils.GetYearsRegistered(user)
+		yearsRegisterd := utils.GetAniInregistrati(user)
 
 		return c.Render("declaratii", fiber.Map{
 			"AniInregistrati": yearsRegisterd,
