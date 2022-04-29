@@ -160,7 +160,7 @@ func getDetaliiMijlocFix(mijloc_fix bool, form *multipart.Form, filename string,
 		amortizareDate := incepereAmortizareDate.AddDate(amortizare_in_ani, 0, 0)
 		anul_amortizarii_complete = amortizareDate.Year()
 		luna_amortizarii_complete = int(amortizareDate.Month())
-		cota_de_amortizare = amortizare_lunara / (suma_cheltuita * 100)
+		cota_de_amortizare = (amortizare_lunara / suma_cheltuita) * 100
 
 	}
 
@@ -284,7 +284,7 @@ func handleCheltuieli(app fiber.App, store session.Store, coduriMijloaceFixe []s
 
 		}
 
-		return c.Redirect("/adauga-cheltuieli")
+		return c.Redirect("/adauga-cheltuieli?title=Cheltuiala adaugata&content=Cheltuiala a fost adaugata. Vezi registre contabile.")
 
 	})
 

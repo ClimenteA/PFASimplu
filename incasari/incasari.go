@@ -148,7 +148,7 @@ func handleIncasari(app fiber.App, store session.Store) {
 
 		}
 
-		return c.Redirect("/adauga-incasari")
+		return c.Redirect("/adauga-incasari?title=Incasare adaugata&content=Incasarea a fost adaugata. Vezi registre contabile.")
 
 	})
 
