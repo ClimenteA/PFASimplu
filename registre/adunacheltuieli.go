@@ -61,7 +61,7 @@ func getExpensesDataSlice(cheltuieliMetadataJson []string, anul string) []cheltu
 
 	for _, path := range cheltuieliMetadataJson {
 		expense := getExpenseMetadata(path)
-		if strings.HasPrefix(expense.Data, anul) {
+		if strings.HasPrefix(expense.Data, anul) && !expense.MijlocFix {
 			expenses = append(expenses, expense)
 		}
 	}

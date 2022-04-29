@@ -1,3 +1,4 @@
+// https://ciel.ro/blog/antreprenoriat/mijloacele-fixe-care-sunt-cum-le-deosebesti-de-obiectele-de-inventar-cum-se-amortizeaza-si-cum-se-caseaza-acestea/
 package cheltuieli
 
 import (
@@ -23,23 +24,32 @@ func HandleCheltuieli(app fiber.App, store session.Store, coduriMijloaceFixe []s
 	handleCheltuieli(app, store, coduriMijloaceFixe)
 }
 
+type AmortizareMijlocFix struct {
+	NumeCheltuiala string  `json:"nume_cheltuiala"`
+	SumaCheltuita  float64 `json:"suma_cheltuita"`
+	TipTranzactie  string  `json:"tip_tranzactie"`
+	Data           string  `json:"data"`
+	CaleCheltuiala string  `json:"cale_cheltuiala"`
+}
+
 type DetaliiMijlocFix struct {
-	AniAmortizare              int     `json:"ani_amortizare"`
-	DataPuneriiInFunctiune     string  `json:"data_punerii_in_functiune"`
-	CodClasificare             string  `json:"cod_clasificare"`
-	NrInventar                 int     `json:"nr_inventar"`
-	FelSerieNumarDataDocument  string  `json:"fel_serie_numar_data_document"`
-	ValoareInventar            float64 `json:"valoare_inventar"`
-	AmortizareLunara           float64 `json:"amortizare_lunara"`
-	DenumireSiCaracteristici   string  `json:"denumire_si_caracteristici"`
-	Accesorii                  string  `json:"accesorii"`
-	Grupa                      string  `json:"grupa"`
-	AnulDariiInFolosinta       int     `json:"anul_darii_in_folosinta"`
-	LunaDariiInFolosinta       int     `json:"luna_darii_in_folosinta"`
-	AnulAmortizariiComplete    int     `json:"anul_amortizarii_complete"`
-	LunaAmortizariiComplete    int     `json:"luna_amortizarii_complete"`
-	DurataNormalaDeFunctionare string  `json:"durata_normala_de_functionare"`
-	CotaDeAmortizare           float64 `json:"cota_de_amortizare"`
+	AniAmortizare                  int                   `json:"ani_amortizare"`
+	DataPuneriiInFunctiune         string                `json:"data_punerii_in_functiune"`
+	CodClasificare                 string                `json:"cod_clasificare"`
+	NrInventar                     int                   `json:"nr_inventar"`
+	FelSerieNumarDataDocument      string                `json:"fel_serie_numar_data_document"`
+	ValoareInventar                float64               `json:"valoare_inventar"`
+	AmortizareLunara               float64               `json:"amortizare_lunara"`
+	DenumireSiCaracteristici       string                `json:"denumire_si_caracteristici"`
+	Accesorii                      string                `json:"accesorii"`
+	Grupa                          string                `json:"grupa"`
+	AnulDariiInFolosinta           int                   `json:"anul_darii_in_folosinta"`
+	LunaDariiInFolosinta           int                   `json:"luna_darii_in_folosinta"`
+	AnulAmortizariiComplete        int                   `json:"anul_amortizarii_complete"`
+	LunaAmortizariiComplete        int                   `json:"luna_amortizarii_complete"`
+	DurataNormalaDeFunctionare     string                `json:"durata_normala_de_functionare"`
+	CotaDeAmortizare               float64               `json:"cota_de_amortizare"`
+	DesfasurareAmortizareMijlocFix []AmortizareMijlocFix `json:"desfasurare_amortizare_mijloc_fix"`
 }
 
 type Cheltuiala struct {
@@ -110,7 +120,43 @@ func getDetaliiMijlocFixFromCodCasificare(cod_clasificare string, coduriMijloace
 	return detaliiMijlocFix
 }
 
-func getDetaliiMijlocFix(mijloc_fix bool, form *multipart.Form, filename string, suma_cheltuita float64, coduriMijloaceFixe []staticdata.CodMijloaceFixe) DetaliiMijlocFix {
+func calcDesfasurareAmortizare(
+	desfasurareAmortizare []AmortizareMijlocFix,
+	startDate, endDate time.Time,
+	expenseData Cheltuiala,
+	amortizare_lunara float64,
+) []AmortizareMijlocFix {
+
+	count := 1
+	for startDate.Before(endDate) {
+
+		startDate = startDate.AddDate(0, count, -startDate.Day())
+		count += 1
+
+		log.Println(startDate, endDate, count)
+
+		d := AmortizareMijlocFix{
+			NumeCheltuiala: "Amortizare lunara " + expenseData.NumeCheltuiala,
+			Data:           startDate.Format(time.RFC3339)[0:10],
+			CaleCheltuiala: expenseData.CaleCheltuiala,
+			TipTranzactie:  expenseData.TipTranzactie,
+			SumaCheltuita:  amortizare_lunara,
+		}
+
+		desfasurareAmortizare = append(desfasurareAmortizare, d)
+
+	}
+
+	return desfasurareAmortizare
+}
+
+func getDetaliiMijlocFix(
+	mijloc_fix bool,
+	form *multipart.Form,
+	filename string,
+	expenseData Cheltuiala,
+	coduriMijloaceFixe []staticdata.CodMijloaceFixe,
+) DetaliiMijlocFix {
 
 	nr_inventar := 0
 	fel_serie_numar_data_document := ""
@@ -128,6 +174,7 @@ func getDetaliiMijlocFix(mijloc_fix bool, form *multipart.Form, filename string,
 	denumire_si_caracteristici := ""
 	data_punerii_in_functiune := ""
 	cod_clasificare := ""
+	desfasurareAmortizare := []AmortizareMijlocFix{}
 
 	if mijloc_fix {
 
@@ -139,8 +186,8 @@ func getDetaliiMijlocFix(mijloc_fix bool, form *multipart.Form, filename string,
 		data_punerii_in_functiune = form.Value["data_punerii_in_functiune"][0]
 		cod_clasificare = form.Value["cod_clasificare"][0]
 		fel_serie_numar_data_document = "Factura/Bon " + filename
-		valoare_inventar = suma_cheltuita
-		amortizare_lunara = suma_cheltuita / (float64(amortizare_in_ani) * 12)
+		valoare_inventar = expenseData.SumaCheltuita
+		amortizare_lunara = expenseData.SumaCheltuita / (float64(amortizare_in_ani) * 12)
 		denumire_si_caracteristici = "Sunt detaliate in factura/bon"
 		accesorii = "Sunt detaliate in factura/bon"
 
@@ -160,27 +207,36 @@ func getDetaliiMijlocFix(mijloc_fix bool, form *multipart.Form, filename string,
 		amortizareDate := incepereAmortizareDate.AddDate(amortizare_in_ani, 0, 0)
 		anul_amortizarii_complete = amortizareDate.Year()
 		luna_amortizarii_complete = int(amortizareDate.Month())
-		cota_de_amortizare = (amortizare_lunara / suma_cheltuita) * 100
+		cota_de_amortizare = (amortizare_lunara / expenseData.SumaCheltuita) * 100
+
+		desfasurareAmortizare = calcDesfasurareAmortizare(
+			desfasurareAmortizare,
+			incepereAmortizareDate,
+			amortizareDate,
+			expenseData,
+			amortizare_lunara,
+		)
 
 	}
 
 	detaliiMijlocFix := DetaliiMijlocFix{
-		AniAmortizare:              amortizare_in_ani,
-		DataPuneriiInFunctiune:     data_punerii_in_functiune,
-		CodClasificare:             cod_clasificare,
-		NrInventar:                 nr_inventar,
-		FelSerieNumarDataDocument:  fel_serie_numar_data_document,
-		ValoareInventar:            valoare_inventar,
-		AmortizareLunara:           amortizare_lunara,
-		DenumireSiCaracteristici:   denumire_si_caracteristici,
-		Accesorii:                  accesorii,
-		Grupa:                      grupa,
-		AnulDariiInFolosinta:       anul_darii_in_folosinta,
-		LunaDariiInFolosinta:       luna_darii_in_folosinta,
-		AnulAmortizariiComplete:    anul_amortizarii_complete,
-		LunaAmortizariiComplete:    luna_amortizarii_complete,
-		DurataNormalaDeFunctionare: durata_normala_de_functionare,
-		CotaDeAmortizare:           cota_de_amortizare,
+		AniAmortizare:                  amortizare_in_ani,
+		DataPuneriiInFunctiune:         data_punerii_in_functiune,
+		CodClasificare:                 cod_clasificare,
+		NrInventar:                     nr_inventar,
+		FelSerieNumarDataDocument:      fel_serie_numar_data_document,
+		ValoareInventar:                valoare_inventar,
+		AmortizareLunara:               amortizare_lunara,
+		DenumireSiCaracteristici:       denumire_si_caracteristici,
+		Accesorii:                      accesorii,
+		Grupa:                          grupa,
+		AnulDariiInFolosinta:           anul_darii_in_folosinta,
+		LunaDariiInFolosinta:           luna_darii_in_folosinta,
+		AnulAmortizariiComplete:        anul_amortizarii_complete,
+		LunaAmortizariiComplete:        luna_amortizarii_complete,
+		DurataNormalaDeFunctionare:     durata_normala_de_functionare,
+		CotaDeAmortizare:               cota_de_amortizare,
+		DesfasurareAmortizareMijlocFix: desfasurareAmortizare,
 	}
 
 	return detaliiMijlocFix
@@ -216,18 +272,18 @@ func getExpenseData(c *fiber.Ctx, user auth.Account, form *multipart.Form, filen
 		log.Println(mfix)
 	}
 
-	detaliiMijlocFix := getDetaliiMijlocFix(mijloc_fix, form, filename, suma_cheltuita, coduriMijloaceFixe)
-
 	expenseData := Cheltuiala{
-		NumeCheltuiala:   nume_cheltuiala,
-		SumaCheltuita:    suma_cheltuita,
-		Data:             data,
-		TipTranzactie:    tip_tranzactie,
-		ObiectInventar:   obiect_inventar,
-		MijlocFix:        mijloc_fix,
-		CaleCheltuiala:   cale_cheltuiala,
-		DetaliiMijlocFix: detaliiMijlocFix,
+		NumeCheltuiala: nume_cheltuiala,
+		SumaCheltuita:  suma_cheltuita,
+		Data:           data,
+		TipTranzactie:  tip_tranzactie,
+		ObiectInventar: obiect_inventar,
+		MijlocFix:      mijloc_fix,
+		CaleCheltuiala: cale_cheltuiala,
 	}
+
+	detaliiMijlocFix := getDetaliiMijlocFix(mijloc_fix, form, filename, expenseData, coduriMijloaceFixe)
+	expenseData.DetaliiMijlocFix = detaliiMijlocFix
 
 	return expenseData
 

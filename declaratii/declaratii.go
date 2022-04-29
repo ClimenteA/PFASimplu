@@ -158,7 +158,7 @@ func handleDeclaratii(app fiber.App, store session.Store) {
 
 		}
 
-		return c.Redirect("/adauga-declaratii?title=Declaratie adaugata&content=Declaratia a fost adaugata. Vezi registre contabile.")
+		return c.Redirect("/adauga-declaratii?title=Document adaugat&content=Documentul a fost adaugat. Vezi registre contabile.")
 
 	})
 
