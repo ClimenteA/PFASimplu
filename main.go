@@ -10,11 +10,12 @@ import (
 
 	"github.com/ClimenteA/pfasimplu-go/auth"
 	"github.com/ClimenteA/pfasimplu-go/cheltuieli"
+	"github.com/ClimenteA/pfasimplu-go/declaratieanaf"
 	"github.com/ClimenteA/pfasimplu-go/declaratii"
 	"github.com/ClimenteA/pfasimplu-go/incasari"
 	"github.com/ClimenteA/pfasimplu-go/registre"
-	"github.com/ClimenteA/pfasimplu-go/staticdata"
 	"github.com/ClimenteA/pfasimplu-go/sold"
+	"github.com/ClimenteA/pfasimplu-go/staticdata"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/session"
@@ -41,6 +42,7 @@ func main() {
 	declaratii.HandleDeclaratii(*app, *store)
 	registre.HandleRegistre(*app, *store)
 	sold.HandleSoldIntermediar(*app, *store)
+	declaratieanaf.HandleDeclaratie212(*app, *store)
 
 	log.Fatal(app.Listen(":3000"))
 
