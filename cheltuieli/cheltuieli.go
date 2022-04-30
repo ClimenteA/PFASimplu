@@ -127,23 +127,21 @@ func calcDesfasurareAmortizare(
 	amortizare_lunara float64,
 ) []AmortizareMijlocFix {
 
-	count := 1
-	for startDate.Before(endDate) {
+	startDate = startDate.AddDate(0, 1, 0)
 
-		startDate = startDate.AddDate(0, count, -startDate.Day())
-		count += 1
+	for d := startDate; !d.After(endDate); d = d.AddDate(0, 1, 0) {
 
-		log.Println(startDate, endDate, count)
+		data := d.AddDate(0, 0, -d.Day())
 
-		d := AmortizareMijlocFix{
+		amf := AmortizareMijlocFix{
 			NumeCheltuiala: "Amortizare lunara " + expenseData.NumeCheltuiala,
-			Data:           startDate.Format(time.RFC3339)[0:10],
+			Data:           data.Format(time.RFC3339)[0:10],
 			CaleCheltuiala: expenseData.CaleCheltuiala,
 			TipTranzactie:  expenseData.TipTranzactie,
 			SumaCheltuita:  amortizare_lunara,
 		}
 
-		desfasurareAmortizare = append(desfasurareAmortizare, d)
+		desfasurareAmortizare = append(desfasurareAmortizare, amf)
 
 	}
 
