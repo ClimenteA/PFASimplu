@@ -63,8 +63,13 @@ func getExpensesDataSlice(cheltuieliMetadataJson []string, anul string) []cheltu
 
 		expense := getExpenseMetadata(path)
 
-		if strings.HasPrefix(expense.Data, anul) && !expense.MijlocFix {
-			expenses = append(expenses, expense)
+		iterDate, _ := time.Parse(time.RFC3339, expense.Data+"T00:00:00Z")
+
+		if iterDate.Before(time.Now()) {
+
+			if strings.HasPrefix(expense.Data, anul) && !expense.MijlocFix {
+				expenses = append(expenses, expense)
+			}
 		}
 
 		if expense.MijlocFix {
@@ -79,7 +84,9 @@ func getExpensesDataSlice(cheltuieliMetadataJson []string, anul string) []cheltu
 					CaleCheltuiala: damf.CaleCheltuiala,
 				}
 
-				if strings.HasPrefix(ch.Data, anul) {
+				iterChDate, _ := time.Parse(time.RFC3339, ch.Data+"T00:00:00Z")
+
+				if strings.HasPrefix(ch.Data, anul) && iterChDate.Before(time.Now()) {
 					expenses = append(expenses, ch)
 				}
 
