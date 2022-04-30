@@ -11,6 +11,7 @@ type RegistruInventar struct {
 	NrCrt            int     `json:"nr_crt"`
 	DenumireaElemInv string  `json:"denumirea_elementelor_inventariate"`
 	ValInvRon        float64 `json:"valoarea_de_inventar_ron"`
+	CaleCheltuiala   string  `json:"cale_cheltuiala"`
 }
 
 type RegistruJurnal struct {

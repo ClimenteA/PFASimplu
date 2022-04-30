@@ -20,6 +20,7 @@ func CreeazaRegistruInventar(cheltuieli []cheltuieli.Cheltuiala) []types.Registr
 				NrCrt:            count,
 				DenumireaElemInv: data.NumeCheltuiala,
 				ValInvRon:        data.SumaCheltuita,
+				CaleCheltuiala:   data.CaleCheltuiala,
 			}
 			inventar = append(inventar, obiect)
 
@@ -39,6 +40,7 @@ func CreeazaRegistruInventar(cheltuieli []cheltuieli.Cheltuiala) []types.Registr
 					NrCrt:            count,
 					DenumireaElemInv: expense.NumeCheltuiala,
 					ValInvRon:        expense.SumaCheltuita,
+					CaleCheltuiala:   data.CaleCheltuiala,
 				}
 
 				inventar = append(inventar, obiect)
