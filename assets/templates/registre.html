@@ -124,13 +124,13 @@
         <thead>
           <tr class="bg-whitesmoke">
             <th scope="col">
+              Data
+            </th>
+            <th scope="col">
               Serie
             </th>
             <th scope="col">
               Numar
-            </th>
-            <th scope="col">
-              Data
             </th>
             <th scope="col">
               Suma Incasata
@@ -151,13 +151,13 @@
           {{range .Incasari}}
           <tr>
             <td>
+              {{.Data}}
+            </td>
+            <td>
               {{.Serie}}
             </td>
             <td>
               {{.Numar}}
-            </td>
-            <td>
-              {{.Data}}
             </td>
             <td>
               {{.SumaIncasata}}
@@ -189,6 +189,9 @@
         <thead>
           <tr class="bg-whitesmoke">
             <th scope="col">
+              Data
+            </th>
+            <th scope="col">
               Nume Cheltuiala
             </th>
             <th scope="col">
@@ -196,9 +199,6 @@
             </th>
             <th scope="col">
               Tip Tranzactie
-            </th>
-            <th scope="col">
-              Data
             </th>
             <th scope="col">
               Obiect Inventar
@@ -267,6 +267,9 @@
           {{range .Cheltuieli}}
           <tr>
             <td>
+              {{.Data}}
+            </td>
+            <td>
               {{.NumeCheltuiala}}
             </td>
             <td>
@@ -274,9 +277,6 @@
             </td>
             <td>
               {{.TipTranzactie}}
-            </td>
-            <td>
-              {{.Data}}
             </td>
             <td>
               {{if .ObiectInventar}}
