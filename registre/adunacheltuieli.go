@@ -60,10 +60,33 @@ func getExpensesDataSlice(cheltuieliMetadataJson []string, anul string) []cheltu
 	expenses := []cheltuieli.Cheltuiala{}
 
 	for _, path := range cheltuieliMetadataJson {
+
 		expense := getExpenseMetadata(path)
+
 		if strings.HasPrefix(expense.Data, anul) && !expense.MijlocFix {
 			expenses = append(expenses, expense)
 		}
+
+		if expense.MijlocFix {
+
+			for _, damf := range expense.DetaliiMijlocFix.DesfasurareAmortizareMijlocFix {
+
+				ch := cheltuieli.Cheltuiala{
+					NumeCheltuiala: damf.NumeCheltuiala,
+					SumaCheltuita:  damf.SumaCheltuita,
+					TipTranzactie:  damf.TipTranzactie,
+					Data:           damf.Data,
+					CaleCheltuiala: damf.CaleCheltuiala,
+				}
+
+				if strings.HasPrefix(ch.Data, anul) {
+					expenses = append(expenses, ch)
+				}
+
+			}
+
+		}
+
 	}
 
 	sort.Slice(expenses, func(i, j int) bool {

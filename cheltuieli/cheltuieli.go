@@ -108,7 +108,10 @@ func getCurrentUser(currentUserPath string) auth.Account {
 	return data
 }
 
-func getDetaliiMijlocFixFromCodCasificare(cod_clasificare string, coduriMijloaceFixe []staticdata.CodMijloaceFixe) staticdata.CodMijloaceFixe {
+func getDetaliiMijlocFixFromCodCasificare(
+	cod_clasificare string, 
+	coduriMijloaceFixe []staticdata.CodMijloaceFixe,
+	) staticdata.CodMijloaceFixe {
 
 	detaliiMijlocFix := staticdata.CodMijloaceFixe{}
 	for _, item := range coduriMijloaceFixe {
