@@ -106,7 +106,7 @@ func handleSold(app fiber.App, store session.Store) {
 
 		}
 
-		return c.Redirect("/adauga-sold-intermediar?title=Sold Intermediar&content=Sold intermediar adaugat")
+		return c.Redirect("/adauga-sold-intermediar?title=Sold Intermediar&content=Sold intermediar adaugat. Vezi registre contabile.")
 
 	})
 
