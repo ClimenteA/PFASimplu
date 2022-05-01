@@ -11,7 +11,7 @@ import (
 
 func SmallerImg(path string) {
 
-	if strings.HasSuffix(path, ".jpeg") && strings.HasSuffix(path, ".jpg") {
+	if strings.HasSuffix(path, ".jpeg") || strings.HasSuffix(path, ".jpg") {
 
 		file, err := os.Open(path)
 		if err != nil {
