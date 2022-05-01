@@ -144,6 +144,7 @@ func handleDeclaratii(app fiber.App, store session.Store) {
 			docPath := getDocPath(dirName)
 			caleDocument := filepath.Join(docPath, fisier.Filename)
 			c.SaveFile(fisier, caleDocument)
+			utils.SmallerImg(caleDocument)
 
 			docData := Declaratie{
 				Data:         data,

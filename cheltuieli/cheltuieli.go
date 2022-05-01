@@ -15,6 +15,7 @@ import (
 
 	"github.com/ClimenteA/pfasimplu-go/auth"
 	"github.com/ClimenteA/pfasimplu-go/staticdata"
+	"github.com/ClimenteA/pfasimplu-go/utils"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/session"
 	"github.com/lithammer/shortuuid"
@@ -109,9 +110,9 @@ func getCurrentUser(currentUserPath string) auth.Account {
 }
 
 func getDetaliiMijlocFixFromCodCasificare(
-	cod_clasificare string, 
+	cod_clasificare string,
 	coduriMijloaceFixe []staticdata.CodMijloaceFixe,
-	) staticdata.CodMijloaceFixe {
+) staticdata.CodMijloaceFixe {
 
 	detaliiMijlocFix := staticdata.CodMijloaceFixe{}
 	for _, item := range coduriMijloaceFixe {
@@ -334,6 +335,7 @@ func handleCheltuieli(app fiber.App, store session.Store, coduriMijloaceFixe []s
 			expensePath := getExpensePath(dirName)
 			cale_cheltuiala := filepath.Join(expensePath, fisier.Filename)
 			c.SaveFile(fisier, cale_cheltuiala)
+			utils.SmallerImg(cale_cheltuiala)
 
 			expenseData := getExpenseData(c, user, form, fisier.Filename, cale_cheltuiala, coduriMijloaceFixe)
 			expenseJsonPath := getExpenseJsonPath(dirName)

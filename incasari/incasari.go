@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/ClimenteA/pfasimplu-go/auth"
+	"github.com/ClimenteA/pfasimplu-go/utils"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/session"
 )
@@ -145,6 +146,7 @@ func handleIncasari(app fiber.App, store session.Store) {
 
 			setInvoiceData(invoiceData, invoiceJsonPath)
 			c.SaveFile(fisier, caleFactura)
+			utils.SmallerImg(caleFactura)
 
 		}
 

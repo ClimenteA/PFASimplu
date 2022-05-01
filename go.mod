@@ -7,6 +7,7 @@ require (
 	github.com/gofiber/template v1.6.26
 	github.com/lithammer/shortuuid v3.0.0+incompatible
 	github.com/lithammer/shortuuid/v4 v4.0.0
+	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 )
 
 require (
