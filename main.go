@@ -6,6 +6,7 @@ package main
 // https://github.com/gofiber/template/blob/master/html/TEMPLATES_CHEATCHEET.md#golang-templates-cheatsheet
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/ClimenteA/pfasimplu-go/auth"
@@ -16,6 +17,7 @@ import (
 	"github.com/ClimenteA/pfasimplu-go/registre"
 	"github.com/ClimenteA/pfasimplu-go/sold"
 	"github.com/ClimenteA/pfasimplu-go/staticdata"
+	"github.com/ClimenteA/pfasimplu-go/utils"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/session"
@@ -44,6 +46,12 @@ func main() {
 	sold.HandleSoldIntermediar(*app, *store)
 	declaratieanaf.HandleDeclaratie212(*app, *store)
 
-	log.Fatal(app.Listen(":3000"))
+	hostIp := utils.GetHostIp()
+
+	fmt.Println("\nAplicatia PFASimplu!")
+	fmt.Println("\n\nPoti vedea aplicatia in browser la addresa:\nhttp://localhost:3000 (pe acest dispozitiv)")
+	fmt.Println("\nSau poti intra de pe telefon/tableta/laptop in browser pe addresa:\n" + "http://" + hostIp + ":3000")
+
+	log.Fatal(app.Listen("0.0.0.0:3000"))
 
 }
