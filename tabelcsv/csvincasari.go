@@ -11,7 +11,7 @@ import (
 	"github.com/ClimenteA/pfasimplu-go/incasari"
 )
 
-func CreeazaIncasariCSV(path string, incasari []incasari.Factura) {
+func CreeazaIncasariCSV(path, filterYear string, incasari []incasari.Factura) string {
 
 	rows := [][]string{
 		{
@@ -35,7 +35,8 @@ func CreeazaIncasariCSV(path string, incasari []incasari.Factura) {
 		})
 	}
 
-	csvfile, err := os.Create(filepath.Join(path, "incasari.csv"))
+	csvPath := filepath.Join(path, filterYear+"_incasari.csv")
+	csvfile, err := os.Create(csvPath)
 
 	if err != nil {
 		log.Fatalf("failed creating file: %s", err)
@@ -49,4 +50,6 @@ func CreeazaIncasariCSV(path string, incasari []incasari.Factura) {
 
 	csvwriter.Flush()
 	csvfile.Close()
+
+	return csvPath
 }

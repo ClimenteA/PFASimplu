@@ -11,7 +11,7 @@ import (
 	"github.com/ClimenteA/pfasimplu-go/cheltuieli"
 )
 
-func CreeazaCheltuieliCSV(path string, cheltuieli []cheltuieli.Cheltuiala) {
+func CreeazaCheltuieliCSV(path, filterYear string, cheltuieli []cheltuieli.Cheltuiala) string {
 
 	rows := [][]string{
 		{
@@ -80,7 +80,8 @@ func CreeazaCheltuieliCSV(path string, cheltuieli []cheltuieli.Cheltuiala) {
 		})
 	}
 
-	csvfile, err := os.Create(filepath.Join(path, "cheltuieli.csv"))
+	csvPath := filepath.Join(path, filterYear+"_cheltuieli.csv")
+	csvfile, err := os.Create(csvPath)
 
 	if err != nil {
 		log.Fatalf("failed creating file: %s", err)
@@ -94,4 +95,6 @@ func CreeazaCheltuieliCSV(path string, cheltuieli []cheltuieli.Cheltuiala) {
 
 	csvwriter.Flush()
 	csvfile.Close()
+
+	return csvPath
 }

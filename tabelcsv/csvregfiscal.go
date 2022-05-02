@@ -11,7 +11,7 @@ import (
 	"github.com/ClimenteA/pfasimplu-go/types"
 )
 
-func CreeazaRegistruFiscalCSV(path string, registruFiscal []types.RegistruFiscal) {
+func CreeazaRegistruFiscalCSV(path, filterYear string, registruFiscal []types.RegistruFiscal) string {
 
 	rows := [][]string{
 		{
@@ -31,7 +31,8 @@ func CreeazaRegistruFiscalCSV(path string, registruFiscal []types.RegistruFiscal
 		})
 	}
 
-	csvfile, err := os.Create(filepath.Join(path, "registru_fiscal.csv"))
+	csvPath := filepath.Join(path, filterYear+"_registru_fiscal.csv")
+	csvfile, err := os.Create(csvPath)
 
 	if err != nil {
 		log.Fatalf("failed creating file: %s", err)
@@ -45,4 +46,6 @@ func CreeazaRegistruFiscalCSV(path string, registruFiscal []types.RegistruFiscal
 
 	csvwriter.Flush()
 	csvfile.Close()
+
+	return csvPath
 }

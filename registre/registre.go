@@ -159,11 +159,11 @@ func handleRegistre(app fiber.App, store session.Store) {
 		registruInventar := CreeazaRegistruInventar(cheltuieli)
 		registruFiscal := CreeazaRegistruFiscal(aniInregistrati, incasari, cheltuieli, filterYear)
 
-		tabelcsv.CreeazaIncasariCSV(user.Stocare, incasari)
-		tabelcsv.CreeazaCheltuieliCSV(user.Stocare, cheltuieli)
-		tabelcsv.CreeazaRegistruJurnalCSV(user.Stocare, registruJurnal)
-		tabelcsv.CreeazaRegistruInventarCSV(user.Stocare, registruInventar)
-		tabelcsv.CreeazaRegistruFiscalCSV(user.Stocare, registruFiscal)
+		incasariCSVPath := tabelcsv.CreeazaIncasariCSV(user.Stocare, filterYear, incasari)
+		cheltuieliCSVPath := tabelcsv.CreeazaCheltuieliCSV(user.Stocare, filterYear, cheltuieli)
+		registruJurnalCSVPath := tabelcsv.CreeazaRegistruJurnalCSV(user.Stocare, filterYear, registruJurnal)
+		registruInventarCSVPath := tabelcsv.CreeazaRegistruInventarCSV(user.Stocare, filterYear, registruInventar)
+		registruFiscalCSVPath := tabelcsv.CreeazaRegistruFiscalCSV(user.Stocare, filterYear, registruFiscal)
 
 		return c.Render("registre", fiber.Map{
 			"AniInregistrati":            aniInregistrati,
@@ -180,11 +180,11 @@ func handleRegistre(app fiber.App, store session.Store) {
 			"TotalIncasariNet":           fmt.Sprintf("%.2f", totalIncasariNet),
 			"TotalCheltuieliDeductibile": fmt.Sprintf("%.2f", totalCheltuieliDeductibile),
 			"TotalPlatiCatreStat":        fmt.Sprintf("%.2f", totalPlatiCatreStat),
-			"CaleIncasariCSV":            filepath.Join(user.Stocare, "incasari.csv"),
-			"CaleCheltuieliCSV":          filepath.Join(user.Stocare, "cheltuieli.csv"),
-			"CaleRegistruJurnalCSV":      filepath.Join(user.Stocare, "registru_jurnal.csv"),
-			"CaleRegistruInventarCSV":    filepath.Join(user.Stocare, "registru_inventar.csv"),
-			"CaleRegistruFiscalCSV":      filepath.Join(user.Stocare, "registru_fiscal.csv"),
+			"CaleIncasariCSV":            incasariCSVPath,
+			"CaleCheltuieliCSV":          cheltuieliCSVPath,
+			"CaleRegistruJurnalCSV":      registruJurnalCSVPath,
+			"CaleRegistruInventarCSV":    registruInventarCSVPath,
+			"CaleRegistruFiscalCSV":      registruFiscalCSVPath,
 		}, "base")
 	})
 }

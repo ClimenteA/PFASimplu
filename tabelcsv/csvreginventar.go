@@ -12,7 +12,7 @@ import (
 	"github.com/ClimenteA/pfasimplu-go/types"
 )
 
-func CreeazaRegistruInventarCSV(path string, registruInventar []types.RegistruInventar) {
+func CreeazaRegistruInventarCSV(path, filterYear string, registruInventar []types.RegistruInventar) string {
 
 	rows := [][]string{
 		{
@@ -30,7 +30,8 @@ func CreeazaRegistruInventarCSV(path string, registruInventar []types.RegistruIn
 		})
 	}
 
-	csvfile, err := os.Create(filepath.Join(path, "registru_inventar.csv"))
+	csvPath := filepath.Join(path, filterYear+"_registru_inventar.csv")
+	csvfile, err := os.Create(csvPath)
 
 	if err != nil {
 		log.Fatalf("failed creating file: %s", err)
@@ -44,4 +45,6 @@ func CreeazaRegistruInventarCSV(path string, registruInventar []types.RegistruIn
 
 	csvwriter.Flush()
 	csvfile.Close()
+
+	return csvPath
 }

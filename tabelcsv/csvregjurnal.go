@@ -11,7 +11,7 @@ import (
 	"github.com/ClimenteA/pfasimplu-go/types"
 )
 
-func CreeazaRegistruJurnalCSV(path string, registruJurnal []types.RegistruJurnal) {
+func CreeazaRegistruJurnalCSV(path, filterYear string, registruJurnal []types.RegistruJurnal) string {
 
 	rows := [][]string{
 		{
@@ -40,7 +40,8 @@ func CreeazaRegistruJurnalCSV(path string, registruJurnal []types.RegistruJurnal
 		})
 	}
 
-	csvfile, err := os.Create(filepath.Join(path, "registru_jurnal.csv"))
+	csvPath := filepath.Join(path, filterYear+"_registru_jurnal.csv")
+	csvfile, err := os.Create(csvPath)
 
 	if err != nil {
 		log.Fatalf("failed creating file: %s", err)
@@ -54,4 +55,6 @@ func CreeazaRegistruJurnalCSV(path string, registruJurnal []types.RegistruJurnal
 
 	csvwriter.Flush()
 	csvfile.Close()
+
+	return csvPath
 }
