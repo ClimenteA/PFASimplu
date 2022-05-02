@@ -1,0 +1,28 @@
+<main class="container">
+
+
+    <hgroup class="container">
+        <h1>Download Date Cont</h1>
+        <h2>
+            Aici poti face download la toate datele contului intr-un zip.
+        </h2>
+    </hgroup>
+
+    <form action="/download-date-cont" method="POST" enctype="multipart/form-data">
+
+        <div>
+            <select id="selected-year" name="anul">
+                <option id="0000" value="0000">Datele pentru toti anii</option>
+                <!-- {{range .AniInregistrati}}
+                <option id="{{.}}" value="{{.}}">Datele pentru anul {{.}}</option>
+                {{end}} -->
+            </select>
+        </div>
+
+        <button type="submit">Download</button>
+
+    </form>
+
+
+
+</main>
