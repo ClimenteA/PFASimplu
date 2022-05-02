@@ -26,6 +26,11 @@
   .none {
     display: none;
   }
+
+  #incasarivscheltuieli {
+    overflow-y: auto;
+    margin: 0 auto;
+  }
 </style>
 
 
@@ -113,6 +118,11 @@
   </div>
 
 
+  <div class="container-fluid">
+    <div id="incasarivscheltuieli">
+      <!-- Plotly -->
+    </div>
+  </div>
 
 
   <div id="tables" class="container-fluid">
@@ -572,57 +582,86 @@
 </main>
 
 
+<script defer src="/plotly-2.11.1.min.js"></script>
+
+
 <script>
 
   window.addEventListener("DOMContentLoaded", (event) => {
 
-    let elemsToHide = [
-      "total-profit",
-      "total-incasari",
-      "total-cheltuieli",
-      "tabel-incasari",
-      "tabel-cheltuieli",
-      "tabel-declaratii",
-      "tabel-incasari-download",
-      "tabel-cheltuieli-download",
-      //"tabel-declaratii-download",
-    ]
 
-    let summary = document.getElementById("total-incasari")
-    let extraTables = document.getElementById("total-cheltuieli")
+  const MONTHS = ['Ianuarie', 'Februarie', 'Martie', 'Aprilie', 'Mai', 'Iunie', 'Iulie', 'August', 'Septembrie', 'Octombrie', 'Noiembrie', 'Decembrie'];
+  let incasari = [{{ range .IncasariPeLuni }} {{.}}, {{end}}];
+  let cheltuieli = [{{ range .CheltuieliPeLuni }} {{.}}, {{end}}];
 
-    let showAllReports = true
-    document.getElementById("display-reports").addEventListener("change", event => {
-      showAllReports = !showAllReports
-      if (!showAllReports) {
-        elemsToHide.forEach(elId => {
-          document.getElementById(elId).classList.add("none")
-        })
-      } else {
-        elemsToHide.forEach(elId => {
-          document.getElementById(elId).classList.remove("none")
-        })
-      }
+  let barIncasari = {
+    x: MONTHS,
+    y: incasari,
+    name: 'Incasari',
+    type: 'bar'
+  };
 
-    }, false)
+  let barCheltuieli = {
+    x: MONTHS,
+    y: cheltuieli,
+    name: 'Cheltuieli',
+    type: 'bar'
+  };
+
+  let data = [barIncasari, barCheltuieli];
+  let layout = { barmode: 'group' };
+
+  Plotly.newPlot('incasarivscheltuieli', data, layout);
 
 
-    const queryString = window.location.search;
-    const urlParams = new URLSearchParams(queryString);
-    const anul = urlParams.get("anul");
 
-    let selectedYear = document.getElementById("selected-year")
+  let elemsToHide = [
+    "total-profit",
+    "total-incasari",
+    "total-cheltuieli",
+    "tabel-incasari",
+    "tabel-cheltuieli",
+    "tabel-declaratii",
+    "tabel-incasari-download",
+    "tabel-cheltuieli-download",
+    //"tabel-declaratii-download",
+  ]
 
-    if (anul) {
-      document.getElementById(anul).setAttribute("selected", "")
+  let summary = document.getElementById("total-incasari")
+  let extraTables = document.getElementById("total-cheltuieli")
+
+  let showAllReports = true
+  document.getElementById("display-reports").addEventListener("change", event => {
+    showAllReports = !showAllReports
+    if (!showAllReports) {
+      elemsToHide.forEach(elId => {
+        document.getElementById(elId).classList.add("none")
+      })
+    } else {
+      elemsToHide.forEach(elId => {
+        document.getElementById(elId).classList.remove("none")
+      })
     }
 
-    selectedYear.addEventListener("click", event => {
-      let url = String(document.location).split("?")[0] + selectedYear.value;
-      const link = document.createElement('a');
-      link.href = url;
-      link.click();
-    }, false)
+  }, false)
+
+
+  const queryString = window.location.search;
+  const urlParams = new URLSearchParams(queryString);
+  const anul = urlParams.get("anul");
+
+  let selectedYear = document.getElementById("selected-year")
+
+  if (anul) {
+    document.getElementById(anul).setAttribute("selected", "")
+  }
+
+  selectedYear.addEventListener("click", event => {
+    let url = String(document.location).split("?")[0] + selectedYear.value;
+    const link = document.createElement('a');
+    link.href = url;
+    link.click();
+  }, false)
 
   })
 

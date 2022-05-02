@@ -159,6 +159,9 @@ func handleRegistre(app fiber.App, store session.Store) {
 		registruInventar := CreeazaRegistruInventar(cheltuieli)
 		registruFiscal := CreeazaRegistruFiscal(aniInregistrati, incasari, cheltuieli, filterYear)
 
+		incasariPeLuni := AddIncasariPeLuni(incasari, filterYear)
+		cheltuieliPeLuni := AddCheltuieliPeLuni(cheltuieli, filterYear)
+
 		incasariCSVPath := tabelcsv.CreeazaIncasariCSV(user.Stocare, filterYear, incasari)
 		cheltuieliCSVPath := tabelcsv.CreeazaCheltuieliCSV(user.Stocare, filterYear, cheltuieli)
 		registruJurnalCSVPath := tabelcsv.CreeazaRegistruJurnalCSV(user.Stocare, filterYear, registruJurnal)
@@ -185,6 +188,8 @@ func handleRegistre(app fiber.App, store session.Store) {
 			"CaleRegistruJurnalCSV":      registruJurnalCSVPath,
 			"CaleRegistruInventarCSV":    registruInventarCSVPath,
 			"CaleRegistruFiscalCSV":      registruFiscalCSVPath,
+			"IncasariPeLuni":             incasariPeLuni,
+			"CheltuieliPeLuni":           cheltuieliPeLuni,
 		}, "base")
 	})
 }
