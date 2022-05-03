@@ -1,28 +1,110 @@
-<main class="container">
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/pico.min.css">
+    <link rel="stylesheet" href="/custom.css">
+    <title>PFASimplu</title>
+</head>
+
+<body>
+
+    <nav class="container-fluid">
+        <ul>
+            <a href="/">
+                <li><button><strong>PFASimplu</strong></button></li>
+            </a>
+        </ul>
+        <ul>
+            <a href="/">
+                <li><a href="/landing">
+                        Inapoi
+                        <svg xmlns="http://www.w3.org/2000/svg" style="width:16px;height:16px" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                    </a>
+                </li>
+            </a>
+        </ul>
+    </nav>
 
 
-    <form action="/login" method="POST" enctype="multipart/form-data">
+    <main class="container">
+
+
+        <form action="/login" method="POST" enctype="multipart/form-data">
+            <article>
+
+                <h1>Intra in cont</h1>
+
+                <label for="email">
+                    Email
+                    <input style="text-transform:lowercase" type="text" id="email" name="email"
+                        placeholder="rpetru@gmail.com" required>
+                </label>
+
+                <label for="parola">
+                    Parola
+                    <input type="password" id="parola" name="parola" placeholder="********" required>
+                </label>
+
+                <button type="submit">INTRA IN CONT</button>
+
+                <a href="/register"><small>Nu am un cont creat</small></a>
+
+            </article>
+
+        </form>
+
+    </main>
+
+
+    <dialog id="msg">
         <article>
-
-            <h1>Intra in cont</h1>
-
-            <label for="email">
-                Email
-                <input style="text-transform:lowercase" type="text" id="email" name="email"
-                    placeholder="rpetru@gmail.com" required>
-            </label>
-
-            <label for="parola">
-                Parola
-                <input type="password" id="parola" name="parola" placeholder="********" required>
-            </label>
-
-            <button type="submit">INTRA IN CONT</button>
-
-            <a href="/register"><small>Nu am un cont creat</small></a>
-
+            <header>
+                <a id="msg-close" href="#close" aria-label="Close" class="close"></a>
+                <strong id="msg-title"></strong>
+            </header>
+            <p id="msg-content">
+            </p>
         </article>
+    </dialog>
 
-    </form>
+</body>
 
-</main>
+<script>
+
+    document.addEventListener('DOMContentLoaded', (event) => {
+
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+        const title = urlParams.get("title");
+        const content = urlParams.get("content");
+
+        if (title && content) {
+            console.log(queryString)
+            let msg = document.getElementById("msg");
+            let closeBtn = document.getElementById("msg-close");
+            let msgTitle = document.getElementById("msg-title");
+            let msgContent = document.getElementById("msg-content");
+
+            msg.setAttribute("open", "");
+
+            msgTitle.innerText = title;
+            msgContent.innerText = content;
+
+            closeBtn.addEventListener("click", event => {
+                msg.removeAttribute("open");
+                window.location.href = window.location.href.split("?")[0];
+            })
+
+        }
+    })
+</script>
+
+</html>

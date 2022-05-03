@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/pico.min.css">
+    <link rel="stylesheet" href="/custom.css">
+    <title>PFASimplu</title>
+</head>
+
+<body>
+
+    <nav class="container-fluid">
+        <ul>
+            <a href="/">
+                <li><button><strong>PFASimplu</strong></button></li>
+            </a>
+        </ul>
+        <ul>
+            <a href="/">
+                <li>
+                    <a href="/login">
+                        Intra in cont
+                        <svg xmlns="http://www.w3.org/2000/svg" style="width:16px;height:16px" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                    </a>
+                </li>
+            </a>
+        </ul>
+    </nav>
+
+
+    <main class="container">
+
+        <hgroup class="container">
+            <h1 style="text-align:center;">PFASimplu</h1>
+            <h2 style="text-align:center;">
+                <strong>Aplicatie pentru simplificarea gestiunii contabilitatii facuta in partida simpla.</strong>
+            </h2>
+        </hgroup>
+
+        <article>
+
+            <hgroup class="container">
+                <h2>Simplu si de oriunde</h2>
+                <h3>
+                    Poti accesa aplicatia de pe orice dispozitiv pentru a adauga incasari, cheltuieli si pentru a
+                    vedea
+                    rapoartele.
+                </h3>
+            </hgroup>
+
+        </article>
+
+
+        <article>
+
+            <hgroup class="container">
+                <h2>Registre contabile la zi</h2>
+                <h3>
+                    Registrele contabile sunt completate automat din incasarile si cheltuielile introduse.
+                </h3>
+            </hgroup>
+
+            <ul>
+                <li>Registru Jurnal</li>
+                <li>Registru Inventar</li>
+                <li>Registru Fiscal</li>
+                <li>Fisa mijloc fix</li>
+            </ul>
+
+        </article>
+
+
+        <article>
+
+            <hgroup class="container">
+                <h1>Cine poate folosi aplicatia?</h1>
+                <h2>
+                    Aplicatia poate fi utila pentru oricine tine contabilitatea in partida simpla in sistem de venit
+                    real, neplatitor de TVA.
+                </h2>
+            </hgroup>
+
+        </article>
+
+
+        <article>
+
+            <hgroup class="container" style="text-align:center;">
+                <h2>Incasari</h2>
+                <h3>
+                    Poti adauga facturile la incasari.
+                </h3>
+            </hgroup>
+
+            <video width="100%" height="100%" autoplay loop muted>
+                <source src="/vids/adaugaincasari.webm" type="video/webm" />
+                Your browser does not support the video tag.
+            </video>
+
+        </article>
+
+
+        <article>
+
+            <hgroup class="container" style="text-align:center;">
+                <h2>Cheltuieli</h2>
+                <h3>
+                    Poti adauga bonurile/facturile la cheltuieli.
+                </h3>
+            </hgroup>
+
+            <video width="100%" height="100%" autoplay loop muted>
+                <source src="/vids/adaugacheltuieli.webm" type="video/webm" />
+                Your browser does not support the video tag.
+            </video>
+
+        </article>
+
+
+        <article>
+
+            <hgroup class="container" style="text-align:center;">
+                <h2>Documente</h2>
+                <h3>
+                    Poti adauga documente anaf, dovezi de plata la documente.
+                </h3>
+            </hgroup>
+
+            <video width="100%" height="100%" autoplay loop muted>
+                <source src="/vids/adaugadocumente.webm" type="video/webm" />
+                Your browser does not support the video tag.
+            </video>
+
+        </article>
+
+
+        <article>
+
+            <hgroup class="container" style="text-align:center;">
+                <h2>Registre</h2>
+                <h3>
+                    Poti vedea registrele generate.
+                </h3>
+            </hgroup>
+
+            <video width="100%" height="100%" autoplay loop muted>
+                <source src="/vids/registre.webm" type="video/webm" />
+                Your browser does not support the video tag.
+            </video>
+
+        </article>
+
+    </main>
+
+
+    <dialog id="msg">
+        <article>
+            <header>
+                <a id="msg-close" href="#close" aria-label="Close" class="close"></a>
+                <strong id="msg-title"></strong>
+            </header>
+            <p id="msg-content">
+            </p>
+        </article>
+    </dialog>
+
+</body>
+
+<script>
+
+    document.addEventListener('DOMContentLoaded', (event) => {
+
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+        const title = urlParams.get("title");
+        const content = urlParams.get("content");
+
+        if (title && content) {
+            console.log(queryString)
+            let msg = document.getElementById("msg");
+            let closeBtn = document.getElementById("msg-close");
+            let msgTitle = document.getElementById("msg-title");
+            let msgContent = document.getElementById("msg-content");
+
+            msg.setAttribute("open", "");
+
+            msgTitle.innerText = title;
+            msgContent.innerText = content;
+
+            closeBtn.addEventListener("click", event => {
+                msg.removeAttribute("open");
+                window.location.href = window.location.href.split("?")[0];
+            })
+
+        }
+    })
+</script>
+
+</html>

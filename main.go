@@ -13,12 +13,13 @@ import (
 	"github.com/ClimenteA/pfasimplu-go/cheltuieli"
 	"github.com/ClimenteA/pfasimplu-go/declaratieanaf"
 	"github.com/ClimenteA/pfasimplu-go/declaratii"
+	"github.com/ClimenteA/pfasimplu-go/download"
 	"github.com/ClimenteA/pfasimplu-go/incasari"
+	"github.com/ClimenteA/pfasimplu-go/landing"
 	"github.com/ClimenteA/pfasimplu-go/registre"
 	"github.com/ClimenteA/pfasimplu-go/sold"
 	"github.com/ClimenteA/pfasimplu-go/staticdata"
 	"github.com/ClimenteA/pfasimplu-go/utils"
-	"github.com/ClimenteA/pfasimplu-go/download"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/session"
@@ -47,6 +48,7 @@ func main() {
 	sold.HandleSoldIntermediar(*app, *store)
 	declaratieanaf.HandleDeclaratie212(*app, *store)
 	download.HandleDownloadDateCont(*app, *store)
+	landing.HandleLandingPage(*app, *store)
 
 	hostIp := utils.GetHostIp()
 

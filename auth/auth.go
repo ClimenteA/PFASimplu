@@ -176,7 +176,7 @@ func handleRegister(app fiber.App, store session.Store) {
 func handleLogin(app fiber.App, store session.Store) {
 
 	app.Get("/login", func(c *fiber.Ctx) error {
-		return c.Render("login", fiber.Map{}, "base")
+		return c.Render("login", fiber.Map{})
 	})
 
 	app.Post("/login", func(c *fiber.Ctx) error {
@@ -235,7 +235,7 @@ func handleIndex(app fiber.App, store session.Store) {
 		}
 		currentUser := sess.Get("currentUser")
 		if currentUser == nil {
-			return c.Redirect("/login")
+			return c.Redirect("/landing")
 		}
 		return c.Render("index", fiber.Map{}, "base")
 	})
