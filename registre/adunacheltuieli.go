@@ -59,13 +59,18 @@ func getExpensesDataSlice(cheltuieliMetadataJson []string, anul string) []cheltu
 
 	expenses := []cheltuieli.Cheltuiala{}
 
+	now := time.Now()
+
 	for _, path := range cheltuieliMetadataJson {
 
 		expense := getExpenseMetadata(path)
 
 		iterDate, _ := time.Parse(time.RFC3339, expense.Data+"T00:00:00Z")
 
-		if iterDate.Before(time.Now()) {
+		isBeforeNow := iterDate.Before(now)
+		sameMonthYear := iterDate.Year() == now.Year() && iterDate.Month() == now.Month()
+
+		if isBeforeNow || sameMonthYear {
 
 			if strings.HasPrefix(expense.Data, anul) && !expense.MijlocFix {
 				expenses = append(expenses, expense)
@@ -105,7 +110,10 @@ func getExpensesDataSlice(cheltuieliMetadataJson []string, anul string) []cheltu
 
 				iterChDate, _ := time.Parse(time.RFC3339, ch.Data+"T00:00:00Z")
 
-				if strings.HasPrefix(ch.Data, anul) && iterChDate.Before(time.Now()) {
+				mfxIsBeforeNow := iterChDate.Before(now)
+				mfxSameMonthYear := iterChDate.Year() == now.Year() && iterChDate.Month() == now.Month()
+
+				if strings.HasPrefix(ch.Data, anul) && (mfxIsBeforeNow || mfxSameMonthYear) {
 					expenses = append(expenses, ch)
 				}
 

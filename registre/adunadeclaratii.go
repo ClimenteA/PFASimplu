@@ -58,6 +58,7 @@ func getDocMetadata(path string) declaratii.Declaratie {
 func getDocsDataSlice(docMetadataJson []string, anul string) []declaratii.Declaratie {
 
 	declaratii := []declaratii.Declaratie{}
+	now := time.Now()
 
 	for _, path := range docMetadataJson {
 
@@ -68,8 +69,17 @@ func getDocsDataSlice(docMetadataJson []string, anul string) []declaratii.Declar
 			continue
 		}
 
-		if strings.HasPrefix(declaratie.Data, anul) && declaratie.PlataAnaf == 0.0 {
-			declaratii = append(declaratii, declaratie)
+		iterDate, _ := time.Parse(time.RFC3339, declaratie.Data+"T00:00:00Z")
+
+		isBeforeNow := iterDate.Before(now)
+		sameMonthYear := iterDate.Year() == now.Year() && iterDate.Month() == now.Month()
+
+		if isBeforeNow || sameMonthYear {
+
+			if strings.HasPrefix(declaratie.Data, anul) && declaratie.PlataAnaf == 0.0 {
+				declaratii = append(declaratii, declaratie)
+			}
+
 		}
 
 	}

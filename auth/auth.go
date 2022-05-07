@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/session"
@@ -31,6 +32,7 @@ type Account struct {
 	StocareIncasari   string `json:"stocare_incasari"`
 	StocareCheltuieli string `json:"stocare_cheltuieli"`
 	StocareDeclaratii string `json:"stocare_declaratii"`
+	DataCreareCont    string `json:"data_creeare_cont"`
 }
 
 func encryptData(dataStr string) string {
@@ -85,6 +87,7 @@ func setAccountData(accountFilePath, email, parola, stocare string) Account {
 		StocareIncasari:   stocareIncasari,
 		StocareCheltuieli: stocareCheltuieli,
 		StocareDeclaratii: stocareDeclaratii,
+		DataCreareCont:    time.Now().Format(time.RFC3339),
 	}
 
 	file, _ := json.MarshalIndent(data, "", " ")

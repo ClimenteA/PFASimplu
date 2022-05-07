@@ -146,6 +146,7 @@ func handleRegistre(app fiber.App, store session.Store) {
 		totalCheltuieliDeductibile := CalculeazaCheltuieliDeductibile(cheltuieli)
 		totalIncasariNet := totalIncasariBrut - totalCheltuieliDeductibile - platiAnaf
 		totalPlatiCatreStat := CalculeazaPlatiCatreStat(totalIncasariNet, platiAnaf, filterYear)
+		totalIncasariNet = totalIncasariNet - totalPlatiCatreStat
 		profitAnual := CalculeazaProfitAnual(user, filterYear)
 		profitAnualProcent := 0.0
 		showProfitAnual := false

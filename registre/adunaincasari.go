@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/ClimenteA/pfasimplu-go/auth"
 	"github.com/ClimenteA/pfasimplu-go/incasari"
@@ -56,6 +57,7 @@ func getInvoiceMetadata(path string) incasari.Factura {
 func getInvoicesDataSlice(incasariMetadataJson []string, anul string) []incasari.Factura {
 
 	invoices := []incasari.Factura{}
+	now := time.Now()
 
 	for _, path := range incasariMetadataJson {
 
@@ -65,9 +67,18 @@ func getInvoicesDataSlice(incasariMetadataJson []string, anul string) []incasari
 			invoice.TipTranzactie = "BANCAR"
 		}
 
-		if strings.HasPrefix(invoice.Data, anul) {
-			invoices = append(invoices, invoice)
+		iterDate, _ := time.Parse(time.RFC3339, invoice.Data+"T00:00:00Z")
+
+		isBeforeNow := iterDate.Before(now)
+		sameMonthYear := iterDate.Year() == now.Year() && iterDate.Month() == now.Month()
+
+		if isBeforeNow || sameMonthYear {
+
+			if strings.HasPrefix(invoice.Data, anul) {
+				invoices = append(invoices, invoice)
+			}
 		}
+
 	}
 
 	sort.Slice(invoices, func(i, j int) bool {
