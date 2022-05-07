@@ -16,4 +16,4 @@
     - Raport incasari clienti (grafic tip `pie`);
 
 
-
+https://askubuntu.com/questions/642511/how-to-autorun-files-and-scripts-in-ubuntu-when-inserting-a-usb-stick-like-autor

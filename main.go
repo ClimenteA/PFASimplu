@@ -8,6 +8,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/ClimenteA/pfasimplu-go/auth"
 	"github.com/ClimenteA/pfasimplu-go/cheltuieli"
@@ -51,6 +52,11 @@ func main() {
 	landing.HandleLandingPage(*app, *store)
 
 	hostIp := utils.GetHostIp()
+
+	go func() {
+		<-time.After(100 * time.Millisecond)
+		utils.Open("http://localhost:3000")
+	}()
 
 	fmt.Println("\nAplicatia PFASimplu!")
 	fmt.Println("\n\nPoti vedea aplicatia in browser la addresa:\nhttp://localhost:3000 (pe acest dispozitiv)")
