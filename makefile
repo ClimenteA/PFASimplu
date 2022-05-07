@@ -8,7 +8,7 @@ build:
 	cp -r assets dist/PFASimplu-Windows-64bit/
 	cp -r assets dist/PFASimplu-Linux-64bit/
 	cp -r assets dist/PFASimplu-MacOS-64bit/
-	cp -r startw.sh dist/PFASimplu-Windows-64bit/start.sh
-	cp -r startl.sh dist/PFASimplu-Linux-64bit/start.sh
-	cp -r startm.sh dist/PFASimplu-MacOS-64bit/start.sh
+	cp -r autorun-windows dist/PFASimplu-Windows-64bit/autorun
+	cp -r autorun-mac-linux dist/PFASimplu-Linux-64bit/autorun
+	cp -r autorun-mac-linux dist/PFASimplu-MacOS-64bit/autorun
 	
