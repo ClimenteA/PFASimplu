@@ -3,10 +3,9 @@ package registre
 import (
 	"strconv"
 
-	"github.com/ClimenteA/pfasimplu-go/cheltuieli"
 	"github.com/ClimenteA/pfasimplu-go/declaratii"
-	"github.com/ClimenteA/pfasimplu-go/types"
 	"github.com/ClimenteA/pfasimplu-go/staticdata"
+	"github.com/ClimenteA/pfasimplu-go/types"
 )
 
 func CalculeazaIncasariBrut(incasari []types.Factura) float64 {
@@ -20,7 +19,7 @@ func CalculeazaIncasariBrut(incasari []types.Factura) float64 {
 
 }
 
-func CalculeazaCheltuieliDeductibile(cheltuieli []cheltuieli.Cheltuiala) float64 {
+func CalculeazaCheltuieliDeductibile(cheltuieli []types.Cheltuiala) float64 {
 
 	total := 0.0
 	for _, data := range cheltuieli {

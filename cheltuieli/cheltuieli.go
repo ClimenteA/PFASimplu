@@ -15,6 +15,7 @@ import (
 
 	"github.com/ClimenteA/pfasimplu-go/auth"
 	"github.com/ClimenteA/pfasimplu-go/staticdata"
+	"github.com/ClimenteA/pfasimplu-go/types"
 	"github.com/ClimenteA/pfasimplu-go/utils"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/session"
@@ -23,45 +24,6 @@ import (
 
 func HandleCheltuieli(app fiber.App, store session.Store, coduriMijloaceFixe []staticdata.CodMijloaceFixe) {
 	handleCheltuieli(app, store, coduriMijloaceFixe)
-}
-
-type AmortizareMijlocFix struct {
-	NumeCheltuiala string  `json:"nume_cheltuiala"`
-	SumaCheltuita  float64 `json:"suma_cheltuita"`
-	TipTranzactie  string  `json:"tip_tranzactie"`
-	Data           string  `json:"data"`
-	CaleCheltuiala string  `json:"cale_cheltuiala"`
-}
-
-type DetaliiMijlocFix struct {
-	AniAmortizare                  int                   `json:"ani_amortizare"`
-	DataPuneriiInFunctiune         string                `json:"data_punerii_in_functiune"`
-	CodClasificare                 string                `json:"cod_clasificare"`
-	NrInventar                     int                   `json:"nr_inventar"`
-	FelSerieNumarDataDocument      string                `json:"fel_serie_numar_data_document"`
-	ValoareInventar                float64               `json:"valoare_inventar"`
-	AmortizareLunara               float64               `json:"amortizare_lunara"`
-	DenumireSiCaracteristici       string                `json:"denumire_si_caracteristici"`
-	Accesorii                      string                `json:"accesorii"`
-	Grupa                          string                `json:"grupa"`
-	AnulDariiInFolosinta           int                   `json:"anul_darii_in_folosinta"`
-	LunaDariiInFolosinta           int                   `json:"luna_darii_in_folosinta"`
-	AnulAmortizariiComplete        int                   `json:"anul_amortizarii_complete"`
-	LunaAmortizariiComplete        int                   `json:"luna_amortizarii_complete"`
-	DurataNormalaDeFunctionare     string                `json:"durata_normala_de_functionare"`
-	CotaDeAmortizare               float64               `json:"cota_de_amortizare"`
-	DesfasurareAmortizareMijlocFix []AmortizareMijlocFix `json:"desfasurare_amortizare_mijloc_fix"`
-}
-
-type Cheltuiala struct {
-	NumeCheltuiala   string           `json:"nume_cheltuiala"`
-	SumaCheltuita    float64          `json:"suma_cheltuita"`
-	TipTranzactie    string           `json:"tip_tranzactie"`
-	Data             string           `json:"data"`
-	ObiectInventar   bool             `json:"obiect_inventar"`
-	MijlocFix        bool             `json:"mijloc_fix"`
-	CaleCheltuiala   string           `json:"cale_cheltuiala"`
-	DetaliiMijlocFix DetaliiMijlocFix `json:"detalii_mijloc_fix"`
 }
 
 func getExpenseJsonPath(dirPath string) string {
@@ -85,7 +47,7 @@ func getExpensePath(dirPath string) string {
 
 }
 
-func setExpenseData(expenseData Cheltuiala, filePath string) {
+func setExpenseData(expenseData types.Cheltuiala, filePath string) {
 	file, _ := json.MarshalIndent(expenseData, "", " ")
 	err := ioutil.WriteFile(filePath, file, 0644)
 	if err != nil {
@@ -125,11 +87,11 @@ func getDetaliiMijlocFixFromCodCasificare(
 }
 
 func calcDesfasurareAmortizare(
-	desfasurareAmortizare []AmortizareMijlocFix,
+	desfasurareAmortizare []types.AmortizareMijlocFix,
 	startDate, endDate time.Time,
-	expenseData Cheltuiala,
+	expenseData types.Cheltuiala,
 	amortizare_lunara float64,
-) []AmortizareMijlocFix {
+) []types.AmortizareMijlocFix {
 
 	startDate = startDate.AddDate(0, 1, 0)
 
@@ -137,7 +99,7 @@ func calcDesfasurareAmortizare(
 
 		data := d.AddDate(0, 0, -d.Day())
 
-		amf := AmortizareMijlocFix{
+		amf := types.AmortizareMijlocFix{
 			NumeCheltuiala: "Amortizare lunara " + expenseData.NumeCheltuiala,
 			Data:           data.Format(time.RFC3339)[0:10],
 			CaleCheltuiala: expenseData.CaleCheltuiala,
@@ -156,9 +118,9 @@ func getDetaliiMijlocFix(
 	mijloc_fix bool,
 	form *multipart.Form,
 	filename string,
-	expenseData Cheltuiala,
+	expenseData types.Cheltuiala,
 	coduriMijloaceFixe []staticdata.CodMijloaceFixe,
-) DetaliiMijlocFix {
+) types.DetaliiMijlocFix {
 
 	nr_inventar := 0
 	fel_serie_numar_data_document := ""
@@ -176,7 +138,7 @@ func getDetaliiMijlocFix(
 	denumire_si_caracteristici := ""
 	data_punerii_in_functiune := ""
 	cod_clasificare := ""
-	desfasurareAmortizare := []AmortizareMijlocFix{}
+	desfasurareAmortizare := []types.AmortizareMijlocFix{}
 
 	if mijloc_fix {
 
@@ -221,7 +183,7 @@ func getDetaliiMijlocFix(
 
 	}
 
-	detaliiMijlocFix := DetaliiMijlocFix{
+	detaliiMijlocFix := types.DetaliiMijlocFix{
 		AniAmortizare:                  amortizare_in_ani,
 		DataPuneriiInFunctiune:         data_punerii_in_functiune,
 		CodClasificare:                 cod_clasificare,
@@ -245,7 +207,12 @@ func getDetaliiMijlocFix(
 
 }
 
-func getExpenseData(c *fiber.Ctx, user auth.Account, form *multipart.Form, filename, cale_cheltuiala string, coduriMijloaceFixe []staticdata.CodMijloaceFixe) Cheltuiala {
+func getExpenseData(
+	c *fiber.Ctx,
+	user auth.Account,
+	form *multipart.Form,
+	filename, cale_cheltuiala string,
+	coduriMijloaceFixe []staticdata.CodMijloaceFixe) types.Cheltuiala {
 
 	data := form.Value["data"][0]
 
@@ -274,7 +241,7 @@ func getExpenseData(c *fiber.Ctx, user auth.Account, form *multipart.Form, filen
 		log.Println(mfix)
 	}
 
-	expenseData := Cheltuiala{
+	expenseData := types.Cheltuiala{
 		NumeCheltuiala: nume_cheltuiala,
 		SumaCheltuita:  suma_cheltuita,
 		Data:           data,
@@ -300,11 +267,20 @@ func handleCheltuieli(app fiber.App, store session.Store, coduriMijloaceFixe []s
 			log.Panic(err)
 		}
 
-		if sess.Get("currentUser") == nil {
+		currentUserPath := sess.Get("currentUser")
+		if currentUserPath == nil {
 			return c.Redirect("/login")
 		}
 
-		return c.Render("cheltuieli", fiber.Map{}, "base")
+		user := getCurrentUser(fmt.Sprint(currentUserPath))
+		filterYear := strconv.Itoa(time.Now().Year())
+
+		cheltuieli := AdunaCheltuieli(user, filterYear)
+
+		return c.Render("cheltuieli", fiber.Map{
+			"Cheltuieli": cheltuieli,
+			"Anul":       filterYear,
+		}, "base")
 	})
 
 	app.Post("/adauga-cheltuieli", func(c *fiber.Ctx) error {

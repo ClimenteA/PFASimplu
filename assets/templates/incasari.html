@@ -1,4 +1,30 @@
-<main class="container">
+<style>
+    #tabel-incasari {
+        margin-bottom: 1rem;
+        margin-top: 4rem;
+        padding: 1rem;
+        max-height: 600px;
+        overflow: auto;
+    }
+
+    .download {
+        display: flex;
+        gap: 2rem;
+        float: right;
+    }
+
+    tr td {
+        width: 1%;
+        white-space: nowrap;
+    }
+
+    .bg-whitesmoke {
+        background: whitesmoke;
+    }
+</style>
+
+
+<main class="container-fluid">
 
     <hgroup class="container">
         <h1>Adauga incasari</h1>
@@ -8,7 +34,7 @@
     </hgroup>
 
 
-    <form action="/adauga-incasari" method="POST" enctype="multipart/form-data">
+    <form class="container" action="/adauga-incasari" method="POST" enctype="multipart/form-data">
 
         <article>
 

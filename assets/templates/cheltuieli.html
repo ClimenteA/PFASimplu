@@ -10,12 +10,8 @@
     width: fit-content;
   }
 
-  #tables {
-    max-width: 90%;
-    margin: 0 auto;
-  }
-
-  #tables>article {
+  #tables>article,
+  #tabel-cheltuieli {
     margin-bottom: 1rem;
     margin-top: 4rem;
     padding: 1rem;
@@ -23,9 +19,19 @@
     overflow: auto;
   }
 
+  .download {
+    display: flex;
+    gap: 2rem;
+    float: right;
+  }
+
   tr td {
     width: 1%;
     white-space: nowrap;
+  }
+
+  .bg-whitesmoke {
+    background: whitesmoke;
   }
 </style>
 
@@ -155,6 +161,178 @@
 
 
   </form>
+
+
+  <article id="tabel-cheltuieli">
+    <h4 style="color: var(--secondary);">Tabel Cheltuieli {{ .Anul }}</h4>
+    <table>
+
+      <thead>
+        <tr class="bg-whitesmoke">
+          <th scope="col">
+            Data
+          </th>
+          <th scope="col">
+            Nume Cheltuiala
+          </th>
+          <th scope="col">
+            Suma Cheltuita
+          </th>
+          <th scope="col">
+            Tip Tranzactie
+          </th>
+          <th scope="col">
+            Obiect Inventar
+          </th>
+          <th scope="col">
+            Mijloc Fix
+          </th>
+          <th scope="col">
+            Download Fisier
+          </th>
+          <th scope="col">
+            Sterge Fisier
+          </th>
+          <th scope="col">
+            Ani Amortizare
+          </th>
+          <th scope="col">
+            Data Punerii In Functiune
+          </th>
+          <th scope="col">
+            Cod Clasificare
+          </th>
+          <th scope="col">
+            Nr Inventar
+          </th>
+          <th scope="col">
+            Fel Serie Numar Data Document
+          </th>
+          <th scope="col">
+            Valoare Inventar
+          </th>
+          <th scope="col">
+            Amortizare Lunara
+          </th>
+          <th scope="col">
+            Denumire Si Caracteristici
+          </th>
+          <th scope="col">
+            Accesorii
+          </th>
+          <th scope="col">
+            Grupa
+          </th>
+          <th scope="col">
+            Anul Darii In Folosinta
+          </th>
+          <th scope="col">
+            Luna Darii In Folosinta
+          </th>
+          <th scope="col">
+            Anul Amortizarii Complete
+          </th>
+          <th scope="col">
+            Luna Amortizarii Complete
+          </th>
+          <th scope="col">
+            Durata Normala De Functionare
+          </th>
+          <th scope="col">
+            Cota De Amortizare
+          </th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {{range .Cheltuieli}}
+        <tr>
+          <td>
+            {{.Data}}
+          </td>
+          <td>
+            {{.NumeCheltuiala}}
+          </td>
+          <td>
+            {{.SumaCheltuita}}
+          </td>
+          <td>
+            {{.TipTranzactie}}
+          </td>
+          <td>
+            {{if .ObiectInventar}}
+            Da
+            {{else}}
+            Nu
+            {{end}}
+          </td>
+          <td>
+            {{if .MijlocFix}}
+            Da
+            {{else}}
+            Nu
+            {{end}}
+          </td>
+          <td>
+            <a href="/download-fisier?path={{.CaleCheltuiala}}">Download</a>
+          </td>
+          <td>
+            <a style="color:var(--del-color);" href="/sterge-fisier?path={{.CaleCheltuiala}}">Sterge</a>
+          </td>
+          <td>
+            {{.DetaliiMijlocFix.AniAmortizare}}
+          </td>
+          <td>
+            {{.DetaliiMijlocFix.DataPuneriiInFunctiune}}
+          </td>
+          <td>
+            {{.DetaliiMijlocFix.CodClasificare}}
+          </td>
+          <td>
+            {{.DetaliiMijlocFix.NrInventar}}
+          </td>
+          <td>
+            {{.DetaliiMijlocFix.FelSerieNumarDataDocument}}
+          </td>
+          <td>
+            {{.DetaliiMijlocFix.ValoareInventar}}
+          </td>
+          <td>
+            {{.DetaliiMijlocFix.AmortizareLunara}}
+          </td>
+          <td>
+            {{.DetaliiMijlocFix.DenumireSiCaracteristici}}
+          </td>
+          <td>
+            {{.DetaliiMijlocFix.Accesorii}}
+          </td>
+          <td>
+            {{.DetaliiMijlocFix.Grupa}}
+          </td>
+          <td>
+            {{.DetaliiMijlocFix.AnulDariiInFolosinta}}
+          </td>
+          <td>
+            {{.DetaliiMijlocFix.LunaDariiInFolosinta}}
+          </td>
+          <td>
+            {{.DetaliiMijlocFix.AnulAmortizariiComplete}}
+          </td>
+          <td>
+            {{.DetaliiMijlocFix.LunaAmortizariiComplete}}
+          </td>
+          <td>
+            {{.DetaliiMijlocFix.DurataNormalaDeFunctionare}}
+          </td>
+          <td>
+            {{.DetaliiMijlocFix.CotaDeAmortizare}}
+          </td>
+        </tr>
+        {{end}}
+      </tbody>
+    </table>
+  </article>
+
 
 
   <div id="tables" style="display:none;">

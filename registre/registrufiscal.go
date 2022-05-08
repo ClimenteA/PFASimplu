@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/ClimenteA/pfasimplu-go/cheltuieli"
 	"github.com/ClimenteA/pfasimplu-go/types"
 )
 
@@ -28,7 +27,7 @@ func calculIncasariAn(incasari []types.Factura) map[string]float64 {
 	return calculIncasari
 }
 
-func calculCheltuieliAn(cheltuieli []cheltuieli.Cheltuiala) map[string]float64 {
+func calculCheltuieliAn(cheltuieli []types.Cheltuiala) map[string]float64 {
 
 	calculCheltuieli := map[string]float64{}
 	for _, data := range cheltuieli {
@@ -61,7 +60,11 @@ func addNrCrtRegFiscal(registruFiscal []types.RegistruFiscal) []types.RegistruFi
 
 }
 
-func CreeazaRegistruFiscal(aniInregistrati []string, incasari []types.Factura, cheltuieli []cheltuieli.Cheltuiala, filterYear string) []types.RegistruFiscal {
+func CreeazaRegistruFiscal(
+	aniInregistrati []string,
+	incasari []types.Factura,
+	cheltuieli []types.Cheltuiala,
+	filterYear string) []types.RegistruFiscal {
 
 	calculIncasari := calculIncasariAn(incasari)
 	calculCheltuieli := calculCheltuieliAn(cheltuieli)

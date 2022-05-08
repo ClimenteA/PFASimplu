@@ -1,13 +1,13 @@
-package registre
+package cheltuieli
 
 import (
 	"fmt"
 	"time"
 
-	"github.com/ClimenteA/pfasimplu-go/cheltuieli"
+	"github.com/ClimenteA/pfasimplu-go/types"
 )
 
-func AddCheltuieliPeLuni(cheltuieli []cheltuieli.Cheltuiala, anul string) []string {
+func AddCheltuieliPeLuni(cheltuieli []types.Cheltuiala, anul string) []string {
 
 	startDate, err := time.Parse(time.RFC3339, anul+"-01-01T00:00:00Z")
 	if err != nil {

@@ -1,4 +1,4 @@
-package registre
+package cheltuieli
 
 import (
 	"encoding/json"
@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/ClimenteA/pfasimplu-go/auth"
-	"github.com/ClimenteA/pfasimplu-go/cheltuieli"
+	"github.com/ClimenteA/pfasimplu-go/types"
 )
 
 func getCheltuieliJsonPaths(user auth.Account) ([]string, error) {
@@ -39,9 +39,9 @@ func getCheltuieliJsonPaths(user auth.Account) ([]string, error) {
 
 }
 
-func getExpenseMetadata(path string) cheltuieli.Cheltuiala {
+func GetExpenseMetadata(path string) types.Cheltuiala {
 
-	var data cheltuieli.Cheltuiala
+	var data types.Cheltuiala
 
 	jsonFile, err := os.Open(path)
 	if err != nil {
@@ -55,15 +55,15 @@ func getExpenseMetadata(path string) cheltuieli.Cheltuiala {
 	return data
 }
 
-func getExpensesDataSlice(cheltuieliMetadataJson []string, anul string) []cheltuieli.Cheltuiala {
+func getExpensesDataSlice(cheltuieliMetadataJson []string, anul string) []types.Cheltuiala {
 
-	expenses := []cheltuieli.Cheltuiala{}
+	expenses := []types.Cheltuiala{}
 
 	now := time.Now()
 
 	for _, path := range cheltuieliMetadataJson {
 
-		expense := getExpenseMetadata(path)
+		expense := GetExpenseMetadata(path)
 
 		iterDate, _ := time.Parse(time.RFC3339, expense.Data+"T00:00:00Z")
 
@@ -81,14 +81,14 @@ func getExpensesDataSlice(cheltuieliMetadataJson []string, anul string) []cheltu
 
 			for _, damf := range expense.DetaliiMijlocFix.DesfasurareAmortizareMijlocFix {
 
-				ch := cheltuieli.Cheltuiala{
+				ch := types.Cheltuiala{
 					NumeCheltuiala: damf.NumeCheltuiala,
 					SumaCheltuita:  damf.SumaCheltuita,
 					TipTranzactie:  damf.TipTranzactie,
 					Data:           damf.Data,
 					MijlocFix:      true,
 					CaleCheltuiala: damf.CaleCheltuiala,
-					DetaliiMijlocFix: cheltuieli.DetaliiMijlocFix{
+					DetaliiMijlocFix: types.DetaliiMijlocFix{
 						AniAmortizare:              expense.DetaliiMijlocFix.AniAmortizare,
 						DataPuneriiInFunctiune:     expense.DetaliiMijlocFix.DataPuneriiInFunctiune,
 						CodClasificare:             expense.DetaliiMijlocFix.CodClasificare,
@@ -142,7 +142,7 @@ func getExpensesDataSlice(cheltuieliMetadataJson []string, anul string) []cheltu
 
 }
 
-func AdunaCheltuieli(user auth.Account, anul string) []cheltuieli.Cheltuiala {
+func AdunaCheltuieli(user auth.Account, anul string) []types.Cheltuiala {
 
 	// comisioaneBancare := AdunaComisioaneBancare(user, anul)
 

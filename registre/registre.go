@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/ClimenteA/pfasimplu-go/auth"
+	outputs "github.com/ClimenteA/pfasimplu-go/cheltuieli"
 	inputs "github.com/ClimenteA/pfasimplu-go/incasari"
 	"github.com/ClimenteA/pfasimplu-go/tabelcsv"
 	"github.com/ClimenteA/pfasimplu-go/utils"
@@ -141,7 +142,7 @@ func handleRegistre(app fiber.App, store session.Store) {
 
 		declaratii := AdunaDeclaratii(user, filterYear)
 		incasari := inputs.AdunaIncasari(user, filterYear)
-		cheltuieli := AdunaCheltuieli(user, filterYear)
+		cheltuieli := outputs.AdunaCheltuieli(user, filterYear)
 		platiAnaf := CalculPlatiAnaf(declaratii)
 		totalIncasariBrut := CalculeazaIncasariBrut(incasari)
 		totalCheltuieliDeductibile := CalculeazaCheltuieliDeductibile(cheltuieli)
@@ -162,7 +163,7 @@ func handleRegistre(app fiber.App, store session.Store) {
 		registruFiscal := CreeazaRegistruFiscal(aniInregistrati, incasari, cheltuieli, filterYear)
 
 		incasariPeLuni := inputs.AddIncasariPeLuni(incasari, filterYear)
-		cheltuieliPeLuni := AddCheltuieliPeLuni(cheltuieli, filterYear)
+		cheltuieliPeLuni := outputs.AddCheltuieliPeLuni(cheltuieli, filterYear)
 
 		incasariCSVPath := tabelcsv.CreeazaIncasariCSV(user.Stocare, filterYear, incasari)
 		cheltuieliCSVPath := tabelcsv.CreeazaCheltuieliCSV(user.Stocare, filterYear, cheltuieli)

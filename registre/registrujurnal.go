@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/ClimenteA/pfasimplu-go/cheltuieli"
 	"github.com/ClimenteA/pfasimplu-go/types"
 )
 
@@ -32,7 +31,7 @@ func processIncasari(sliceJurnal []types.RegistruJurnal, incasari []types.Factur
 
 }
 
-func processCheltuieli(sliceJurnal []types.RegistruJurnal, cheltuieli []cheltuieli.Cheltuiala) []types.RegistruJurnal {
+func processCheltuieli(sliceJurnal []types.RegistruJurnal, cheltuieli []types.Cheltuiala) []types.RegistruJurnal {
 
 	for _, cheltuiala := range cheltuieli {
 		registruJurnal := types.RegistruJurnal{
@@ -88,7 +87,7 @@ func sortByDate(sliceJurnal []types.RegistruJurnal) []types.RegistruJurnal {
 
 }
 
-func CreeazaRegistruJurnal(incasari []types.Factura, cheltuieli []cheltuieli.Cheltuiala) []types.RegistruJurnal {
+func CreeazaRegistruJurnal(incasari []types.Factura, cheltuieli []types.Cheltuiala) []types.RegistruJurnal {
 
 	sliceJurnal := []types.RegistruJurnal{}
 	sliceJurnal = processIncasari(sliceJurnal, incasari)

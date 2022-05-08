@@ -8,10 +8,10 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"github.com/ClimenteA/pfasimplu-go/cheltuieli"
+	"github.com/ClimenteA/pfasimplu-go/types"
 )
 
-func CreeazaCheltuieliCSV(path, filterYear string, cheltuieli []cheltuieli.Cheltuiala) string {
+func CreeazaCheltuieliCSV(path, filterYear string, cheltuieli []types.Cheltuiala) string {
 
 	rows := [][]string{
 		{

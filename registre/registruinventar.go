@@ -3,12 +3,12 @@ package registre
 import (
 	"path/filepath"
 
-	"github.com/ClimenteA/pfasimplu-go/cheltuieli"
+	output "github.com/ClimenteA/pfasimplu-go/cheltuieli"
 	"github.com/ClimenteA/pfasimplu-go/types"
 	"github.com/ClimenteA/pfasimplu-go/utils"
 )
 
-func CreeazaRegistruInventar(cheltuieli []cheltuieli.Cheltuiala) []types.RegistruInventar {
+func CreeazaRegistruInventar(cheltuieli []types.Cheltuiala) []types.RegistruInventar {
 
 	mijloaceFixeSalvate := []string{}
 	inventar := []types.RegistruInventar{}
@@ -34,7 +34,7 @@ func CreeazaRegistruInventar(cheltuieli []cheltuieli.Cheltuiala) []types.Registr
 
 			if !utils.SliceContains(mijloaceFixeSalvate, metadataPath) {
 
-				expense := getExpenseMetadata(metadataPath)
+				expense := output.GetExpenseMetadata(metadataPath)
 
 				obiect := types.RegistruInventar{
 					NrCrt:            count,
