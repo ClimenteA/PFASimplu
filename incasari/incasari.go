@@ -85,11 +85,17 @@ func handleIncasari(app fiber.App, store session.Store) {
 		filterYear := strconv.Itoa(time.Now().Year())
 
 		incasari := AdunaIncasari(user, filterYear)
+		ultimaSerie := "INV"
+		ultimulNumar := 0
+		if len(incasari) > 0 {
+			ultimaSerie = incasari[0].Serie
+			ultimulNumar = incasari[0].Numar
+		}
 
 		return c.Render("incasari", fiber.Map{
 			"Incasari":     incasari,
-			"UltimaSerie":  incasari[0].Serie,
-			"UltimulNumar": incasari[0].Numar + 1,
+			"UltimaSerie":  ultimaSerie,
+			"UltimulNumar": ultimulNumar + 1,
 			"Anul":         filterYear,
 		}, "base")
 	})
