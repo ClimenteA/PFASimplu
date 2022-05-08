@@ -16,9 +16,11 @@ type Config struct {
 	PragMijlocFix []ConfigDetails `json:"prag_mijloc_fix"`
 	EuroToRon     []ConfigDetails `json:"euro_to_ron"`
 	SalariiMinime []ConfigDetails `json:"salarii_minime"`
+	Port          string          `json:"port"`
+	Environment   string          `json:"environment"`
 }
 
-func LoadVariabileAnuale() Config {
+func LoadPFAConfig() Config {
 
 	var data Config
 

@@ -53,7 +53,7 @@ func CalculeazaPlatiCatreStat(totalIncasariNet, platiAnaf float64, anul string) 
 	// Nu se plateste daca venitul net este mai mic sau egal cu 12 salarii minime brute (2300 RON in 2021)
 	// 10% din salariulMinim * 12
 
-	anualVars := staticdata.LoadVariabileAnuale()
+	anualVars := staticdata.LoadPFAConfig()
 
 	salariulMinim := 0.0
 	for idx, data := range anualVars.SalariiMinime {

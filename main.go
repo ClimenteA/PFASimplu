@@ -52,15 +52,19 @@ func main() {
 
 	hostIp := utils.GetHostIp()
 
-	// go func() {
-	// 	<-time.After(100 * time.Millisecond)
-	// 	utils.Open("http://localhost:3000")
-	// }()
+	config := staticdata.LoadPFAConfig()
 
-	fmt.Println("\nAplicatia PFASimplu!")
-	fmt.Println("\n\nPoti vedea aplicatia in browser la addresa:\nhttp://localhost:3000 (pe acest dispozitiv)")
-	fmt.Println("\nSau poti intra de pe telefon/tableta/laptop in browser pe addresa:\n" + "http://" + hostIp + ":3000")
+	fmt.Println("\nAplicatia PFASimplu v1.0.0!")
+	fmt.Println("Pastreaza aceasta fereastra deschisa cat timp folosesti aplicatia!")
 
-	log.Fatal(app.Listen("0.0.0.0:3000"))
+	if config.Environment == "desktop" {
+		fmt.Println("\n\nPoti vedea aplicatia in browser la addresa:\nhttp://localhost:" + config.Port + " (pe acest dispozitiv)")
+		fmt.Println("\nSau poti intra de pe telefon/tableta/laptop in browser pe addresa:\n" + "http://" + hostIp + ":" + config.Port)
+		log.Fatal(app.Listen("0.0.0.0:" + config.Port))
+	} else {
+		fmt.Println("\n\nPoti vedea aplicatia in browser la addresa:\nhttp://localhost:3000 (pe acest dispozitiv)")
+		fmt.Println("\nSau poti intra de pe telefon/tableta/laptop in browser pe addresa:\n" + "http://" + hostIp + ":3000")
+		log.Fatal(app.Listen("0.0.0.0:3000"))
+	}
 
 }

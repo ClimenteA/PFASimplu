@@ -18,5 +18,7 @@
             "an": 2022,
             "valoare": 2550
         }
-    ]
+    ],
+    "port": "3000",
+    "environment": "desktop"
 }
