@@ -1,13 +1,13 @@
-package registre
+package incasari
 
 import (
 	"fmt"
 	"time"
 
-	"github.com/ClimenteA/pfasimplu-go/incasari"
+	"github.com/ClimenteA/pfasimplu-go/types"
 )
 
-func AddIncasariPeLuni(incasari []incasari.Factura, anul string) []string {
+func AddIncasariPeLuni(incasari []types.Factura, anul string) []string {
 
 	startDate, err := time.Parse(time.RFC3339, anul+"-01-01T00:00:00Z")
 	if err != nil {

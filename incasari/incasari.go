@@ -9,8 +9,10 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/ClimenteA/pfasimplu-go/auth"
+	"github.com/ClimenteA/pfasimplu-go/types"
 	"github.com/ClimenteA/pfasimplu-go/utils"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/session"
@@ -22,15 +24,6 @@ import (
 
 func HandleIncasari(app fiber.App, store session.Store) {
 	handleIncasari(app, store)
-}
-
-type Factura struct {
-	Serie         string  `json:"serie"`
-	Numar         int     `json:"numar"`
-	Data          string  `json:"data"`
-	TipTranzactie string  `json:"tip_tranzactie"`
-	SumaIncasata  float64 `json:"suma_incasata"`
-	CaleFactura   string  `json:"cale_factura"`
 }
 
 func getInvoiceJsonPath(dirPath string) string {
@@ -54,7 +47,7 @@ func getInvoicePath(dirPath string) string {
 
 }
 
-func setInvoiceData(invoiceData Factura, filePath string) {
+func setInvoiceData(invoiceData types.Factura, filePath string) {
 	file, _ := json.MarshalIndent(invoiceData, "", " ")
 	err := ioutil.WriteFile(filePath, file, 0644)
 	if err != nil {
@@ -87,11 +80,22 @@ func handleIncasari(app fiber.App, store session.Store) {
 			panic(err)
 		}
 
-		if sess.Get("currentUser") == nil {
+		currentUserPath := sess.Get("currentUser")
+		if currentUserPath == nil {
 			return c.Redirect("/login")
 		}
 
-		return c.Render("incasari", fiber.Map{}, "base")
+		user := getCurrentUser(fmt.Sprint(currentUserPath))
+		filterYear := strconv.Itoa(time.Now().Year())
+
+		incasari := AdunaIncasari(user, filterYear)
+
+		return c.Render("incasari", fiber.Map{
+			"Incasari":     incasari,
+			"UltimaSerie":  incasari[0].Serie,
+			"UltimulNumar": incasari[0].Numar + 1,
+			"Anul":  filterYear,
+		}, "base")
 	})
 
 	app.Post("/adauga-incasari", func(c *fiber.Ctx) error {
@@ -135,7 +139,7 @@ func handleIncasari(app fiber.App, store session.Store) {
 			invoiceJsonPath := getInvoiceJsonPath(dirName)
 			caleFactura := filepath.Join(invoicePath, fisier.Filename)
 
-			invoiceData := Factura{
+			invoiceData := types.Factura{
 				Serie:         serie,
 				Numar:         numar,
 				Data:          data,

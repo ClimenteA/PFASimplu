@@ -1,4 +1,4 @@
-package registre
+package incasari
 
 import (
 	"encoding/json"
@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/ClimenteA/pfasimplu-go/auth"
-	"github.com/ClimenteA/pfasimplu-go/incasari"
+	"github.com/ClimenteA/pfasimplu-go/types"
 )
 
 func getIncasariJsonPaths(user auth.Account) ([]string, error) {
@@ -38,9 +38,9 @@ func getIncasariJsonPaths(user auth.Account) ([]string, error) {
 
 }
 
-func getInvoiceMetadata(path string) incasari.Factura {
+func getInvoiceMetadata(path string) types.Factura {
 
-	var data incasari.Factura
+	var data types.Factura
 
 	jsonFile, err := os.Open(path)
 	if err != nil {
@@ -54,9 +54,9 @@ func getInvoiceMetadata(path string) incasari.Factura {
 	return data
 }
 
-func getInvoicesDataSlice(incasariMetadataJson []string, anul string) []incasari.Factura {
+func getInvoicesDataSlice(incasariMetadataJson []string, anul string) []types.Factura {
 
-	invoices := []incasari.Factura{}
+	invoices := []types.Factura{}
 	now := time.Now()
 
 	for _, path := range incasariMetadataJson {
@@ -89,7 +89,7 @@ func getInvoicesDataSlice(incasariMetadataJson []string, anul string) []incasari
 
 }
 
-func AdunaIncasari(user auth.Account, anul string) []incasari.Factura {
+func AdunaIncasari(user auth.Account, anul string) []types.Factura {
 
 	incasariMetadataJson, err := getIncasariJsonPaths(user)
 	if err != nil {

@@ -21,13 +21,14 @@
 
                     <label for="serie">
                         Serie factura
-                        <input style="text-transform:uppercase" type="text" id="serie" name="serie" value=""
-                            placeholder="INV" required>
+                        <input style="text-transform:uppercase" type="text" id="serie" name="serie"
+                            value="{{.UltimaSerie}}" placeholder="INV" required>
                     </label>
 
                     <label for="numar">
                         Numar factura
-                        <input type="number" id="numar" min=0 name="numar" value="" placeholder="123" required>
+                        <input type="number" id="numar" min=0 name="numar" value="{{.UltimulNumar}}" placeholder="123"
+                            required>
                     </label>
 
                 </div>
@@ -67,5 +68,66 @@
         </article>
     </form>
 
+
+
+    <article id="tabel-incasari">
+        <h4 style="color: var(--secondary);">Tabel Incasari {{ .Anul }}</h4>
+        <table>
+
+            <thead>
+                <tr class="bg-whitesmoke">
+                    <th scope="col">
+                        Data
+                    </th>
+                    <th scope="col">
+                        Serie
+                    </th>
+                    <th scope="col">
+                        Numar
+                    </th>
+                    <th scope="col">
+                        Suma Incasata
+                    </th>
+                    <th scope="col">
+                        Tip Tranzactie
+                    </th>
+                    <th scope="col">
+                        Download Fisier
+                    </th>
+                    <th scope="col">
+                        Sterge Fisier
+                    </th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {{range .Incasari}}
+                <tr>
+                    <td>
+                        {{.Data}}
+                    </td>
+                    <td>
+                        {{.Serie}}
+                    </td>
+                    <td>
+                        {{.Numar}}
+                    </td>
+                    <td>
+                        {{.SumaIncasata}}
+                    </td>
+                    <td>
+                        {{.TipTranzactie}}
+                    </td>
+                    <td>
+                        <a href="/download-fisier?path={{.CaleFactura}}">Download</a>
+                    </td>
+                    <td>
+                        <a style="color:var(--del-color);" href="/sterge-fisier?path={{.CaleFactura}}">Sterge</a>
+                    </td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+    </article>
 
 </main>

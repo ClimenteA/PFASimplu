@@ -5,11 +5,11 @@ import (
 
 	"github.com/ClimenteA/pfasimplu-go/cheltuieli"
 	"github.com/ClimenteA/pfasimplu-go/declaratii"
-	"github.com/ClimenteA/pfasimplu-go/incasari"
+	"github.com/ClimenteA/pfasimplu-go/types"
 	"github.com/ClimenteA/pfasimplu-go/staticdata"
 )
 
-func CalculeazaIncasariBrut(incasari []incasari.Factura) float64 {
+func CalculeazaIncasariBrut(incasari []types.Factura) float64 {
 
 	total := 0.0
 	for _, data := range incasari {
