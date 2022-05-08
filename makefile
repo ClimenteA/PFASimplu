@@ -8,4 +8,7 @@ build:
 	cp -r assets dist/PFASimplu-Windows-64bit/
 	cp -r assets dist/PFASimplu-Linux-64bit/
 	cp -r assets dist/PFASimplu-MacOS-64bit/
+	cp -r INSTRUCTIUNI-WINDOWS.txt dist/PFASimplu-Windows-64bit/INSTRUCTIUNI.txt
+	cp -r INSTRUCTIUNI-LINUX.txt dist/PFASimplu-Linux-64bit/INSTRUCTIUNI.txt
+	cp -r INSTRUCTIUNI-MAC.txt dist/PFASimplu-MacOS-64bit/INSTRUCTIUNI.txt
 	

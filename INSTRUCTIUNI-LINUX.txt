@@ -1,0 +1,8 @@
+Pentru a folosi aplicatia:
+
+1. Deschide un terminal in folderul acesta si tasteaza `./pfasimplu`, apoi apasa enter;
+2. Click pe `Intra in cont` si creeaza un cont;
+3. Un nou folder `stocare` va aparea langa executabil, acolo vor fi salvate datele tale;
+
+
+Folderul `stocare` este foarte important pastreaza-l pe USB stick ca backup!
