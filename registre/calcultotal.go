@@ -29,7 +29,7 @@ func CalculeazaCheltuieliDeductibile(cheltuieli []types.Cheltuiala) float64 {
 
 }
 
-func CalculPlatiAnaf(declaratii []declaratii.Declaratie) float64 {
+func CalculPlatiFacuteAnaf(declaratii []declaratii.Declaratie) float64 {
 
 	total := 0.0
 	for _, data := range declaratii {
@@ -38,7 +38,14 @@ func CalculPlatiAnaf(declaratii []declaratii.Declaratie) float64 {
 	return total
 }
 
-func CalculeazaPlatiCatreStat(totalIncasariNet, platiAnaf float64, anul string) float64 {
+type PlatiStat struct {
+	CASPensie    float64 `json:"cas_pensie"`
+	CASSSanatate float64 `json:"cass_sanatate"`
+	ImpozitVenit float64 `json:"impozit_venit"`
+	Total        float64 `json:"total"`
+}
+
+func CalculeazaPlatiCatreStat(totalIncasariNet float64, anul string) PlatiStat {
 
 	// https://startco.ro/blog/taxe-pfa/
 
@@ -65,23 +72,27 @@ func CalculeazaPlatiCatreStat(totalIncasariNet, platiAnaf float64, anul string) 
 	}
 
 	pragulMinim := salariulMinim * 12
-	impozitPeVenit := 10 * totalIncasariNet / 100
 
 	pensie := 0.0
 	sanatate := 0.0
-
-	if totalIncasariNet >= pragulMinim {
+	if totalIncasariNet > pragulMinim {
 		pensie = 25 * pragulMinim / 100
 		sanatate = 10 * pragulMinim / 100
 	}
 
-	allTaxes := impozitPeVenit + pensie + sanatate
-	remainingTaxes := allTaxes - platiAnaf
+	totalIncasariNet = totalIncasariNet - pensie
 
-	// if remainingTaxes < 0 {
-	// 	remainingTaxes = 0
-	// }
+	impozitPeVenit := 10 * totalIncasariNet / 100
 
-	return remainingTaxes
+	total := pensie + sanatate + impozitPeVenit
+
+	data := PlatiStat{
+		CASPensie:    pensie,
+		CASSSanatate: sanatate,
+		ImpozitVenit: impozitPeVenit,
+		Total:        total,
+	}
+
+	return data
 
 }
