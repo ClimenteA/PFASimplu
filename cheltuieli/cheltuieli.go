@@ -277,9 +277,20 @@ func handleCheltuieli(app fiber.App, store session.Store, coduriMijloaceFixe []s
 
 		cheltuieli := AdunaCheltuieli(user, filterYear)
 
+		config := staticdata.LoadPFAConfig()
+
+		pragMijlocFix := 2500
+		for _, prag := range config.PragMijlocFix {
+			if strconv.Itoa(prag.An) == filterYear {
+				pragMijlocFix = prag.Valoare
+				break
+			}
+		}
+
 		return c.Render("cheltuieli", fiber.Map{
-			"Cheltuieli": cheltuieli,
-			"Anul":       filterYear,
+			"Cheltuieli":    cheltuieli,
+			"Anul":          filterYear,
+			"PragMijlocFix": pragMijlocFix,
 		}, "base")
 	})
 

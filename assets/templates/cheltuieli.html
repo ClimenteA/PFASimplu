@@ -64,7 +64,7 @@
         <label for="suma_cheltuita">
           Suma cheltuita (RON)
           <input type="number" step=any id="suma_cheltuita" name="suma_cheltuita" placeholder="123" required>
-          <small id="suma_cheltuita_helper" style="display:none;">Mijloc fix (suma depaseste 2500RON)</small>
+          <small id="suma_cheltuita_helper" style="display:none;">Mijloc fix (suma depaseste {{ .PragMijlocFix }}RON)</small>
         </label>
 
       </div>
@@ -3250,7 +3250,7 @@
 
       let suma_cheltuita = parseFloat(event.target.value);
 
-      if (suma_cheltuita > 2499.99) {
+      if (suma_cheltuita > {{ .PragMijlocFix }}) {
 
         document.getElementById("mijlocfix").checked = true;
         document.getElementById("data_punerii_in_functiune").setAttribute("required", "");
