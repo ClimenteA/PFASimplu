@@ -86,6 +86,10 @@ func CalculeazaPlatiCatreStat(totalIncasariNet float64, anul string) PlatiStat {
 
 	total := pensie + sanatate + impozitPeVenit
 
+	if total < 0 {
+		total = 0.0
+	}
+
 	data := PlatiStat{
 		CASPensie:    pensie,
 		CASSSanatate: sanatate,

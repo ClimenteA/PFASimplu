@@ -146,7 +146,11 @@ func handleRegistre(app fiber.App, store session.Store) {
 
 		totalIncasariBrut := CalculeazaIncasariBrut(incasari)
 		totalCheltuieliDeductibile := CalculeazaCheltuieliDeductibile(cheltuieli)
-		totalIncasariNet := totalIncasariBrut - totalCheltuieliDeductibile
+		totalIncasariNet := 0.0
+		if totalIncasariBrut > 0 {
+			totalIncasariNet = totalIncasariBrut - totalCheltuieliDeductibile
+		}
+
 		platiCatreStat := CalculeazaPlatiCatreStat(totalIncasariNet, filterYear)
 
 		platiFacuteAnaf := CalculPlatiFacuteAnaf(declaratii)
@@ -156,7 +160,7 @@ func handleRegistre(app fiber.App, store session.Store) {
 		profitAnual := CalculeazaProfitAnual(user, filterYear)
 		profitAnualProcent := 0.0
 		showProfitAnual := false
-		if profitAnual > 0 {
+		if profitAnual > 0 && totalIncasariNet > 0 {
 			profitAnual = profitAnual - totalPlatiCatreStat
 			profitAnualProcent = (profitAnual / totalIncasariBrut) * 100
 			showProfitAnual = true
@@ -197,6 +201,7 @@ func handleRegistre(app fiber.App, store session.Store) {
 			"CaleRegistruFiscalCSV":      registruFiscalCSVPath,
 			"IncasariPeLuni":             incasariPeLuni,
 			"CheltuieliPeLuni":           cheltuieliPeLuni,
+			"PlatiCatreStat":             platiCatreStat,
 		}, "base")
 	})
 }

@@ -79,7 +79,7 @@
 
     <div id="total-profit" class="grid">
       <small style="color: var(--secondary)">
-        Adauga extrasul bancar sau un sold intermediar pentru anul incheiat pentru a vedea profitul total
+        Adauga un sold intermediar pentru anul curent/incheiat pentru a vedea profitul total.
       </small>
     </div>
 
@@ -110,7 +110,15 @@
 
       <article class="article-grid">
         <h4 style="color: var(--secondary)">Total Plati Ramase Catre Stat</h4>
-        <h1 style="color: indianred">{{.TotalPlatiCatreStat}} RON</h1>
+        <h1 style="color: indianred">{{.TotalPlatiCatreStat}} RON
+          <small style="color: var(--secondary);font-size:16px;display:block;">
+            CAS: {{.PlatiCatreStat.CASPensie}}RON, 
+            CASS: {{.PlatiCatreStat.CASSSanatate}}RON, 
+            <br/>
+            IMPOZIT: {{.PlatiCatreStat.ImpozitVenit}}RON
+          </small>
+        </h1>
+
       </article>
 
     </div>
@@ -589,10 +597,9 @@
 
   window.addEventListener("DOMContentLoaded", (event) => {
 
-
   const MONTHS = ['Ianuarie', 'Februarie', 'Martie', 'Aprilie', 'Mai', 'Iunie', 'Iulie', 'August', 'Septembrie', 'Octombrie', 'Noiembrie', 'Decembrie'];
-  let incasari = [{{ range .IncasariPeLuni }} {{.}}, {{end}}];
-  let cheltuieli = [{{ range .CheltuieliPeLuni }} {{.}}, {{end}}];
+  let incasari = [{{ range .IncasariPeLuni }} {{.}}, {{ end }}];
+  let cheltuieli = [{{ range .CheltuieliPeLuni }} {{.}}, {{ end }}];
 
   let barIncasari = {
     x: MONTHS,
@@ -663,7 +670,7 @@
     link.click();
   }, false)
 
-  })
+  });
 
 
 
