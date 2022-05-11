@@ -179,6 +179,13 @@ func handleRegistre(app fiber.App, store session.Store) {
 		registruInventarCSVPath := tabelcsv.CreeazaRegistruInventarCSV(user.Stocare, filterYear, registruInventar)
 		registruFiscalCSVPath := tabelcsv.CreeazaRegistruFiscalCSV(user.Stocare, filterYear, registruFiscal)
 
+		platiCatreStatRounted := map[string]string{
+			"CASPensie":    fmt.Sprintf("%.2f", platiCatreStat.CASPensie),
+			"CASSSanatate": fmt.Sprintf("%.2f", platiCatreStat.CASSSanatate),
+			"ImpozitVenit": fmt.Sprintf("%.2f", platiCatreStat.ImpozitVenit),
+			"Total":        fmt.Sprintf("%.2f", platiCatreStat.Total),
+		}
+
 		return c.Render("registre", fiber.Map{
 			"AniInregistrati":            aniInregistrati,
 			"Incasari":                   incasari,
@@ -201,7 +208,7 @@ func handleRegistre(app fiber.App, store session.Store) {
 			"CaleRegistruFiscalCSV":      registruFiscalCSVPath,
 			"IncasariPeLuni":             incasariPeLuni,
 			"CheltuieliPeLuni":           cheltuieliPeLuni,
-			"PlatiCatreStat":             platiCatreStat,
+			"PlatiCatreStat":             platiCatreStatRounted,
 		}, "base")
 	})
 }
