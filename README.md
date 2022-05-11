@@ -11,9 +11,7 @@
 - Generare factura in format PDF;
 - Calcul automat impozite pentru declaratia unica;
 - Rapoarte suplimentare:
-    - Raport incasari vs cheltuieli (grafic liniar pe luni);
-    - Raport incasari vs cheltuieli (grafic tip `pie` pe luni);
-    - Raport incasari clienti (grafic tip `pie`);
-
-
-https://askubuntu.com/questions/642511/how-to-autorun-files-and-scripts-in-ubuntu-when-inserting-a-usb-stick-like-autor
+    - Tabel incasari - unde poti vedea/sterge incasarile;
+    - Tabel cheltuieli - unde poti vedea/sterge cheltuielile;
+    - Tabel declaratii - unde poti vedea/sterge declaratiile;
+    - Grafic tip `bar chart` cu incasari vs cheltuieli pe luni;

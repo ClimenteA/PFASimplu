@@ -1,0 +1,176 @@
+<script defer src="/mithril.js"></script>
+<script defer src="/factura.js"></script>
+<script defer src="/facturapdf.js"></script>
+
+<main class="container">
+
+    <hgroup class="container">
+        <h1>Creeaza o factura</h1>
+        <h2>
+            Creeaza o factura in format pdf pentru a o trimite catre client.
+            Facturile create sunt automat adaugate in Registru Jurnal.
+            Datele tale si cele ale clientilor vor fi salvate si pentru urmatoarele facturi.
+            Numarul facturii va fi actualizat automat cu +1 de la ultima factura.
+        </h2>
+    </hgroup>
+
+    <form id="creeaza-factura">
+
+
+        <article>
+
+            <h5 style="color:var(--secondary);">Factura</h5>
+
+            <div class="grid">
+
+                <label for="serie">
+                    Serie
+                    <input style="text-transform:uppercase" type="text" id="serie" name="serie" value=""
+                        placeholder="INV0001" required>
+                </label>
+
+                <label for="numar">
+                    Numar factura
+                    <input type="number" id="numar" min=0 name="numar" placeholder="123" value="" required>
+                </label>
+
+                <div id="data_container">
+
+                </div>
+
+            </div>
+
+
+            <div class="grid" style="margin-top: 2rem;">
+
+                <div>
+                    <h5 style="color:var(--secondary);">Client</h5>
+
+                    <div id="numeClientContainer">
+
+                    </div>
+
+                    <label for="nrRegComClient">
+                        Nr.Reg.Com.
+                        <input style="text-transform:uppercase" type="text" id="nrRegComClient" name="nrRegComClient"
+                            placeholder="J34/4838/2018">
+                    </label>
+
+                    <label for="cifClient">
+                        CIF
+                        <input style="text-transform:uppercase" type="number" id="cifClient" name="cifClient"
+                            placeholder="65811429">
+                    </label>
+
+                    <label for="adresaClient">
+                        Adresa
+                        <input style="text-transform:uppercase" type="text" maxlength="80" id="adresaClient"
+                            name="adresaClient" placeholder="SOS. REGIONALA, NR.1 MUN. BRASOV" required>
+                    </label>
+
+                    <label for="telefonClient">
+                        Telefon
+                        <input style="text-transform:uppercase" type="text" id="telefonClient" name="telefonClient"
+                            placeholder="0789878789">
+                    </label>
+
+                    <label for="emailClient">
+                        Email
+                        <input style="text-transform:lowercase" type="email" id="emailClient" name="emailClient"
+                            placeholder="alexv@gmail.com" required>
+                    </label>
+
+
+                    <label for="bancaClient">
+                        Banca
+                        <input style="text-transform:uppercase" type="text" id="bancaClient" name="bancaClient"
+                            placeholder="ING">
+                    </label>
+
+                    <label for="ibanClient">
+                        IBAN
+                        <input style="text-transform:uppercase" type="text" maxlength="34" id="ibanClient"
+                            name="ibanClient" placeholder="RO49AAAA1B31007593840000">
+                    </label>
+
+                </div>
+
+
+                <div>
+                    <h5 style="color:var(--secondary);">Furnizor</h5>
+
+                    <label for="numeFurnizor">
+                        Nume
+                        <input style="text-transform:uppercase" type="text" id="numeFurnizor" name="numeFurnizor"
+                            value="" placeholder="Alex Valentin PFA" required>
+                    </label>
+
+                    <label for="nrRegComFurnizor">
+                        Nr.Reg.Com.
+                        <input style="text-transform:uppercase" type="text" id="nrRegComFurnizor" value=""
+                            name="nrRegComFurnizor" placeholder="F34/4838/2018" required>
+                    </label>
+
+                    <label for="cifFurnizor">
+                        CIF
+                        <input style="text-transform:uppercase" type="number" id="cifFurnizor" name="cifFurnizor"
+                            value="" placeholder="45611321" required>
+                    </label>
+
+                    <label for="adresaFurnizor">
+                        Adresa
+                        <input style="text-transform:uppercase" type="text" maxlength="80" id="adresaFurnizor" value=""
+                            name="adresaFurnizor" placeholder="IASI, SOS.NATIONALA, NR.111, BL.A1, SC.A, AP.1" required>
+                    </label>
+
+                    <label for="telefonFurnizor">
+                        Telefon
+                        <input style="text-transform:uppercase" type="text" id="telefonFurnizor" value=""
+                            name="telefonFurnizor" placeholder="0789878789" required>
+                    </label>
+
+                    <label for="emailFurnizor">
+                        Email
+                        <input style="text-transform:lowercase" type="email" id="emailFurnizor" name="emailFurnizor"
+                            value="" placeholder="alexv@gmail.com" required>
+                    </label>
+
+                    <label for="bancaFurnizor">
+                        Banca
+                        <input style="text-transform:uppercase" type="text" id="bancaFurnizor" name="bancaFurnizor"
+                            value="" placeholder="ING" required>
+                    </label>
+
+                    <label for="ibanFurnizor">
+                        IBAN
+                        <input style="text-transform:uppercase" type="text" maxlength="34" id="ibanFurnizor" value=""
+                            name="ibanFurnizor" placeholder="RO49AAAA1B31007593840000" required>
+                    </label>
+
+                </div>
+
+
+            </div>
+
+
+            <div>
+                <label for="nota">
+                    Nota (optional)
+                    <input type="text" id="nota" name="nota">
+                </label>
+            </div>
+
+
+            <h5 style="color:var(--secondary);margin-top:2rem;">Produse/Servicii</h5>
+
+            <div id="billables">
+                <!-- Mithril Magic -->
+            </div>
+
+            <button style="margin-top:6rem;" type="submit">GENEREAZA FACTURA</button>
+
+        </article>
+
+    </form>
+
+</main>
