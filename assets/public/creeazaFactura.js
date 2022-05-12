@@ -643,20 +643,43 @@ const clientElemIds = ['adresaClient', 'bancaClient',
     'nrRegComClient', 'telefonClient']
 
 
+const furnizorElemIds = ['numeFurnizor', 'nrRegComFurnizor',
+    'cifFurnizor', 'adresaFurnizor', 'telefonFurnizor',
+    'emailFurnizor', 'bancaFurnizor', 'ibanFurnizor', 'serie', 'numar']
+
+
 class ClientForm {
 
     constructor() {
         this.clienti = []
     }
 
-    // oninit(v) {
-    //     m.request({
-    //         method: "GET",
-    //         url: "/clienti"
-    //     }).then(res => {
-    //         this.clienti = res
-    //     })
-    // }
+    oninit(v) {
+
+        m.request({
+            method: "GET",
+            url: "/clienti"
+        }).then(res => {
+            console.log("CLIENTI:", res)
+            this.clienti = res
+        });
+
+        m.request({
+            method: "GET",
+            url: "/furnizor"
+        }).then(furnizorObj => {
+
+            for (let key in furnizorObj) {
+                let elementId = key;
+                if (key != "serie" || key != "numar") {
+                    elementId = key + "Furnizor";
+                }
+                let el = document.getElementById(elementId);
+                if (!el) continue;
+                el.value = furnizorObj[key];
+            }
+        })
+    }
 
     fillClientData(event) {
 

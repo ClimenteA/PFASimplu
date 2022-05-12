@@ -93,14 +93,33 @@ func handleClientsRequests(app fiber.App, store session.Store) {
 
 		currentUserPath := sess.Get("currentUser")
 		if currentUserPath == nil {
-			c.Redirect("/login")
+			return c.Redirect("/login")
 		}
 
-		data := types.DateIdentificare{
-			Nume: "alin",
+		user := getCurrentUser(fmt.Sprint(currentUserPath))
+
+		allClients := getCurrentClients(user.Stocare)
+
+		return c.JSON(allClients)
+	})
+
+	app.Get("/furnizor", func(c *fiber.Ctx) error {
+
+		sess, err := store.Get(c)
+		if err != nil {
+			panic(err)
 		}
 
-		return c.JSON(data)
+		currentUserPath := sess.Get("currentUser")
+		if currentUserPath == nil {
+			return c.Redirect("/login")
+		}
+
+		user := getCurrentUser(fmt.Sprint(currentUserPath))
+
+		furnizor := getFurnizor(user.Stocare)
+
+		return c.JSON(furnizor)
 	})
 
 	app.Post("/clienti", func(c *fiber.Ctx) error {
@@ -157,8 +176,6 @@ func handleClientsRequests(app fiber.App, store session.Store) {
 
 			} else {
 
-				currentFurnizor := getFurnizor(user.Stocare)
-
 				furnizor := types.DateIdentificare{
 					Serie:    di.Serie,
 					Numar:    di.Numar,
@@ -175,9 +192,7 @@ func handleClientsRequests(app fiber.App, store session.Store) {
 					IsClient: di.IsClient,
 				}
 
-				if currentFurnizor != furnizor {
-					updateFurnizor(furnizor, user.Stocare)
-				}
+				updateFurnizor(furnizor, user.Stocare)
 
 			}
 		}
