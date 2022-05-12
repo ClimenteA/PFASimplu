@@ -1,7 +1,3 @@
-<script defer src="/mithril.js"></script>
-<script defer src="/factura.js"></script>
-<script defer src="/facturapdf.js"></script>
-
 <main class="container">
 
     <hgroup class="container">
@@ -14,8 +10,7 @@
         </h2>
     </hgroup>
 
-    <form id="creeaza-factura">
-
+    <form id="factura-form">
 
         <article>
 
@@ -25,13 +20,13 @@
 
                 <label for="serie">
                     Serie
-                    <input style="text-transform:uppercase" type="text" id="serie" name="serie" value=""
+                    <input style="text-transform:uppercase" type="text" id="serie" name="serie" value="INV"
                         placeholder="INV0001" required>
                 </label>
 
                 <label for="numar">
                     Numar factura
-                    <input type="number" id="numar" min=0 name="numar" placeholder="123" value="" required>
+                    <input type="number" id="numar" min=0 name="numar" placeholder="123" value="1" required>
                 </label>
 
                 <div id="data_container">
@@ -53,7 +48,7 @@
                     <label for="nrRegComClient">
                         Nr.Reg.Com.
                         <input style="text-transform:uppercase" type="text" id="nrRegComClient" name="nrRegComClient"
-                            placeholder="J34/4838/2018">
+                            value="testclient" placeholder="J34/4838/2018">
                     </label>
 
                     <label for="cifClient">
@@ -77,7 +72,7 @@
                     <label for="emailClient">
                         Email
                         <input style="text-transform:lowercase" type="email" id="emailClient" name="emailClient"
-                            placeholder="alexv@gmail.com" required>
+                            value="testclient@gmail.com" placeholder="alexv@gmail.com" required>
                     </label>
 
 
@@ -102,49 +97,50 @@
                     <label for="numeFurnizor">
                         Nume
                         <input style="text-transform:uppercase" type="text" id="numeFurnizor" name="numeFurnizor"
-                            value="" placeholder="Alex Valentin PFA" required>
+                            value="testFurnizor" placeholder="Alex Valentin PFA" required>
                     </label>
 
                     <label for="nrRegComFurnizor">
                         Nr.Reg.Com.
-                        <input style="text-transform:uppercase" type="text" id="nrRegComFurnizor" value=""
+                        <input style="text-transform:uppercase" type="text" id="nrRegComFurnizor" value="testFurnizor"
                             name="nrRegComFurnizor" placeholder="F34/4838/2018" required>
                     </label>
 
                     <label for="cifFurnizor">
                         CIF
                         <input style="text-transform:uppercase" type="number" id="cifFurnizor" name="cifFurnizor"
-                            value="" placeholder="45611321" required>
+                            value="testFurnizor" placeholder="45611321" required>
                     </label>
 
                     <label for="adresaFurnizor">
                         Adresa
-                        <input style="text-transform:uppercase" type="text" maxlength="80" id="adresaFurnizor" value=""
-                            name="adresaFurnizor" placeholder="IASI, SOS.NATIONALA, NR.111, BL.A1, SC.A, AP.1" required>
+                        <input style="text-transform:uppercase" type="text" maxlength="80" id="adresaFurnizor"
+                            value="testFurnizor" name="adresaFurnizor"
+                            placeholder="IASI, SOS.NATIONALA, NR.111, BL.A1, SC.A, AP.1" required>
                     </label>
 
                     <label for="telefonFurnizor">
                         Telefon
-                        <input style="text-transform:uppercase" type="text" id="telefonFurnizor" value=""
+                        <input style="text-transform:uppercase" type="text" id="telefonFurnizor" value="testFurnizor"
                             name="telefonFurnizor" placeholder="0789878789" required>
                     </label>
 
                     <label for="emailFurnizor">
                         Email
                         <input style="text-transform:lowercase" type="email" id="emailFurnizor" name="emailFurnizor"
-                            value="" placeholder="alexv@gmail.com" required>
+                            value="testFurnizor@gmail.com" placeholder="alexv@gmail.com" required>
                     </label>
 
                     <label for="bancaFurnizor">
                         Banca
                         <input style="text-transform:uppercase" type="text" id="bancaFurnizor" name="bancaFurnizor"
-                            value="" placeholder="ING" required>
+                            value="testFurnizor" placeholder="ING" required>
                     </label>
 
                     <label for="ibanFurnizor">
                         IBAN
-                        <input style="text-transform:uppercase" type="text" maxlength="34" id="ibanFurnizor" value=""
-                            name="ibanFurnizor" placeholder="RO49AAAA1B31007593840000" required>
+                        <input style="text-transform:uppercase" type="text" maxlength="34" id="ibanFurnizor"
+                            value="testFurnizor" name="ibanFurnizor" placeholder="RO49AAAA1B31007593840000" required>
                     </label>
 
                 </div>
@@ -167,10 +163,35 @@
                 <!-- Mithril Magic -->
             </div>
 
-            <button style="margin-top:6rem;" type="submit">GENEREAZA FACTURA</button>
+            <button id="creeaza-factura" style="margin-top:6rem;" type="submit">GENEREAZA FACTURA</button>
 
         </article>
 
     </form>
 
 </main>
+
+
+<script src="/mithril.js"></script>
+<script src="/pdf-lib.min.js"></script>
+<script src="/download.js"></script>
+<script src="/creeazaFactura.js"></script>
+
+<script>
+
+
+    document.getElementById("factura-form").addEventListener(
+        "submit",
+        async event => {
+            event.preventDefault();
+
+            let formData = new FormData(event.target);
+            formData = Object.fromEntries(formData);
+
+            let pdfBytes = await creeaza_factura(formData);
+            let now = new Date();
+            download(pdfBytes, `Factura ${now.toISOString()}.pdf`, "application/pdf");
+        }
+    );
+
+</script>
