@@ -99,8 +99,6 @@ async function creeaza_factura(RawDateFactura) {
 
     let dateFactura = proceseazaRawData(RawDateFactura)
 
-    console.log(dateFactura)
-
     const url = 'http://localhost:3000/model_factura.pdf'
     const model_factura_bytes = await fetch(url).then(res => res.arrayBuffer())
 
@@ -466,7 +464,10 @@ async function creeaza_factura(RawDateFactura) {
 
     const pdfBytes = await pdfDoc.save()
 
-    return pdfBytes
+    return {
+        bytes: pdfBytes,
+        data: dateFactura
+    }
 
 }
 

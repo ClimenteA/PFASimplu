@@ -11,6 +11,7 @@ import (
 
 	"github.com/ClimenteA/pfasimplu-go/auth"
 	"github.com/ClimenteA/pfasimplu-go/cheltuieli"
+	"github.com/ClimenteA/pfasimplu-go/clienti"
 	"github.com/ClimenteA/pfasimplu-go/declaratieanaf"
 	"github.com/ClimenteA/pfasimplu-go/declaratii"
 	"github.com/ClimenteA/pfasimplu-go/download"
@@ -51,6 +52,7 @@ func main() {
 	download.HandleDownloadDateCont(*app, *store)
 	landing.HandleLandingPage(*app, *store)
 	factura.HandleInvoicePage(*app, *store)
+	clienti.HandleClientsRequests(*app, *store)
 
 	hostIp := utils.GetHostIp()
 
