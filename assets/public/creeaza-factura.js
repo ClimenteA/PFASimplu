@@ -643,18 +643,13 @@ const clientElemIds = ['adresaClient', 'bancaClient',
     'nrRegComClient', 'telefonClient']
 
 
-const furnizorElemIds = ['numeFurnizor', 'nrRegComFurnizor',
-    'cifFurnizor', 'adresaFurnizor', 'telefonFurnizor',
-    'emailFurnizor', 'bancaFurnizor', 'ibanFurnizor', 'serie', 'numar']
-
-
 class ClientForm {
 
     constructor() {
         this.clienti = []
     }
 
-    oninit(v) {
+    getClients() {
 
         m.request({
             method: "GET",
@@ -663,22 +658,47 @@ class ClientForm {
             console.log("CLIENTI:", res)
             this.clienti = res
         });
+    }
+
+    getFurnizor() {
 
         m.request({
             method: "GET",
             url: "/furnizor"
         }).then(furnizorObj => {
 
+            console.log("FURNIZOR: ", furnizorObj)
+
             for (let key in furnizorObj) {
                 let elementId = key;
-                if (key != "serie" || key != "numar") {
+
+                if (key == "serie") {
+                    elementId = key;
+                } else if (key == "numar") {
+                    elementId = key;
+                } else {
                     elementId = key + "Furnizor";
                 }
+
                 let el = document.getElementById(elementId);
                 if (!el) continue;
-                el.value = furnizorObj[key];
+
+                if (key == "numar") {
+                    el.value = parseInt(furnizorObj[key]) + 1;
+                } else {
+                    el.value = furnizorObj[key];
+                }
+
             }
-        })
+        });
+
+    }
+
+    oninit(v) {
+
+        this.getClients();
+        this.getFurnizor();
+
     }
 
     fillClientData(event) {
@@ -893,20 +913,24 @@ class BillablesApp {
 }
 
 
-m.mount(
-    document.getElementById("billables"),
-    BillablesApp
-);
+function mountComponents() {
 
-m.mount(
-    document.getElementById("data_container"),
-    DateComp
-);
+    m.mount(
+        document.getElementById("billables"),
+        BillablesApp
+    );
 
-
-m.mount(
-    document.getElementById("numeClientContainer"),
-    ClientForm
-);
+    m.mount(
+        document.getElementById("data_container"),
+        DateComp
+    );
 
 
+    m.mount(
+        document.getElementById("numeClientContainer"),
+        ClientForm
+    );
+
+
+
+}

@@ -20,13 +20,13 @@
 
                 <label for="serie">
                     Serie
-                    <input style="text-transform:uppercase" type="text" id="serie" name="serie" value="INV"
-                        placeholder="INV0001" required>
+                    <input style="text-transform:uppercase" type="text" id="serie" name="serie" placeholder="INV0001"
+                        required>
                 </label>
 
                 <label for="numar">
                     Numar factura
-                    <input type="number" id="numar" min=0 name="numar" placeholder="123" value="1" required>
+                    <input type="number" id="numar" min=0 name="numar" placeholder="123" required>
                 </label>
 
                 <div id="data_container">
@@ -175,9 +175,11 @@
 <script src="/mithril.js"></script>
 <script src="/pdf-lib.min.js"></script>
 <script src="/download.js"></script>
-<script src="/creeazaFactura.js"></script>
+<script src="/creeaza-factura.js"></script>
 
 <script>
+
+    mountComponents();
 
     document.getElementById("factura-form").addEventListener(
         "submit",
@@ -220,6 +222,9 @@
             }).then(function (result) {
                 console.log(result);
             });
+
+
+            mountComponents();
 
         }
     );
