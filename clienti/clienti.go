@@ -7,6 +7,8 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sort"
+	"time"
 
 	"github.com/ClimenteA/pfasimplu-go/auth"
 	"github.com/ClimenteA/pfasimplu-go/types"
@@ -51,7 +53,7 @@ func getCurrentClients(currentUserPath string) []types.DateIdentificare {
 }
 
 func updateClients(data []types.DateIdentificare, filePath string) {
-	file, _ := json.MarshalIndent(data, "", " ")
+	file, _ := json.Marshal(data)
 	err := ioutil.WriteFile(filepath.Join(filePath, "clienti.json"), file, 0644)
 	if err != nil {
 		panic(err)
@@ -170,6 +172,26 @@ func handleClientsRequests(app fiber.App, store session.Store) {
 
 				if newUser {
 					allClients = append(allClients, client)
+				}
+
+				sort.Slice(allClients, func(i, j int) bool {
+
+					ti, err := time.Parse(time.RFC3339, allClients[i].Data+"T00:00:00Z")
+					if err != nil {
+						log.Panic(err)
+					}
+
+					tj, err := time.Parse(time.RFC3339, allClients[j].Data+"T00:00:00Z")
+					if err != nil {
+						log.Panic(err)
+					}
+
+					return ti.After(tj)
+				})
+
+				// 4000 clients is ~1MB in clients.json size
+				if len(allClients) > 4000 {
+					allClients = allClients[:4000]
 				}
 
 				updateClients(allClients, user.Stocare)
