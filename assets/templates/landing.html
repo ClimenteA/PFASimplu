@@ -47,7 +47,7 @@
         <article>
 
             <hgroup class="container">
-                <h2>Simplu ca acest website</h2>
+                <h2>Simplu de folosit</h2>
                 <h3>
                     Poti accesa aplicatia de pe orice dispozitiv pentru a adauga incasari, cheltuieli si pentru a
                     vedea
@@ -86,6 +86,21 @@
                     real, neplatitor de TVA.
                 </h2>
             </hgroup>
+
+        </article>
+
+        <article>
+
+            <hgroup class="container" style="text-align:center;">
+                <h2>Tutorial</h2>
+                <h3>
+                    Ce poti face in aplicatie pas cu pas.
+                </h3>
+            </hgroup>
+
+            <div id="readme">
+
+            </div>
 
         </article>
 
@@ -182,9 +197,22 @@
 
 </body>
 
+
+<script src="/showdown.min.js"></script>
 <script>
 
     document.addEventListener('DOMContentLoaded', (event) => {
+
+        let converter = new showdown.Converter();
+        let md = '[**Showdown**](http://www.showdownjs.com) is *great*\n' +
+            'because:\n\n' +
+            ' - it\'s easy to use\n' +
+            ' - it\'s extensible\n' +
+            ' - works in the server and in the browser';
+        let html = converter.makeHtml(md);
+
+        document.getElementById("readme").innerHTML = html;
+
 
         const queryString = window.location.search;
         const urlParams = new URLSearchParams(queryString);
