@@ -1,6 +1,9 @@
 package landing
 
 import (
+	"io/ioutil"
+	"log"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/session"
 )
@@ -24,8 +27,16 @@ func handleLandingPage(app fiber.App, store session.Store) {
 			userLoggedIn = false
 		}
 
+		content, err := ioutil.ReadFile("./assets/public/README.md")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		readme := string(content)
+
 		return c.Render("landing", fiber.Map{
 			"UserLoggedIn": userLoggedIn,
+			"Readme":       readme,
 		})
 	})
 

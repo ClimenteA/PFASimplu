@@ -1,7 +1,3 @@
-# PFASimplu
-
-Aplicatie pentru simplificarea gestiunii contabilitatii facuta in partida simpla.
-
 ## Descriere 
 
 Aplicatia PFASimplu este utila pentru persoanele care isi tin contabilitatea in partida simpla.

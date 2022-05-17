@@ -46,58 +46,6 @@
 
         <article>
 
-            <hgroup class="container">
-                <h2>Simplu de folosit</h2>
-                <h3>
-                    Poti accesa aplicatia de pe orice dispozitiv pentru a adauga incasari, cheltuieli si pentru a
-                    vedea
-                    rapoartele.
-                </h3>
-            </hgroup>
-
-        </article>
-
-
-        <article>
-
-            <hgroup class="container">
-                <h2>Registre contabile la zi</h2>
-                <h3>
-                    Registrele contabile sunt completate automat din incasarile si cheltuielile introduse.
-                </h3>
-            </hgroup>
-
-            <ul>
-                <li>Registru Jurnal</li>
-                <li>Registru Inventar</li>
-                <li>Registru Fiscal</li>
-                <li>Fisa mijloc fix</li>
-            </ul>
-
-        </article>
-
-
-        <article>
-
-            <hgroup class="container">
-                <h1>Cine poate folosi aplicatia?</h1>
-                <h2>
-                    Aplicatia poate fi utila pentru oricine tine contabilitatea in partida simpla cu sistem de venit
-                    real, neplatitor de TVA.
-                </h2>
-            </hgroup>
-
-        </article>
-
-        <article>
-
-            <hgroup class="container" style="text-align:center;">
-                <h2>Tutorial</h2>
-                <h3>
-                    Ce poti face in aplicatie pas cu pas.
-                </h3>
-            </hgroup>
-
             <div id="readme">
 
             </div>
@@ -204,11 +152,8 @@
     document.addEventListener('DOMContentLoaded', (event) => {
 
         let converter = new showdown.Converter();
-        let md = '[**Showdown**](http://www.showdownjs.com) is *great*\n' +
-            'because:\n\n' +
-            ' - it\'s easy to use\n' +
-            ' - it\'s extensible\n' +
-            ' - works in the server and in the browser';
+        let md = '{{ .Readme }}';
+
         let html = converter.makeHtml(md);
 
         document.getElementById("readme").innerHTML = html;
