@@ -1,0 +1,5 @@
+make --dry-run --always-make --keep-going --print-directory
+make: Entering directory '/home/acmt/Documents/pfasimplu-go'
+nodemon --exec go run main.go --signal SIGTERM
+make: Leaving directory '/home/acmt/Documents/pfasimplu-go'
+ 

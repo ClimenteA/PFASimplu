@@ -113,11 +113,11 @@
         <h1 style="color: indianred">{{.TotalPlatiCatreStat}} RON
           <small style="color: var(--secondary);font-size:16px;display:block;">
             CAS: {{.PlatiCatreStat.CASPensie}}RON
-            <br/>
+            <br />
             CASS: {{.PlatiCatreStat.CASSSanatate}}RON
-            <br/>
+            <br />
             IMPOZIT: {{.PlatiCatreStat.ImpozitVenit}}RON
-            <br/>
+            <br />
             TOTAL: {{.PlatiCatreStat.Total}}RON
           </small>
         </h1>
@@ -160,7 +160,7 @@
               Tip Tranzactie
             </th>
             <th scope="col">
-              Download Fisier
+              Descarca Fisier
             </th>
             <th scope="col">
               Sterge Fisier
@@ -187,7 +187,7 @@
               {{.TipTranzactie}}
             </td>
             <td>
-              <a href="/download-fisier?path={{.CaleFactura}}">Download</a>
+              <a href="/download-fisier?path={{.CaleFactura}}">Descarca</a>
             </td>
             <td>
               <a style="color:var(--del-color);" href="/sterge-fisier?path={{.CaleFactura}}">Sterge</a>
@@ -199,7 +199,7 @@
     </article>
 
     <div id="tabel-incasari-download" class="download">
-      <a href="/download-fisier?path={{.CaleIncasariCSV}}">Download CSV</a>
+      <a href="/download-fisier?path={{.CaleIncasariCSV}}">Descarca CSV</a>
     </div>
 
 
@@ -228,7 +228,7 @@
               Mijloc Fix
             </th>
             <th scope="col">
-              Download Fisier
+              Descarca Fisier
             </th>
             <th scope="col">
               Sterge Fisier
@@ -314,7 +314,7 @@
               {{end}}
             </td>
             <td>
-              <a href="/download-fisier?path={{.CaleCheltuiala}}">Download</a>
+              <a href="/download-fisier?path={{.CaleCheltuiala}}">Descarca</a>
             </td>
             <td>
               <a style="color:var(--del-color);" href="/sterge-fisier?path={{.CaleCheltuiala}}">Sterge</a>
@@ -374,7 +374,7 @@
     </article>
 
     <div id="tabel-cheltuieli-download" class="download">
-      <a href="/download-fisier?path={{.CaleCheltuieliCSV}}">Download CSV</a>
+      <a href="/download-fisier?path={{.CaleCheltuieliCSV}}">Descarca CSV</a>
     </div>
 
 
@@ -391,7 +391,7 @@
               Tip Document
             </th>
             <th scope="col">
-              Download Fisier
+              Descarca Fisier
             </th>
             <th scope="col">
               Sterge Fisier
@@ -409,7 +409,7 @@
               {{.TipDocument}}
             </td>
             <td>
-              <a href="/download-fisier?path={{.CaleDocument}}">Download</a>
+              <a href="/download-fisier?path={{.CaleDocument}}">Descarca</a>
             </td>
             <td>
               <a style="color:var(--del-color);" href="/sterge-fisier?path={{.CaleDocument}}">Sterge</a>
@@ -467,7 +467,7 @@
               {{.Data}}
             </td>
             <td>
-              <a href="/download-fisier?path={{.DocumentFelNr}}">Download document justificativ</a>
+              <a href="/download-fisier?path={{.DocumentFelNr}}">Descarca document justificativ</a>
             </td>
             <td>
               {{.FelulOperatiuniiExplicatii}}
@@ -493,7 +493,7 @@
     </article>
 
     <div class="download">
-      <a href="/download-fisier?path={{.CaleRegistruJurnalCSV}}">Download CSV</a>
+      <a href="/download-fisier?path={{.CaleRegistruJurnalCSV}}">Descarca CSV</a>
     </div>
 
 
@@ -536,7 +536,7 @@
     </article>
 
     <div class="download">
-      <a href="/download-fisier?path={{.CaleRegistruInventarCSV}}">Download CSV</a>
+      <a href="/download-fisier?path={{.CaleRegistruInventarCSV}}">Descarca CSV</a>
     </div>
 
 
@@ -584,7 +584,7 @@
     </article>
 
     <div class="download">
-      <a href="/download-fisier?path={{.CaleRegistruFiscalCSV}}">Download CSV</a>
+      <a href="/download-fisier?path={{.CaleRegistruFiscalCSV}}">Descarca CSV</a>
     </div>
 
   </div>
@@ -600,13 +600,37 @@
 
   window.addEventListener("DOMContentLoaded", (event) => {
 
-  const MONTHS = ['Ianuarie', 'Februarie', 'Martie', 'Aprilie', 'Mai', 'Iunie', 'Iulie', 'August', 'Septembrie', 'Octombrie', 'Noiembrie', 'Decembrie'];
-  let incasari = [{{ range .IncasariPeLuni }} {{.}}, {{ end }}];
+
+
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const anul = urlParams.get("anul");
+
+    let selectedYear = document.getElementById("selected-year")
+
+    if (anul) {
+      document.getElementById(anul).setAttribute("selected", "")
+    }
+
+    selectedYear.addEventListener("click", event => {
+      let url = String(document.location).split("?")[0] + selectedYear.value;
+      const link = document.createElement('a');
+      link.href = url;
+      link.click();
+    }, false)
+
+
+
+
+    const MONTHS = ['Ianuarie', 'Februarie', 'Martie', 'Aprilie', 'Mai', 'Iunie', 'Iulie', 'August', 'Septembrie', 'Octombrie', 'Noiembrie', 'Decembrie'];
+    let incasari = [{{ range .IncasariPeLuni }} {{.}}, {{ end }}];
   let cheltuieli = [{{ range .CheltuieliPeLuni }} {{.}}, {{ end }}];
 
   let barIncasari = {
     x: MONTHS,
     y: incasari,
+    text: incasari.map(it => parseFloat(it).toFixed(2)),
+    textposition: 'auto',
     name: 'Incasari',
     type: 'bar'
   };
@@ -614,12 +638,27 @@
   let barCheltuieli = {
     x: MONTHS,
     y: cheltuieli,
+    text: cheltuieli.map(it => parseFloat(it).toFixed(2)),
+    textposition: 'auto',
     name: 'Cheltuieli',
     type: 'bar'
   };
 
+  let firstYear = {{.AniInregistrati }}[0];
+
+  let anGrafic = anul || firstYear;
+
+  if (anGrafic == undefined) {
+    anGrafic = "curent";
+  }
+
+  console.log(anGrafic, firstYear)
+
   let data = [barIncasari, barCheltuieli];
-  let layout = { barmode: 'group' };
+  let layout = {
+    title: `Calcul lunar incasari/cheltuieli pentru anul ${anGrafic}`,
+    barmode: 'group'
+  };
 
   Plotly.newPlot('incasarivscheltuieli', data, layout);
 
@@ -656,22 +695,10 @@
   }, false)
 
 
-  const queryString = window.location.search;
-  const urlParams = new URLSearchParams(queryString);
-  const anul = urlParams.get("anul");
 
-  let selectedYear = document.getElementById("selected-year")
 
-  if (anul) {
-    document.getElementById(anul).setAttribute("selected", "")
-  }
 
-  selectedYear.addEventListener("click", event => {
-    let url = String(document.location).split("?")[0] + selectedYear.value;
-    const link = document.createElement('a');
-    link.href = url;
-    link.click();
-  }, false)
+
 
   });
 
