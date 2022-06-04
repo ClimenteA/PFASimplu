@@ -20,7 +20,7 @@ build:
 	cp -r INSTRUCTIUNI-WINDOWS.txt dist/PFASimplu/Instructiuni/INSTRUCTIUNI-WIN.txt
 	cp -r INSTRUCTIUNI-LINUX.txt dist/PFASimplu/Instructiuni/INSTRUCTIUNI-NIX.txt
 	cp -r INSTRUCTIUNI-MAC.txt dist/PFASimplu/Instructiuni/INSTRUCTIUNI-MAC.txt
-	zip -r dist/PFASimplu-Windows-64bit.zip dist/PFASimplu-Windows-64bit
-	zip -r dist/PFASimplu-Linux-64bit.zip dist/PFASimplu-Linux-64bit
-	zip -r dist/PFASimplu-MacOS-64bit.zip dist/PFASimplu-MacOS-64bit
+	zip -r dist/PFASimplu-Windows-64bit.zip dist/PFASimplu-Windows-64bit/ 
+	zip -r dist/PFASimplu-Linux-64bit.zip dist/PFASimplu-Linux-64bit/ 
+	zip -r dist/PFASimplu-MacOS-64bit.zip dist/PFASimplu-MacOS-64bit/ 
 	

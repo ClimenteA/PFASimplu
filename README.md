@@ -10,7 +10,12 @@ Aplicatia este de tip website asa ca poate fi accesata chiar si de pe un telefon
 
 
 ## Cine poate folosi aplicatia?
-Aplicatia poate fi utila pentru oricine tine contabilitatea in partida simpla cu sistem de venit real, neplatitor de TVA.
+Aplicatia poate fi utila pentru oricine:
+- tine contabilitatea in partida simpla;
+- cu sistem de venit real;
+- este neplatitor de TVA;
+- nu are angajati; 
+
 
 
 ## Facilitati 

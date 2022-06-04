@@ -6,7 +6,12 @@ Aplicatia este de tip website asa ca poate fi accesata chiar si de pe un telefon
 
 
 ## Cine poate folosi aplicatia?
-Aplicatia poate fi utila pentru oricine tine contabilitatea in partida simpla cu sistem de venit real, neplatitor de TVA.
+Aplicatia poate fi utila pentru oricine:
+- tine contabilitatea in partida simpla;
+- cu sistem de venit real;
+- este neplatitor de TVA;
+- nu are angajati; 
+
 
 
 ## Facilitati 
@@ -67,7 +72,6 @@ Rapoarte suplimentare:
 - [Download PFASimplu-Windows-64bit](https://github.com/ClimenteA/PFASimplu/releases/tag/v.0.0.0);
 - [Download PFASimplu-MacOS-64bit](https://github.com/ClimenteA/PFASimplu/releases/tag/v.0.0.0);
 - [Download PFASimplu-Linux-64bit](https://github.com/ClimenteA/PFASimplu/releases/tag/v.0.0.0);
-
 
 2. Extrage-ti zip-ul pe un stick sau in pc/laptop;
 3. Deschide-ti fisierul `INSTRUCTIUNI.txt` si urmati pasii de acolo;
