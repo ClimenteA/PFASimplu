@@ -58,8 +58,9 @@ Rapoarte suplimentare:
 6. [Adauga sold intermediar](#adaugare-sold-intermediar)
 7. [Creeaza o factura](#creeaza-factura)
 8. [Registre contabile](#registre-contabile)
-9. [Observatii](#observatii)
-10. [Pe viitor](#pe-viitor)
+9. [Setari avansate](#setari-avansate)
+10. [Observatii](#observatii)
+11. [Pe viitor](#pe-viitor)
 
 
 
@@ -191,6 +192,27 @@ Daca esti platitor de TVA poti adauga inca o linie pentru produse/servicii (apas
 
 
 
+<a name="setari-avansate"></a>
+## Setari avansate
+
+Sunt niste date care stau la baza calculelor si care se pot schimba de la an la an.
+
+Aceste date sunt:
+- salariul minim brut (se schimba anual);
+- prag mijlox fix (se schimba foarte rar);
+- tabel amortizare mijloace fixe (se schimba foarte rar);
+
+O data pe an se recomanda un update al aplicatiei. Asta inseamna doar inlocuirea folderului `assets` si a executabilului `pfasimplu.exe` cu cele din zip-ul descarcat. 
+
+
+Poti modifica aceste date si fara a descarca noua versiune. Pentru a face asta trebuie doar sa adaugi valorile necesare in fisierele din folderul `assets/public`:
+
+- `salariul minim brut` si `prag mijlox fix` se pot schimba in fisierul `assets/public/pfaconfig.json`;
+- `tabel amortizare mijloace fixe` se pot schimba in fisierul `assets/public/lista_coduri_mijloace_fixe.json`;
+
+
+
+
 <a name="observatii"></a>
 ## Observatii
 
@@ -206,6 +228,9 @@ Testati aplicatia inainte si vedeti daca raspunde nevoilor dvs. inainte de o ada
 - posibilitate adaugare `pragCasCass` pentru cei care au norma de venit;
 - generare model completare Declaratie 212; 
 - adaugare TVA in calcul (avertizare depasire prag TVA);
+- declaratie pentru TVA;
+- modificare setari anuale (salariul minim pentru anul in curs, prag minim, tabel amortizare mijloc fix);
+- one-click update app; 
 - verificare aplicatie facuta de un specialist contabil;
 
 Daca programul iti este si tie folositor, **[nu ezita sa faci o donatie!](https://www.buymeacoffee.com/climentea)**. Donatiile ma vor ajuta sa mentin acest mic proiect "in viata". 
