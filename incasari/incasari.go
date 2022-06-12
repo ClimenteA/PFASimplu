@@ -152,7 +152,7 @@ func handleIncasari(app fiber.App, store session.Store) {
 
 			setInvoiceData(invoiceData, invoiceJsonPath)
 			c.SaveFile(fisier, caleFactura)
-			utils.SmallerImg(caleFactura)
+			go utils.SmallerImg(caleFactura)
 
 		}
 

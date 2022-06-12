@@ -62,8 +62,8 @@
                 </h3>
             </hgroup>
 
-            <video width="100%" height="100%" autoplay loop muted>
-                <source src="/vids/adaugaincasari.webm" type="video/webm" />
+            <video class="lozad" width="100%" height="100%" autoplay loop muted>
+                <source data-src="/vids/adaugaincasari.webm" type="video/webm" />
                 Your browser does not support the video tag.
             </video>
 
@@ -79,8 +79,8 @@
                 </h3>
             </hgroup>
 
-            <video width="100%" height="100%" autoplay loop muted>
-                <source src="/vids/adaugacheltuieli.webm" type="video/webm" />
+            <video class="lozad" width="100%" height="100%" autoplay loop muted>
+                <source data-src="/vids/adaugacheltuieli.webm" type="video/webm" />
                 Your browser does not support the video tag.
             </video>
 
@@ -96,8 +96,8 @@
                 </h3>
             </hgroup>
 
-            <video width="100%" height="100%" autoplay loop muted>
-                <source src="/vids/adaugadocumente.webm" type="video/webm" />
+            <video class="lozad" width="100%" height="100%" autoplay loop muted>
+                <source data-src="/vids/adaugadocumente.webm" type="video/webm" />
                 Your browser does not support the video tag.
             </video>
 
@@ -113,8 +113,8 @@
                 </h3>
             </hgroup>
 
-            <video width="100%" height="100%" autoplay loop muted>
-                <source src="/vids/registre.webm" type="video/webm" />
+            <video class="lozad" width="100%" height="100%" autoplay loop muted>
+                <source data-src="/vids/registre.webm" type="video/webm" />
                 Your browser does not support the video tag.
             </video>
 
@@ -146,10 +146,14 @@
 </body>
 
 
+<script src="/lozad.min.js"></script>
 <script src="/showdown.min.js"></script>
 <script>
 
     document.addEventListener('DOMContentLoaded', (event) => {
+
+        const observer = lozad();
+        observer.observe();
 
         let converter = new showdown.Converter();
         let md = '{{ .Readme }}';

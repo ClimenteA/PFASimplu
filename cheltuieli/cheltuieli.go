@@ -322,7 +322,7 @@ func handleCheltuieli(app fiber.App, store session.Store, coduriMijloaceFixe []s
 			expensePath := getExpensePath(dirName)
 			cale_cheltuiala := filepath.Join(expensePath, fisier.Filename)
 			c.SaveFile(fisier, cale_cheltuiala)
-			utils.SmallerImg(cale_cheltuiala)
+			go utils.SmallerImg(cale_cheltuiala)
 
 			expenseData := getExpenseData(c, user, form, fisier.Filename, cale_cheltuiala, coduriMijloaceFixe)
 			expenseJsonPath := getExpenseJsonPath(dirName)
