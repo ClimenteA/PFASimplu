@@ -17,6 +17,7 @@ build:
 	cp dist/PFASimplu-Linux-64bit/pfasimplu dist/PFASimplu/pfasimplu-nix
 	cp dist/PFASimplu-MacOS-64bit/pfasimplu dist/PFASimplu/pfasimplu-mac
 	cp -r assets dist/PFASimplu/
+	cp -r stocare dist/PFASimplu/
 	cp -r INSTRUCTIUNI-WINDOWS.txt dist/PFASimplu/Instructiuni/INSTRUCTIUNI-WIN.txt
 	cp -r INSTRUCTIUNI-LINUX.txt dist/PFASimplu/Instructiuni/INSTRUCTIUNI-NIX.txt
 	cp -r INSTRUCTIUNI-MAC.txt dist/PFASimplu/Instructiuni/INSTRUCTIUNI-MAC.txt
