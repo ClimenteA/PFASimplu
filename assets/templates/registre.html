@@ -467,7 +467,11 @@
               {{.Data}}
             </td>
             <td>
-              <a href="/download-fisier?path={{.DocumentFelNr}}">Descarca document justificativ</a>
+              {{if .Total }}
+                {{.DocumentFelNr}}
+              {{ else }}
+                <a href="/download-fisier?path={{.DocumentFelNr}}">Descarca document justificativ</a>
+              {{ end }}
             </td>
             <td>
               {{.FelulOperatiuniiExplicatii}}

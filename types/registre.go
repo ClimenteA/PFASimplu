@@ -23,4 +23,5 @@ type RegistruJurnal struct {
 	IncasariBanca              float64 `json:"incasari_banca"`
 	PlatiNumerar               float64 `json:"plati_numerar"`
 	PlatiBanca                 float64 `json:"PlatiBanca"`
+	Total                      bool    `json:"total,omitempty"`
 }

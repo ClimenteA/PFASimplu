@@ -4,6 +4,7 @@ import (
 	"log"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/ClimenteA/pfasimplu-go/types"
@@ -12,10 +13,26 @@ import (
 func processIncasari(sliceJurnal []types.RegistruJurnal, incasari []types.Factura) []types.RegistruJurnal {
 
 	for _, incasare := range incasari {
-		registruJurnal := types.RegistruJurnal{
-			Data:                       incasare.Data,
-			DocumentFelNr:              incasare.CaleFactura,
-			FelulOperatiuniiExplicatii: "Incasare " + incasare.Serie + strconv.Itoa(incasare.Numar),
+
+		registruJurnal := types.RegistruJurnal{}
+
+		if strings.HasPrefix(incasare.CaleFactura, "Total luna") {
+
+			registruJurnal = types.RegistruJurnal{
+				Total:                      true,
+				Data:                       incasare.Data,
+				DocumentFelNr:              incasare.CaleFactura,
+				FelulOperatiuniiExplicatii: incasare.Serie,
+			}
+
+		} else {
+
+			registruJurnal = types.RegistruJurnal{
+				Data:                       incasare.Data,
+				DocumentFelNr:              incasare.CaleFactura,
+				FelulOperatiuniiExplicatii: "Incasare " + incasare.Serie + strconv.Itoa(incasare.Numar),
+			}
+
 		}
 
 		if incasare.TipTranzactie == "NUMERAR" {
@@ -34,10 +51,26 @@ func processIncasari(sliceJurnal []types.RegistruJurnal, incasari []types.Factur
 func processCheltuieli(sliceJurnal []types.RegistruJurnal, cheltuieli []types.Cheltuiala) []types.RegistruJurnal {
 
 	for _, cheltuiala := range cheltuieli {
-		registruJurnal := types.RegistruJurnal{
-			Data:                       cheltuiala.Data,
-			DocumentFelNr:              cheltuiala.CaleCheltuiala,
-			FelulOperatiuniiExplicatii: "Cheltuiala " + cheltuiala.NumeCheltuiala,
+
+		registruJurnal := types.RegistruJurnal{}
+
+		if strings.HasPrefix(cheltuiala.CaleCheltuiala, "Total luna") {
+
+			registruJurnal = types.RegistruJurnal{
+				Total:                      true,
+				Data:                       cheltuiala.Data,
+				DocumentFelNr:              cheltuiala.CaleCheltuiala,
+				FelulOperatiuniiExplicatii: cheltuiala.NumeCheltuiala,
+			}
+
+		} else {
+
+			registruJurnal = types.RegistruJurnal{
+				Data:                       cheltuiala.Data,
+				DocumentFelNr:              cheltuiala.CaleCheltuiala,
+				FelulOperatiuniiExplicatii: "Cheltuiala " + cheltuiala.NumeCheltuiala,
+			}
+
 		}
 
 		if cheltuiala.TipTranzactie == "NUMERAR" {
@@ -81,7 +114,20 @@ func sortByDate(sliceJurnal []types.RegistruJurnal) []types.RegistruJurnal {
 		}
 
 		return ti.Before(tj)
+
 	})
+
+	// sort.Slice(sliceJurnal, func(i, j int) bool {
+
+	// 	ti := strings.HasPrefix(sliceJurnal[i].DocumentFelNr, "Total luna")
+	// 	tj := strings.HasPrefix(sliceJurnal[j].DocumentFelNr, "Total luna")
+
+	// 	if !ti && tj {
+	// 		return true
+	// 	} else {
+	// 		return false
+	// 	}
+	// })
 
 	return sliceJurnal
 

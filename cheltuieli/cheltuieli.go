@@ -97,7 +97,7 @@ func calcDesfasurareAmortizare(
 
 	for d := startDate; !d.After(endDate); d = d.AddDate(0, 1, 0) {
 
-		data := d.AddDate(0, 0, -d.Day())
+		data := time.Date(d.Year(), d.Month()+1, 0, 0, 0, 0, 0, d.Location())
 
 		amf := types.AmortizareMijlocFix{
 			NumeCheltuiala: "Amortizare lunara " + expenseData.NumeCheltuiala,
