@@ -113,21 +113,20 @@ func sortByDate(sliceJurnal []types.RegistruJurnal) []types.RegistruJurnal {
 			log.Panic(err)
 		}
 
-		return ti.Before(tj)
+		// Make sure total is always at the end of month
+		sameDate := ti.Equal(tj)
+		stocarei := strings.HasPrefix(sliceJurnal[i].DocumentFelNr, "stocare")
+		totalj := strings.HasPrefix(sliceJurnal[j].DocumentFelNr, "Total luna")
+
+		if sameDate && !stocarei && !totalj {
+			return false
+		} else if sameDate && stocarei && totalj {
+			return true
+		} else {
+			return ti.Before(tj)
+		}
 
 	})
-
-	// sort.Slice(sliceJurnal, func(i, j int) bool {
-
-	// 	ti := strings.HasPrefix(sliceJurnal[i].DocumentFelNr, "Total luna")
-	// 	tj := strings.HasPrefix(sliceJurnal[j].DocumentFelNr, "Total luna")
-
-	// 	if !ti && tj {
-	// 		return true
-	// 	} else {
-	// 		return false
-	// 	}
-	// })
 
 	return sliceJurnal
 
