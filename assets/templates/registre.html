@@ -468,13 +468,21 @@
             </td>
             <td>
               {{if .Total }}
+              <i>
                 {{.DocumentFelNr}}
+              </i>
               {{ else }}
-                <a href="/download-fisier?path={{.DocumentFelNr}}">Descarca document justificativ</a>
+              <a href="/download-fisier?path={{.DocumentFelNr}}">Descarca document justificativ</a>
               {{ end }}
             </td>
             <td>
+              {{if .Total }}
+              <i>
+                {{.FelulOperatiuniiExplicatii}}
+              </i>
+              {{ else }}
               {{.FelulOperatiuniiExplicatii}}
+              {{ end }}
             </td>
             <td>
               {{.IncasariNumerar}}
@@ -624,10 +632,8 @@
     }, false)
 
 
-
-
-    const MONTHS = ['Ianuarie', 'Februarie', 'Martie', 'Aprilie', 'Mai', 'Iunie', 'Iulie', 'August', 'Septembrie', 'Octombrie', 'Noiembrie', 'Decembrie'];
-    let incasari = [{{ range .IncasariPeLuni }} {{.}}, {{ end }}];
+  const MONTHS = ['Ianuarie', 'Februarie', 'Martie', 'Aprilie', 'Mai', 'Iunie', 'Iulie', 'August', 'Septembrie', 'Octombrie', 'Noiembrie', 'Decembrie'];
+  let incasari = [{{ range .IncasariPeLuni }} {{.}}, {{ end }}];
   let cheltuieli = [{{ range .CheltuieliPeLuni }} {{.}}, {{ end }}];
 
   let barIncasari = {
@@ -699,12 +705,7 @@
   }, false)
 
 
-
-
-
-
-
-  });
+});
 
 
 
