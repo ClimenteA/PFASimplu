@@ -26,7 +26,6 @@ func AddIncasariPeLuni(incasari []types.Factura, anul string) []string {
 			cdate, _ := time.Parse(time.RFC3339, data.Data+"T00:00:00Z")
 
 			if d.Month() == cdate.Month() {
-				fmt.Println(d)
 
 				totalMonth += data.SumaIncasata
 			}

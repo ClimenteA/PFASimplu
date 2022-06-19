@@ -118,7 +118,6 @@ func appendTotalLunarIncasari(incasari []types.Factura, incasariPeLuni []string,
 		}
 
 		lastDateOfMonth := endOfThisMonth.Format(time.RFC3339)[0:10]
-		fmt.Println("incasari", month, lastDateOfMonth)
 
 		val := types.Factura{
 			Data:        lastDateOfMonth,
@@ -154,8 +153,6 @@ func appendTotalLunarCheltuieli(cheltuieli []types.Cheltuiala, cheltuieliPeLuni 
 		}
 
 		lastDateOfMonth := endOfThisMonth.Format(time.RFC3339)[0:10]
-
-		fmt.Println("cheltuieli", month, lastDateOfMonth)
 
 		val := types.Cheltuiala{
 			Data:           lastDateOfMonth,

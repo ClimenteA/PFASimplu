@@ -138,8 +138,6 @@ func handleRegistre(app fiber.App, store session.Store) {
 		user := getCurrentUser(fmt.Sprint(currentUserPath))
 		aniInregistrati := utils.GetAniInregistrati(user)
 
-		log.Println("Filtreaza datale pentru anul: ", filterYear, aniInregistrati)
-
 		declaratii := AdunaDeclaratii(user, filterYear)
 		incasari := inputs.AdunaIncasari(user, filterYear)
 		cheltuieli := outputs.AdunaCheltuieli(user, filterYear)
@@ -179,8 +177,11 @@ func handleRegistre(app fiber.App, store session.Store) {
 		incasariCSVPath := tabelcsv.CreeazaIncasariCSV(user.Stocare, filterYear, incasari)
 		cheltuieliCSVPath := tabelcsv.CreeazaCheltuieliCSV(user.Stocare, filterYear, cheltuieli)
 		registruJurnalCSVPath := tabelcsv.CreeazaRegistruJurnalCSV(user.Stocare, filterYear, registruJurnal)
-		registruInventarCSVPath := tabelcsv.CreeazaRegistruInventarCSV(user.Stocare, filterYear, registruInventar)
 		registruFiscalCSVPath := tabelcsv.CreeazaRegistruFiscalCSV(user.Stocare, filterYear, registruFiscal)
+
+		tabelcsv.CreeazaRegistruInventarCSV(user.Stocare, filterYear+"_", registruInventar)
+		registruInventar = tabelcsv.FullRegistruInventar(user.Stocare, filterYear)
+		registruInventarCSVPath := tabelcsv.CreeazaRegistruInventarCSV(filepath.Join(user.Stocare, "inventar"), "", registruInventar)
 
 		platiCatreStatRounted := map[string]string{
 			"CASPensie":    fmt.Sprintf("%.2f", platiCatreStat.CASPensie),

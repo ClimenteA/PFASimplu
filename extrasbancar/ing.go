@@ -20,13 +20,13 @@ type ExtrasBancarING struct {
 	SoldIntermediar  float64 `json:"sold_intermediar"`
 }
 
-// 0 RO04INGB0000999911194833
-// 1 20211122
+// 0 RO04INGG0000885511194822
+// 1 20215522
 // 2 -5,00
 // 3 RON
 // 4 Comision pe operatiune
 // 5 ING Bank Romania
-// 10 29124,73
+// 10 291333334,73
 
 func parseExtrasBancar(data [][]string) []ExtrasBancarING {
 
