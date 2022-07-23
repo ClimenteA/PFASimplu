@@ -1,6 +1,7 @@
 package registre
 
 import (
+	"log"
 	"strconv"
 
 	"github.com/ClimenteA/pfasimplu-go/declaratii"
@@ -45,54 +46,77 @@ type PlatiStat struct {
 	Total        float64 `json:"total"`
 }
 
-func CalculeazaPlatiCatreStat(totalIncasariNet float64, anul string) PlatiStat {
-
-	// https://startco.ro/blog/taxe-pfa/
-
-	// Impozit anual pe venit
-	// 10% din venitul net
-
-	// Contributia de asigurari sociale (CAS) Pensie
-	// Nu se plateste daca venitul net este mai mic sau egal cu 12 salarii minime brute (2300 RON in 2021)
-	// 25% din salariulMinim * 12
-
-	// Contributia de asigurari sociale de sanatate (CASS) - Sanatate
-	// Nu se plateste daca venitul net este mai mic sau egal cu 12 salarii minime brute (2300 RON in 2021)
-	// 10% din salariulMinim * 12
+func CalculeazaPlatiCatreStat(venitNet float64, anul string) PlatiStat {
+	// - Calcul Venit Net: `venitNet = totalIncasari - totalCheltuieli`;
+	// - Calcul Impozit pe Venit: `impozitPeVenit = 10% din venitNet`;
+	// - Calcul CAS (Pensie):
+	// 	* `bazaDeCalculCAS = salariuMinimBrut x 12` - daca `venitNet` mai mare de 12 salarii minime brute pana in anul 2022 inclusiv;
+	// 	* `bazaDeCalculCAS = salariuMinimBrut x 12` - daca `venitNet` intre 12 si 24 salarii minime brute din anul 2023+;
+	// 	* `bazaDeCalculCAS = salariuMinimBrut x 24` - daca `venitNet` mai mare de 24 salarii minime brute din anul 2023+;
+	// 	* `CAS = 25% din bazaDeCalculCAS`;
+	// - Calcul CASS (Sanatate):
+	// 	* `bazaDeCalculCASS = salariuMinimBrut x 12` - daca `venitNet` mai mare de 12 salarii minime brute pana in anul 2022 inclusiv;
+	// 	* `bazaDeCalculCASS = salariuMinimBrut x 6` - daca `venitNet` mai mare de 6 salarii minime brute din anul 2023+;
+	// 	* `bazaDeCalculCAS = salariuMinimBrut x 12` - daca `venitNet` intre 12 si 24 salarii minime brute din anul 2023+;
+	// 	* `bazaDeCalculCAS = salariuMinimBrut x 24` - daca `venitNet` mai mare de 24 salarii minime brute din anul 2023+;
+	// 	* `CASS = 10% din bazaDeCalculCASS`;
 
 	anualVars := staticdata.LoadPFAConfig()
 
-	salariulMinim := 0.0
+	salariuMinimBrut := 0.0
 	for idx, data := range anualVars.SalariiMinime {
 		strAn := strconv.Itoa(data.An)
 		if strAn == anul {
-			salariulMinim = float64(anualVars.SalariiMinime[idx].Valoare)
+			salariuMinimBrut = float64(anualVars.SalariiMinime[idx].Valoare)
 			break
 		}
 	}
 
-	pragulMinim := salariulMinim * 12
+	CAS := 0.0
+	CASS := 0.0
+	impozitPeVenit := 0.0
+	total := 0.0
 
-	pensie := 0.0
-	sanatate := 0.0
-	if totalIncasariNet > pragulMinim {
-		pensie = 25 * pragulMinim / 100
-		sanatate = 10 * pragulMinim / 100
+	impozitPeVenit = 10 * venitNet / 100
+
+	anulCurrent, err := strconv.Atoi(anul)
+	if err != nil {
+		log.Panicln(err)
 	}
 
-	totalIncasariNet = totalIncasariNet - pensie
+	plafon6 := salariuMinimBrut * 6
+	plafon12 := salariuMinimBrut * 12
+	plafon24 := salariuMinimBrut * 24
 
-	impozitPeVenit := 10 * totalIncasariNet / 100
+	if anulCurrent <= 2022 {
 
-	total := pensie + sanatate + impozitPeVenit
+		if venitNet > plafon12 {
+			CAS = 25 * plafon12 / 100
+			CASS = 10 * plafon12 / 100
+		}
 
-	if total < 0 {
-		total = 0.0
+	} else {
+
+		if venitNet > plafon6 {
+			CASS = 10 * plafon6 / 100
+		}
+
+		if venitNet > plafon12 || venitNet <= plafon24 {
+			CAS = 25 * plafon12 / 100
+			CASS = 10 * plafon12 / 100
+		}
+
+		if venitNet > plafon24 {
+			CAS = 25 * plafon24 / 100
+			CASS = 10 * plafon24 / 100
+		}
 	}
+
+	total = CAS + CASS + impozitPeVenit
 
 	data := PlatiStat{
-		CASPensie:    pensie,
-		CASSSanatate: sanatate,
+		CASPensie:    CAS,
+		CASSSanatate: CASS,
 		ImpozitVenit: impozitPeVenit,
 		Total:        total,
 	}

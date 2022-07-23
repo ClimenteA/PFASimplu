@@ -49,6 +49,13 @@ func getCurrentUser(currentUserPath string) auth.Account {
 	return data
 }
 
+
+
+
+
+
+
+
 func handleRegistre(app fiber.App, store session.Store) {
 
 	app.Get("/download-fisier", func(c *fiber.Ctx) error {

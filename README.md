@@ -31,12 +31,20 @@ Aplicatia poate fi utila pentru oricine:
 - Generare factura in format PDF;
 
 Calcul automat impozite pentru declaratia unica (CAS/CASS/Impozit):
-- Prag CAS/CASS PFA/II/s.a pentru sistem real: `pragCasCass = salariul_minim_pe_anul_in_curs * 12`;
-- Prag CAS/CASS PFA/II/s.a pentru sistem norma de venit: cauta pe google: `Normele anuale de venit pe anul 20XX` - `pragCasCass` va fi cel pentru CAEN-ul/localitatea ta;
-- Venit net: `venitNet = Total incasari - Total cheltuieli`;
-- Calcul CAS (Pensie): 25% din `venitNet` daca `venitNet` > (mai mare ca) `pragCasCass`;
-- Calcul CASS (Sanatate): 10% din `venitNet` daca `venitNet` > (mai mare ca) `pragCasCass`;
-- Impozit pe venit : 10% din (incasari - cheltuieli - CAS) - impozitul pe venit nu este deductibil.
+- Calcul Venit Net: `venitNet = totalIncasari - totalCheltuieli`;
+- Calcul Impozit pe Venit: `impozitPeVenit = 10% din venitNet`;
+- Calcul CAS (Pensie): 
+    * `bazaDeCalculCAS = salariuMinimBrut x 12` - daca `venitNet` mai mare de 12 salarii minime brute pana in anul 2022 inclusiv;
+    * `bazaDeCalculCAS = salariuMinimBrut x 12` - daca `venitNet` intre 12 si 24 salarii minime brute din anul 2023+;
+    * `bazaDeCalculCAS = salariuMinimBrut x 24` - daca `venitNet` mai mare de 24 salarii minime brute din anul 2023+;
+    * `CAS = 25% din bazaDeCalculCAS`;
+- Calcul CASS (Sanatate):
+    * `bazaDeCalculCASS = salariuMinimBrut x 12` - daca `venitNet` mai mare de 12 salarii minime brute pana in anul 2022 inclusiv;
+    * `bazaDeCalculCASS = salariuMinimBrut x 6` - daca `venitNet` mai mare de 6 salarii minime brute din anul 2023+;
+    * `bazaDeCalculCAS = salariuMinimBrut x 12` - daca `venitNet` intre 12 si 24 salarii minime brute din anul 2023+;
+    * `bazaDeCalculCAS = salariuMinimBrut x 24` - daca `venitNet` mai mare de 24 salarii minime brute din anul 2023+;
+    * `CASS = 10% din bazaDeCalculCASS`;
+
 
 Extra calcule:
 - Total Profit Anual : daca ai adaugat soldul intermediar (suma cu care ai ramas pe card la sfarsit de an), se scade ce a mai ramas de plata catre stat si rezulta profitul anual;
@@ -229,7 +237,7 @@ Testati aplicatia inainte si vedeti daca raspunde nevoilor dvs. inainte de o ada
 <a name="pe-viitor"></a>
 ## Pe viitor
 
-- posibilitate adaugare `pragCasCass` pentru cei care au norma de venit;
+- posibilitate adaugare `bazaDeCalcul` pentru cei care au norma de venit;
 - generare model completare Declaratie 212; 
 - adaugare TVA in calcul (avertizare depasire prag TVA);
 - declaratie pentru TVA;
