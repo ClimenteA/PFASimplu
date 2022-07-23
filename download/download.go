@@ -51,7 +51,13 @@ func downloadDateCont(app fiber.App, store session.Store) {
 			return c.Redirect("/login")
 		}
 
-		return c.Render("downloadcont", fiber.Map{}, "base")
+		user := getCurrentUser(fmt.Sprint(currentUserPath))
+		aniInregistrati := utils.GetAniInregistrati(user)
+
+		return c.Render("downloadcont", fiber.Map{
+			"AniInregistrati": aniInregistrati,
+		}, "base")
+
 	})
 
 	app.Post("/download-date-cont", func(c *fiber.Ctx) error {

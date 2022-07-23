@@ -40,15 +40,14 @@ func getIncasariJsonPaths(user auth.Account) ([]string, error) {
 
 func getInvoiceMetadata(path string) types.Factura {
 
-	var data types.Factura
-
 	jsonFile, err := os.Open(path)
 	if err != nil {
 		log.Panicln(err)
 	}
 	defer jsonFile.Close()
-
 	byteValue, _ := ioutil.ReadAll(jsonFile)
+
+	var data types.Factura
 	json.Unmarshal(byteValue, &data)
 
 	return data

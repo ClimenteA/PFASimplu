@@ -64,7 +64,8 @@
         <label for="suma_cheltuita">
           Suma cheltuita (RON)
           <input type="number" step=any id="suma_cheltuita" name="suma_cheltuita" placeholder="123" required>
-          <small id="suma_cheltuita_helper" style="display:none;">Mijloc fix (suma depaseste {{ .PragMijlocFix }}RON)</small>
+          <small id="suma_cheltuita_helper" style="display:none;">Mijloc fix (suma depaseste {{ .PragMijlocFix
+            }}RON)</small>
         </label>
 
       </div>
@@ -254,7 +255,7 @@
             {{.NumeCheltuiala}}
           </td>
           <td>
-            {{.SumaCheltuita}}
+            {{ printf "%.2f" .SumaCheltuita}}
           </td>
           <td>
             {{.TipTranzactie}}
@@ -295,10 +296,10 @@
             {{.DetaliiMijlocFix.FelSerieNumarDataDocument}}
           </td>
           <td>
-            {{.DetaliiMijlocFix.ValoareInventar}}
+            {{ printf "%.2f" .DetaliiMijlocFix.ValoareInventar}}
           </td>
           <td>
-            {{.DetaliiMijlocFix.AmortizareLunara}}
+            {{ printf "%.2f" .DetaliiMijlocFix.AmortizareLunara}}
           </td>
           <td>
             {{.DetaliiMijlocFix.DenumireSiCaracteristici}}
@@ -325,7 +326,7 @@
             {{.DetaliiMijlocFix.DurataNormalaDeFunctionare}}
           </td>
           <td>
-            {{.DetaliiMijlocFix.CotaDeAmortizare}}
+            {{ printf "%.2f" .DetaliiMijlocFix.CotaDeAmortizare}}
           </td>
         </tr>
         {{end}}
@@ -3252,31 +3253,31 @@
 
       if (suma_cheltuita > {{ .PragMijlocFix }}) {
 
-        document.getElementById("mijlocfix").checked = true;
-        document.getElementById("data_punerii_in_functiune").setAttribute("required", "");
-        document.getElementById("amortizare_in_ani").setAttribute("required", "");
-        document.getElementById("tables").style.display = "block";
-        document.getElementById("suma_cheltuita_helper").style.display = "block";
-        document.getElementById("mijlocfix-fields").className = "block";
-        document.getElementById("mijlocfix-fieldset").style.display = "block";
-        document.getElementById("inventar-fieldset").style.display = "none";
-        document.getElementById("nume_cheltuiala").setAttribute("placeholder", "Laptop");
+      document.getElementById("mijlocfix").checked = true;
+      document.getElementById("data_punerii_in_functiune").setAttribute("required", "");
+      document.getElementById("amortizare_in_ani").setAttribute("required", "");
+      document.getElementById("tables").style.display = "block";
+      document.getElementById("suma_cheltuita_helper").style.display = "block";
+      document.getElementById("mijlocfix-fields").className = "block";
+      document.getElementById("mijlocfix-fieldset").style.display = "block";
+      document.getElementById("inventar-fieldset").style.display = "none";
+      document.getElementById("nume_cheltuiala").setAttribute("placeholder", "Laptop");
 
-      } else {
+    } else {
 
-        document.getElementById("mijlocfix").checked = false;
-        document.getElementById("data_punerii_in_functiune").removeAttribute("required");
-        document.getElementById("amortizare_in_ani").removeAttribute("required");
-        document.getElementById("tables").style.display = "none";
-        document.getElementById("suma_cheltuita_helper").style.display = "none";
-        document.getElementById("mijlocfix-fields").className = "none";
-        document.getElementById("mijlocfix-fieldset").style.display = "none";
-        document.getElementById("inventar-fieldset").style.display = "block";
-        document.getElementById("nume_cheltuiala").setAttribute("placeholder", "4 Baterii AA");
+      document.getElementById("mijlocfix").checked = false;
+      document.getElementById("data_punerii_in_functiune").removeAttribute("required");
+      document.getElementById("amortizare_in_ani").removeAttribute("required");
+      document.getElementById("tables").style.display = "none";
+      document.getElementById("suma_cheltuita_helper").style.display = "none";
+      document.getElementById("mijlocfix-fields").className = "none";
+      document.getElementById("mijlocfix-fieldset").style.display = "none";
+      document.getElementById("inventar-fieldset").style.display = "block";
+      document.getElementById("nume_cheltuiala").setAttribute("placeholder", "4 Baterii AA");
 
-      }
+    }
 
-    }, false);
+  }, false);
 
 
   }, false);

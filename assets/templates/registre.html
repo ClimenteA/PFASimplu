@@ -181,7 +181,7 @@
               {{.Numar}}
             </td>
             <td>
-              {{.SumaIncasata}}
+              {{ printf "%.2f" .SumaIncasata}}
             </td>
             <td>
               {{.TipTranzactie}}
@@ -294,7 +294,7 @@
               {{.NumeCheltuiala}}
             </td>
             <td>
-              {{.SumaCheltuita}}
+              {{ printf "%.2f" .SumaCheltuita}}
             </td>
             <td>
               {{.TipTranzactie}}
@@ -335,10 +335,10 @@
               {{.DetaliiMijlocFix.FelSerieNumarDataDocument}}
             </td>
             <td>
-              {{.DetaliiMijlocFix.ValoareInventar}}
+              {{ printf "%.2f" .DetaliiMijlocFix.ValoareInventar}}
             </td>
             <td>
-              {{.DetaliiMijlocFix.AmortizareLunara}}
+              {{ printf "%.2f" .DetaliiMijlocFix.AmortizareLunara}}
             </td>
             <td>
               {{.DetaliiMijlocFix.DenumireSiCaracteristici}}
@@ -365,7 +365,7 @@
               {{.DetaliiMijlocFix.DurataNormalaDeFunctionare}}
             </td>
             <td>
-              {{.DetaliiMijlocFix.CotaDeAmortizare}}
+              {{ printf "%.2f" .DetaliiMijlocFix.CotaDeAmortizare}}
             </td>
           </tr>
           {{end}}
@@ -485,16 +485,16 @@
               {{ end }}
             </td>
             <td>
-              {{.IncasariNumerar}}
+              {{ printf "%.2f" .IncasariNumerar}}
             </td>
             <td>
-              {{.IncasariBanca}}
+              {{ printf "%.2f" .IncasariBanca}}
             </td>
             <td>
-              {{.PlatiNumerar}}
+              {{ printf "%.2f" .PlatiNumerar}}
             </td>
             <td>
-              {{.PlatiBanca}}
+              {{ printf "%.2f" .PlatiBanca}}
             </td>
           </tr>
           {{end}}
@@ -542,7 +542,7 @@
               <a href="/download-fisier?path={{.CaleCheltuiala}}">{{.DenumireaElemInv}}</a>
             </td>
             <td>
-              {{.ValInvRon}}
+              {{ printf "%.2f" .ValInvRon}}
             </td>
             <td>
               {{.Data}}
@@ -590,7 +590,7 @@
               {{.ElemDeCalculVenit}}
             </td>
             <td>
-              {{.ValoareRon}}
+              {{ printf "%.2f" .ValoareRon}}
             </td>
             <td>
               {{.Anul}}
