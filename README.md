@@ -34,16 +34,16 @@ Calcul automat impozite pentru declaratia unica (CAS/CASS/Impozit):
 - Calcul Venit Net: `venitNet = totalIncasari - totalCheltuieli`;
 - Calcul Impozit pe Venit: `impozitPeVenit = 10% din venitNet`;
 - Calcul CAS (Pensie): 
-    * `bazaDeCalculCAS = salariuMinimBrut x 12` - daca `venitNet` mai mare de 12 salarii minime brute pana in anul 2022 inclusiv;
-    * `bazaDeCalculCAS = salariuMinimBrut x 12` - daca `venitNet` intre 12 si 24 salarii minime brute din anul 2023+;
-    * `bazaDeCalculCAS = salariuMinimBrut x 24` - daca `venitNet` mai mare de 24 salarii minime brute din anul 2023+;
-    * `CAS = 25% din bazaDeCalculCAS`;
+    * `bazaDeCalcul = salariuMinimBrut x 12` - daca `venitNet` mai mare de 12 salarii minime brute pana in anul 2022 inclusiv;
+    * `bazaDeCalcul = salariuMinimBrut x 12` - daca `venitNet` intre 12 si 24 salarii minime brute din anul 2023+;
+    * `bazaDeCalcul = salariuMinimBrut x 24` - daca `venitNet` mai mare de 24 salarii minime brute din anul 2023+;
+    * `CAS = 25% din bazaDeCalcul`;
 - Calcul CASS (Sanatate):
-    * `bazaDeCalculCASS = salariuMinimBrut x 12` - daca `venitNet` mai mare de 12 salarii minime brute pana in anul 2022 inclusiv;
-    * `bazaDeCalculCASS = salariuMinimBrut x 6` - daca `venitNet` mai mare de 6 salarii minime brute din anul 2023+;
-    * `bazaDeCalculCAS = salariuMinimBrut x 12` - daca `venitNet` intre 12 si 24 salarii minime brute din anul 2023+;
-    * `bazaDeCalculCAS = salariuMinimBrut x 24` - daca `venitNet` mai mare de 24 salarii minime brute din anul 2023+;
-    * `CASS = 10% din bazaDeCalculCASS`;
+    * `bazaDeCalcul = salariuMinimBrut x 12` - daca `venitNet` mai mare de 12 salarii minime brute pana in anul 2022 inclusiv;
+    * `bazaDeCalcul = salariuMinimBrut x 6` - daca `venitNet` mai mare de 6 salarii minime brute din anul 2023+;
+    * `bazaDeCalcul = salariuMinimBrut x 12` - daca `venitNet` intre 12 si 24 salarii minime brute din anul 2023+;
+    * `bazaDeCalcul = salariuMinimBrut x 24` - daca `venitNet` mai mare de 24 salarii minime brute din anul 2023+;
+    * `CASS = 10% din bazaDeCalcul`;
 
 
 Extra calcule:
