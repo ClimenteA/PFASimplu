@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 
 	"github.com/ClimenteA/pfasimplu-go/auth"
 	"github.com/ClimenteA/pfasimplu-go/utils"
@@ -77,15 +78,52 @@ func downloadDateCont(app fiber.App, store session.Store) {
 		if form, err := c.MultipartForm(); err == nil {
 
 			anul := form.Value["anul"][0]
-			fmt.Println(anul)
 
-			zipPath := user.Stocare + ".zip"
-			utils.ZipDir(user.Stocare, zipPath)
+			zipSrcPath := filepath.Join(user.Stocare, "ZIP")
+			zipDstPath := filepath.Join(user.Stocare, anul+".zip")
 
-			return c.Download(zipPath)
+			errsrc := os.RemoveAll(zipSrcPath)
+			if errsrc != nil {
+				fmt.Println("No source SRC ZIP folder found")
+			}
+
+			errdst := os.RemoveAll(zipDstPath)
+			if errdst != nil {
+				fmt.Println("No source DST ZIP folder found")
+			}
+
+			allRequestedDirs := utils.GetAllDirsForYear(anul, user)
+
+			for _, fp := range allRequestedDirs {
+
+				bytesRead, err := ioutil.ReadFile(fp)
+				if err != nil {
+					log.Fatal(err)
+				}
+
+				srcFilePath := filepath.Join(zipSrcPath, fp)
+				srcPath := filepath.Dir(srcFilePath)
+
+				os.MkdirAll(srcPath, 0755)
+
+				err = ioutil.WriteFile(srcFilePath, bytesRead, 0755)
+				if err != nil {
+					log.Fatal(err)
+				}
+			}
+
+			utils.ZipDir(zipSrcPath, zipDstPath)
+
+			errsrcafter := os.RemoveAll(zipSrcPath)
+			if errsrcafter != nil {
+				fmt.Println("No source SRC ZIP folder found")
+			}
+
+			return c.Download(zipDstPath)
+
 		}
 
-		return c.Redirect("/download-date-cont?title=Date adunate&content=Datele au fost adunate intr-un zip.")
+		return c.Redirect("/download-date-cont?title=Eroare&content=Arhiva nu a putut fi creata.")
 
 	})
 
