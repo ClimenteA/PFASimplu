@@ -140,7 +140,7 @@
 
     <article id="tabel-incasari">
       <h4 style="color: var(--secondary);">Tabel Incasari</h4>
-      <table>
+      <table id="date-incasari">
 
         <thead>
           <tr class="bg-whitesmoke">
@@ -205,7 +205,7 @@
 
     <article id="tabel-cheltuieli">
       <h4 style="color: var(--secondary);">Tabel Cheltuieli</h4>
-      <table>
+      <table id="date-cheltuieli">
 
         <thead>
           <tr class="bg-whitesmoke">
@@ -380,7 +380,7 @@
 
     <article id="tabel-declaratii">
       <h4 style="color: var(--secondary);">Tabel Declaratii</h4>
-      <table>
+      <table id="date-declaratii">
 
         <thead>
           <tr class="bg-whitesmoke">
@@ -426,7 +426,7 @@
 
     <article id="tabel-registru-jurnal">
       <h4 style="color: var(--secondary);">Registru jurnal</h4>
-      <table>
+      <table id="date-registru-jurnal">
         <thead>
           <tr class="bg-whitesmoke">
             <th scope="col">
@@ -512,7 +512,7 @@
 
     <article id="tabel-registru-inventar">
       <h4 style="color: var(--secondary);">Registru inventar</h4>
-      <table>
+      <table id="date-registru-inventar">
 
         <thead>
           <tr class="bg-whitesmoke">
@@ -560,7 +560,7 @@
 
     <article id="tabel-registru-fiscal">
       <h4 style="color: var(--secondary);">Registru fiscal</h4>
-      <table>
+      <table id="date-registru-fiscal">
 
         <thead>
           <tr class="bg-whitesmoke">
@@ -611,7 +611,7 @@
 </main>
 
 
-<script defer src="/plotly-2.11.1.min.js"></script>
+<script defer src="/plotly-basic-2.14.0.min.js"></script>
 
 
 <script>
@@ -637,10 +637,10 @@
       link.click();
     }, false)
 
+    const MONTHS = ['Ianuarie', 'Februarie', 'Martie', 'Aprilie', 'Mai', 'Iunie', 'Iulie', 'August', 'Septembrie', 'Octombrie', 'Noiembrie', 'Decembrie'];
+    let incasari = [{{ range .IncasariPeLuni }} {{.}}, {{ end }}];
+    let cheltuieli = [{{ range .CheltuieliPeLuni }} {{.}}, {{ end }}];
 
-  const MONTHS = ['Ianuarie', 'Februarie', 'Martie', 'Aprilie', 'Mai', 'Iunie', 'Iulie', 'August', 'Septembrie', 'Octombrie', 'Noiembrie', 'Decembrie'];
-  let incasari = [{{ range .IncasariPeLuni }} {{.}}, {{ end }}];
-  let cheltuieli = [{{ range .CheltuieliPeLuni }} {{.}}, {{ end }}];
 
   let barIncasari = {
     x: MONTHS,
@@ -667,8 +667,6 @@
   if (anGrafic == undefined) {
     anGrafic = "curent";
   }
-
-  console.log(anGrafic, firstYear)
 
   let data = [barIncasari, barCheltuieli];
   let layout = {
@@ -715,6 +713,56 @@
 
 
 
+</script>
+
+
+
+<script src="/tablefilter/tablefilter.js"></script>
+
+
+<script data-config>
+
+    let baseFiltersConfig = {
+      base_path: 'tablefilter/',
+      alternate_rows: true,
+      rows_counter: false,
+      btn_reset: true,
+      loader: true,
+      status_bar: false,
+      mark_active_columns: true,
+      highlight_keywords: true,
+      toolbar: true,
+    };
+  
+    let incasariFiltersConfig = {
+      col_4: 'select',
+    };
+  
+    let tfIncasari = new TableFilter('date-incasari', { ...baseFiltersConfig, ...incasariFiltersConfig });
+    tfIncasari.init();
+  
+    let cheltuieliFiltersConfig = {
+      col_3: 'select',
+      col_4: 'select',
+      col_5: 'select',
+    };
+  
+    let tfCheltuieli = new TableFilter('date-cheltuieli', { ...baseFiltersConfig, ...cheltuieliFiltersConfig });
+    tfCheltuieli.init();
+  
+  
+    let tfdeclaratii = new TableFilter('date-declaratii', baseFiltersConfig);
+    tfdeclaratii.init();
+  
+    let tfregjurnal = new TableFilter('date-registru-jurnal', baseFiltersConfig);
+    tfregjurnal.init();
+  
+    let tfreginv = new TableFilter('date-registru-inventar', baseFiltersConfig);
+    tfreginv.init();
+  
+    let tfregfisc = new TableFilter('date-registru-fiscal', baseFiltersConfig);
+    tfregfisc.init();
+  
 </script>
 
 </body>
