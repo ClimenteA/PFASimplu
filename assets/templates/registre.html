@@ -509,6 +509,54 @@
     </div>
 
 
+    <article id="tabel-registru-fiscal">
+      <h4 style="color: var(--secondary);">Registru fiscal</h4>
+      <table id="date-registru-fiscal">
+
+        <thead>
+          <tr class="bg-whitesmoke">
+            <th scope="col">
+              Nr.Crt.
+            </th>
+            <th scope="col">
+              Elemente de calcul pentru stabilirea venitului net annual/pierderii nete anuale
+            </th>
+            <th scope="col">
+              Valoare (RON)
+            </th>
+            <th scope="col">
+              Anul
+            </th>
+          </tr>
+
+        </thead>
+
+        <tbody>
+          {{range .RegistruFiscal}}
+          <tr>
+            <td>
+              {{.NrCrt}}
+            </td>
+            <td>
+              {{.ElemDeCalculVenit}}
+            </td>
+            <td>
+              {{ printf "%.2f" .ValoareRon}}
+            </td>
+            <td>
+              {{.Anul}}
+            </td>
+          </tr>
+          {{end}}
+        </tbody>
+      </table>
+    </article>
+
+    <div class="download">
+      <a href="/download-fisier?path={{.CaleRegistruFiscalCSV}}">Descarca CSV</a>
+    </div>
+
+
 
     <article id="tabel-registru-inventar">
       <h4 style="color: var(--secondary);">Registru inventar</h4>
@@ -555,54 +603,6 @@
 
     <div class="download">
       <a href="/download-fisier?path={{.CaleRegistruInventarCSV}}">Descarca CSV</a>
-    </div>
-
-
-    <article id="tabel-registru-fiscal">
-      <h4 style="color: var(--secondary);">Registru fiscal</h4>
-      <table id="date-registru-fiscal">
-
-        <thead>
-          <tr class="bg-whitesmoke">
-            <th scope="col">
-              Nr.Crt.
-            </th>
-            <th scope="col">
-              Elemente de calcul pentru stabilirea venitului net annual/pierderii nete anuale
-            </th>
-            <th scope="col">
-              Valoare (RON)
-            </th>
-            <th scope="col">
-              Anul
-            </th>
-          </tr>
-
-        </thead>
-
-        <tbody>
-          {{range .RegistruFiscal}}
-          <tr>
-            <td>
-              {{.NrCrt}}
-            </td>
-            <td>
-              {{.ElemDeCalculVenit}}
-            </td>
-            <td>
-              {{ printf "%.2f" .ValoareRon}}
-            </td>
-            <td>
-              {{.Anul}}
-            </td>
-          </tr>
-          {{end}}
-        </tbody>
-      </table>
-    </article>
-
-    <div class="download">
-      <a href="/download-fisier?path={{.CaleRegistruFiscalCSV}}">Descarca CSV</a>
     </div>
 
   </div>
@@ -687,6 +687,7 @@
     "tabel-declaratii",
     "tabel-incasari-download",
     "tabel-cheltuieli-download",
+    "incasarivscheltuieli"
     //"tabel-declaratii-download",
   ]
 
