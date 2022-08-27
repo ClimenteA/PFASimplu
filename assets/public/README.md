@@ -1,3 +1,11 @@
+
+## Descriere 
+
+Aplicatia PFASimplu este utila pentru persoanele care isi tin contabilitatea in partida simpla.
+Este foarte simplu de folosit, poate fi rulata de pe un stick. 
+Aplicatia este de tip website asa ca poate fi accesata chiar si de pe un telefon aflat in aceeasi retea wifi (aplicatia trebuie sa ruleze pe un laptop/pc pentru asta). Acest lucru este folositor pentru adaugarea de bonuri/facturi care trebuie pozate.
+
+
 ## Cine poate folosi aplicatia?
 Aplicatia poate fi utila pentru oricine:
 - tine contabilitatea in partida simpla;
@@ -23,16 +31,16 @@ Calcul automat impozite pentru declaratia unica (CAS/CASS/Impozit):
 - Calcul Venit Net: `venitNet = totalIncasari - totalCheltuieli`;
 - Calcul Impozit pe Venit: `impozitPeVenit = 10% din venitNet`;
 - Calcul CAS (Pensie): 
-    * `bazaDeCalculCAS = salariuMinimBrut x 12` - daca `venitNet` mai mare de 12 salarii minime brute pana in anul 2022 inclusiv;
-    * `bazaDeCalculCAS = salariuMinimBrut x 12` - daca `venitNet` intre 12 si 24 salarii minime brute din anul 2023+;
-    * `bazaDeCalculCAS = salariuMinimBrut x 24` - daca `venitNet` mai mare de 24 salarii minime brute din anul 2023+;
-    * `CAS = 25% din bazaDeCalculCAS`;
+    * `bazaDeCalcul = salariuMinimBrut x 12` - daca `venitNet` mai mare de 12 salarii minime brute pana in anul 2022 inclusiv;
+    * `bazaDeCalcul = salariuMinimBrut x 12` - daca `venitNet` intre 12 si 24 salarii minime brute din anul 2023+;
+    * `bazaDeCalcul = salariuMinimBrut x 24` - daca `venitNet` mai mare de 24 salarii minime brute din anul 2023+;
+    * `CAS = 25% din bazaDeCalcul`;
 - Calcul CASS (Sanatate):
-    * `bazaDeCalculCASS = salariuMinimBrut x 12` - daca `venitNet` mai mare de 12 salarii minime brute pana in anul 2022 inclusiv;
-    * `bazaDeCalculCASS = salariuMinimBrut x 6` - daca `venitNet` mai mare de 6 salarii minime brute din anul 2023+;
-    * `bazaDeCalculCAS = salariuMinimBrut x 12` - daca `venitNet` intre 12 si 24 salarii minime brute din anul 2023+;
-    * `bazaDeCalculCAS = salariuMinimBrut x 24` - daca `venitNet` mai mare de 24 salarii minime brute din anul 2023+;
-    * `CASS = 10% din bazaDeCalculCASS`;
+    * `bazaDeCalcul = salariuMinimBrut x 12` - daca `venitNet` mai mare de 12 salarii minime brute pana in anul 2022 inclusiv;
+    * `bazaDeCalcul = salariuMinimBrut x 6` - daca `venitNet` mai mare de 6 salarii minime brute din anul 2023+;
+    * `bazaDeCalcul = salariuMinimBrut x 12` - daca `venitNet` intre 12 si 24 salarii minime brute din anul 2023+;
+    * `bazaDeCalcul = salariuMinimBrut x 24` - daca `venitNet` mai mare de 24 salarii minime brute din anul 2023+;
+    * `CASS = 10% din bazaDeCalcul`;
 
 
 Extra calcule:
@@ -56,12 +64,11 @@ Rapoarte suplimentare:
 3. [Adaugare incasari](#adaugare-incasari)
 4. [Adaugare cheltuieli](#adaugare-cheltuieli)
 5. [Adaugare documente](#adaugare-documente)
-6. [Adauga sold intermediar](#adaugare-sold-intermediar)
-7. [Creeaza o factura](#creeaza-factura)
-8. [Registre contabile](#registre-contabile)
-9. [Setari avansate](#setari-avansate)
-10. [Observatii](#observatii)
-11. [Pe viitor](#pe-viitor)
+6. [Creeaza o factura](#creeaza-factura)
+7. [Registre contabile](#registre-contabile)
+8. [Setari avansate](#setari-avansate)
+9. [Observatii](#observatii)
+10. [Pe viitor](#pe-viitor)
 
 
 
@@ -71,9 +78,9 @@ Rapoarte suplimentare:
 ## Cum rulezi aplicatia
 
 1. Download executabil pentru sistemul dvs de operare:
-- [Download PFASimplu-Windows-64bit](https://github.com/ClimenteA/PFASimplu/releases/tag/v.0.0.0);
-- [Download PFASimplu-MacOS-64bit](https://github.com/ClimenteA/PFASimplu/releases/tag/v.0.0.0);
-- [Download PFASimplu-Linux-64bit](https://github.com/ClimenteA/PFASimplu/releases/tag/v.0.0.0);
+- [Download PFASimplu-Windows-64bit](https://github.com/ClimenteA/PFASimplu/releases/tag/v0.0.1);
+- [Download PFASimplu-MacOS-64bit](https://github.com/ClimenteA/PFASimplu/releases/tag/v0.0.1);
+- [Download PFASimplu-Linux-64bit](https://github.com/ClimenteA/PFASimplu/releases/tag/v0.0.1);
 
 2. Extrage-ti zip-ul pe un stick sau in pc/laptop;
 3. Deschide-ti fisierul `INSTRUCTIUNI.txt` si urmati pasii de acolo;
@@ -156,16 +163,6 @@ Poti oricand daca ai gresit sa stergi documentul fie din pagina `Adauga cheltuie
 
 Factura va fi salvata in folderul `stocare`. 
 Poti oricand daca ai gresit sa stergi factura din pagina `Vezi registre contabile`. 
-
-
-<a name="adaugare-sold-intermediar"></a>
-## Adauga sold intermediar
-
-- click pe `Adauga sold intermediar`;
-- completeaza campurile din formular;
-
-In orice extras bancar sau aplicatie bancara vei avea disponibila soldul/suma curenta.
-Odata completat acest formular vei putea vedea cat profit ai realizat dupa toate cheltuielile facute. 
 
 
 <a name="creeaza-factura"></a>

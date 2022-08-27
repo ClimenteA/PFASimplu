@@ -67,12 +67,11 @@ Rapoarte suplimentare:
 3. [Adaugare incasari](#adaugare-incasari)
 4. [Adaugare cheltuieli](#adaugare-cheltuieli)
 5. [Adaugare documente](#adaugare-documente)
-6. [Adauga sold intermediar](#adaugare-sold-intermediar)
-7. [Creeaza o factura](#creeaza-factura)
-8. [Registre contabile](#registre-contabile)
-9. [Setari avansate](#setari-avansate)
-10. [Observatii](#observatii)
-11. [Pe viitor](#pe-viitor)
+6. [Creeaza o factura](#creeaza-factura)
+7. [Registre contabile](#registre-contabile)
+8. [Setari avansate](#setari-avansate)
+9. [Observatii](#observatii)
+10. [Pe viitor](#pe-viitor)
 
 
 
@@ -167,16 +166,6 @@ Poti oricand daca ai gresit sa stergi documentul fie din pagina `Adauga cheltuie
 
 Factura va fi salvata in folderul `stocare`. 
 Poti oricand daca ai gresit sa stergi factura din pagina `Vezi registre contabile`. 
-
-
-<a name="adaugare-sold-intermediar"></a>
-## Adauga sold intermediar
-
-- click pe `Adauga sold intermediar`;
-- completeaza campurile din formular;
-
-In orice extras bancar sau aplicatie bancara vei avea disponibila soldul/suma curenta.
-Odata completat acest formular vei putea vedea cat profit ai realizat dupa toate cheltuielile facute. 
 
 
 <a name="creeaza-factura"></a>

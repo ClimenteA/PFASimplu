@@ -19,7 +19,6 @@ import (
 	"github.com/ClimenteA/pfasimplu-go/incasari"
 	"github.com/ClimenteA/pfasimplu-go/landing"
 	"github.com/ClimenteA/pfasimplu-go/registre"
-	"github.com/ClimenteA/pfasimplu-go/sold"
 	"github.com/ClimenteA/pfasimplu-go/staticdata"
 	"github.com/ClimenteA/pfasimplu-go/utils"
 	"github.com/gofiber/fiber/v2"
@@ -47,7 +46,6 @@ func main() {
 	cheltuieli.HandleCheltuieli(*app, *store, coduriMijloaceFixe)
 	declaratii.HandleDeclaratii(*app, *store)
 	registre.HandleRegistre(*app, *store)
-	sold.HandleSoldIntermediar(*app, *store)
 	declaratieanaf.HandleDeclaratie212(*app, *store)
 	download.HandleDownloadDateCont(*app, *store)
 	landing.HandleLandingPage(*app, *store)

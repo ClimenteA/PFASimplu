@@ -49,13 +49,6 @@ func getCurrentUser(currentUserPath string) auth.Account {
 	return data
 }
 
-
-
-
-
-
-
-
 func handleRegistre(app fiber.App, store session.Store) {
 
 	app.Get("/download-fisier", func(c *fiber.Ctx) error {
@@ -162,15 +155,6 @@ func handleRegistre(app fiber.App, store session.Store) {
 		totalPlatiCatreStat := platiCatreStat.Total - platiFacuteAnaf
 		totalIncasariNet = totalIncasariNet - platiCatreStat.Total
 
-		profitAnual := CalculeazaProfitAnual(user, filterYear)
-		profitAnualProcent := 0.0
-		showProfitAnual := false
-		if profitAnual > 0 && totalIncasariNet > 0 {
-			profitAnual = profitAnual - totalPlatiCatreStat
-			profitAnualProcent = (profitAnual / totalIncasariBrut) * 100
-			showProfitAnual = true
-		}
-
 		incasariPeLuni := inputs.AddIncasariPeLuni(incasari, filterYear)
 		cheltuieliPeLuni := outputs.AddCheltuieliPeLuni(cheltuieli, filterYear)
 
@@ -201,9 +185,6 @@ func handleRegistre(app fiber.App, store session.Store) {
 			"AniInregistrati":            aniInregistrati,
 			"Incasari":                   incasari,
 			"Cheltuieli":                 cheltuieli,
-			"ProfitAnual":                fmt.Sprintf("%.2f", profitAnual),
-			"ProfitAnualProcent":         fmt.Sprintf("%.2f", profitAnualProcent),
-			"ShowProfitAnual":            showProfitAnual,
 			"Declaratii":                 declaratii,
 			"RegistruJurnal":             registruJurnal,
 			"RegistruInventar":           registruInventar,
