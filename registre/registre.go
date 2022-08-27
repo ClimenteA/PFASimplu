@@ -14,6 +14,7 @@ import (
 	"github.com/ClimenteA/pfasimplu-go/auth"
 	outputs "github.com/ClimenteA/pfasimplu-go/cheltuieli"
 	inputs "github.com/ClimenteA/pfasimplu-go/incasari"
+	"github.com/ClimenteA/pfasimplu-go/staticdata"
 	"github.com/ClimenteA/pfasimplu-go/tabelcsv"
 	"github.com/ClimenteA/pfasimplu-go/utils"
 
@@ -174,11 +175,26 @@ func handleRegistre(app fiber.App, store session.Store) {
 		registruInventar = tabelcsv.FullRegistruInventar(user.Stocare, filterYear)
 		registruInventarCSVPath := tabelcsv.CreeazaRegistruInventarCSV(filepath.Join(user.Stocare, "inventar"), "", registruInventar)
 
-		platiCatreStatRounted := map[string]string{
+		platiCatreStatRounded := map[string]string{
 			"CASPensie":    fmt.Sprintf("%.2f", platiCatreStat.CASPensie),
 			"CASSSanatate": fmt.Sprintf("%.2f", platiCatreStat.CASSSanatate),
 			"ImpozitVenit": fmt.Sprintf("%.2f", platiCatreStat.ImpozitVenit),
 			"Total":        fmt.Sprintf("%.2f", platiCatreStat.Total),
+		}
+
+		config := staticdata.LoadPFAConfig()
+
+		plafonTVA := 300000.0
+		for _, prag := range config.PlafonTVA {
+			if strconv.Itoa(prag.An) == filterYear {
+				plafonTVA = prag.Valoare
+				break
+			}
+		}
+
+		platitorTVA := false
+		if totalIncasariBrut > plafonTVA {
+			platitorTVA = true
 		}
 
 		return c.Render("registre", fiber.Map{
@@ -189,6 +205,7 @@ func handleRegistre(app fiber.App, store session.Store) {
 			"RegistruJurnal":             registruJurnal,
 			"RegistruInventar":           registruInventar,
 			"RegistruFiscal":             registruFiscal,
+			"PlatitorTVA":                platitorTVA,
 			"TotalIncasariBrut":          fmt.Sprintf("%.2f", totalIncasariBrut),
 			"TotalIncasariNet":           fmt.Sprintf("%.2f", totalIncasariNet),
 			"TotalCheltuieliDeductibile": fmt.Sprintf("%.2f", totalCheltuieliDeductibile),
@@ -200,7 +217,7 @@ func handleRegistre(app fiber.App, store session.Store) {
 			"CaleRegistruFiscalCSV":      registruFiscalCSVPath,
 			"IncasariPeLuni":             incasariPeLuni,
 			"CheltuieliPeLuni":           cheltuieliPeLuni,
-			"PlatiCatreStat":             platiCatreStatRounted,
+			"PlatiCatreStat":             platiCatreStatRounded,
 		}, "base")
 	})
 }

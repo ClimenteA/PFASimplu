@@ -24,5 +24,15 @@
         }
     ],
     "port": "3000",
-    "environment": "desktop"
+    "environment": "desktop",
+    "plafon_tva": [
+        {
+            "an": 2022,
+            "valoare": 300000
+        },
+        {
+            "an": 2023,
+            "valoare": 300000
+        }
+    ]
 }

@@ -65,6 +65,12 @@
       <article class="article-grid">
         <h4 style="color: var(--secondary)">Total Incasari (Brut)</h4>
         <h1 style="color: green">{{.TotalIncasariBrut}} RON</h1>
+        {{if .PlatitorTVA}} 
+        <small style="color: indianred;">
+          Atentie ai depasit plafonul TVA!
+          Trebuie sa depui documentele necesare la ANAF!
+        </small>
+        {{ end }}
       </article>
 
       <article class="article-grid">

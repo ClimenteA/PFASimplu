@@ -8,14 +8,15 @@ import (
 )
 
 type ConfigDetails struct {
-	An      int `json:"an"`
-	Valoare int `json:"valoare"`
+	An      int     `json:"an"`
+	Valoare float64 `json:"valoare"`
 }
 
 type Config struct {
 	PragMijlocFix []ConfigDetails `json:"prag_mijloc_fix"`
 	EuroToRon     []ConfigDetails `json:"euro_to_ron"`
 	SalariiMinime []ConfigDetails `json:"salarii_minime"`
+	PlafonTVA     []ConfigDetails `json:"plafon_tva"`
 	Port          string          `json:"port"`
 	Environment   string          `json:"environment"`
 }

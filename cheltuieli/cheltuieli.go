@@ -279,7 +279,7 @@ func handleCheltuieli(app fiber.App, store session.Store, coduriMijloaceFixe []s
 
 		config := staticdata.LoadPFAConfig()
 
-		pragMijlocFix := 2500
+		pragMijlocFix := 2500.0
 		for _, prag := range config.PragMijlocFix {
 			if strconv.Itoa(prag.An) == filterYear {
 				pragMijlocFix = prag.Valoare
