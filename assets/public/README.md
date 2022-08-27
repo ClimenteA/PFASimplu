@@ -59,7 +59,6 @@ Rapoarte suplimentare:
 
 <!-- TOC -->
 
-1. [Cum rulezi aplicatia](#cum-rulezi-aplicatia)
 2. [Creeare cont](#creeare-cont)
 3. [Adaugare incasari](#adaugare-incasari)
 4. [Adaugare cheltuieli](#adaugare-cheltuieli)
@@ -73,40 +72,6 @@ Rapoarte suplimentare:
 
 
 <!-- /TOC -->
-
-<a name="cum-rulezi-aplicatia"></a>
-## Cum rulezi aplicatia
-
-1. Download executabil pentru sistemul dvs de operare:
-- [Download PFASimplu-Windows-64bit](https://github.com/ClimenteA/PFASimplu/releases/tag/v0.0.1);
-- [Download PFASimplu-MacOS-64bit](https://github.com/ClimenteA/PFASimplu/releases/tag/v0.0.1);
-- [Download PFASimplu-Linux-64bit](https://github.com/ClimenteA/PFASimplu/releases/tag/v0.0.1);
-
-2. Extrage-ti zip-ul pe un stick sau in pc/laptop;
-3. Deschide-ti fisierul `INSTRUCTIUNI.txt` si urmati pasii de acolo;
-
-Pentru Windows trebuie doar sa dati dublu click pe `pfasimplu.exe` si se va deschide un terminal cu urmatoare date (similare):
-
-```
-
-Aplicatia PFASimplu vX.X.X!
-Pastreaza aceasta fereastra deschisa cat timp folosesti aplicatia!
-
-
-Poti vedea aplicatia in browser la addresa:
-http://localhost:3000 (pe acest dispozitiv)
-
-Sau poti intra de pe telefon/tableta/laptop in browser pe addresa:
-http://192.168.1.7:3000
-
-```
-
-Acum poti deschide aplicatia intr-un browser pe pc/laptop la adresa `http://localhost:3000` sau de pe browser dintr-un telefon aflat in aceeeasi retea wifi la adresa `http://192.168.1.7:3000` (adresa ta poate fi diferita).
-
-Pornire aplicatie din codul sursa:
-- [clone github repo](https://github.com/ClimenteA/PFASimplu);
-- Deschide un terminal si tasteaza `make run` apoi apasa enter;
-- aplicatia este facuta in limbajul [GO](https://go.dev/) cu web framework-ul [Fiber](https://docs.gofiber.io/);
 
 
 

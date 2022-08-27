@@ -81,9 +81,9 @@ Rapoarte suplimentare:
 ## Cum rulezi aplicatia
 
 1. Download executabil pentru sistemul dvs de operare:
-- [Download PFASimplu-Windows-64bit](https://github.com/ClimenteA/PFASimplu/releases/tag/v0.0.1);
-- [Download PFASimplu-MacOS-64bit](https://github.com/ClimenteA/PFASimplu/releases/tag/v0.0.1);
-- [Download PFASimplu-Linux-64bit](https://github.com/ClimenteA/PFASimplu/releases/tag/v0.0.1);
+- [Download PFASimplu-Windows-64bit](https://github.com/ClimenteA/PFASimplu/releases);
+- [Download PFASimplu-MacOS-64bit](https://github.com/ClimenteA/PFASimplu/releases);
+- [Download PFASimplu-Linux-64bit](https://github.com/ClimenteA/PFASimplu/releases);
 
 2. Extrage-ti zip-ul pe un stick sau in pc/laptop;
 3. Deschide-ti fisierul `INSTRUCTIUNI.txt` si urmati pasii de acolo;
