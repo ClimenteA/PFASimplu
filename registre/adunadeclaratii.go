@@ -64,9 +64,11 @@ func getDocsDataSlice(docMetadataJson []string, anul string) []declaratii.Declar
 
 		declaratie := getDocMetadata(path)
 
-		if declaratie.PlataAnaf != 0.0 && anul == strconv.Itoa(declaratie.PlataPtAnul) {
-			declaratii = append(declaratii, declaratie)
-			continue
+		if anul == strconv.Itoa(declaratie.PtAnul) {
+			if declaratie.TipDocument == "Declaratie unica (212)" || declaratie.TipDocument == "Dovada plata impozite" || declaratie.TipDocument == "Dovada incarcare Declaratie 212" {
+				declaratii = append(declaratii, declaratie)
+				continue
+			}
 		}
 
 		iterDate, _ := time.Parse(time.RFC3339, declaratie.Data+"T00:00:00Z")
@@ -76,7 +78,7 @@ func getDocsDataSlice(docMetadataJson []string, anul string) []declaratii.Declar
 
 		if isBeforeNow || sameMonthYear {
 
-			if strings.HasPrefix(declaratie.Data, anul) && declaratie.PlataAnaf == 0.0 {
+			if strings.HasPrefix(declaratie.Data, anul) {
 				declaratii = append(declaratii, declaratie)
 			}
 

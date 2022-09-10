@@ -29,19 +29,8 @@
 
                     <datalist id="tipdoc">
                         <option value="Declaratie unica (212)"></option>
+                        <option value="Dovada incarcare Declaratie 212"></option>
                         <option value="Dovada plata impozite"></option>
-                        <option value="Extras bancar ING"></option>
-                        <option value="C168"></option>
-                        <option value="D112Contrib"></option>
-                        <option value="Duplicat Recipisa"></option>
-                        <option value="Duplicat declaratie unica"></option>
-                        <option value="InterogariBanci"></option>
-                        <option value="Istoric Spatiu Virtual"></option>
-                        <option value="Istoric declaratii PF"></option>
-                        <option value="Nota obligatiilor de plata"></option>
-                        <option value="Obligatii de plata"></option>
-                        <option value="Registru intrari-iesiri"></option>
-                        <option value="Venituri Formular Banca"></option>
                     </datalist>
 
                 </label>
@@ -51,6 +40,21 @@
                     <input type="date" id="data" name="data" required>
                     <small></small>
                 </label>
+
+
+                <label class="none" id="declaratie_label_year" for="declaratie_pentru_anul">
+                    Declaratie pentru anul
+                    <input list="aniinregistrati" type="number" id="declaratie_pentru_anul"
+                        name="declaratie_pentru_anul" required>
+
+                    <datalist id="aniinregistrati">
+                        {{range .AniInregistrati}}
+                        <option value="{{.}}">{{.}}</option>
+                        {{end}}
+                    </datalist>
+
+                </label>
+
             </div>
 
             <div class="grid">
@@ -62,11 +66,14 @@
 
                 <label class="none" id="plata_anaf_label_year" for="plata_pentru_anul">
                     Plata pentru anul
-                    <select name="plata_pentru_anul" id="plata_pentru_anul">
+                    <input list="regyears" type="number" id="plata_pentru_anul" name="plata_pentru_anul" required>
+
+                    <datalist id="regyears">
                         {{range .AniInregistrati}}
                         <option value="{{.}}">{{.}}</option>
                         {{end}}
-                    </select>
+                    </datalist>
+
                 </label>
 
             </div>
@@ -90,16 +97,39 @@
 
     window.onload = event => {
         let tipDoc = document.getElementById("tip_document");
+        let dataDoc = document.getElementById("data");
         let plata_anaf_label_sum = document.getElementById("plata_anaf_label_sum");
         let plata_anaf_label_year = document.getElementById("plata_anaf_label_year");
+        let declaratie_label_year = document.getElementById("declaratie_label_year");
+        let declaratie_pentru_anul = document.getElementById("declaratie_pentru_anul");
+        let plata_pentru_anul = document.getElementById("plata_pentru_anul");
+
+        dataDoc.addEventListener("change", event => {
+            let currentYear = dataDoc.value.slice(0, 4);
+            let previousYear = String(parseInt(currentYear) - 1);
+
+            if (tipDoc.value == "Dovada plata impozite") {
+                declaratie_pentru_anul.value = previousYear;
+                plata_pentru_anul.value = previousYear;
+            } else {
+                declaratie_pentru_anul.value = currentYear;
+                plata_pentru_anul.value = currentYear;
+            }
+
+        }, false);
 
         tipDoc.addEventListener("change", event => {
             if (event.target.value == "Dovada plata impozite") {
                 plata_anaf_label_sum.classList.remove("none");
                 plata_anaf_label_year.classList.remove("none");
-            } else {
+            }
+            else if (event.target.value == "Declaratie unica (212)" || event.target.value == "Dovada incarcare Declaratie 212") {
+                declaratie_label_year.classList.remove("none");
+            }
+            else {
                 plata_anaf_label_sum.classList.add("none");
                 plata_anaf_label_year.classList.add("none");
+                declaratie_label_year.classList.add("none");
             }
         }, false);
 

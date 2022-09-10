@@ -24,7 +24,7 @@ type Declaratie struct {
 	Data         string  `json:"data"`
 	TipDocument  string  `json:"tip_document"`
 	PlataAnaf    float64 `json:"plata_anaf"`
-	PlataPtAnul  int     `json:"plata_pentru_anul"`
+	PtAnul       int     `json:"pentru_anul"`
 	CaleDocument string  `json:"cale_document"`
 }
 
@@ -116,6 +116,7 @@ func handleDeclaratii(app fiber.App, store session.Store) {
 
 			plata_anaf := form.Value["plata_anaf"][0]
 			plata_pentru_anul := form.Value["plata_pentru_anul"][0]
+			declaratie_pentru_anul := form.Value["declaratie_pentru_anul"][0]
 
 			if tip_document == "Dovada plata impozite" {
 				if plata_anaf == "0" {
@@ -126,6 +127,18 @@ func handleDeclaratii(app fiber.App, store session.Store) {
 			plata_pentru_anul_int, err := strconv.Atoi(plata_pentru_anul)
 			if err != nil {
 				return c.Redirect("/adauga-declaratii?title=An incorect&content=Anul nu este valid")
+			}
+
+			declaratie_pentru_anul_int, err := strconv.Atoi(declaratie_pentru_anul)
+			if err != nil {
+				return c.Redirect("/adauga-declaratii?title=An incorect&content=Anul nu este valid")
+			}
+
+			anul := 0
+			if plata_pentru_anul_int > 0 {
+				anul = plata_pentru_anul_int
+			} else if declaratie_pentru_anul_int > 0 {
+				anul = declaratie_pentru_anul_int
 			}
 
 			plata_anaf_float, err := strconv.ParseFloat(plata_anaf, 64)
@@ -150,7 +163,7 @@ func handleDeclaratii(app fiber.App, store session.Store) {
 				Data:         data,
 				TipDocument:  tip_document,
 				PlataAnaf:    plata_anaf_float,
-				PlataPtAnul:  plata_pentru_anul_int,
+				PtAnul:       anul,
 				CaleDocument: caleDocument,
 			}
 
