@@ -1,4 +1,4 @@
-package registre
+package declaratii
 
 import (
 	"encoding/json"
@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/ClimenteA/pfasimplu-go/auth"
-	"github.com/ClimenteA/pfasimplu-go/declaratii"
 )
 
 func getDeclaratiiJsonPaths(user auth.Account) ([]string, error) {
@@ -39,9 +38,9 @@ func getDeclaratiiJsonPaths(user auth.Account) ([]string, error) {
 
 }
 
-func getDocMetadata(path string) declaratii.Declaratie {
+func getDocMetadata(path string) Declaratie {
 
-	var data declaratii.Declaratie
+	var data Declaratie
 
 	jsonFile, err := os.Open(path)
 	if err != nil {
@@ -55,9 +54,9 @@ func getDocMetadata(path string) declaratii.Declaratie {
 	return data
 }
 
-func getDocsDataSlice(docMetadataJson []string, anul string) []declaratii.Declaratie {
+func getDocsDataSlice(docMetadataJson []string, anul string) []Declaratie {
 
-	declaratii := []declaratii.Declaratie{}
+	declaratii := []Declaratie{}
 	now := time.Now()
 
 	for _, path := range docMetadataJson {
@@ -101,7 +100,7 @@ func getDocsDataSlice(docMetadataJson []string, anul string) []declaratii.Declar
 
 }
 
-func AdunaDeclaratii(user auth.Account, anul string) []declaratii.Declaratie {
+func AdunaDeclaratii(user auth.Account, anul string) []Declaratie {
 
 	docMetadataJson, err := getDeclaratiiJsonPaths(user)
 	if err != nil {

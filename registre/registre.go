@@ -12,6 +12,7 @@ import (
 
 	"github.com/ClimenteA/pfasimplu-go/auth"
 	outputs "github.com/ClimenteA/pfasimplu-go/cheltuieli"
+	"github.com/ClimenteA/pfasimplu-go/declaratii"
 	inputs "github.com/ClimenteA/pfasimplu-go/incasari"
 	"github.com/ClimenteA/pfasimplu-go/staticdata"
 	"github.com/ClimenteA/pfasimplu-go/tabelcsv"
@@ -144,7 +145,7 @@ func handleRegistre(app fiber.App, store session.Store) {
 		user := getCurrentUser(fmt.Sprint(currentUserPath))
 		aniInregistrati := utils.GetAniInregistrati(user)
 
-		declaratii := AdunaDeclaratii(user, filterYear)
+		declaratii := declaratii.AdunaDeclaratii(user, filterYear)
 		incasari := inputs.AdunaIncasari(user, filterYear)
 		cheltuieli := outputs.AdunaCheltuieli(user, filterYear)
 

@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"time"
 
 	"github.com/ClimenteA/pfasimplu-go/auth"
 	"github.com/ClimenteA/pfasimplu-go/utils"
@@ -89,8 +90,12 @@ func handleDeclaratii(app fiber.App, store session.Store) {
 
 		user := getCurrentUser(fmt.Sprint(currentUserPath))
 		yearsRegisterd := utils.GetAniInregistrati(user)
+		filterYear := strconv.Itoa(time.Now().Year())
+
+		declaratii := AdunaDeclaratii(user, filterYear)
 
 		return c.Render("declaratii", fiber.Map{
+			"Declaratii":      declaratii,
 			"AniInregistrati": yearsRegisterd,
 		}, "base")
 	})

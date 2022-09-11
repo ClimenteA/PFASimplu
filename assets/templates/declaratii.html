@@ -2,13 +2,36 @@
     .none {
         display: none;
     }
+
+    #tabel-incasari {
+        margin-bottom: 1rem;
+        margin-top: 4rem;
+        padding: 1rem;
+        max-height: 600px;
+        overflow: auto;
+    }
+
+    .download {
+        display: flex;
+        gap: 2rem;
+        float: right;
+    }
+
+    tr td {
+        width: 1%;
+        white-space: nowrap;
+    }
+
+    .bg-whitesmoke {
+        background: whitesmoke;
+    }
 </style>
 
 
 <main class="container">
 
     <hgroup class="container">
-        <h1>Adauga declaratii/documente</h1>
+        <h1>Adauga declaratii</h1>
         <h2>
             Adauga declaratiile depuse la ANAF si dovezile de plata impozite.
         </h2>
@@ -89,6 +112,49 @@
         </article>
 
     </form>
+
+
+    <article id="tabel-declaratii">
+        <h4 style="color: var(--secondary);">Tabel Declaratii</h4>
+        <table id="date-declaratii">
+
+            <thead>
+                <tr class="bg-whitesmoke">
+                    <th scope="col">
+                        Data
+                    </th>
+                    <th scope="col">
+                        Tip Document
+                    </th>
+                    <th scope="col">
+                        Descarca Fisier
+                    </th>
+                    <th scope="col">
+                        Sterge Fisier
+                    </th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {{range .Declaratii}}
+                <tr>
+                    <td>
+                        {{.Data}}
+                    </td>
+                    <td>
+                        {{.TipDocument}}
+                    </td>
+                    <td>
+                        <a href="/download-fisier?path={{.CaleDocument}}">Descarca</a>
+                    </td>
+                    <td>
+                        <a style="color:var(--del-color);" href="/sterge-fisier?path={{.CaleDocument}}">Sterge</a>
+                    </td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+    </article>
 
 </main>
 
