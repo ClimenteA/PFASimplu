@@ -152,8 +152,7 @@ func handleRegistre(app fiber.App, store session.Store) {
 
 		platiCatreStat := CalculeazaPlatiCatreStat(totalIncasariNet, filterYear)
 
-		platiFacuteAnaf := CalculPlatiFacuteAnaf(declaratii)
-		log.Println("platiFacuteAnaf: ", platiFacuteAnaf)
+		platiFacuteAnaf := CalculPlatiFacuteAnaf(declaratii, filterYear)
 		totalPlatiCatreStat := platiCatreStat.Total - platiFacuteAnaf
 		totalIncasariNet = totalIncasariNet - platiCatreStat.Total
 

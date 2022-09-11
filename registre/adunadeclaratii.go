@@ -64,24 +64,20 @@ func getDocsDataSlice(docMetadataJson []string, anul string) []declaratii.Declar
 
 		declaratie := getDocMetadata(path)
 
-		if anul == strconv.Itoa(declaratie.PtAnul) {
-			if declaratie.TipDocument == "Declaratie unica (212)" || declaratie.TipDocument == "Dovada plata impozite" || declaratie.TipDocument == "Dovada incarcare Declaratie 212" {
+		if declaratie.TipDocument == "Declaratie unica (212)" || declaratie.TipDocument == "Dovada plata impozite" || declaratie.TipDocument == "Dovada incarcare Declaratie 212" {
+			if anul == strconv.Itoa(declaratie.PtAnul) {
 				declaratii = append(declaratii, declaratie)
-				continue
 			}
+			continue
 		}
 
 		iterDate, _ := time.Parse(time.RFC3339, declaratie.Data+"T00:00:00Z")
-
-		isBeforeNow := iterDate.Before(now)
 		sameMonthYear := iterDate.Year() == now.Year() && iterDate.Month() == now.Month()
 
-		if isBeforeNow || sameMonthYear {
-
+		if iterDate.Before(now) || sameMonthYear {
 			if strings.HasPrefix(declaratie.Data, anul) {
 				declaratii = append(declaratii, declaratie)
 			}
-
 		}
 
 	}

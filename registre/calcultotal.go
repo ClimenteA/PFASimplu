@@ -30,11 +30,15 @@ func CalculeazaCheltuieliDeductibile(cheltuieli []types.Cheltuiala) float64 {
 
 }
 
-func CalculPlatiFacuteAnaf(declaratii []declaratii.Declaratie) float64 {
+func CalculPlatiFacuteAnaf(declaratii []declaratii.Declaratie, filterYear string) float64 {
+
+	anul, _ := strconv.Atoi(filterYear)
 
 	total := 0.0
-	for _, data := range declaratii {
-		total = total + data.PlataAnaf
+	for _, d := range declaratii {
+		if d.PtAnul == anul {
+			total = total + d.PlataAnaf
+		}
 	}
 	return total
 }
