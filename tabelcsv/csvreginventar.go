@@ -170,25 +170,6 @@ func FullRegistruInventar(path, filterYear string) []types.RegistruInventar {
 		panic(err)
 	}
 
-	// filterDate, err := time.Parse(time.RFC3339, filterYear+"-12-31T00:00:00Z")
-	// if err != nil {
-	// 	log.Panic(err)
-	// }
-
-	// files := []string{}
-	// for _, fp := range allFiles {
-
-	// 	fpDate, err := time.Parse(time.RFC3339, filepath.Base(fp)[0:4]+"-01-01T00:00:00Z")
-	// 	if err != nil {
-	// 		log.Panic(err)
-	// 	}
-
-	// 	log.Println("filterDate, fpDate", filterDate, fpDate)
-
-	// 	if filterDate.Before(fpDate) {
-	// 		files = append(files, fp)
-	// 	}
-	// }
 
 	registruInventar := []types.RegistruInventar{}
 	for _, path := range pathsRegistruInventar {

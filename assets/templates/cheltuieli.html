@@ -189,7 +189,7 @@
             Mijloc Fix
           </th>
           <th scope="col">
-            Download Fisier
+            Descarca Fisier
           </th>
           <th scope="col">
             Sterge Fisier
@@ -275,7 +275,7 @@
             {{end}}
           </td>
           <td>
-            <a href="/download-fisier?path={{.CaleCheltuiala}}">Download</a>
+            <a href="/download-fisier?path={{.CaleCheltuiala}}">Descarca</a>
           </td>
           <td>
             <a style="color:var(--del-color);" href="/sterge-fisier?path={{.CaleCheltuiala}}">Sterge</a>
@@ -3251,7 +3251,7 @@
 
       let suma_cheltuita = parseFloat(event.target.value);
 
-      if (suma_cheltuita > {{ .PragMijlocFix }}) {
+      if (suma_cheltuita > {{.PragMijlocFix}}) {
 
       document.getElementById("mijlocfix").checked = true;
       document.getElementById("data_punerii_in_functiune").setAttribute("required", "");

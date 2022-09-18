@@ -1,0 +1,194 @@
+<script defer src="/mithril.js"></script>
+<style>
+    .none {
+        display: none;
+    }
+
+    fieldset {
+        margin-top: 1rem;
+        margin-bottom: 2.5rem;
+        width: fit-content;
+    }
+
+    #tables>article,
+    #tabel-registru-inventar {
+        margin-bottom: 1rem;
+        margin-top: 4rem;
+        padding: 1rem;
+        max-height: 600px;
+        overflow: auto;
+    }
+
+    .download {
+        display: flex;
+        gap: 2rem;
+        float: right;
+    }
+
+    tr td {
+        width: 1%;
+        white-space: nowrap;
+    }
+
+    .bg-whitesmoke {
+        background: whitesmoke;
+    }
+</style>
+
+
+<main class="container-fluid">
+
+    <hgroup class="container">
+        <h1>Scoate din inventar obiecte/mijloce fixe</h1>
+        <h2>
+            Scoate din Registru inventar obiecte de inventar/mijloce fixe
+            prin adaugarea documentelor justificative de casare sau vanzare.
+        </h2>
+    </hgroup>
+
+
+
+    <form class="container" action="/scoate-din-inventar" method="POST" enctype="multipart/form-data">
+
+        <article>
+
+            <h5>Scoate obiect/mijloc fix</h5>
+
+            <label for="cale_obiect_mijloc_fix">
+                Obiect/Mijloc Fix din Registru Inventar
+                <select id="cale_obiect_mijloc_fix" name="cale_obiect_mijloc_fix">
+                    {{range .RegistruInventar}}
+                    <option value="{{.CaleCheltuiala}}">{{.NrCrt}} - {{.DenumireaElemInv}}</option>
+                    {{end}}
+                </select>
+            </label>
+
+            <div class="grid">
+
+                <label for="tip_operatiune">
+                    Tip operatiune
+                    <select id="tip_operatiune" name="tip_operatiune">
+                        <option value="CASARE" selected>CASARE</option>
+                        <option value="VANZARE">VANZARE</option>
+                    </select>
+                </label>
+
+
+                <label for="suma_incasata">
+                    Suma incasata (RON)
+                    <input type="number" id="suma_incasata" step=any name="suma_incasata" placeholder="5000" disabled>
+                </label>
+
+                <label for="tip_tranzactie">
+                    Tip Tranzactie
+                    <select id="tip_tranzactie" name="tip_tranzactie" disabled>
+                        <option value="NUMERAR" selected>NUMERAR</option>
+                        <option value="BANCAR">BANCAR</option>
+                    </select>
+                </label>
+
+
+            </div>
+
+
+            <div class="grid">
+
+                <label for="file">
+                    Incarca bonul/factura/extras
+                    <input type="file" id="file" name="fisier" required>
+                </label>
+
+                <label for="data">
+                    Data iesire din uz
+                    <input type="date" id="data" name="data" required>
+                </label>
+
+            </div>
+
+            <button type="submit">SCOATE</button>
+
+        </article>
+
+
+    </form>
+
+
+
+    <article id="tabel-registru-inventar">
+        <h4 style="color: var(--secondary);">Registru inventar</h4>
+        <table id="date-registru-inventar">
+
+            <thead>
+                <tr class="bg-whitesmoke">
+                    <th scope="col">
+                        Nr.Crt.
+                    </th>
+                    <th scope="col">
+                        Denumirea elementelor inventariate
+                    </th>
+                    <th scope="col">
+                        Valoarea de inventar (RON)
+                    </th>
+                    <th scope="col">
+                        Data
+                    </th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+                {{range .RegistruInventar}}
+                <tr>
+                    <td>
+                        {{.NrCrt}}
+                    </td>
+                    <td>
+                        <a href="/download-fisier?path={{.CaleCheltuiala}}">{{.DenumireaElemInv}}</a>
+                    </td>
+                    <td>
+                        {{ printf "%.2f" .ValInvRon}}
+                    </td>
+                    <td>
+                        {{.Data}}
+                    </td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+    </article>
+
+    <div class="download">
+        <a href="/download-fisier?path={{.CaleRegistruInventarCSV}}">Descarca CSV</a>
+    </div>
+
+    </div>
+
+
+
+</main>
+
+
+<script>
+
+    document.addEventListener('DOMContentLoaded', () => {
+
+        let label_tip_tranzactie = document.getElementById("label_tip_tranzactie");
+        let tip_operatiune = document.getElementById("tip_operatiune");
+        let suma_incasata = document.getElementById("suma_incasata");
+
+
+        tip_operatiune.addEventListener("change", event => {
+
+            if (tip_operatiune.value == "VANZARE") {
+                tip_tranzactie.disabled = false;
+                suma_incasata.disabled = false;
+            } else {
+                tip_tranzactie.disabled = true;
+                suma_incasata.disabled = true;
+            }
+
+        }, false);
+
+    }, false);
+
+</script>

@@ -22,7 +22,7 @@ func HandleIncasari(app fiber.App, store session.Store) {
 	handleIncasari(app, store)
 }
 
-func getInvoiceJsonPath(dirPath string) string {
+func GetInvoiceJsonPath(dirPath string) string {
 
 	if _, err := os.Stat(dirPath); err == nil || os.IsExist(err) {
 		return filepath.Join(dirPath, "metadata.json")
@@ -32,7 +32,7 @@ func getInvoiceJsonPath(dirPath string) string {
 	}
 }
 
-func getInvoicePath(dirPath string) string {
+func GetInvoicePath(dirPath string) string {
 
 	if _, err := os.Stat(dirPath); err == nil || os.IsExist(err) {
 		return dirPath
@@ -43,7 +43,7 @@ func getInvoicePath(dirPath string) string {
 
 }
 
-func setInvoiceData(invoiceData types.Factura, filePath string) {
+func SetInvoiceData(invoiceData types.Factura, filePath string) {
 	file, _ := json.MarshalIndent(invoiceData, "", " ")
 	err := ioutil.WriteFile(filePath, file, 0644)
 	if err != nil {
@@ -137,8 +137,8 @@ func handleIncasari(app fiber.App, store session.Store) {
 			}
 
 			dirName := filepath.Join(user.StocareIncasari, data+"-"+serie+"-"+strconv.Itoa(numar))
-			invoicePath := getInvoicePath(dirName)
-			invoiceJsonPath := getInvoiceJsonPath(dirName)
+			invoicePath := GetInvoicePath(dirName)
+			invoiceJsonPath := GetInvoiceJsonPath(dirName)
 			caleFactura := filepath.Join(invoicePath, fisier.Filename)
 
 			invoiceData := types.Factura{
@@ -150,7 +150,7 @@ func handleIncasari(app fiber.App, store session.Store) {
 				CaleFactura:   caleFactura,
 			}
 
-			setInvoiceData(invoiceData, invoiceJsonPath)
+			SetInvoiceData(invoiceData, invoiceJsonPath)
 			c.SaveFile(fisier, caleFactura)
 			go utils.SmallerImg(caleFactura)
 

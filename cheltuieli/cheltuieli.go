@@ -47,7 +47,7 @@ func getExpensePath(dirPath string) string {
 
 }
 
-func setExpenseData(expenseData types.Cheltuiala, filePath string) {
+func SetExpenseData(expenseData types.Cheltuiala, filePath string) {
 	file, _ := json.MarshalIndent(expenseData, "", " ")
 	err := ioutil.WriteFile(filePath, file, 0644)
 	if err != nil {
@@ -326,7 +326,7 @@ func handleCheltuieli(app fiber.App, store session.Store, coduriMijloaceFixe []s
 
 			expenseData := getExpenseData(c, user, form, fisier.Filename, cale_cheltuiala, coduriMijloaceFixe)
 			expenseJsonPath := getExpenseJsonPath(dirName)
-			setExpenseData(expenseData, expenseJsonPath)
+			SetExpenseData(expenseData, expenseJsonPath)
 
 		}
 

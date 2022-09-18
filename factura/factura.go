@@ -20,7 +20,7 @@ func handleInvoicePage(app fiber.App, store session.Store) {
 
 		currentUserPath := sess.Get("currentUser")
 		if currentUserPath == nil {
-			c.Redirect("/login")
+			return c.Redirect("/login")
 		}
 
 		return c.Render("factura", fiber.Map{}, "base")

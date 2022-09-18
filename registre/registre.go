@@ -169,14 +169,14 @@ func handleRegistre(app fiber.App, store session.Store) {
 		cheltuieliRj := appendTotalLunarCheltuieli(cheltuieli, cheltuieliPeLuni, filterYear)
 		registruJurnal := CreeazaRegistruJurnal(incasariRj, cheltuieliRj)
 
-		registruInventar := CreeazaRegistruInventar(cheltuieli)
 		registruFiscal := CreeazaRegistruFiscal(aniInregistrati, incasari, cheltuieli, filterYear)
-
+		
 		incasariCSVPath := tabelcsv.CreeazaIncasariCSV(user.Stocare, filterYear, incasari)
 		cheltuieliCSVPath := tabelcsv.CreeazaCheltuieliCSV(user.Stocare, filterYear, cheltuieli)
 		registruJurnalCSVPath := tabelcsv.CreeazaRegistruJurnalCSV(user.Stocare, filterYear, registruJurnal)
 		registruFiscalCSVPath := tabelcsv.CreeazaRegistruFiscalCSV(user.Stocare, filterYear, registruFiscal)
-
+		
+		registruInventar := CreeazaRegistruInventar(cheltuieli)
 		tabelcsv.CreeazaRegistruInventarCSV(user.Stocare, filterYear+"_", registruInventar)
 		registruInventar = tabelcsv.FullRegistruInventar(user.Stocare, filterYear)
 		registruInventarCSVPath := tabelcsv.CreeazaRegistruInventarCSV(filepath.Join(user.Stocare, "inventar"), "", registruInventar)

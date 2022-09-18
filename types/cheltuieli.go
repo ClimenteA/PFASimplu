@@ -28,13 +28,22 @@ type DetaliiMijlocFix struct {
 	DesfasurareAmortizareMijlocFix []AmortizareMijlocFix `json:"desfasurare_amortizare_mijloc_fix"`
 }
 
+type IesireDinUz struct {
+	ScosDinUz             bool   `json:"scos_din_uz"`
+	DataIesireDinUz       string `json:"data_iesire_din_uz"`
+	CaleDovadaIesireDinUz string `json:"cale_dovada_iesire_din_uz"`
+	TipOperatiune         string `json:"tip_operatiune"`
+}
+
 type Cheltuiala struct {
-	NumeCheltuiala   string           `json:"nume_cheltuiala"`
-	SumaCheltuita    float64          `json:"suma_cheltuita"`
-	TipTranzactie    string           `json:"tip_tranzactie"`
-	Data             string           `json:"data"`
-	ObiectInventar   bool             `json:"obiect_inventar"`
-	MijlocFix        bool             `json:"mijloc_fix"`
-	CaleCheltuiala   string           `json:"cale_cheltuiala"`
-	DetaliiMijlocFix DetaliiMijlocFix `json:"detalii_mijloc_fix"`
+	NumeCheltuiala     string           `json:"nume_cheltuiala"`
+	SumaCheltuita      float64          `json:"suma_cheltuita"`
+	TipTranzactie      string           `json:"tip_tranzactie"`
+	Data               string           `json:"data"`
+	ObiectInventar     bool             `json:"obiect_inventar"`
+	MijlocFix          bool             `json:"mijloc_fix"`
+	ScosDinUz          bool             `json:"scos_din_uz"`
+	CaleCheltuiala     string           `json:"cale_cheltuiala"`
+	DetaliiMijlocFix   DetaliiMijlocFix `json:"detalii_mijloc_fix"`
+	DetaliiIesireDinUz IesireDinUz      `json:"detalii_iesire_din_uz"`
 }
