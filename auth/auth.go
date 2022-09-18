@@ -26,13 +26,14 @@ func HandleAuth(app fiber.App, store session.Store) {
 }
 
 type Account struct {
-	Email             string `json:"email"`
-	Parola            string `json:"parola"`
-	Stocare           string `json:"stocare"`
-	StocareIncasari   string `json:"stocare_incasari"`
-	StocareCheltuieli string `json:"stocare_cheltuieli"`
-	StocareDeclaratii string `json:"stocare_declaratii"`
-	DataCreareCont    string `json:"data_creeare_cont"`
+	Email                string `json:"email"`
+	Parola               string `json:"parola"`
+	Stocare              string `json:"stocare"`
+	StocareIncasari      string `json:"stocare_incasari"`
+	StocareIncasariExtra string `json:"stocare_incasari_extra"`
+	StocareCheltuieli    string `json:"stocare_cheltuieli"`
+	StocareDeclaratii    string `json:"stocare_declaratii"`
+	DataCreareCont       string `json:"data_creeare_cont"`
 }
 
 func encryptData(dataStr string) string {
@@ -61,6 +62,7 @@ func getAccountPath(accountName string) string {
 func setAccountData(accountFilePath, email, parola, stocare string) Account {
 
 	stocareIncasari := filepath.Join(stocare, "incasari")
+	stocareIncasariExtra := filepath.Join(stocare, "incasariextra")
 	stocareCheltuieli := filepath.Join(stocare, "cheltuieli")
 	stocareDeclaratii := filepath.Join(stocare, "declaratii")
 
@@ -72,6 +74,10 @@ func setAccountData(accountFilePath, email, parola, stocare string) Account {
 		os.MkdirAll(stocareIncasari, 0750)
 	}
 
+	if _, err := os.Stat(stocareIncasariExtra); err != nil || !os.IsExist(err) {
+		os.MkdirAll(stocareIncasariExtra, 0750)
+	}
+
 	if _, err := os.Stat(stocareCheltuieli); err != nil || !os.IsExist(err) {
 		os.MkdirAll(stocareCheltuieli, 0750)
 	}
@@ -81,13 +87,14 @@ func setAccountData(accountFilePath, email, parola, stocare string) Account {
 	}
 
 	data := Account{
-		Email:             email,
-		Parola:            parola,
-		Stocare:           stocare,
-		StocareIncasari:   stocareIncasari,
-		StocareCheltuieli: stocareCheltuieli,
-		StocareDeclaratii: stocareDeclaratii,
-		DataCreareCont:    time.Now().Format(time.RFC3339),
+		Email:                email,
+		Parola:               parola,
+		Stocare:              stocare,
+		StocareIncasari:      stocareIncasari,
+		StocareIncasariExtra: stocareIncasariExtra,
+		StocareCheltuieli:    stocareCheltuieli,
+		StocareDeclaratii:    stocareDeclaratii,
+		DataCreareCont:       time.Now().Format(time.RFC3339),
 	}
 
 	file, _ := json.MarshalIndent(data, "", " ")
