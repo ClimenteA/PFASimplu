@@ -58,7 +58,13 @@
                 Obiect/Mijloc Fix din Registru Inventar
                 <select id="cale_obiect_mijloc_fix" name="cale_obiect_mijloc_fix">
                     {{range .RegistruInventar}}
+
+                    {{if .ScosDinUz}}
+                    <option disabled>{{.NrCrt}} - {{.DenumireaElemInv}} - scos din uz</option>
+                    {{else}}
                     <option value="{{.CaleCheltuiala}}">{{.NrCrt}} - {{.DenumireaElemInv}}</option>
+                    {{end}}
+
                     {{end}}
                 </select>
             </label>
@@ -115,6 +121,18 @@
                     <th scope="col">
                         Data
                     </th>
+                    <th scope="col">
+                        Scos din uz
+                    </th>
+                    <th scope="col">
+                        Modalitate iesire din uz
+                    </th>
+                    <th scope="col">
+                        Data iesirii in uz
+                    </th>
+                    <th scope="col">
+                        Document justificativ
+                    </th>
                 </tr>
 
             </thead>
@@ -134,6 +152,35 @@
                     <td>
                         {{.Data}}
                     </td>
+                    <td>
+                        {{if .ScosDinUz}}
+                        Da
+                        {{else}}
+                        Nu
+                        {{end}}
+                    </td>
+                    <td>
+                        {{if .ScosDinUz}}
+                        {{.ModalitateIesireDinUz}}
+                        {{else}}
+                        -
+                        {{end}}
+                    </td>
+                    <td>
+                        {{if .ScosDinUz}}
+                        {{.DataIesireDinUz}}
+                        {{else}}
+                        -
+                        {{end}}
+                    </td>
+                    <td>
+                        {{if .ScosDinUz}}
+                        <a href="/download-fisier?path={{.CaleDovadaIesireDinUz}}">Descarca dovada
+                            {{.ModalitateIesireDinUz}}</a>
+                        {{else}}
+                        -
+                        {{end}}
+                    </td>
                 </tr>
                 {{end}}
             </tbody>
@@ -143,9 +190,6 @@
     <div class="download">
         <a href="/download-fisier?path={{.CaleRegistruInventarCSV}}">Descarca CSV</a>
     </div>
-
-    </div>
-
 
 
 </main>
