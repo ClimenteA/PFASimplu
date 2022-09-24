@@ -38,6 +38,10 @@ func CreeazaCheltuieliCSV(path, filterYear string, cheltuieli []types.Cheltuiala
 			"Durata Normala De Functionare",
 			"Cota De Amortizare",
 			"Cale Fisier",
+			"Scos din uz",
+			"Modalitate iesire din uz",
+			"Data iesire din uz",
+			"Document justificativ",
 		},
 	}
 
@@ -51,6 +55,11 @@ func CreeazaCheltuieliCSV(path, filterYear string, cheltuieli []types.Cheltuiala
 		mijlocFix := "Nu"
 		if cheltuiala.MijlocFix {
 			mijlocFix = "Da"
+		}
+
+		scosDinUz := "Nu"
+		if cheltuiala.ScosDinUz {
+			scosDinUz = "Da"
 		}
 
 		rows = append(rows, []string{
@@ -77,6 +86,10 @@ func CreeazaCheltuieliCSV(path, filterYear string, cheltuieli []types.Cheltuiala
 			cheltuiala.DetaliiMijlocFix.DurataNormalaDeFunctionare,
 			fmt.Sprintf("%f", cheltuiala.DetaliiMijlocFix.CotaDeAmortizare),
 			cheltuiala.CaleCheltuiala,
+			scosDinUz,
+			cheltuiala.DetaliiIesireDinUz.ModalidateIesireDinUz,
+			cheltuiala.DetaliiIesireDinUz.DataIesireDinUz,
+			cheltuiala.DetaliiIesireDinUz.CaleDovadaIesireDinUz,
 		})
 	}
 

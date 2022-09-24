@@ -59,7 +59,7 @@ func getAccountPath(accountName string) string {
 	}
 }
 
-func setAccountData(accountFilePath, email, parola, stocare string) Account {
+func setAccountData(accountFilePath, email, parola, stocare string, saveUserMetadata bool) Account {
 
 	stocareIncasari := filepath.Join(stocare, "incasari")
 	stocareIncasariExtra := filepath.Join(stocare, "incasariextra")
@@ -97,12 +97,16 @@ func setAccountData(accountFilePath, email, parola, stocare string) Account {
 		DataCreareCont:       time.Now().Format(time.RFC3339),
 	}
 
-	file, _ := json.MarshalIndent(data, "", " ")
-	err := ioutil.WriteFile(accountFilePath, file, 0644)
-	if err != nil {
-		panic(err)
+	if saveUserMetadata {
+		file, _ := json.MarshalIndent(data, "", " ")
+		err := ioutil.WriteFile(accountFilePath, file, 0644)
+		if err != nil {
+			panic(err)
+		}
 	}
+
 	return data
+
 }
 
 func getAccountData(accountFilePath string) Account {
@@ -136,7 +140,7 @@ func handleResetPassword(app fiber.App, store session.Store) {
 			accountFilePath := getAccountPath(accountName)
 
 			if _, err := os.Stat(accountFilePath); err == nil || os.IsExist(err) {
-				setAccountData(accountFilePath, email, "reset", filepath.Join("stocare", accountName))
+				setAccountData(accountFilePath, email, "reset", filepath.Join("stocare", accountName), true)
 			} else {
 				return c.Redirect("/register")
 			}
@@ -173,7 +177,7 @@ func handleRegister(app fiber.App, store session.Store) {
 			if _, err := os.Stat(accountFilePath); err == nil || os.IsExist(err) {
 				return c.Redirect("/reset-password")
 			} else {
-				setAccountData(accountFilePath, email, accountPassword, filepath.Join("stocare", accountName))
+				setAccountData(accountFilePath, email, accountPassword, filepath.Join("stocare", accountName), true)
 			}
 		}
 
@@ -214,7 +218,7 @@ func handleLogin(app fiber.App, store session.Store) {
 					}
 				}
 
-				setAccountData(accountFilePath, email, accountPassword, filepath.Join("stocare", accountName))
+				setAccountData(accountFilePath, email, accountPassword, filepath.Join("stocare", accountName), false)
 
 			} else {
 				return c.Redirect("/login?title=Date autentificare gresite&content=Parola sau emailul nu corespund sau contul nu exista")

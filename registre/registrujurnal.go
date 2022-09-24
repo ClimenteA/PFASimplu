@@ -10,7 +10,7 @@ import (
 	"github.com/ClimenteA/pfasimplu-go/types"
 )
 
-func processIncasari(sliceJurnal []types.RegistruJurnal, incasari []types.Factura) []types.RegistruJurnal {
+func processIncasari(sliceJurnal []types.RegistruJurnal, incasari []types.FacturaPlusExtraIncasari) []types.RegistruJurnal {
 
 	for _, incasare := range incasari {
 
@@ -132,7 +132,7 @@ func sortByDate(sliceJurnal []types.RegistruJurnal) []types.RegistruJurnal {
 
 }
 
-func CreeazaRegistruJurnal(incasari []types.Factura, cheltuieli []types.Cheltuiala) []types.RegistruJurnal {
+func CreeazaRegistruJurnal(incasari []types.FacturaPlusExtraIncasari, cheltuieli []types.Cheltuiala) []types.RegistruJurnal {
 
 	sliceJurnal := []types.RegistruJurnal{}
 	sliceJurnal = processIncasari(sliceJurnal, incasari)

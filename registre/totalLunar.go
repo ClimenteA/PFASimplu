@@ -98,7 +98,7 @@ func getCheltuieliMapper(cheltuieliPeLuni []string) map[string]float64 {
 
 }
 
-func appendTotalLunarIncasari(incasari []types.Factura, incasariPeLuni []string, filterYear string) []types.Factura {
+func appendTotalLunarIncasari(incasari []types.FacturaPlusExtraIncasari, incasariPeLuni []string, filterYear string) []types.FacturaPlusExtraIncasari {
 
 	incasariMapper := getIncasariMapper(incasariPeLuni)
 
@@ -119,7 +119,7 @@ func appendTotalLunarIncasari(incasari []types.Factura, incasariPeLuni []string,
 
 		lastDateOfMonth := endOfThisMonth.Format(time.RFC3339)[0:10]
 
-		val := types.Factura{
+		val := types.FacturaPlusExtraIncasari{
 			Data:        lastDateOfMonth,
 			Serie:       fmt.Sprintf("%.2f", total) + " RON",
 			CaleFactura: "Total luna " + monthMapper[month] + " (incasari)",

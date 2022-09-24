@@ -9,7 +9,7 @@ import (
 	"github.com/ClimenteA/pfasimplu-go/types"
 )
 
-func calculIncasariAn(incasari []types.Factura) map[string]float64 {
+func calculIncasariAn(incasari []types.FacturaPlusExtraIncasari) map[string]float64 {
 
 	calculIncasari := map[string]float64{}
 	for _, data := range incasari {
@@ -62,7 +62,7 @@ func addNrCrtRegFiscal(registruFiscal []types.RegistruFiscal) []types.RegistruFi
 
 func CreeazaRegistruFiscal(
 	aniInregistrati []string,
-	incasari []types.Factura,
+	incasari []types.FacturaPlusExtraIncasari,
 	cheltuieli []types.Cheltuiala,
 	filterYear string) []types.RegistruFiscal {
 

@@ -9,7 +9,7 @@ import (
 	"github.com/ClimenteA/pfasimplu-go/types"
 )
 
-func CalculeazaIncasariBrut(incasari []types.Factura) float64 {
+func CalculeazaIncasariBrut(incasari []types.FacturaPlusExtraIncasari) float64 {
 
 	total := 0.0
 	for _, data := range incasari {

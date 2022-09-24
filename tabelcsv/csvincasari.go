@@ -11,10 +11,11 @@ import (
 	"github.com/ClimenteA/pfasimplu-go/types"
 )
 
-func CreeazaIncasariCSV(path, filterYear string, incasari []types.Factura) string {
+func CreeazaIncasariCSV(path, filterYear string, incasari []types.FacturaPlusExtraIncasari) string {
 
 	rows := [][]string{
 		{
+			"Sursa venit",
 			"Serie",
 			"Numar",
 			"Data",
@@ -26,6 +27,7 @@ func CreeazaIncasariCSV(path, filterYear string, incasari []types.Factura) strin
 
 	for _, incasare := range incasari {
 		rows = append(rows, []string{
+			incasare.SursaVenit,
 			incasare.Serie,
 			strconv.Itoa(incasare.Numar),
 			incasare.Data,
