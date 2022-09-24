@@ -64,7 +64,7 @@ func CreeazaRegistruInventar(cheltuieli []types.Cheltuiala) []types.RegistruInve
 			if data.ScosDinUz {
 
 				obiect.ScosDinUz = data.DetaliiIesireDinUz.ScosDinUz
-				obiect.ModalitateIesireDinUz = data.DetaliiIesireDinUz.TipOperatiune
+				obiect.ModalitateIesireDinUz = data.DetaliiIesireDinUz.ModalidateIesireDinUz
 				obiect.DataIesireDinUz = data.DetaliiIesireDinUz.DataIesireDinUz
 				obiect.CaleDovadaIesireDinUz = data.DetaliiIesireDinUz.CaleDovadaIesireDinUz
 			}
@@ -92,7 +92,7 @@ func CreeazaRegistruInventar(cheltuieli []types.Cheltuiala) []types.RegistruInve
 
 				if data.ScosDinUz {
 					obiect.ScosDinUz = data.DetaliiIesireDinUz.ScosDinUz
-					obiect.ModalitateIesireDinUz = data.DetaliiIesireDinUz.TipOperatiune
+					obiect.ModalitateIesireDinUz = data.DetaliiIesireDinUz.ModalidateIesireDinUz
 					obiect.DataIesireDinUz = data.DetaliiIesireDinUz.DataIesireDinUz
 					obiect.CaleDovadaIesireDinUz = data.DetaliiIesireDinUz.CaleDovadaIesireDinUz
 				}

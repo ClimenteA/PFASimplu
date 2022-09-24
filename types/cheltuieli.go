@@ -32,7 +32,7 @@ type IesireDinUz struct {
 	ScosDinUz             bool   `json:"scos_din_uz"`
 	DataIesireDinUz       string `json:"data_iesire_din_uz"`
 	CaleDovadaIesireDinUz string `json:"cale_dovada_iesire_din_uz"`
-	TipOperatiune         string `json:"tip_operatiune"`
+	ModalidateIesireDinUz string `json:"modalitate_iesire_din_uz"`
 }
 
 type Cheltuiala struct {

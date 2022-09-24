@@ -107,7 +107,7 @@ func handleInventarPage(app fiber.App, store session.Store) {
 				ScosDinUz:             true,
 				DataIesireDinUz:       data,
 				CaleDovadaIesireDinUz: cale_dovada_scos_din_uz,
-				TipOperatiune:         tip_operatiune,
+				ModalidateIesireDinUz: tip_operatiune,
 			}
 
 			outputs.SetExpenseData(cheltuiala, cale_metadata)

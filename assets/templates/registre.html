@@ -262,6 +262,18 @@
             <th scope="col">
               Cota De Amortizare
             </th>
+            <th scope="col">
+              Scos din uz
+            </th>
+            <th scope="col">
+              Modalitate iesire din uz
+            </th>
+            <th scope="col">
+              Data iesirii in uz
+            </th>
+            <th scope="col">
+              Document justificativ
+            </th>
           </tr>
         </thead>
 
@@ -347,6 +359,34 @@
             </td>
             <td>
               {{ printf "%.2f" .DetaliiMijlocFix.CotaDeAmortizare}}
+            </td>
+            <td>
+              {{if .DetaliiIesireDinUz.ScosDinUz}}
+              Da
+              {{else}}
+              Nu
+              {{end}}
+            </td>
+            <td>
+              {{if .DetaliiIesireDinUz.ScosDinUz}}
+              {{ .DetaliiIesireDinUz.ModalitateIesireDinUz }}
+              {{else}}
+              -
+              {{end}}
+            </td>
+            <td>
+              {{if .DetaliiIesireDinUz.ScosDinUz}}
+              {{ .DetaliiIesireDinUz.DataIesireDinUz }}
+              {{else}}
+              -
+              {{end}}
+            </td>
+            <td>
+              {{if .DetaliiIesireDinUz.ScosDinUz}}
+              <a href="/download-fisier?path={{.DetaliiIesireDinUz.CaleDovadaIesireDinUz}}">Descarca dovada {{.DetaliiIesireDinUz.ModalitateIesireDinUz}}</a>
+              {{else}}
+              -
+              {{end}}
             </td>
           </tr>
           {{end}}

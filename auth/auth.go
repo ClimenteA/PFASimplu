@@ -213,6 +213,9 @@ func handleLogin(app fiber.App, store session.Store) {
 						panic(err)
 					}
 				}
+
+				setAccountData(accountFilePath, email, accountPassword, filepath.Join("stocare", accountName))
+
 			} else {
 				return c.Redirect("/login?title=Date autentificare gresite&content=Parola sau emailul nu corespund sau contul nu exista")
 			}
