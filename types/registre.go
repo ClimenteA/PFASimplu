@@ -15,8 +15,9 @@ type RegistruInventar struct {
 	Data                  string  `json:"data,omitempty"`
 	MijlocFix             bool    `json:"mijloc_fix"`
 	ScosDinUz             bool    `json:"scos_din_uz"`
-	CaleDovadaIesireDinUz string  `json:"cale_dovada_iesire_din_uz"`
+	ModalitateIesireDinUz string  `json:"modalitate_iesire_din_uz"`
 	DataIesireDinUz       string  `json:"data_iesire_din_uz"`
+	CaleDovadaIesireDinUz string  `json:"cale_dovada_iesire_din_uz"`
 }
 
 type RegistruJurnal struct {

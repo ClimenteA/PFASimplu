@@ -29,6 +29,10 @@ func CreeazaRegistruInventarCSV(path, filterYear string, registruInventar []type
 			"Data",
 			"Stocare",
 			"MijlocFix",
+			"Scos din uz",
+			"Modalitate iesire din uz",
+			"Data iesire din uz",
+			"Document justificativ",
 		},
 	}
 
@@ -40,6 +44,10 @@ func CreeazaRegistruInventarCSV(path, filterYear string, registruInventar []type
 			inventar.Data,
 			inventar.CaleCheltuiala,
 			strconv.FormatBool(inventar.MijlocFix),
+			strconv.FormatBool(inventar.ScosDinUz),
+			inventar.ModalitateIesireDinUz,
+			inventar.DataIesireDinUz,
+			inventar.CaleDovadaIesireDinUz,
 		})
 	}
 
@@ -110,7 +118,16 @@ func parseRegistruInventar(data [][]string) []types.RegistruInventar {
 			continue
 		}
 
-		// Nr.Crt.,Denumirea elementelor inventariate,Valoarea de inventar (RON),Data,Stocare
+		// "Nr.Crt.",
+		// "Denumirea elementelor inventariate",
+		// "Valoarea de inventar (RON)",
+		// "Data",
+		// "Stocare",
+		// "MijlocFix",
+		// "Scos din uz",
+		// "Modalitate iesire din uz",
+		// "Data iesire din uz",
+		// "Document justificativ",
 		row := types.RegistruInventar{}
 		for j, field := range line {
 
@@ -138,6 +155,23 @@ func parseRegistruInventar(data [][]string) []types.RegistruInventar {
 			if j == 5 {
 				fieldb, _ := strconv.ParseBool(field)
 				row.MijlocFix = fieldb
+			}
+
+			if j == 6 {
+				fieldb, _ := strconv.ParseBool(field)
+				row.ScosDinUz = fieldb
+			}
+
+			if j == 7 {
+				row.ModalitateIesireDinUz = field
+			}
+
+			if j == 8 {
+				row.DataIesireDinUz = field
+			}
+
+			if j == 9 {
+				row.CaleDovadaIesireDinUz = field
 			}
 
 		}
@@ -169,7 +203,6 @@ func FullRegistruInventar(path, filterYear string) []types.RegistruInventar {
 	if err != nil {
 		panic(err)
 	}
-
 
 	registruInventar := []types.RegistruInventar{}
 	for _, path := range pathsRegistruInventar {

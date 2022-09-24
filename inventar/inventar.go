@@ -12,11 +12,9 @@ import (
 
 	"github.com/ClimenteA/pfasimplu-go/auth"
 	outputs "github.com/ClimenteA/pfasimplu-go/cheltuieli"
-	inputs "github.com/ClimenteA/pfasimplu-go/incasari"
 	"github.com/ClimenteA/pfasimplu-go/registre"
 	"github.com/ClimenteA/pfasimplu-go/tabelcsv"
 	"github.com/ClimenteA/pfasimplu-go/types"
-	"github.com/ClimenteA/pfasimplu-go/utils"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/session"
 )
@@ -93,47 +91,6 @@ func handleInventarPage(app fiber.App, store session.Store) {
 			data := form.Value["data"][0]
 			tip_operatiune := form.Value["tip_operatiune"][0]
 
-			if tip_operatiune == "VANZARE" {
-				tip_tranzactie := form.Value["tip_tranzactie"][0]
-				suma_incasata, err := strconv.ParseFloat(form.Value["suma_incasata"][0], 64)
-				if err != nil {
-					panic(err)
-				}
-
-				user := getCurrentUser(fmt.Sprint(currentUserPath))
-				filterYear := strconv.Itoa(time.Now().Year())
-				incasari := inputs.AdunaIncasari(user, filterYear)
-				ultimaSerie := "INV"
-				ultimulNumar := 0
-				if len(incasari) > 0 {
-					ultimaSerie = incasari[0].Serie
-					ultimulNumar = incasari[0].Numar + 1
-				}
-
-				dirName := filepath.Join(user.StocareIncasari, data+"-"+ultimaSerie+"-"+strconv.Itoa(ultimulNumar))
-				invoicePath := inputs.GetInvoicePath(dirName)
-				invoiceJsonPath := inputs.GetInvoiceJsonPath(dirName)
-				caleFactura := filepath.Join(invoicePath, "Vanzare din inventar - "+fisier.Filename)
-
-				if _, err := os.Stat(caleFactura); err == nil {
-					os.Remove(caleFactura)
-				}
-
-				invoiceData := types.Factura{
-					Serie:         ultimaSerie,
-					Numar:         ultimulNumar,
-					Data:          data,
-					TipTranzactie: tip_tranzactie,
-					SumaIncasata:  suma_incasata,
-					CaleFactura:   caleFactura,
-				}
-
-				inputs.SetInvoiceData(invoiceData, invoiceJsonPath)
-				c.SaveFile(fisier, caleFactura)
-				go utils.SmallerImg(caleFactura)
-
-			}
-
 			cale_cheltuiala_root, _ := filepath.Split(cale_obiect_mijloc_fix)
 			cale_metadata := filepath.Join(cale_cheltuiala_root, "metadata.json")
 
@@ -157,7 +114,7 @@ func handleInventarPage(app fiber.App, store session.Store) {
 
 		}
 
-		return c.Redirect("/scoate-din-inventar?title=Document adaugat&content=Documentul a fost adaugat. Vezi registre contabile.")
+		return c.Redirect("/scoate-din-inventar?title=Scos din uz&content=Obiect/Mijloc fix scos din uz. Vezi registre contabile.")
 
 	})
 

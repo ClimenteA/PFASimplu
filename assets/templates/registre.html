@@ -65,7 +65,7 @@
       <article class="article-grid">
         <h4 style="color: var(--secondary)">Total Incasari (Brut)</h4>
         <h1 style="color: green">{{.TotalIncasariBrut}} RON</h1>
-        {{if .PlatitorTVA}} 
+        {{if .PlatitorTVA}}
         <small style="color: indianred;">
           Atentie ai depasit plafonul TVA!
           Trebuie sa depui documentele necesare la ANAF!
@@ -557,6 +557,18 @@
             <th scope="col">
               Data
             </th>
+            <th scope="col">
+              Scos din uz
+            </th>
+            <th scope="col">
+              Modalitate iesire din uz
+            </th>
+            <th scope="col">
+              Data iesirii in uz
+            </th>
+            <th scope="col">
+              Document justificativ
+            </th>
           </tr>
 
         </thead>
@@ -575,6 +587,34 @@
             </td>
             <td>
               {{.Data}}
+            </td>
+            <td>
+              {{if .ScosDinUz}}
+              Da
+              {{else}}
+              Nu
+              {{end}}
+            </td>
+            <td>
+              {{if .ScosDinUz}}
+              {{.ModalitateIesireDinUz}}
+              {{else}}
+              -
+              {{end}}
+            </td>
+            <td>
+              {{if .ScosDinUz}}
+              {{.DataIesireDinUz}}
+              {{else}}
+              -
+              {{end}}
+            </td>
+            <td>
+              {{if .ScosDinUz}}
+              <a href="/download-fisier?path={{.CaleDovadaIesireDinUz}}">Descarca dovada {{.ModalitateIesireDinUz}}</a>
+              {{else}}
+              -
+              {{end}}
             </td>
           </tr>
           {{end}}
@@ -702,47 +742,47 @@
 
 <script data-config>
 
-    let baseFiltersConfig = {
-      base_path: 'tablefilter/',
-      alternate_rows: true,
-      rows_counter: false,
-      btn_reset: true,
-      loader: true,
-      status_bar: false,
-      mark_active_columns: true,
-      highlight_keywords: true,
-      toolbar: true,
-    };
-  
-    let incasariFiltersConfig = {
-      col_4: 'select',
-    };
-  
-    let tfIncasari = new TableFilter('date-incasari', { ...baseFiltersConfig, ...incasariFiltersConfig });
-    tfIncasari.init();
-  
-    let cheltuieliFiltersConfig = {
-      col_3: 'select',
-      col_4: 'select',
-      col_5: 'select',
-    };
-  
-    let tfCheltuieli = new TableFilter('date-cheltuieli', { ...baseFiltersConfig, ...cheltuieliFiltersConfig });
-    tfCheltuieli.init();
-  
-  
-    let tfdeclaratii = new TableFilter('date-declaratii', baseFiltersConfig);
-    tfdeclaratii.init();
-  
-    let tfregjurnal = new TableFilter('date-registru-jurnal', baseFiltersConfig);
-    tfregjurnal.init();
-  
-    let tfreginv = new TableFilter('date-registru-inventar', baseFiltersConfig);
-    tfreginv.init();
-  
-    let tfregfisc = new TableFilter('date-registru-fiscal', baseFiltersConfig);
-    tfregfisc.init();
-  
+  let baseFiltersConfig = {
+    base_path: 'tablefilter/',
+    alternate_rows: true,
+    rows_counter: false,
+    btn_reset: true,
+    loader: true,
+    status_bar: false,
+    mark_active_columns: true,
+    highlight_keywords: true,
+    toolbar: true,
+  };
+
+  let incasariFiltersConfig = {
+    col_4: 'select',
+  };
+
+  let tfIncasari = new TableFilter('date-incasari', { ...baseFiltersConfig, ...incasariFiltersConfig });
+  tfIncasari.init();
+
+  let cheltuieliFiltersConfig = {
+    col_3: 'select',
+    col_4: 'select',
+    col_5: 'select',
+  };
+
+  let tfCheltuieli = new TableFilter('date-cheltuieli', { ...baseFiltersConfig, ...cheltuieliFiltersConfig });
+  tfCheltuieli.init();
+
+
+  let tfdeclaratii = new TableFilter('date-declaratii', baseFiltersConfig);
+  tfdeclaratii.init();
+
+  let tfregjurnal = new TableFilter('date-registru-jurnal', baseFiltersConfig);
+  tfregjurnal.init();
+
+  let tfreginv = new TableFilter('date-registru-inventar', baseFiltersConfig);
+  tfreginv.init();
+
+  let tfregfisc = new TableFilter('date-registru-fiscal', baseFiltersConfig);
+  tfregfisc.init();
+
 </script>
 
 </body>

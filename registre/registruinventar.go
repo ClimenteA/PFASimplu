@@ -60,6 +60,17 @@ func CreeazaRegistruInventar(cheltuieli []types.Cheltuiala) []types.RegistruInve
 				Data:             data.Data,
 				MijlocFix:        false,
 			}
+
+			if data.ScosDinUz {
+
+				obiect.ScosDinUz = data.DetaliiIesireDinUz.ScosDinUz
+				obiect.ModalitateIesireDinUz = data.DetaliiIesireDinUz.TipOperatiune
+				obiect.DataIesireDinUz = data.DetaliiIesireDinUz.DataIesireDinUz
+				obiect.CaleDovadaIesireDinUz = data.DetaliiIesireDinUz.CaleDovadaIesireDinUz
+			}
+
+			log.Println(obiect.ScosDinUz)
+
 			inventar = append(inventar, obiect)
 		}
 
@@ -77,6 +88,13 @@ func CreeazaRegistruInventar(cheltuieli []types.Cheltuiala) []types.RegistruInve
 					CaleCheltuiala:   data.CaleCheltuiala,
 					Data:             data.DetaliiMijlocFix.DataPuneriiInFunctiune,
 					MijlocFix:        true,
+				}
+
+				if data.ScosDinUz {
+					obiect.ScosDinUz = data.DetaliiIesireDinUz.ScosDinUz
+					obiect.ModalitateIesireDinUz = data.DetaliiIesireDinUz.TipOperatiune
+					obiect.DataIesireDinUz = data.DetaliiIesireDinUz.DataIesireDinUz
+					obiect.CaleDovadaIesireDinUz = data.DetaliiIesireDinUz.CaleDovadaIesireDinUz
 				}
 
 				inventar = append(inventar, obiect)
