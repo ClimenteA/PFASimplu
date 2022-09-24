@@ -48,6 +48,16 @@ func GetIncasareExtraPath(dirPath string) string {
 
 }
 
+func GetIncasareExtraJsonPath(dirPath string) string {
+
+	if _, err := os.Stat(dirPath); err == nil || os.IsExist(err) {
+		return filepath.Join(dirPath, "metadata.json")
+	} else {
+		os.MkdirAll(dirPath, 0750)
+		return filepath.Join(dirPath, "metadata.json")
+	}
+}
+
 func SetIncasareExtraData(data types.ExtraIncasare, filePath string) {
 	file, _ := json.MarshalIndent(data, "", " ")
 	err := ioutil.WriteFile(filePath, file, 0644)
@@ -86,15 +96,14 @@ func handleIncasariExtra(app fiber.App, store session.Store) {
 		}
 
 		if form, err := c.MultipartForm(); err == nil {
-			tip_tranzactie := form.Value["tip_tranzactie"][0]
-			data := form.Value["data"][0]
-			sursa_venit := form.Value["sursa_venit"][0]
 
+			sursa_venit := form.Value["sursa_venit"][0]
+			tip_tranzactie := form.Value["tip_tranzactie"][0]
 			suma_incasata, err := strconv.ParseFloat(form.Value["suma_incasata"][0], 64)
 			if err != nil {
 				panic(err)
 			}
-
+			data := form.Value["data"][0]
 			fisier, err := c.FormFile("fisier")
 			if err != nil {
 				panic(err)
@@ -102,8 +111,9 @@ func handleIncasariExtra(app fiber.App, store session.Store) {
 
 			uid := shortuuid.New()
 			user := getCurrentUser(fmt.Sprint(currentUserPath))
-			dirName := filepath.Join(user.StocareCheltuieli, data, uid)
+			dirName := filepath.Join(user.StocareIncasariExtra, data, uid)
 			incasarePath := GetIncasareExtraPath(dirName)
+			incasareJsonPath := GetIncasareExtraJsonPath(dirName)
 			caleIncasare := filepath.Join(incasarePath, fisier.Filename)
 
 			incasareExtra := types.ExtraIncasare{
@@ -114,7 +124,7 @@ func handleIncasariExtra(app fiber.App, store session.Store) {
 				CaleIncasare:  caleIncasare,
 			}
 
-			SetIncasareExtraData(incasareExtra, caleIncasare)
+			SetIncasareExtraData(incasareExtra, incasareJsonPath)
 			c.SaveFile(fisier, caleIncasare)
 			go utils.SmallerImg(caleIncasare)
 
