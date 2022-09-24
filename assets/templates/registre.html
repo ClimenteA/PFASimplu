@@ -162,10 +162,18 @@
               {{.SursaVenit}}
             </td>
             <td>
+              {{if .Serie}}
               {{.Serie}}
+              {{else}}
+              -
+              {{end}}
             </td>
             <td>
+              {{if .Numar}}
               {{.Numar}}
+              {{else}}
+              -
+              {{end}}
             </td>
             <td>
               {{ printf "%.2f" .SumaIncasata}}
@@ -174,10 +182,10 @@
               {{.TipTranzactie}}
             </td>
             <td>
-              <a href="/download-fisier?path={{.CaleFactura}}">Descarca</a>
+              <a href="/download-fisier?path={{.CaleIncasare}}">Descarca</a>
             </td>
             <td>
-              <a style="color:var(--del-color);" href="/sterge-fisier?path={{.CaleFactura}}">Sterge</a>
+              <a style="color:var(--del-color);" href="/sterge-fisier?path={{.CaleIncasare}}">Sterge</a>
             </td>
           </tr>
           {{end}}
@@ -389,7 +397,8 @@
             </td>
             <td>
               {{if .DetaliiIesireDinUz.ScosDinUz}}
-              <a href="/download-fisier?path={{.DetaliiIesireDinUz.CaleDovadaIesireDinUz}}">Descarca dovada {{.DetaliiIesireDinUz.ModalitateIesireDinUz}}</a>
+              <a href="/download-fisier?path={{.DetaliiIesireDinUz.CaleDovadaIesireDinUz}}">Descarca dovada
+                {{.DetaliiIesireDinUz.ModalitateIesireDinUz}}</a>
               {{else}}
               -
               {{end}}
@@ -706,7 +715,7 @@
 
     const MONTHS = ['Ianuarie', 'Februarie', 'Martie', 'Aprilie', 'Mai', 'Iunie', 'Iulie', 'August', 'Septembrie', 'Octombrie', 'Noiembrie', 'Decembrie'];
     let incasari = [{{ range .IncasariPeLuni }} {{.}}, {{ end }}];
-    let cheltuieli = [{{ range .CheltuieliPeLuni }} {{.}}, {{ end }}];
+    let cheltuieli = [{{ range .CheltuieliPeLuni }} {{.}}, {{end}}];
 
 
   let barIncasari = {

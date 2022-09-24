@@ -122,7 +122,7 @@ func appendTotalLunarIncasari(incasari []types.FacturaPlusExtraIncasari, incasar
 		val := types.FacturaPlusExtraIncasari{
 			Data:        lastDateOfMonth,
 			Serie:       fmt.Sprintf("%.2f", total) + " RON",
-			CaleFactura: "Total luna " + monthMapper[month] + " (incasari)",
+			CaleIncasare: "Total luna " + monthMapper[month] + " (incasari)",
 		}
 
 		incasari = append(incasari, val)

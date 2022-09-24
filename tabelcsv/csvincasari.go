@@ -25,6 +25,16 @@ func CreeazaIncasariCSV(path, filterYear string, incasari []types.FacturaPlusExt
 		},
 	}
 
+	// serie := "-"
+	// if incasare.Serie != "" {
+	// 	serie = incasare.Serie
+	// }
+
+	// numar := "-"
+	// if incasare.Numar > 0 {
+	// 	numar = strconv.Itoa(incasare.Numar)
+	// }
+
 	for _, incasare := range incasari {
 		rows = append(rows, []string{
 			incasare.SursaVenit,
@@ -33,7 +43,7 @@ func CreeazaIncasariCSV(path, filterYear string, incasari []types.FacturaPlusExt
 			incasare.Data,
 			fmt.Sprintf("%.2f", incasare.SumaIncasata),
 			incasare.TipTranzactie,
-			incasare.CaleFactura,
+			incasare.CaleIncasare,
 		})
 	}
 

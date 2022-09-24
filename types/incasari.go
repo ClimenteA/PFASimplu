@@ -6,7 +6,7 @@ type Factura struct {
 	Data          string  `json:"data"`
 	TipTranzactie string  `json:"tip_tranzactie"`
 	SumaIncasata  float64 `json:"suma_incasata"`
-	CaleFactura   string  `json:"cale_factura"`
+	CaleIncasare  string  `json:"cale_incasare"`
 }
 
 type ExtraIncasare struct {
@@ -24,5 +24,5 @@ type FacturaPlusExtraIncasari struct {
 	Data          string  `json:"data"`
 	TipTranzactie string  `json:"tip_tranzactie"`
 	SumaIncasata  float64 `json:"suma_incasata"`
-	CaleFactura   string  `json:"cale_factura"`
+	CaleIncasare  string  `json:"cale_incasare"`
 }

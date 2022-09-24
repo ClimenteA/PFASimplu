@@ -16,21 +16,26 @@ func processIncasari(sliceJurnal []types.RegistruJurnal, incasari []types.Factur
 
 		registruJurnal := types.RegistruJurnal{}
 
-		if strings.HasPrefix(incasare.CaleFactura, "Total luna") {
+		if strings.HasPrefix(incasare.CaleIncasare, "Total luna") {
 
 			registruJurnal = types.RegistruJurnal{
 				Total:                      true,
 				Data:                       incasare.Data,
-				DocumentFelNr:              incasare.CaleFactura,
+				DocumentFelNr:              incasare.CaleIncasare,
 				FelulOperatiuniiExplicatii: incasare.Serie,
 			}
 
 		} else {
 
+			explicatii := "Incasare " + incasare.Serie + strconv.Itoa(incasare.Numar)
+			if incasare.Serie == "" {
+				explicatii = incasare.SursaVenit
+			}
+
 			registruJurnal = types.RegistruJurnal{
 				Data:                       incasare.Data,
-				DocumentFelNr:              incasare.CaleFactura,
-				FelulOperatiuniiExplicatii: "Incasare " + incasare.Serie + strconv.Itoa(incasare.Numar),
+				DocumentFelNr:              incasare.CaleIncasare,
+				FelulOperatiuniiExplicatii: explicatii,
 			}
 
 		}

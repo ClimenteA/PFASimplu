@@ -147,7 +147,7 @@ func handleIncasari(app fiber.App, store session.Store) {
 				Data:          data,
 				TipTranzactie: tip_tranzactie,
 				SumaIncasata:  suma_incasata,
-				CaleFactura:   caleFactura,
+				CaleIncasare:   caleFactura,
 			}
 
 			SetInvoiceData(invoiceData, invoiceJsonPath)
