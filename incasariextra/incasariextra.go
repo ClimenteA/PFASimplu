@@ -8,8 +8,10 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"time"
 
 	"github.com/ClimenteA/pfasimplu-go/auth"
+	"github.com/ClimenteA/pfasimplu-go/incasari"
 	"github.com/ClimenteA/pfasimplu-go/types"
 	"github.com/ClimenteA/pfasimplu-go/utils"
 	"github.com/gofiber/fiber/v2"
@@ -80,7 +82,24 @@ func handleIncasariExtra(app fiber.App, store session.Store) {
 			return c.Redirect("/login")
 		}
 
-		return c.Render("incasari_extra", fiber.Map{}, "base")
+		user := getCurrentUser(fmt.Sprint(currentUserPath))
+		filterYear := strconv.Itoa(time.Now().Year())
+
+		incasari := incasari.AdunaIncasari(user, filterYear)
+		ultimaSerie := "INV"
+		ultimulNumar := 0
+		if len(incasari) > 0 {
+			ultimaSerie = incasari[0].Serie
+			ultimulNumar = incasari[0].Numar
+		}
+
+		return c.Render("incasari_extra", fiber.Map{
+			"Incasari":     incasari,
+			"UltimaSerie":  ultimaSerie,
+			"UltimulNumar": ultimulNumar + 1,
+			"Anul":         filterYear,
+		}, "base")
+
 	})
 
 	app.Post("/adauga-incasari-extra", func(c *fiber.Ctx) error {

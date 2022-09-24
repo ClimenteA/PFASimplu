@@ -1,3 +1,30 @@
+<style>
+    #tabel-incasari {
+        margin-bottom: 1rem;
+        margin-top: 4rem;
+        padding: 1rem;
+        max-height: 600px;
+        overflow: auto;
+    }
+
+    .download {
+        display: flex;
+        gap: 2rem;
+        float: right;
+    }
+
+    tr td {
+        width: 1%;
+        white-space: nowrap;
+    }
+
+    .bg-whitesmoke {
+        background: whitesmoke;
+    }
+</style>
+
+
+
 <main class="container-fluid">
 
     <hgroup class="container">
@@ -70,4 +97,78 @@
 
 
 
+    <article id="tabel-incasari">
+        <h4 style="color: var(--secondary);">Tabel Incasari</h4>
+        <table id="date-incasari">
+  
+          <thead>
+            <tr class="bg-whitesmoke">
+              <th scope="col">
+                Data
+              </th>
+              <th scope="col">
+                Sursa venit
+              </th>
+              <th scope="col">
+                Serie
+              </th>
+              <th scope="col">
+                Numar
+              </th>
+              <th scope="col">
+                Suma Incasata
+              </th>
+              <th scope="col">
+                Tip Tranzactie
+              </th>
+              <th scope="col">
+                Descarca Fisier
+              </th>
+              <th scope="col">
+                Sterge Fisier
+              </th>
+            </tr>
+          </thead>
+  
+          <tbody>
+            {{range .Incasari}}
+            <tr>
+              <td>
+                {{.Data}}
+              </td>
+              <td>
+                {{.SursaVenit}}
+              </td>
+              <td>
+                {{if .Serie}}
+                {{.Serie}}
+                {{else}}
+                -
+                {{end}}
+              </td>
+              <td>
+                {{if .Numar}}
+                {{.Numar}}
+                {{else}}
+                -
+                {{end}}
+              </td>
+              <td>
+                {{ printf "%.2f" .SumaIncasata}}
+              </td>
+              <td>
+                {{.TipTranzactie}}
+              </td>
+              <td>
+                <a href="/download-fisier?path={{.CaleIncasare}}">Descarca</a>
+              </td>
+              <td>
+                <a style="color:var(--del-color);" href="/sterge-fisier?path={{.CaleIncasare}}">Sterge</a>
+              </td>
+            </tr>
+            {{end}}
+          </tbody>
+        </table>
+      </article>
+  
 </main>

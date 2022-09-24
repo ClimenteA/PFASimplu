@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/ClimenteA/pfasimplu-go/auth"
@@ -93,18 +94,15 @@ func handleRegistre(app fiber.App, store session.Store) {
 		}
 
 		if _, err := os.Stat(f.Path); err == nil || os.IsExist(err) {
-
 			delPath := filepath.Dir(f.Path)
-
 			err := os.RemoveAll(delPath)
 			if err != nil {
 				return c.Redirect("/registre-contabile?title=Calea catre fisier gresita&content=Fisierul dorit nu a fost gasit.")
 			}
-
 			delSplitPath, _ := filepath.Split(delPath)
 			files, _ := ioutil.ReadDir(delSplitPath)
 
-			if len(files) == 0 {
+			if len(files) == 0 && !strings.HasSuffix(delSplitPath, "incasari/") {
 				err := os.RemoveAll(delSplitPath)
 				if err != nil {
 					log.Panicln(err)

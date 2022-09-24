@@ -163,10 +163,9 @@
 
   </form>
 
-
   <article id="tabel-cheltuieli">
-    <h4 style="color: var(--secondary);">Tabel Cheltuieli {{ .Anul }}</h4>
-    <table>
+    <h4 style="color: var(--secondary);">Tabel Cheltuieli</h4>
+    <table id="date-cheltuieli">
 
       <thead>
         <tr class="bg-whitesmoke">
@@ -241,6 +240,18 @@
           </th>
           <th scope="col">
             Cota De Amortizare
+          </th>
+          <th scope="col">
+            Scos din uz
+          </th>
+          <th scope="col">
+            Modalitate iesire din uz
+          </th>
+          <th scope="col">
+            Data iesirii in uz
+          </th>
+          <th scope="col">
+            Document justificativ
           </th>
         </tr>
       </thead>
@@ -328,13 +339,40 @@
           <td>
             {{ printf "%.2f" .DetaliiMijlocFix.CotaDeAmortizare}}
           </td>
+          <td>
+            {{if .DetaliiIesireDinUz.ScosDinUz}}
+            Da
+            {{else}}
+            Nu
+            {{end}}
+          </td>
+          <td>
+            {{if .DetaliiIesireDinUz.ScosDinUz}}
+            {{ .DetaliiIesireDinUz.ModalitateIesireDinUz }}
+            {{else}}
+            -
+            {{end}}
+          </td>
+          <td>
+            {{if .DetaliiIesireDinUz.ScosDinUz}}
+            {{ .DetaliiIesireDinUz.DataIesireDinUz }}
+            {{else}}
+            -
+            {{end}}
+          </td>
+          <td>
+            {{if .DetaliiIesireDinUz.ScosDinUz}}
+            <a href="/download-fisier?path={{.DetaliiIesireDinUz.CaleDovadaIesireDinUz}}">Descarca dovada
+              {{.DetaliiIesireDinUz.ModalitateIesireDinUz}}</a>
+            {{else}}
+            -
+            {{end}}
+          </td>
         </tr>
         {{end}}
       </tbody>
     </table>
   </article>
-
-
 
   <div id="tables" style="display:none;">
 
@@ -3251,7 +3289,7 @@
 
       let suma_cheltuita = parseFloat(event.target.value);
 
-      if (suma_cheltuita > {{.PragMijlocFix}}) {
+      if (suma_cheltuita > {{.PragMijlocFix }}) {
 
       document.getElementById("mijlocfix").checked = true;
       document.getElementById("data_punerii_in_functiune").setAttribute("required", "");
