@@ -4,6 +4,7 @@ import (
 	"log"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/ClimenteA/pfasimplu-go/types"
@@ -21,6 +22,24 @@ func calculIncasariAn(incasari []types.FacturaPlusExtraIncasari) map[string]floa
 		anul := strconv.Itoa(ti.Year())
 
 		calculIncasari[anul] = calculIncasari[anul] + data.SumaIncasata
+
+	}
+
+	return calculIncasari
+}
+
+func calculIncasariGrupateAn(incasari []types.FacturaPlusExtraIncasari) map[string]float64 {
+
+	calculIncasari := map[string]float64{}
+	for _, data := range incasari {
+
+		ti, err := time.Parse(time.RFC3339, data.Data+"T00:00:00Z")
+		if err != nil {
+			log.Panic(err)
+		}
+		anul := strconv.Itoa(ti.Year())
+		key := anul + ":__:" + data.SursaVenit
+		calculIncasari[key] = calculIncasari[key] + data.SumaIncasata
 
 	}
 
@@ -67,6 +86,7 @@ func CreeazaRegistruFiscal(
 	filterYear string) []types.RegistruFiscal {
 
 	calculIncasari := calculIncasariAn(incasari)
+	calculIncasariGrupate := calculIncasariGrupateAn(incasari)
 	calculCheltuieli := calculCheltuieliAn(cheltuieli)
 
 	registruFiscal := []types.RegistruFiscal{}
@@ -75,8 +95,23 @@ func CreeazaRegistruFiscal(
 		if filterYear == anul {
 			anulInt, _ := strconv.Atoi(anul)
 
+			for key, incasareGrup := range calculIncasariGrupate {
+
+				anulSursa := strings.Split(key, ":__:")
+				anulGroup, _ := strconv.Atoi(anulSursa[0])
+
+				dateIncasariAn := types.RegistruFiscal{
+					ElemDeCalculVenit: anulSursa[1],
+					ValoareRon:        incasareGrup,
+					Anul:              anulGroup,
+				}
+
+				registruFiscal = append(registruFiscal, dateIncasariAn)
+
+			}
+
 			dateIncasariAn := types.RegistruFiscal{
-				ElemDeCalculVenit: "Total incasari",
+				ElemDeCalculVenit: "Total Incasari",
 				ValoareRon:        calculIncasari[anul],
 				Anul:              anulInt,
 			}

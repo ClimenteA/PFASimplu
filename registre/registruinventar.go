@@ -69,8 +69,6 @@ func CreeazaRegistruInventar(cheltuieli []types.Cheltuiala) []types.RegistruInve
 				obiect.CaleDovadaIesireDinUz = data.DetaliiIesireDinUz.CaleDovadaIesireDinUz
 			}
 
-			log.Println(obiect.ScosDinUz)
-
 			inventar = append(inventar, obiect)
 		}
 
