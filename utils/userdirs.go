@@ -34,10 +34,12 @@ func GetAllDirs(user auth.Account) []string {
 	allDirs := []string{}
 
 	incasariDirs := getDirs(user.StocareIncasari)
+	incasariExtraDirs := getDirs(user.StocareIncasariExtra)
 	cheltuieliDirs := getDirs(user.StocareCheltuieli)
 	declaratiiDirs := getDirs(user.StocareDeclaratii)
 
 	allDirs = append(allDirs, incasariDirs...)
+	allDirs = append(allDirs, incasariExtraDirs...)
 	allDirs = append(allDirs, cheltuieliDirs...)
 	allDirs = append(allDirs, declaratiiDirs...)
 
@@ -86,6 +88,47 @@ func GetAllIncasariFiles(filterYear string, user auth.Account) []string {
 				for _, file := range files {
 					allFiles = append(allFiles, filepath.Join(path, file.Name()))
 				}
+			}
+		}
+	}
+
+	return allFiles
+
+}
+
+func GetAllIncasariExtraFiles(filterYear string, user auth.Account) []string {
+
+	dirs, err := ioutil.ReadDir(user.StocareIncasariExtra)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	allFiles := []string{}
+	for _, dir := range dirs {
+		if dir.IsDir() {
+			year := strings.Split(dir.Name(), "-")[0]
+			if filterYear == year {
+				path := filepath.Join(user.StocareIncasariExtra, dir.Name())
+				subDirs, err := ioutil.ReadDir(path)
+				if err != nil {
+					log.Fatal(err)
+				}
+
+				for _, sdir := range subDirs {
+
+					if sdir.IsDir() {
+						sdirPath := filepath.Join(path, sdir.Name())
+						files, err := ioutil.ReadDir(sdirPath)
+						if err != nil {
+							log.Fatal(err)
+						}
+
+						for _, file := range files {
+							allFiles = append(allFiles, filepath.Join(sdirPath, file.Name()))
+						}
+					}
+				}
+
 			}
 		}
 	}
@@ -182,11 +225,13 @@ func GetAllDirsForYear(filterYear string, user auth.Account) []string {
 
 	stocareFiles := GetAllStocareFiles(filterYear, user)
 	incasariFiles := GetAllIncasariFiles(filterYear, user)
+	incasariExtraFiles := GetAllIncasariExtraFiles(filterYear, user)
 	cheltuieliFiles := GetAllCheltuieliFiles(filterYear, user)
 	declaratiiFiles := GetAllDeclaratiiFiles(filterYear, user)
 
 	allFiles = append(allFiles, stocareFiles...)
 	allFiles = append(allFiles, incasariFiles...)
+	allFiles = append(allFiles, incasariExtraFiles...)
 	allFiles = append(allFiles, cheltuieliFiles...)
 	allFiles = append(allFiles, declaratiiFiles...)
 
