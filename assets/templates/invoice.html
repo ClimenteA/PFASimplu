@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            font-family: Arial, Helvetica, sans-serif;
+            color: rgb(65, 65, 65);
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        td,
+        th {
+            border: 1px solid rgb(177, 177, 177);
+            padding: 5px;
+        }
+
+        .detalii-factura {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .detalii-furnizor-client {
+            margin-top: 100px;
+        }
+
+        .servicii-oferite {
+            margin-top: 80px;
+        }
+
+        .full-width {
+            width: 100%;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        tbody>tr>th {
+            text-align: left;
+        }
+
+        thead {
+            background-color: rgb(232, 231, 231);
+        }
+
+        .observatii {
+            margin-top: 20px;
+            color: rgb(161, 161, 161);
+        }
+
+        .underline {
+            text-decoration: underline;
+        }
+
+        .total {
+            margin-top: 50px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .container {
+            width: 800px;
+            margin: 0 auto;
+        }
+    </style>
+    <title>Factura</title>
+</head>
+
+<body class="container">
+
+    <section class="detalii-factura">
+
+        <h1 class="underline">Factura</h1>
+
+        <table>
+            <thead>
+                <th>Serie</th>
+                <th>Numar</th>
+                <th>Data emiterii</th>
+                <th>Data scadenta</th>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>CA</td>
+                    <td>0012</td>
+                    <td>23-02-2022</td>
+                    <td>23-03-2022</td>
+                </tr>
+            </tbody>
+        </table>
+
+    </section>
+
+    <section class="detalii-furnizor-client">
+        <table class="full-width">
+            <thead>
+                <th>DETALII</th>
+                <th>FURNIZOR</th>
+                <th>CLIENT</th>
+            </thead>
+            <tbody>
+
+                <tr>
+                    <th>Nr. Reg. Com.</th>
+                    <td>FXX/XXXX/XXXX</td>
+                    <td>FXX/XXXX/XXXX</td>
+                <tr>
+                    <th>CIF/VAT</th>
+                    <td>XX0000XX</td>
+                    <td>ROXX0000XX</td>
+                </tr>
+
+                <tr>
+                    <th>Adresa</th>
+                    <td>ŞOS. INTERNAŢIONALĂ, NR.152, PARTER, BL.A7, SC.R, AP.1, MUN. IAŞI, IAŞI</td>
+                    <td>ŞOS. OCCIDENTALA, NR.152, PARTER, BL.A7, SC.R, AP.1, MUN. SUCEAVA, SUCEAVA</td>
+                </tr>
+
+                <tr>
+                    <th>Telefon</th>
+                    <td>(+40)0724XXXXXX</td>
+                    <td>(+40)0724XXXXXX</td>
+                </tr>
+
+                <tr>
+                    <th>Email</th>
+                    <td>furnizor@gmail.com</td>
+                    <td>client@gmail.com</td>
+                </tr>
+
+                <tr>
+                    <th>Banca</th>
+                    <td>ING</td>
+                    <td>BRD</td>
+                </tr>
+
+                <tr>
+                    <th>IBAN</th>
+                    <td>RO01INGB0000XXXXXXXXXXXX</td>
+                    <td>RO01BRDB0000XXXXXXXXXXXX</td>
+                </tr>
+
+            </tbody>
+        </table>
+    </section>
+
+
+    <section class="servicii-oferite">
+        <table class="full-width text-center">
+            <thead>
+                <th>Denumire produse sau servicii</th>
+                <th>U.M</th>
+                <th>Cant.</th>
+                <th>Pret</th>
+                <th>Total</th>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Activități de realizare a soft-ului la comandă</td>
+                    <td>ore</td>
+                    <td>125</td>
+                    <td>12</td>
+                    <td>1500</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section class="observatii">
+        <p>Observatii: </p>
+    </section>
+
+    <section class="total">
+        <table>
+            <thead>
+                <th>Total de plata:</th>
+                <th>1500 RON</th>
+            </thead>
+        </table>
+    </section>
+
+</body>
+
+</html>

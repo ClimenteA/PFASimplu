@@ -179,12 +179,17 @@
 
 <script>
 
+
+
     mountComponents();
 
     document.getElementById("factura-form").addEventListener(
         "submit",
         async event => {
             event.preventDefault();
+
+            window.print();
+            return
 
             let formData = new FormData(event.target);
             formData = Object.fromEntries(formData);
