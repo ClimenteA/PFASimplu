@@ -35,6 +35,32 @@
 
             </div>
 
+            <div class="grid">
+
+                <label for="moneda">
+                    Moneda
+                    <input list="monezi" style="text-transform:uppercase" type="text" id="moneda" name="moneda"
+                        value="RON" placeholder="RON" required>
+
+                    <datalist id="monezi">
+                        <option value="RON">RON</option>
+                        <option value="EUR">EUR</option>
+                        <option value="GBP">GBP</option>
+                        <option value="CHF">CHF</option>
+                    </datalist>
+                </label>
+
+                <label for="limba">
+                    Limba
+                    <select id="limba" name="limba" required>
+                        <option value="RO" selected>RO</option>
+                        <option value="EN">EN</option>
+                        <option value="FR">FR</option>
+                    </select>
+                </label>
+
+            </div>
+
 
             <div class="grid" style="margin-top: 2rem;">
 
@@ -52,7 +78,7 @@
                     </label>
 
                     <label for="cifClient">
-                        CIF
+                        CIF/VAT
                         <input style="text-transform:uppercase" type="number" id="cifClient" name="cifClient"
                             placeholder="65811429">
                     </label>
@@ -151,7 +177,7 @@
 
             <div>
                 <label for="nota">
-                    Nota (optional)
+                    Observatii (optional)
                     <input type="text" id="nota" name="nota">
                 </label>
             </div>
@@ -173,13 +199,9 @@
 
 
 <script src="/mithril.js"></script>
-<script src="/pdf-lib.min.js"></script>
-<script src="/download.js"></script>
 <script src="/creeaza-factura.js"></script>
 
 <script>
-
-
 
     mountComponents();
 

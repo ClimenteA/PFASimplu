@@ -23,7 +23,7 @@ func handleInvoicePage(app fiber.App, store session.Store) {
 			return c.Redirect("/login")
 		}
 
-		return c.Render("editable_invoice", fiber.Map{})
+		return c.Render("factura", fiber.Map{}, "base")
 	})
 
 }
