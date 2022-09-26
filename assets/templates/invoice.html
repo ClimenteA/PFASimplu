@@ -9,6 +9,18 @@
         * {
             font-family: Arial, Helvetica, sans-serif;
             color: rgb(65, 65, 65);
+            -webkit-print-color-adjust: exact !important;
+            color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+
+        @media print {
+            @page {
+                margin-left: 0.5in;
+                margin-right: 0.5in;
+                margin-top: 0;
+                margin-bottom: 0;
+            }
         }
 
         table {
@@ -17,7 +29,7 @@
 
         td,
         th {
-            border: 1px solid rgb(177, 177, 177);
+            border: 2px solid rgb(177, 177, 177);
             padding: 5px;
         }
 
@@ -53,7 +65,8 @@
         }
 
         .observatii {
-            margin-top: 20px;
+            position: absolute;
+            bottom: 50px;
             color: rgb(161, 161, 161);
         }
 
@@ -72,7 +85,7 @@
             margin: 0 auto;
         }
     </style>
-    <title>Factura</title>
+    <title>Factura CA 0012 23-02-2022</title>
 </head>
 
 <body class="container">
@@ -175,10 +188,6 @@
         </table>
     </section>
 
-    <section class="observatii">
-        <p>Observatii: </p>
-    </section>
-
     <section class="total">
         <table>
             <thead>
@@ -186,6 +195,10 @@
                 <th>1500 RON</th>
             </thead>
         </table>
+    </section>
+
+    <section class="observatii">
+        <p>Observatii: </p>
     </section>
 
 </body>
