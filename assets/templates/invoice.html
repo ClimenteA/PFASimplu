@@ -14,10 +14,14 @@
             print-color-adjust: exact !important;
         }
 
+        a {
+            color: blue;
+        }
+
         @media print {
             @page {
-                margin-left: 0.5in;
-                margin-right: 0.5in;
+                margin-left: 0.8in;
+                margin-right: 0.8in;
                 margin-top: 0;
                 margin-bottom: 0;
             }
@@ -80,15 +84,49 @@
             justify-content: flex-end;
         }
 
-        .container {
+        #container {
             width: 800px;
             margin: 0 auto;
         }
+
+        .genereaza-factura {
+            display: flex;
+            justify-content: center;
+        }
+
+        .genereaza-factura>a {
+            margin-top: 50px;
+            margin-bottom: 50px;
+        }
     </style>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            let printLink = document.getElementById("print");
+            let container = document.getElementById("container");
+
+            printLink.addEventListener("click", event => {
+                event.preventDefault();
+                printLink.style.display = "none";
+                window.print();
+            }, false);
+
+            container.addEventListener("click", event => {
+                printLink.style.display = "flex";
+            }, false);
+
+        }, false);
+    </script>
     <title>Factura CA 0012 23-02-2022</title>
 </head>
 
-<body class="container">
+
+
+<body id="container">
+
+    <section class="genereaza-factura">
+        <a href="#" id="print">GENEREAZA PDF DIN FACTURA</a>
+    </section>
 
     <section class="detalii-factura">
 
@@ -200,6 +238,9 @@
     <section class="observatii">
         <p>Observatii: </p>
     </section>
+
+
+
 
 </body>
 
