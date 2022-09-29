@@ -13,16 +13,12 @@ function round(num) {
 function proceseazaRawData(request) {
 
     let dateFactura = {
-        'totalFactura': bodyParamString(request, "totalFactura") + ' RON',
-        'serie': bodyParamString(request, "serie").toUpperCase(),
-        'numar': bodyParamString(request, "numar").padStart(6, '0'),
-        'data': bodyParamString(request, "data"),
-        'adauga_la_incasari': bodyParamString(request, "adauga_la_incasari")
+        totalFactura: bodyParamString(request, "totalFactura") + ' RON',
+        serie: bodyParamString(request, "serie").toUpperCase(),
+        numar: bodyParamString(request, "numar").padStart(6, '0'),
+        data: bodyParamString(request, "data"),
+        adauga_la_incasari: bodyParamString(request, "adauga_la_incasari")
     }
-
-    // '../ANAF/Factura 2022-03-21 FAB22 12 1000000 RON.pdf'
-    // let numeFactura = `Factura ${dateFactura.data} ${dateFactura.serie} ${String(parseInt(dateFactura.numar))} ${dateFactura.totalFactura}.pdf`
-    // dateFactura['facturaPath'] = `../ANAF/An fiscal ${dateFactura.data.split('-')[0]}/Incasari/${numeFactura}`
 
     dateFactura['furnizor'] = {
         nume: bodyParamString(request, "numeFurnizor").toUpperCase(),
@@ -53,17 +49,25 @@ function proceseazaRawData(request) {
 
         produseServicii.push({
 
-            'denumire': bodyParamString(request, 'denumire' + i).toUpperCase(),
-            'unitateDeMasura': bodyParamString(request, 'unitateDeMasura' + i).toUpperCase(),
-            'cantitate': bodyParamString(request, 'cantitate' + i).toUpperCase(),
-            'pretPeUnitate': bodyParamString(request, 'pretPeUnitate' + i).toUpperCase(),
-            'total': bodyParamString(request, 'total' + i)
+            denumire: bodyParamString(request, 'denumire' + i).toUpperCase(),
+            unitateDeMasura: bodyParamString(request, 'unitateDeMasura' + i).toUpperCase(),
+            cantitate: bodyParamString(request, 'cantitate' + i).toUpperCase(),
+            pretPeUnitate: bodyParamString(request, 'pretPeUnitate' + i).toUpperCase(),
+            total: bodyParamString(request, 'total' + i)
 
         })
 
     }
 
-    dateFactura['produseServicii'] = produseServicii
+
+    let produseServiciiFilled = []
+    for (ps of produseServicii) {
+        if (ps.denumire != "") {
+            produseServiciiFilled.push(ps)
+        }
+    }
+
+    dateFactura['produseServicii'] = produseServiciiFilled
 
     let date = new Date(dateFactura.data)
 

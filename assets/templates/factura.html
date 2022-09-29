@@ -200,9 +200,9 @@
             let formData = new FormData(event.target);
             formData = Object.fromEntries(formData);
 
-            let factura = await creeaza_factura(formData);
-            let now = new Date();
-            download(factura.bytes, `Factura ${now.toISOString()}.pdf`, "application/pdf");
+            let factura = proceseazaRawData(formData);
+
+            console.log("factura", factura);
 
             let extraData = {
                 serie: factura.data.serie,
@@ -235,6 +235,13 @@
             });
 
             mountComponents();
+
+            let facturaStr = encodeURIComponent(JSON.stringify(factura));
+
+            let link = document.createElement("a");
+            link.href = "http://localhost:3000/factura_pdf_ro.html?data=" + facturaStr;
+            link.target = "_blank";
+            link.click();
 
         }
     );
