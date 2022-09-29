@@ -26,4 +26,19 @@ func handleInvoicePage(app fiber.App, store session.Store) {
 		return c.Render("factura", fiber.Map{}, "base")
 	})
 
+	app.Get("/factura-pdf", func(c *fiber.Ctx) error {
+
+		sess, err := store.Get(c)
+		if err != nil {
+			panic(err)
+		}
+
+		currentUserPath := sess.Get("currentUser")
+		if currentUserPath == nil {
+			return c.Redirect("/login")
+		}
+
+		return c.Render("factura_pdf", fiber.Map{})
+	})
+
 }

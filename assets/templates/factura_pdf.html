@@ -14,10 +14,6 @@
             print-color-adjust: exact !important;
         }
 
-        a {
-            color: blue;
-        }
-
         @media print {
             @page {
                 margin-left: 0.8in;
@@ -25,6 +21,10 @@
                 margin-top: 0;
                 margin-bottom: 0;
             }
+        }
+
+        a {
+            color: blue;
         }
 
         table {
@@ -117,7 +117,7 @@
 
         }, false);
     </script>
-    <title>Factura CA 0012 23-02-2022</title>
+    <title>Factura {{ .Serie }} {{ .Numar }} {{ .DataEmiterii }}</title>
 </head>
 
 
@@ -141,10 +141,10 @@
             </thead>
             <tbody>
                 <tr>
-                    <td>CA</td>
-                    <td>0012</td>
-                    <td>23-02-2022</td>
-                    <td>23-03-2022</td>
+                    <td>{{ .Serie }}</td>
+                    <td>{{ .Numar }}</td>
+                    <td>{{ .DataEmiterii }}</td>
+                    <td>{{ .DataScadenta }}</td>
                 </tr>
             </tbody>
         </table>
@@ -162,42 +162,36 @@
 
                 <tr>
                     <th>Nr. Reg. Com.</th>
-                    <td>FXX/XXXX/XXXX</td>
-                    <td>FXX/XXXX/XXXX</td>
+                    <td>{{ .NrRegComFurnizor }}</td>
+                    <td>{{ .NrRegComClient }}</td>
                 <tr>
                     <th>CIF/VAT</th>
-                    <td>XX0000XX</td>
-                    <td>ROXX0000XX</td>
+                    <td>{{ .CifVatFurnizor }}</td>
+                    <td>{{ .CifVatClient }}</td>
                 </tr>
 
                 <tr>
                     <th>Adresa</th>
-                    <td>ŞOS. INTERNAŢIONALĂ, NR.152, PARTER, BL.A7, SC.R, AP.1, MUN. IAŞI, IAŞI</td>
-                    <td>ŞOS. OCCIDENTALA, NR.152, PARTER, BL.A7, SC.R, AP.1, MUN. SUCEAVA, SUCEAVA</td>
+                    <td>{{ .AdresaFurnizor }}</td>
+                    <td>{{ .AdresaClient }}</td>
                 </tr>
 
                 <tr>
                     <th>Telefon</th>
-                    <td>(+40)0724XXXXXX</td>
-                    <td>(+40)0724XXXXXX</td>
+                    <td>{{ .TelefonFurnizor }}</td>
+                    <td>{{ .TelefonClient }}</td>
                 </tr>
 
                 <tr>
                     <th>Email</th>
-                    <td>furnizor@gmail.com</td>
-                    <td>client@gmail.com</td>
-                </tr>
-
-                <tr>
-                    <th>Banca</th>
-                    <td>ING</td>
-                    <td>BRD</td>
+                    <td>{{ .EmailFurnizor }}</td>
+                    <td>{{ .EmailClient }}</td>
                 </tr>
 
                 <tr>
                     <th>IBAN</th>
-                    <td>RO01INGB0000XXXXXXXXXXXX</td>
-                    <td>RO01BRDB0000XXXXXXXXXXXX</td>
+                    <td>{{ .IbanFurnizor }}</td>
+                    <td>{{ .IbanClient }}</td>
                 </tr>
 
             </tbody>
@@ -211,17 +205,23 @@
                 <th>Denumire produse sau servicii</th>
                 <th>U.M</th>
                 <th>Cant.</th>
-                <th>Pret</th>
+                <th>Pret Unitar</th>
                 <th>Total</th>
             </thead>
             <tbody>
+
+                {{range .ServiciiProduse}}
+
                 <tr>
-                    <td>Activități de realizare a soft-ului la comandă</td>
-                    <td>ore</td>
-                    <td>125</td>
-                    <td>12</td>
-                    <td>1500</td>
+                    <td>{{ .Nume }}</td>
+                    <td>{{ .UnitateDeMasura }}</td>
+                    <td>{{ .Cantitate }}</td>
+                    <td>{{ .PretUnitar }}</td>
+                    <td>{{ .PretTotal }}</td>
                 </tr>
+
+                {{end}}
+
             </tbody>
         </table>
     </section>
@@ -230,16 +230,14 @@
         <table>
             <thead>
                 <th>Total de plata:</th>
-                <th>1500 RON</th>
+                <th>{{ .TotalDePlata }} {{ .Moneda }}</th>
             </thead>
         </table>
     </section>
 
     <section class="observatii">
-        <p>Observatii: </p>
+        <p>Observatii: {{ .Observatii }}</p>
     </section>
-
-
 
 
 </body>

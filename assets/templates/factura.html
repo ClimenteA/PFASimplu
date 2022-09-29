@@ -79,7 +79,7 @@
 
                     <label for="cifClient">
                         CIF/VAT
-                        <input style="text-transform:uppercase" type="number" id="cifClient" name="cifClient"
+                        <input style="text-transform:uppercase" type="text" id="cifClient" name="cifClient"
                             placeholder="65811429">
                     </label>
 
@@ -98,14 +98,7 @@
                     <label for="emailClient">
                         Email
                         <input style="text-transform:lowercase" type="email" id="emailClient" name="emailClient"
-                            placeholder="alexv@gmail.com" required>
-                    </label>
-
-
-                    <label for="bancaClient">
-                        Banca
-                        <input style="text-transform:uppercase" type="text" id="bancaClient" name="bancaClient"
-                            placeholder="ING">
+                            placeholder="alexv@gmail.com">
                     </label>
 
                     <label for="ibanClient">
@@ -133,9 +126,9 @@
                     </label>
 
                     <label for="cifFurnizor">
-                        CIF
-                        <input style="text-transform:uppercase" type="number" id="cifFurnizor" name="cifFurnizor"
-                            value="111111" placeholder="45611321" required>
+                        CIF/VAT
+                        <input style="text-transform:uppercase" type="text" id="cifFurnizor" name="cifFurnizor"
+                            placeholder="45611321" required>
                     </label>
 
                     <label for="adresaFurnizor">
@@ -155,12 +148,6 @@
                         Email
                         <input style="text-transform:lowercase" type="email" id="emailFurnizor" name="emailFurnizor"
                             value="TODO@gmail.com" placeholder="alexv@gmail.com" required>
-                    </label>
-
-                    <label for="bancaFurnizor">
-                        Banca
-                        <input style="text-transform:uppercase" type="text" id="bancaFurnizor" name="bancaFurnizor"
-                            placeholder="ING" required>
                     </label>
 
                     <label for="ibanFurnizor">
@@ -189,7 +176,7 @@
                 <!-- Mithril Magic -->
             </div>
 
-            <button id="creeaza-factura" style="margin-top:6rem;" type="submit">GENEREAZA FACTURA</button>
+            <button id="creeaza-factura" style="margin-top:6rem;" type="submit">VEZI FACTURA</button>
 
         </article>
 
@@ -209,9 +196,6 @@
         "submit",
         async event => {
             event.preventDefault();
-
-            window.print();
-            return
 
             let formData = new FormData(event.target);
             formData = Object.fromEntries(formData);
@@ -249,7 +233,6 @@
             }).then(function (result) {
                 console.log(result);
             });
-
 
             mountComponents();
 

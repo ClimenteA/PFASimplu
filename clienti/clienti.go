@@ -42,7 +42,7 @@ func getCurrentClients(currentUserPath string) []types.DateIdentificare {
 
 	jsonFile, err := os.Open(filepath.Join(currentUserPath, "clienti.json"))
 	if err != nil {
-		log.Println(err)
+		log.Println("Nici un client inregistrat momentan")
 	}
 	defer jsonFile.Close()
 
@@ -66,7 +66,7 @@ func getFurnizor(currentUserPath string) types.DateIdentificare {
 
 	jsonFile, err := os.Open(filepath.Join(currentUserPath, "furnizor.json"))
 	if err != nil {
-		log.Println(err)
+		log.Println("Nici un furnizor inregistrat momentan")
 	}
 	defer jsonFile.Close()
 
@@ -153,11 +153,10 @@ func handleClientsRequests(app fiber.App, store session.Store) {
 					Suma:     di.Suma,
 					Nume:     di.Nume,
 					NrRegCom: di.NrRegCom,
-					CIF:      di.CIF,
+					CIFVAT:   di.CIFVAT,
 					Adresa:   di.Adresa,
 					Telefon:  di.Telefon,
 					Email:    di.Email,
-					Banca:    di.Banca,
 					IBAN:     di.IBAN,
 					IsClient: di.IsClient,
 				}
@@ -205,11 +204,10 @@ func handleClientsRequests(app fiber.App, store session.Store) {
 					Suma:     di.Suma,
 					Nume:     di.Nume,
 					NrRegCom: di.NrRegCom,
-					CIF:      di.CIF,
+					CIFVAT:   di.CIFVAT,
 					Adresa:   di.Adresa,
 					Telefon:  di.Telefon,
 					Email:    di.Email,
-					Banca:    di.Banca,
 					IBAN:     di.IBAN,
 					IsClient: di.IsClient,
 				}

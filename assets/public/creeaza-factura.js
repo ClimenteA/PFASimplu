@@ -3,6 +3,13 @@ function bodyParamString(request, field) {
     return ""
 }
 
+
+function round(num) {
+    const places = 10 ** 2;
+    const res = Math.round(num * places) / places;
+    return res
+}
+
 function proceseazaRawData(request) {
 
     let dateFactura = {
@@ -72,7 +79,7 @@ function proceseazaRawData(request) {
 // Mithril
 
 
-const clientElemIds = ['adresaClient', 'bancaClient',
+const clientElemIds = ['adresaClient',
     'cifClient', 'emailClient', 'ibanClient',
     'nrRegComClient', 'telefonClient']
 
@@ -217,10 +224,10 @@ class Billable {
         function calculateTotal() {
             let total = 0
             for (let i = 0; i < v.attrs.billables.length; i++) {
-                let partialTotal = Number(document.getElementById("total" + i).value)
+                let partialTotal = parseFloat(document.getElementById("total" + i).value)
                 total = total + partialTotal
             }
-            document.getElementById("totalFactura").value = total
+            document.getElementById("totalFactura").value = round(total)
         }
 
 
@@ -242,12 +249,12 @@ class Billable {
                         ]),
 
                         m("label", { for: "cantitate" + i }, [
-                            "Cant.",
+                            "Cantitate",
                             m("input", {
                                 onchange: event => {
-                                    let sum = Number(document.getElementById("cantitate" + i).value) * Number(document.getElementById("pretPeUnitate" + i).value)
-                                    document.getElementById("total" + i).value = sum
-                                    calculateTotal()
+                                    let sum = parseFloat(document.getElementById("cantitate" + i).value) * parseFloat(document.getElementById("pretPeUnitate" + i).value);
+                                    document.getElementById("total" + i).value = round(sum);
+                                    calculateTotal();
                                 },
                                 style: "text-transform:uppercase", step: "any", type: "number", id: "cantitate" + i, name: "cantitate" + i, placeholder: "5"
                             })
@@ -255,12 +262,12 @@ class Billable {
 
 
                         m("label", { for: "pretPeUnitate" + i }, [
-                            "Pret",
+                            "Pret Unitar",
                             m("input", {
                                 onchange: event => {
-                                    let sum = Number(document.getElementById("cantitate" + i).value) * Number(document.getElementById("pretPeUnitate" + i).value)
-                                    document.getElementById("total" + i).value = sum
-                                    calculateTotal()
+                                    let sum = parseFloat(document.getElementById("cantitate" + i).value) * parseFloat(document.getElementById("pretPeUnitate" + i).value);
+                                    document.getElementById("total" + i).value = round(sum);
+                                    calculateTotal();
                                 },
                                 style: "text-transform:uppercase", step: "any", type: "number", id: "pretPeUnitate" + i, name: "pretPeUnitate" + i, placeholder: "4.5"
                             })
@@ -271,9 +278,9 @@ class Billable {
                             "Total",
                             m("input", {
                                 onfocus: event => {
-                                    let sum = Number(document.getElementById("cantitate" + i).value) * Number(document.getElementById("pretPeUnitate" + i).value)
-                                    document.getElementById("total" + i).value = sum
-                                    calculateTotal()
+                                    let sum = parseFloat(document.getElementById("cantitate" + i).value) * parseFloat(document.getElementById("pretPeUnitate" + i).value);
+                                    document.getElementById("total" + i).value = round(sum);
+                                    calculateTotal();
                                 },
                                 style: "text-transform:uppercase", step: "any", type: "number", id: "total" + i, name: "total" + i, placeholder: "22.5"
                             })
@@ -289,7 +296,7 @@ class Billable {
             }, [
                 m("label", { for: "totalFactura" }, [
                     "Total de Plata",
-                    m("input", { type: "number", id: "totalFactura", name: "totalFactura", placeholder: "Ex: 65811429" })
+                    m("input", { type: "number", step: "any", id: "totalFactura", name: "totalFactura", placeholder: "Ex: 65811429" })
                 ])
             ])
         ]
