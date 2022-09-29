@@ -34,8 +34,9 @@
                 </div>
 
             </div>
-
+            <!-- 
             <div class="grid">
+
 
                 <label for="moneda">
                     Moneda
@@ -59,7 +60,7 @@
                     </select>
                 </label>
 
-            </div>
+            </div> -->
 
 
             <div class="grid" style="margin-top: 2rem;">
@@ -205,17 +206,17 @@
             console.log("factura", factura);
 
             let extraData = {
-                serie: factura.data.serie,
-                numar: parseInt(factura.data.numar),
-                data: factura.data.data,
-                suma: parseFloat(factura.data.totalFactura),
+                serie: factura.serie,
+                numar: parseInt(factura.numar),
+                data: factura.data,
+                suma: parseFloat(factura.totalFactura),
             }
 
-            let dateFurnizor = { ...factura.data.furnizor, ...{ is_client: false }, ...extraData };
-            let dateClient = { ...factura.data.client, ...{ is_client: true }, ...extraData };
+            let dateFurnizor = { ...factura.furnizor, ...{ is_client: false }, ...extraData };
+            let dateClient = { ...factura.client, ...{ is_client: true }, ...extraData };
 
-            console.log("dateFurnizor", dateFurnizor)
-            console.log("dateClient", dateClient)
+            console.log("dateFurnizor", dateFurnizor);
+            console.log("dateClient", dateClient);
 
             m.request({
                 method: "POST",

@@ -73,7 +73,7 @@ function proceseazaRawData(request) {
 
     dateFactura['data_emitere'] = dateFactura.data
     dateFactura['data_scadenta'] = new Date(date.setMonth(date.getMonth() + 1)).toISOString().split("T")[0]
-    dateFactura['nota'] = dateFactura.nota ? "Nota: " + dateFactura.nota : ""
+    dateFactura['nota'] = dateFactura.nota
 
     return dateFactura
 
@@ -83,7 +83,7 @@ function proceseazaRawData(request) {
 // Mithril
 
 
-const clientElemIds = ['adresaClient',
+const clientElemIds = ['adresaClient', 'cifFurnizor',
     'cifClient', 'emailClient', 'ibanClient',
     'nrRegComClient', 'telefonClient']
 
@@ -179,7 +179,7 @@ class ClientForm {
     view(v) {
 
         return [
-            m('label', { 'for': 'numeClient' }, [
+            m('label', { for: 'numeClient' }, [
                 m('span', 'Nume'),
                 m('input', {
                     list: "clienti",
@@ -212,9 +212,9 @@ class DateComp {
     view(v) {
 
         return [
-            m('label', { "for": "data" }, [
+            m('label', { for: "data" }, [
                 m('span', "Data factura"),
-                m("input", { "type": "date", "id": "data", "name": "data", "required": true, "value": this.getCurrentDate() })
+                m("input", { type: "date", id: "data", name: "data", required: true, value: this.getCurrentDate() })
             ])
         ]
     }
