@@ -61,13 +61,15 @@ Rapoarte suplimentare:
 1. [Cum rulezi aplicatia](#cum-rulezi-aplicatia)
 2. [Creeare cont](#creeare-cont)
 3. [Adaugare incasari](#adaugare-incasari)
-4. [Adaugare cheltuieli](#adaugare-cheltuieli)
-5. [Adaugare documente](#adaugare-documente)
-6. [Creeaza o factura](#creeaza-factura)
-7. [Registre contabile](#registre-contabile)
-8. [Setari avansate](#setari-avansate)
-9. [Observatii](#observatii)
-10. [Pe viitor](#pe-viitor)
+4. [Adaugare incasari din alte surse](#adaugare-alte-incasari)
+5. [Adaugare cheltuieli](#adaugare-cheltuieli)
+6. [Adaugare documente](#adaugare-documente)
+7. [Creeaza o factura](#creeaza-factura)
+8. [Registre contabile](#registre-contabile)
+9. [Scoate din inventar obiecte/mijloce fixe](#scoate-din-inventar)
+10. [Setari avansate](#setari-avansate)
+11. [Observatii](#observatii)
+12. [Pe viitor](#pe-viitor)
 
 
 
@@ -102,12 +104,7 @@ http://192.168.1.7:3000
 
 Acum poti deschide aplicatia intr-un browser pe pc/laptop la adresa `http://localhost:3000` sau de pe browser dintr-un telefon aflat in aceeeasi retea wifi la adresa `http://192.168.1.7:3000` (adresa ta poate fi diferita).
 
-
-Pentru developeri:
-- [clone github repo](https://github.com/ClimenteA/PFASimplu);
-- Deschide un terminal si tasteaza `make run` apoi apasa enter;
-- aplicatia este facuta in limbajul [GO](https://go.dev/) cu web framework-ul [Fiber](https://docs.gofiber.io/);
-
+Aplicatia este facuta in limbajul [GO](https://go.dev/) cu web framework-ul [Fiber](https://docs.gofiber.io/);
 
 
 <a name="creeare-cont"></a>
@@ -120,6 +117,7 @@ Pentru developeri:
 
 Vei vedea langa executabil un nou folder `stocare` aici se vor salva doate datele introduse. 
 Ai grija de folderul `stocare` pastreaza-l in 2 locatii pentru a nu pierde datele.
+Contul este creat doar in PC-ul/Laptopul tau, datele personale nu se transmit nicaieri (programul functioneaza si fara conexiune la internet).
 
 
 <a name="adaugare-incasari"></a>
@@ -151,15 +149,14 @@ Poti oricand daca ai gresit sa stergi documentul fie din pagina `Adauga cheltuie
 
 
 <a name="adaugare-documente"></a>
-## Adaugare documente
+## Adaugare declaratii/documente
 
 - click pe `Adauga declaratii/documente`;
 - completeaza campurile din formular;
 - click pe `Choose File` si incarca factura pe care ai trimis-o catre client (pe telefon ai optiunea de a face poza la document);
-- daca ai selectat `Dovada plata impozite` ca tip document 2 campuri in plus vor mai aparea de completat: `Suma Platita catre ANAF` si `Plata pentru anul` - aceste campuri sunt folosite pentru a calcula cat mai ai de platit catre stat;
-- In campul `Plata pentru anul` trebuie completat anul pentru care a fost facuta plata catre stat - pentru fiecare an data scadenta pentru datoriile catre stat este pe 25 mai anul viitor celui curent (ex: anul 2021 a trecut si la noua declaratie revizuita pentru anul 2021 a mai ramas ceva de plata, atunci documentul care dovedeste restul de plata pentru anul 2021 va fi adaugat pentru anul 2021 desi anul curent este 2022);
+- daca ai selectat `Declaratie unica (212)` ca tip document va mai aparea un camp `Declaratie pentru anul` aici poti trece anul pentru care adaugi declaratia. Declaratia poate fi pentru anul curent sau poate fi o declaratie rectificativa pentru anul anterior. Aceleasi reguli sunt valabile si pentru optiunile: `Dovada incarcare Declaratie 212` si `Dovada plata impozite`;
+- daca ai selectat `Dovada plata impozite` ca tip document 2 campuri in plus vor mai aparea de completat: `Suma Platita catre ANAF` si `Plata pentru anul` - aceste campuri sunt folosite pentru a calcula cat mai ai de platit catre stat. In campul `Plata pentru anul` trebuie completat anul pentru care a fost facuta plata catre stat - pentru fiecare an data scadenta pentru datoriile catre stat este pe 25 mai anul viitor celui curent (ex: anul 2021 a trecut si la noua declaratie revizuita pentru anul 2021 a mai ramas ceva de plata, atunci documentul care dovedeste restul de plata pentru anul 2021 va fi adaugat pentru anul 2021 desi anul curent este 2022);
 - click pe `Adauga`;
-
 
 Factura va fi salvata in folderul `stocare`. 
 Poti oricand daca ai gresit sa stergi factura din pagina `Vezi registre contabile`. 
@@ -171,10 +168,10 @@ Poti oricand daca ai gresit sa stergi factura din pagina `Vezi registre contabil
 - click pe `Creeaza o factura`;
 - completeaza campurile cerute (o parte din campuri vor fi completate automat pentru facturile viitoare);
 - click pe `Adauga livrabil` pentru a adauga un produs/serviciu;
-- click pe `Genereaza factura`;
-- factura in format pdf va fi creata;
+- click pe `Vezi factura` un nou tab se va deschide cu factura, o poti verifica apoi daca e in regula click pe linkul `GENEREAZA PDF DIN FACTURA` si apoi click pe `Save` in dialogul urmator; 
+- factura in format pdf va fi descarcata;
 
-Creearea de facturi nu se face doar prin aceasta pagina poti folosi Google Docs pentru o factura mai personalizata pentru tine care mai apoi o poti adauga in pagina `Adauga incasari`.
+Factura nu este automat adaugata la incasari, va trebui apoi sa o adaugi in sectiunea `Adauga incasari`.
 
 Daca esti platitor de TVA poti adauga inca o linie pentru produse/servicii (apasa `Adauga livrabil`) unde completezi valoarea TVA.
 
@@ -185,8 +182,20 @@ Daca esti platitor de TVA poti adauga inca o linie pentru produse/servicii (apas
 - click pe `Vezi registre contabile`;
 - selecteaza rapoartele pentru anul dorit;
 - vezi informatiile calculate automat din datele introduse anterior;
-- download documente introduse;
-- download tabele in format CSV;
+- descarca documente introduse;
+- descarca tabele in format CSV;
+
+
+<a name="scoate-din-inventar"></a>
+## Scoate din inventar obiecte/mijloce fixe
+
+Daca un obiect de inventar sau mijloc fix adaugat anterior in sectiunea `Adauga cheltuieli` nu mai poate fi folosit sau l-ai vandut in sectiunea `Scoate din inventar obiecte/mijloce fixe` putem inregistra aceasta operatie.
+
+- selecteaza obiectul de inventar/mijloc fix din lista campul `Obiect/Mijloc Fix din Registru Inventar`;
+- selecteaza `Tip operatiune` - `CASARE` sau `VANZARE`;
+- pune data iesirii din uz (data casarii/vanzarii);
+- adauga documentul care dovedeste ca obiectul a fost casat/vandut;
+- click pe scoate;
 
 
 
@@ -219,20 +228,19 @@ Nu ne asumam raspunderea pentru eventuale erori in procesare date contabilitate,
 Testati aplicatia inainte si vedeti daca raspunde nevoilor dvs. inainte de o adauga in rutina de lucru. 
 
 
-
 <a name="pe-viitor"></a>
 ## Pe viitor
 
 - posibilitate adaugare `bazaDeCalcul` pentru cei care au norma de venit;
 - generare model completare Declaratie 212; 
-- adaugare TVA in calcul (avertizare depasire prag TVA);
+- adaugare TVA in calcul;
 - declaratie pentru TVA;
 - modificare setari anuale (salariul minim pentru anul in curs, prag minim, tabel amortizare mijloc fix);
 - one-click update app; 
 - verificare aplicatie facuta de un specialist contabil;
 
-Daca programul iti este si tie folositor, **[nu ezita sa faci o donatie!](https://www.buymeacoffee.com/climentea)**. Donatiile ma vor ajuta sa mentin acest mic proiect "in viata". 
+**Daca ai observat orice greseala sau ai o intrebare poti deschide un [issue pe github](https://github.com/ClimenteA/PFASimplu) sau poti intra pe reddit grupul [r/PFASimplu](https://www.reddit.com/r/PFASimplu/).**
 
 
-**Daca ai observat orice greseala poti deschide un [issue pe github](https://github.com/ClimenteA/PFASimplu) sau o poti seziza in [mesajul pentru donatii](https://www.buymeacoffee.com/climentea).**
+Daca programul iti este si tie folositor, **[nu ezita sa faci o donatie!](https://www.buymeacoffee.com/climentea)**. 
 
