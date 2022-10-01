@@ -128,7 +128,7 @@
                 document.getElementById(id).innerText = value;
             }
 
-            setText("numeFisier", `Factura ${factura.serie} ${factura.numar} ${factura.data_emitere}`);
+            setText("numeFisier", `Factura ${factura.serie} ${factura.numar} ${factura.totalFactura} ${factura.data_emitere}`);
             setText("Serie", factura.serie);
             setText("Numar", factura.numar);
             setText("DataEmiterii", factura.data_emitere);
@@ -148,8 +148,9 @@
             setText("IbanFurnizor", factura.furnizor.iban);
             setText("IbanClient", factura.client.iban);
             setText("TotalDePlata", factura.totalFactura);
-            if (factura.nota != "") {
-                setText("Observatii", "Observatii:" + factura.nota);
+
+            if (factura.nota) {
+                setText("Observatii", "Observatii: " + factura.nota);
             }
 
             let serviciiProduse = document.getElementById("ServiciiProduse");

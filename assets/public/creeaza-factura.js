@@ -17,6 +17,7 @@ function proceseazaRawData(request) {
         serie: bodyParamString(request, "serie").toUpperCase(),
         numar: bodyParamString(request, "numar").padStart(6, '0'),
         data: bodyParamString(request, "data"),
+        nota: bodyParamString(request, "nota"),
         adauga_la_incasari: bodyParamString(request, "adauga_la_incasari")
     }
 
@@ -73,7 +74,6 @@ function proceseazaRawData(request) {
 
     dateFactura['data_emitere'] = dateFactura.data
     dateFactura['data_scadenta'] = new Date(date.setMonth(date.getMonth() + 1)).toISOString().split("T")[0]
-    dateFactura['nota'] = dateFactura.nota
 
     return dateFactura
 
@@ -83,7 +83,7 @@ function proceseazaRawData(request) {
 // Mithril
 
 
-const clientElemIds = ['adresaClient', 'cifFurnizor',
+const clientElemIds = ['adresaClient',
     'cifClient', 'emailClient', 'ibanClient',
     'nrRegComClient', 'telefonClient']
 
@@ -101,7 +101,11 @@ class ClientForm {
             url: "/clienti"
         }).then(res => {
             console.log("CLIENTI:", res)
-            this.clienti = res
+            if (res) {
+                this.clienti = res
+            } else {
+                this.clienti = []
+            }
         });
     }
 
