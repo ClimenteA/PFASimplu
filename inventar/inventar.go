@@ -103,7 +103,7 @@ func handleInventarPage(app fiber.App, store session.Store) {
 			c.SaveFile(fisier, cale_dovada_scos_din_uz)
 
 			cheltuiala.ScosDinUz = true
-			cheltuiala.DetaliiIesireDinUz = types.IesireDinUz{
+			cheltuiala.DetaliiIesireDinUz = types.DetaliiIesireDinUz{
 				ScosDinUz:             true,
 				DataIesireDinUz:       data,
 				CaleDovadaIesireDinUz: cale_dovada_scos_din_uz,

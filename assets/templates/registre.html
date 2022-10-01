@@ -375,30 +375,30 @@
               {{ printf "%.2f" .DetaliiMijlocFix.CotaDeAmortizare}}
             </td>
             <td>
-              {{if .DetaliiIesireDinUz.ScosDinUz}}
+              {{if .ScosDinUz}}
               Da
               {{else}}
               Nu
               {{end}}
             </td>
             <td>
-              {{if .DetaliiIesireDinUz.ScosDinUz}}
-              {{ .DetaliiIesireDinUz.ModalitateIesireDinUz }}
+              {{if .ScosDinUz}}
+              {{ .DetaliiIesireDinUz.ModalidateIesireDinUz }}
               {{else}}
               -
               {{end}}
             </td>
             <td>
-              {{if .DetaliiIesireDinUz.ScosDinUz}}
+              {{if .ScosDinUz}}
               {{ .DetaliiIesireDinUz.DataIesireDinUz }}
               {{else}}
               -
               {{end}}
             </td>
             <td>
-              {{if .DetaliiIesireDinUz.ScosDinUz}}
+              {{if .ScosDinUz}}
               <a href="/download-fisier?path={{.DetaliiIesireDinUz.CaleDovadaIesireDinUz}}">Descarca dovada
-                {{.DetaliiIesireDinUz.ModalitateIesireDinUz}}</a>
+                {{.DetaliiIesireDinUz.ModalidateIesireDinUz}}</a>
               {{else}}
               -
               {{end}}
@@ -715,7 +715,7 @@
 
     const MONTHS = ['Ianuarie', 'Februarie', 'Martie', 'Aprilie', 'Mai', 'Iunie', 'Iulie', 'August', 'Septembrie', 'Octombrie', 'Noiembrie', 'Decembrie'];
     let incasari = [{{ range .IncasariPeLuni }} {{.}}, {{ end }}];
-    let cheltuieli = [{{ range .CheltuieliPeLuni }} {{.}}, {{end}}];
+  let cheltuieli = [{{ range .CheltuieliPeLuni }} {{.}}, {{ end }}];
 
 
   let barIncasari = {
