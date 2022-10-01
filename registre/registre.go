@@ -35,7 +35,7 @@ func HandleRegistre(app fiber.App, store session.Store) {
 	handleRegistre(app, store)
 }
 
-func getCurrentUser(currentUserPath string) auth.Account {
+func GetCurrentUser(currentUserPath string) auth.Account {
 
 	var data auth.Account
 
@@ -140,7 +140,7 @@ func handleRegistre(app fiber.App, store session.Store) {
 			filterYear = r.Anul
 		}
 
-		user := getCurrentUser(fmt.Sprint(currentUserPath))
+		user := GetCurrentUser(fmt.Sprint(currentUserPath))
 		aniInregistrati := utils.GetAniInregistrati(user)
 
 		declaratii := declaratii.AdunaDeclaratii(user, filterYear)

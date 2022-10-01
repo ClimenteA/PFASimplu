@@ -58,7 +58,7 @@ func setDocData(docData Declaratie, filePath string) {
 	}
 }
 
-func getCurrentUser(currentUserPath string) auth.Account {
+func GetCurrentUser(currentUserPath string) auth.Account {
 
 	var data auth.Account
 
@@ -88,7 +88,7 @@ func handleDeclaratii(app fiber.App, store session.Store) {
 			return c.Redirect("/login")
 		}
 
-		user := getCurrentUser(fmt.Sprint(currentUserPath))
+		user := GetCurrentUser(fmt.Sprint(currentUserPath))
 		yearsRegisterd := utils.GetAniInregistrati(user)
 		filterYear := strconv.Itoa(time.Now().Year())
 
@@ -112,7 +112,7 @@ func handleDeclaratii(app fiber.App, store session.Store) {
 			return c.Redirect("/login")
 		}
 
-		user := getCurrentUser(fmt.Sprint(currentUserPath))
+		user := GetCurrentUser(fmt.Sprint(currentUserPath))
 
 		if form, err := c.MultipartForm(); err == nil {
 

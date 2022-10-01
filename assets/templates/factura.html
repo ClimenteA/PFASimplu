@@ -1,4 +1,29 @@
-<main class="container">
+<style>
+    #tabel-incasari {
+        margin-bottom: 1rem;
+        margin-top: 4rem;
+        padding: 1rem;
+        max-height: 600px;
+        overflow: auto;
+    }
+
+    .download {
+        display: flex;
+        gap: 2rem;
+        float: right;
+    }
+
+    tr td {
+        width: 1%;
+        white-space: nowrap;
+    }
+
+    .bg-whitesmoke {
+        background: whitesmoke;
+    }
+</style>
+
+<main class="container-fluid">
 
     <hgroup class="container">
         <h1>Creeaza o factura</h1>
@@ -10,7 +35,7 @@
         </h2>
     </hgroup>
 
-    <form id="factura-form">
+    <form class="container" id="factura-form">
 
         <article>
 
@@ -20,13 +45,13 @@
 
                 <label for="serie">
                     Serie
-                    <input style="text-transform:uppercase" type="text" id="serie" name="serie" placeholder="INV0001"
-                        required>
+                    <input style="text-transform:uppercase" type="text" id="serie" name="serie"
+                        value="{{ .UltimaSerie }}" required>
                 </label>
 
                 <label for="numar">
                     Numar factura
-                    <input type="number" id="numar" min=0 name="numar" placeholder="123" required>
+                    <input type="number" id="numar" min=0 name="numar" value="{{ .UltimulNumar }}" required>
                 </label>
 
                 <div id="data_container">
@@ -182,6 +207,80 @@
         </article>
 
     </form>
+
+    <article id="tabel-incasari">
+        <h4 style="color: var(--secondary);">Tabel Incasari</h4>
+        <table id="date-incasari">
+
+            <thead>
+                <tr class="bg-whitesmoke">
+                    <th scope="col">
+                        Data
+                    </th>
+                    <th scope="col">
+                        Sursa venit
+                    </th>
+                    <th scope="col">
+                        Serie
+                    </th>
+                    <th scope="col">
+                        Numar
+                    </th>
+                    <th scope="col">
+                        Suma Incasata
+                    </th>
+                    <th scope="col">
+                        Tip Tranzactie
+                    </th>
+                    <th scope="col">
+                        Descarca Fisier
+                    </th>
+                    <th scope="col">
+                        Sterge Fisier
+                    </th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {{range .Incasari}}
+                <tr>
+                    <td>
+                        {{.Data}}
+                    </td>
+                    <td>
+                        {{.SursaVenit}}
+                    </td>
+                    <td>
+                        {{if .Serie}}
+                        {{.Serie}}
+                        {{else}}
+                        -
+                        {{end}}
+                    </td>
+                    <td>
+                        {{if .Numar}}
+                        {{.Numar}}
+                        {{else}}
+                        -
+                        {{end}}
+                    </td>
+                    <td>
+                        {{ printf "%.2f" .SumaIncasata}}
+                    </td>
+                    <td>
+                        {{.TipTranzactie}}
+                    </td>
+                    <td>
+                        <a href="/download-fisier?path={{.CaleIncasare}}">Descarca</a>
+                    </td>
+                    <td>
+                        <a style="color:var(--del-color);" href="/sterge-fisier?path={{.CaleIncasare}}">Sterge</a>
+                    </td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+    </article>
 
 </main>
 

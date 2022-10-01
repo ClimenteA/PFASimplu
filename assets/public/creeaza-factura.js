@@ -119,25 +119,9 @@ class ClientForm {
             console.log("FURNIZOR: ", furnizorObj)
 
             for (let key in furnizorObj) {
-                let elementId = key;
-
-                if (key == "serie") {
-                    elementId = key;
-                } else if (key == "numar") {
-                    elementId = key;
-                } else {
-                    elementId = key + "Furnizor";
-                }
-
-                let el = document.getElementById(elementId);
+                let el = document.getElementById(key + "Furnizor");
                 if (!el) continue;
-
-                if (key == "numar") {
-                    el.value = parseInt(furnizorObj[key]) + 1;
-                } else {
-                    el.value = furnizorObj[key];
-                }
-
+                el.value = furnizorObj[key];
             }
         });
 

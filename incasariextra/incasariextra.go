@@ -23,7 +23,7 @@ func HandleIncasariExtra(app fiber.App, store session.Store) {
 	handleIncasariExtra(app, store)
 }
 
-func getCurrentUser(currentUserPath string) auth.Account {
+func GetCurrentUser(currentUserPath string) auth.Account {
 
 	var data auth.Account
 
@@ -82,7 +82,7 @@ func handleIncasariExtra(app fiber.App, store session.Store) {
 			return c.Redirect("/login")
 		}
 
-		user := getCurrentUser(fmt.Sprint(currentUserPath))
+		user := GetCurrentUser(fmt.Sprint(currentUserPath))
 		filterYear := strconv.Itoa(time.Now().Year())
 
 		incasari := incasari.AdunaIncasari(user, filterYear)
@@ -129,7 +129,7 @@ func handleIncasariExtra(app fiber.App, store session.Store) {
 			}
 
 			uid := shortuuid.New()
-			user := getCurrentUser(fmt.Sprint(currentUserPath))
+			user := GetCurrentUser(fmt.Sprint(currentUserPath))
 			dirName := filepath.Join(user.StocareIncasariExtra, data, uid)
 			incasarePath := GetIncasareExtraPath(dirName)
 			incasareJsonPath := GetIncasareExtraJsonPath(dirName)

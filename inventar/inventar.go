@@ -19,7 +19,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/session"
 )
 
-func getCurrentUser(currentUserPath string) auth.Account {
+func GetCurrentUser(currentUserPath string) auth.Account {
 
 	var data auth.Account
 
@@ -53,7 +53,7 @@ func handleInventarPage(app fiber.App, store session.Store) {
 			return c.Redirect("/login")
 		}
 
-		user := getCurrentUser(fmt.Sprint(currentUserPath))
+		user := GetCurrentUser(fmt.Sprint(currentUserPath))
 
 		filterYear := strconv.Itoa(time.Now().Year())
 		cheltuieli := outputs.AdunaCheltuieli(user, filterYear)

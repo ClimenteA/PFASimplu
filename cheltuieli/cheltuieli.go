@@ -55,7 +55,7 @@ func SetExpenseData(expenseData types.Cheltuiala, filePath string) {
 	}
 }
 
-func getCurrentUser(currentUserPath string) auth.Account {
+func GetCurrentUser(currentUserPath string) auth.Account {
 
 	var data auth.Account
 
@@ -272,7 +272,7 @@ func handleCheltuieli(app fiber.App, store session.Store, coduriMijloaceFixe []s
 			return c.Redirect("/login")
 		}
 
-		user := getCurrentUser(fmt.Sprint(currentUserPath))
+		user := GetCurrentUser(fmt.Sprint(currentUserPath))
 		filterYear := strconv.Itoa(time.Now().Year())
 
 		cheltuieli := AdunaCheltuieli(user, filterYear)
@@ -306,7 +306,7 @@ func handleCheltuieli(app fiber.App, store session.Store, coduriMijloaceFixe []s
 			return c.Redirect("/login")
 		}
 
-		user := getCurrentUser(fmt.Sprint(currentUserPath))
+		user := GetCurrentUser(fmt.Sprint(currentUserPath))
 
 		if form, err := c.MultipartForm(); err == nil {
 

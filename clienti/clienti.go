@@ -20,7 +20,7 @@ func HandleClientsRequests(app fiber.App, store session.Store) {
 	handleClientsRequests(app, store)
 }
 
-func getCurrentUser(currentUserPath string) auth.Account {
+func GetCurrentUser(currentUserPath string) auth.Account {
 
 	var data auth.Account
 
@@ -98,7 +98,7 @@ func handleClientsRequests(app fiber.App, store session.Store) {
 			return c.Redirect("/login")
 		}
 
-		user := getCurrentUser(fmt.Sprint(currentUserPath))
+		user := GetCurrentUser(fmt.Sprint(currentUserPath))
 
 		allClients := getCurrentClients(user.Stocare)
 
@@ -117,7 +117,7 @@ func handleClientsRequests(app fiber.App, store session.Store) {
 			return c.Redirect("/login")
 		}
 
-		user := getCurrentUser(fmt.Sprint(currentUserPath))
+		user := GetCurrentUser(fmt.Sprint(currentUserPath))
 
 		furnizor := getFurnizor(user.Stocare)
 
@@ -136,7 +136,7 @@ func handleClientsRequests(app fiber.App, store session.Store) {
 			return c.Redirect("/login")
 		}
 
-		user := getCurrentUser(fmt.Sprint(currentUserPath))
+		user := GetCurrentUser(fmt.Sprint(currentUserPath))
 
 		di := new(types.DateIdentificare)
 

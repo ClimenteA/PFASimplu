@@ -13,8 +13,8 @@ Aplicatia este de tip website asa ca poate fi accesata chiar si de pe un telefon
 Aplicatia poate fi utila pentru oricine:
 - tine contabilitatea in partida simpla;
 - cu sistem de venit real;
-- este neplatitor de TVA;
-- nu are angajati; 
+- este neplatitor de TVA (daca castigi sub 5000 EUR in fiecare luna e ok);
+- nu are angajati (mai bine un SRL pentru asta); 
 
 
 
@@ -27,7 +27,7 @@ Aplicatia poate fi utila pentru oricine:
     - Registru Inventar; 
     - Registru Fiscal;
     - Fisa Mijloc Fix;
-- Download CSV registre;
+- Descarca registre contabile in format CSV (pentru Microsoft Excel/Libre Office/Google Sheets etc);
 - Generare factura in format PDF;
 
 Calcul automat impozite pentru declaratia unica (CAS/CASS/Impozit):
@@ -45,10 +45,6 @@ Calcul automat impozite pentru declaratia unica (CAS/CASS/Impozit):
     * `bazaDeCalcul = salariuMinimBrut x 24` - daca `venitNet` mai mare de 24 salarii minime brute din anul 2023+;
     * `CASS = 10% din bazaDeCalcul`;
 
-
-Extra calcule:
-- Total Profit Anual : daca ai adaugat soldul intermediar (suma cu care ai ramas pe card la sfarsit de an), se scade ce a mai ramas de plata catre stat si rezulta profitul anual;
-- Procent Profit Anual : daca ai adaugat soldul intermediar, se calculeaza cat la suta reprezinta profitul anual din total incasari brut.
 
 Rapoarte suplimentare:
 - Tabel incasari - unde poti vedea/sterge incasarile;
@@ -80,10 +76,10 @@ Rapoarte suplimentare:
 <a name="cum-rulezi-aplicatia"></a>
 ## Cum rulezi aplicatia
 
-1. Download executabil pentru sistemul dvs de operare:
-- [Download PFASimplu-Windows-64bit](https://github.com/ClimenteA/PFASimplu/releases);
-- [Download PFASimplu-MacOS-64bit](https://github.com/ClimenteA/PFASimplu/releases);
-- [Download PFASimplu-Linux-64bit](https://github.com/ClimenteA/PFASimplu/releases);
+1. Descarca executabil pentru sistemul dvs de operare:
+- [Descarca PFASimplu-Windows-64bit](https://github.com/ClimenteA/PFASimplu/releases);
+- [Descarca PFASimplu-MacOS-64bit](https://github.com/ClimenteA/PFASimplu/releases);
+- [Descarca PFASimplu-Linux-64bit](https://github.com/ClimenteA/PFASimplu/releases);
 
 2. Extrage-ti zip-ul pe un stick sau in pc/laptop;
 3. Deschide-ti fisierul `INSTRUCTIUNI.txt` si urmati pasii de acolo;
@@ -106,7 +102,8 @@ http://192.168.1.7:3000
 
 Acum poti deschide aplicatia intr-un browser pe pc/laptop la adresa `http://localhost:3000` sau de pe browser dintr-un telefon aflat in aceeeasi retea wifi la adresa `http://192.168.1.7:3000` (adresa ta poate fi diferita).
 
-Pornire aplicatie din codul sursa:
+
+Pentru developeri:
 - [clone github repo](https://github.com/ClimenteA/PFASimplu);
 - Deschide un terminal si tasteaza `make run` apoi apasa enter;
 - aplicatia este facuta in limbajul [GO](https://go.dev/) cu web framework-ul [Fiber](https://docs.gofiber.io/);

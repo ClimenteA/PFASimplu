@@ -22,7 +22,7 @@ func HandleDownloadDateCont(app fiber.App, store session.Store) {
 	downloadDateCont(app, store)
 }
 
-func getCurrentUser(currentUserPath string) auth.Account {
+func GetCurrentUser(currentUserPath string) auth.Account {
 
 	var data auth.Account
 
@@ -52,7 +52,7 @@ func downloadDateCont(app fiber.App, store session.Store) {
 			return c.Redirect("/login")
 		}
 
-		user := getCurrentUser(fmt.Sprint(currentUserPath))
+		user := GetCurrentUser(fmt.Sprint(currentUserPath))
 		aniInregistrati := utils.GetAniInregistrati(user)
 
 		return c.Render("downloadcont", fiber.Map{
@@ -73,7 +73,7 @@ func downloadDateCont(app fiber.App, store session.Store) {
 			return c.Redirect("/login")
 		}
 
-		user := getCurrentUser(fmt.Sprint(currentUserPath))
+		user := GetCurrentUser(fmt.Sprint(currentUserPath))
 
 		if form, err := c.MultipartForm(); err == nil {
 

@@ -51,7 +51,7 @@ func SetInvoiceData(invoiceData types.Factura, filePath string) {
 	}
 }
 
-func getCurrentUser(currentUserPath string) auth.Account {
+func GetCurrentUser(currentUserPath string) auth.Account {
 
 	var data auth.Account
 
@@ -81,7 +81,7 @@ func handleIncasari(app fiber.App, store session.Store) {
 			return c.Redirect("/login")
 		}
 
-		user := getCurrentUser(fmt.Sprint(currentUserPath))
+		user := GetCurrentUser(fmt.Sprint(currentUserPath))
 		filterYear := strconv.Itoa(time.Now().Year())
 
 		incasari := AdunaIncasari(user, filterYear)
@@ -112,7 +112,7 @@ func handleIncasari(app fiber.App, store session.Store) {
 			return c.Redirect("/login")
 		}
 
-		user := getCurrentUser(fmt.Sprint(currentUserPath))
+		user := GetCurrentUser(fmt.Sprint(currentUserPath))
 
 		if form, err := c.MultipartForm(); err == nil {
 
@@ -147,7 +147,7 @@ func handleIncasari(app fiber.App, store session.Store) {
 				Data:          data,
 				TipTranzactie: tip_tranzactie,
 				SumaIncasata:  suma_incasata,
-				CaleIncasare:   caleFactura,
+				CaleIncasare:  caleFactura,
 			}
 
 			SetInvoiceData(invoiceData, invoiceJsonPath)
