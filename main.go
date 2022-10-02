@@ -22,6 +22,7 @@ import (
 	"github.com/ClimenteA/pfasimplu-go/landing"
 	"github.com/ClimenteA/pfasimplu-go/registre"
 	"github.com/ClimenteA/pfasimplu-go/staticdata"
+	"github.com/ClimenteA/pfasimplu-go/tabelpdf"
 	"github.com/ClimenteA/pfasimplu-go/utils"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -55,6 +56,7 @@ func main() {
 	clienti.HandleClientsRequests(*app, *store)
 	inventar.HandleInventarPage(*app, *store)
 	incasariextra.HandleIncasariExtra(*app, *store)
+	tabelpdf.HandleTabelPDFPage(*app, *store)
 
 	hostIp := utils.GetHostIp()
 

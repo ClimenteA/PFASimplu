@@ -10,7 +10,7 @@
   .download {
     display: flex;
     gap: 2rem;
-    float: right;
+    justify-content: end;
   }
 
   tr td {
@@ -195,6 +195,7 @@
 
     <div id="tabel-incasari-download" class="download">
       <a href="/download-fisier?path={{.CaleIncasariCSV}}">Descarca CSV</a>
+      <a href="/tabel-incasari-pdf">Vezi PDF</a>
     </div>
 
 
@@ -411,6 +412,7 @@
 
     <div id="tabel-cheltuieli-download" class="download">
       <a href="/download-fisier?path={{.CaleCheltuieliCSV}}">Descarca CSV</a>
+      <a href="/tabel-cheltuieli-pdf">Vezi PDF</a>
     </div>
 
 

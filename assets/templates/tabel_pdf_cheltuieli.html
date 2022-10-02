@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/pico.min.css">
+    <link rel="stylesheet" href="/print.css">
+    <script src="/print.js"></script>
+    <title>Tabel Cheltuieli {{.Anul}}</title>
+</head>
+
+<body id="container">
+
+    <main style="width: 800px;">
+
+        <section class="genereaza-pdf">
+            <a href="#" id="print">GENEREAZA PDF</a>
+        </section>
+
+        <div id="tabel-cheltuieli">
+            <h4 style="color: var(--secondary);">Tabel Cheltuieli {{.Anul}}</h4>
+            <table id="date-cheltuieli">
+
+                <thead>
+                    <tr class="bg-whitesmoke">
+                        <th scope="col">
+                            Data
+                        </th>
+                        <th scope="col">
+                            Nume Cheltuiala
+                        </th>
+                        <th scope="col">
+                            Suma Cheltuita
+                        </th>
+                        <th scope="col">
+                            Tip Tranzactie
+                        </th>
+                        <th scope="col">
+                            Obiect Inventar
+                        </th>
+                        <th scope="col">
+                            Mijloc Fix
+                        </th>
+                        <th scope="col">
+                            Cale Fisier
+                        </th>
+                        <th scope="col">
+                            Ani Amortizare
+                        </th>
+                        <th scope="col">
+                            Data Punerii In Functiune
+                        </th>
+                        <th scope="col">
+                            Cod Clasificare
+                        </th>
+                        <!-- <th scope="col">
+                    Nr Inventar
+                  </th> -->
+                        <th scope="col">
+                            Fel Serie Numar Data Document
+                        </th>
+                        <th scope="col">
+                            Valoare Inventar
+                        </th>
+                        <th scope="col">
+                            Amortizare Lunara
+                        </th>
+                        <th scope="col">
+                            Denumire Si Caracteristici
+                        </th>
+                        <th scope="col">
+                            Accesorii
+                        </th>
+                        <th scope="col">
+                            Grupa
+                        </th>
+                        <th scope="col">
+                            Anul Darii In Folosinta
+                        </th>
+                        <th scope="col">
+                            Luna Darii In Folosinta
+                        </th>
+                        <th scope="col">
+                            Anul Amortizarii Complete
+                        </th>
+                        <th scope="col">
+                            Luna Amortizarii Complete
+                        </th>
+                        <th scope="col">
+                            Durata Normala De Functionare
+                        </th>
+                        <th scope="col">
+                            Cota De Amortizare
+                        </th>
+                        <th scope="col">
+                            Scos din uz
+                        </th>
+                        <th scope="col">
+                            Modalitate iesire din uz
+                        </th>
+                        <th scope="col">
+                            Data iesirii in uz
+                        </th>
+                        <th scope="col">
+                            Document justificativ
+                        </th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {{range .Cheltuieli}}
+                    <tr>
+                        <td>
+                            {{.Data}}
+                        </td>
+                        <td>
+                            {{.NumeCheltuiala}}
+                        </td>
+                        <td>
+                            {{ printf "%.2f" .SumaCheltuita}}
+                        </td>
+                        <td>
+                            {{.TipTranzactie}}
+                        </td>
+                        <td>
+                            {{if .ObiectInventar}}
+                            Da
+                            {{else}}
+                            Nu
+                            {{end}}
+                        </td>
+                        <td>
+                            {{if .MijlocFix}}
+                            Da
+                            {{else}}
+                            Nu
+                            {{end}}
+                        </td>
+                        <td>
+                            {{.CaleCheltuiala}}
+                        </td>
+                        <td>
+                            {{.DetaliiMijlocFix.AniAmortizare}}
+                        </td>
+                        <td>
+                            {{.DetaliiMijlocFix.DataPuneriiInFunctiune}}
+                        </td>
+                        <td>
+                            {{.DetaliiMijlocFix.CodClasificare}}
+                        </td>
+                        <!-- <td>
+                    {{.DetaliiMijlocFix.NrInventar}}
+                  </td> -->
+                        <td>
+                            {{.DetaliiMijlocFix.FelSerieNumarDataDocument}}
+                        </td>
+                        <td>
+                            {{ printf "%.2f" .DetaliiMijlocFix.ValoareInventar}}
+                        </td>
+                        <td>
+                            {{ printf "%.2f" .DetaliiMijlocFix.AmortizareLunara}}
+                        </td>
+                        <td>
+                            {{.DetaliiMijlocFix.DenumireSiCaracteristici}}
+                        </td>
+                        <td>
+                            {{.DetaliiMijlocFix.Accesorii}}
+                        </td>
+                        <td>
+                            {{.DetaliiMijlocFix.Grupa}}
+                        </td>
+                        <td>
+                            {{.DetaliiMijlocFix.AnulDariiInFolosinta}}
+                        </td>
+                        <td>
+                            {{.DetaliiMijlocFix.LunaDariiInFolosinta}}
+                        </td>
+                        <td>
+                            {{.DetaliiMijlocFix.AnulAmortizariiComplete}}
+                        </td>
+                        <td>
+                            {{.DetaliiMijlocFix.LunaAmortizariiComplete}}
+                        </td>
+                        <td>
+                            {{.DetaliiMijlocFix.DurataNormalaDeFunctionare}}
+                        </td>
+                        <td>
+                            {{ printf "%.2f" .DetaliiMijlocFix.CotaDeAmortizare}}
+                        </td>
+                        <td>
+                            {{if .ScosDinUz}}
+                            Da
+                            {{else}}
+                            Nu
+                            {{end}}
+                        </td>
+                        <td>
+                            {{if .ScosDinUz}}
+                            {{ .DetaliiIesireDinUz.ModalidateIesireDinUz }}
+                            {{else}}
+                            -
+                            {{end}}
+                        </td>
+                        <td>
+                            {{if .ScosDinUz}}
+                            {{ .DetaliiIesireDinUz.DataIesireDinUz }}
+                            {{else}}
+                            -
+                            {{end}}
+                        </td>
+                        <td>
+                            {{if .ScosDinUz}}
+                            {{.DetaliiIesireDinUz.CaleDovadaIesireDinUz}}
+                            {{else}}
+                            -
+                            {{end}}
+                        </td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+        </div>
+
+    </main>
+
+</body>
+
+</html>
