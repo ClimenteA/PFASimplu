@@ -1,4 +1,5 @@
-# PFASimplu
+# PFASimplu 
+![GitHub all releases](https://img.shields.io/github/downloads/ClimenteA/PFASimplu/total?label=descarcari&style=for-the-badge)
 
 Aplicatie pentru simplificarea gestiunii contabilitatii facuta in partida simpla.
 
