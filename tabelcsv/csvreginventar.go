@@ -13,9 +13,10 @@ import (
 	"path/filepath"
 
 	"github.com/ClimenteA/pfasimplu-go/types"
+	"github.com/ClimenteA/pfasimplu-go/utils"
 )
 
-func CreeazaRegistruInventarCSV(path, filterYear string, registruInventar []types.RegistruInventar) string {
+func CreeazaRegistruInventarCSV(path, filterYear string, registruInventar []types.RegistruInventar) types.CaleFisier {
 
 	if _, err := os.Stat(path); err != nil || !os.IsExist(err) {
 		os.MkdirAll(path, 0750)
@@ -37,14 +38,29 @@ func CreeazaRegistruInventarCSV(path, filterYear string, registruInventar []type
 	}
 
 	for _, inventar := range registruInventar {
+
+		var mijlocFix string
+		if inventar.MijlocFix {
+			mijlocFix = "Da"
+		} else {
+			mijlocFix = "Nu"
+		}
+
+		var scosDinUz string
+		if inventar.ScosDinUz {
+			scosDinUz = "Da"
+		} else {
+			scosDinUz = "Nu"
+		}
+
 		rows = append(rows, []string{
 			strconv.Itoa(inventar.NrCrt),
 			inventar.DenumireaElemInv,
 			fmt.Sprintf("%.2f", inventar.ValInvRon),
 			inventar.Data,
 			inventar.CaleCheltuiala,
-			strconv.FormatBool(inventar.MijlocFix),
-			strconv.FormatBool(inventar.ScosDinUz),
+			mijlocFix,
+			scosDinUz,
 			inventar.ModalitateIesireDinUz,
 			inventar.DataIesireDinUz,
 			inventar.CaleDovadaIesireDinUz,
@@ -67,7 +83,18 @@ func CreeazaRegistruInventarCSV(path, filterYear string, registruInventar []type
 	csvwriter.Flush()
 	csvfile.Close()
 
-	return csvPath
+	xlsxPath := filepath.Join(path, filterYear+"registru_inventar.xlsx")
+	err = utils.GenerateXLSXFromCSV(csvPath, xlsxPath, ',')
+	if err != nil {
+		log.Println(err)
+	}
+	paths := types.CaleFisier{
+		XLSX: xlsxPath,
+		CSV:  csvPath,
+	}
+
+	return paths
+
 }
 
 func getFisiereRegistruInventar(root string) ([]string, error) {
@@ -153,13 +180,21 @@ func parseRegistruInventar(data [][]string) []types.RegistruInventar {
 			}
 
 			if j == 5 {
-				fieldb, _ := strconv.ParseBool(field)
-				row.MijlocFix = fieldb
+				if field == "Da" {
+					row.MijlocFix = true
+				}
+				if field == "Nu" {
+					row.MijlocFix = false
+				}
 			}
 
 			if j == 6 {
-				fieldb, _ := strconv.ParseBool(field)
-				row.ScosDinUz = fieldb
+				if field == "Da" {
+					row.ScosDinUz = true
+				}
+				if field == "Nu" {
+					row.ScosDinUz = false
+				}
 			}
 
 			if j == 7 {

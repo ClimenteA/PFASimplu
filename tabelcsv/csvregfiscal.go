@@ -9,9 +9,10 @@ import (
 	"strconv"
 
 	"github.com/ClimenteA/pfasimplu-go/types"
+	"github.com/ClimenteA/pfasimplu-go/utils"
 )
 
-func CreeazaRegistruFiscalCSV(path, filterYear string, registruFiscal []types.RegistruFiscal) string {
+func CreeazaRegistruFiscalCSV(path, filterYear string, registruFiscal []types.RegistruFiscal) types.CaleFisier {
 
 	rows := [][]string{
 		{
@@ -47,5 +48,16 @@ func CreeazaRegistruFiscalCSV(path, filterYear string, registruFiscal []types.Re
 	csvwriter.Flush()
 	csvfile.Close()
 
-	return csvPath
+	xlsxPath := filepath.Join(path, filterYear+"_registru_fiscal.xlsx")
+	err = utils.GenerateXLSXFromCSV(csvPath, xlsxPath, ',')
+	if err != nil {
+		log.Println(err)
+	}
+	paths := types.CaleFisier{
+		XLSX: xlsxPath,
+		CSV:  csvPath,
+	}
+
+	return paths
+
 }

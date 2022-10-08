@@ -9,9 +9,10 @@ import (
 	"strconv"
 
 	"github.com/ClimenteA/pfasimplu-go/types"
+	"github.com/ClimenteA/pfasimplu-go/utils"
 )
 
-func CreeazaIncasariCSV(path, filterYear string, incasari []types.FacturaPlusExtraIncasari) string {
+func CreeazaIncasariCSV(path, filterYear string, incasari []types.FacturaPlusExtraIncasari) types.CaleFisier {
 
 	rows := [][]string{
 		{
@@ -24,16 +25,6 @@ func CreeazaIncasariCSV(path, filterYear string, incasari []types.FacturaPlusExt
 			"Cale Fisier",
 		},
 	}
-
-	// serie := "-"
-	// if incasare.Serie != "" {
-	// 	serie = incasare.Serie
-	// }
-
-	// numar := "-"
-	// if incasare.Numar > 0 {
-	// 	numar = strconv.Itoa(incasare.Numar)
-	// }
 
 	for _, incasare := range incasari {
 		rows = append(rows, []string{
@@ -63,5 +54,18 @@ func CreeazaIncasariCSV(path, filterYear string, incasari []types.FacturaPlusExt
 	csvwriter.Flush()
 	csvfile.Close()
 
-	return csvPath
+	xlsxPath := filepath.Join(path, filterYear+"_incasari.xlsx")
+	err = utils.GenerateXLSXFromCSV(csvPath, xlsxPath, ',')
+	if err != nil {
+		log.Println(err)
+	}
+	
+
+	paths := types.CaleFisier{
+		XLSX: xlsxPath,
+		CSV:  csvPath,
+	}
+
+	return paths
+
 }

@@ -169,15 +169,15 @@ func handleRegistre(app fiber.App, store session.Store) {
 
 		registruFiscal := CreeazaRegistruFiscal(aniInregistrati, incasari, cheltuieli, filterYear)
 
-		incasariCSVPath := tabelcsv.CreeazaIncasariCSV(user.Stocare, filterYear, incasari)
-		cheltuieliCSVPath := tabelcsv.CreeazaCheltuieliCSV(user.Stocare, filterYear, cheltuieli)
-		registruJurnalCSVPath := tabelcsv.CreeazaRegistruJurnalCSV(user.Stocare, filterYear, registruJurnal)
-		registruFiscalCSVPath := tabelcsv.CreeazaRegistruFiscalCSV(user.Stocare, filterYear, registruFiscal)
+		CaleIncasari := tabelcsv.CreeazaIncasariCSV(user.Stocare, filterYear, incasari)
+		CaleCheltuieli := tabelcsv.CreeazaCheltuieliCSV(user.Stocare, filterYear, cheltuieli)
+		CaleRegistruJurnal := tabelcsv.CreeazaRegistruJurnalCSV(user.Stocare, filterYear, registruJurnal)
+		CaleRegistruFiscal := tabelcsv.CreeazaRegistruFiscalCSV(user.Stocare, filterYear, registruFiscal)
 
 		registruInventar := CreeazaRegistruInventar(cheltuieli)
 		tabelcsv.CreeazaRegistruInventarCSV(user.Stocare, filterYear+"_", registruInventar)
 		registruInventar = tabelcsv.FullRegistruInventar(user.Stocare, filterYear)
-		registruInventarCSVPath := tabelcsv.CreeazaRegistruInventarCSV(filepath.Join(user.Stocare, "inventar"), "", registruInventar)
+		CaleRegistruInventar := tabelcsv.CreeazaRegistruInventarCSV(filepath.Join(user.Stocare, "inventar"), "", registruInventar)
 
 		platiCatreStatRounded := map[string]string{
 			"CASPensie":    fmt.Sprintf("%.2f", platiCatreStat.CASPensie),
@@ -214,11 +214,16 @@ func handleRegistre(app fiber.App, store session.Store) {
 			"TotalIncasariNet":           fmt.Sprintf("%.2f", totalIncasariNet),
 			"TotalCheltuieliDeductibile": fmt.Sprintf("%.2f", totalCheltuieliDeductibile),
 			"TotalPlatiCatreStat":        fmt.Sprintf("%.2f", totalPlatiCatreStat),
-			"CaleIncasariCSV":            incasariCSVPath,
-			"CaleCheltuieliCSV":          cheltuieliCSVPath,
-			"CaleRegistruJurnalCSV":      registruJurnalCSVPath,
-			"CaleRegistruInventarCSV":    registruInventarCSVPath,
-			"CaleRegistruFiscalCSV":      registruFiscalCSVPath,
+			"CaleIncasariCSV":            CaleIncasari.CSV,
+			"CaleCheltuieliCSV":          CaleCheltuieli.CSV,
+			"CaleRegistruJurnalCSV":      CaleRegistruJurnal.CSV,
+			"CaleRegistruInventarCSV":    CaleRegistruInventar.CSV,
+			"CaleRegistruFiscalCSV":      CaleRegistruFiscal.CSV,
+			"CaleIncasariXLSX":           CaleIncasari.XLSX,
+			"CaleCheltuieliXLSX":         CaleCheltuieli.XLSX,
+			"CaleRegistruJurnalXLSX":     CaleRegistruJurnal.XLSX,
+			"CaleRegistruInventarXLSX":   CaleRegistruInventar.XLSX,
+			"CaleRegistruFiscalXLSX":     CaleRegistruFiscal.XLSX,
 			"IncasariPeLuni":             incasariPeLuni,
 			"CheltuieliPeLuni":           cheltuieliPeLuni,
 			"PlatiCatreStat":             platiCatreStatRounded,

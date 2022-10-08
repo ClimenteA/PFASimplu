@@ -194,6 +194,7 @@
     </article>
 
     <div id="tabel-incasari-download" class="download">
+      <a href="/download-fisier?path={{.CaleIncasariXLSX}}">Descarca XLSX</a>
       <a href="/download-fisier?path={{.CaleIncasariCSV}}">Descarca CSV</a>
     </div>
 
@@ -410,6 +411,7 @@
     </article>
 
     <div id="tabel-cheltuieli-download" class="download">
+      <a href="/download-fisier?path={{.CaleCheltuieliXLSX}}">Descarca XLSX</a>
       <a href="/download-fisier?path={{.CaleCheltuieliCSV}}">Descarca CSV</a>
     </div>
 
@@ -541,6 +543,7 @@
     </article>
 
     <div class="download">
+      <a href="/download-fisier?path={{.CaleRegistruJurnalXLSX}}">Descarca XLSX</a>
       <a href="/download-fisier?path={{.CaleRegistruJurnalCSV}}">Descarca CSV</a>
     </div>
 
@@ -589,6 +592,7 @@
     </article>
 
     <div class="download">
+      <a href="/download-fisier?path={{.CaleRegistruFiscalXLSX}}">Descarca XLSX</a>
       <a href="/download-fisier?path={{.CaleRegistruFiscalCSV}}">Descarca CSV</a>
     </div>
 
@@ -678,6 +682,7 @@
     </article>
 
     <div class="download">
+      <a href="/download-fisier?path={{.CaleRegistruInventarXLSX}}">Descarca XLSX</a>
       <a href="/download-fisier?path={{.CaleRegistruInventarCSV}}">Descarca CSV</a>
     </div>
 
@@ -715,7 +720,7 @@
 
     const MONTHS = ['Ianuarie', 'Februarie', 'Martie', 'Aprilie', 'Mai', 'Iunie', 'Iulie', 'August', 'Septembrie', 'Octombrie', 'Noiembrie', 'Decembrie'];
     let incasari = [{{ range .IncasariPeLuni }} {{.}}, {{ end }}];
-  let cheltuieli = [{{ range .CheltuieliPeLuni }} {{.}}, {{ end }}];
+    let cheltuieli = [{{ range .CheltuieliPeLuni }} {{.}}, {{ end }}];
 
 
   let barIncasari = {
