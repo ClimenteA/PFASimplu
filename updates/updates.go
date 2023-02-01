@@ -68,7 +68,7 @@ func handleUpdatesPage(app fiber.App, store session.Store) {
 			updateNeeded = true
 		}
 
-		versionColor := "text-nok"
+		versionColor := "text-ok"
 		if updateNeeded {
 			versionColor = "text-nok"
 		}
