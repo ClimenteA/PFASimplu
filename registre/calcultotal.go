@@ -51,7 +51,7 @@ type PlatiStat struct {
 }
 
 func CalculeazaPlatiCatreStat(venitNet float64, anul string) PlatiStat {
-	// - Calcul Venit Net: `venitNet = totalIncasari - totalCheltuieli`;
+	// - Calcul Venit Net: `venitNet = totalIncasari - totalCheltuieli - CAS`;
 	// - Calcul Impozit pe Venit: `impozitPeVenit = 10% din venitNet`;
 	// - Calcul CAS (Pensie):
 	// 	* `bazaDeCalculCAS = salariuMinimBrut x 12` - daca `venitNet` mai mare de 12 salarii minime brute pana in anul 2022 inclusiv;
@@ -76,14 +76,10 @@ func CalculeazaPlatiCatreStat(venitNet float64, anul string) PlatiStat {
 		}
 	}
 
-	// log.Println("VeniNet:", venitNet, "Anul:", anul, "Salariul minim brut:", salariuMinimBrut)
-
 	CAS := 0.0
 	CASS := 0.0
 	impozitPeVenit := 0.0
 	total := 0.0
-
-	impozitPeVenit = 10 * venitNet / 100
 
 	anulCurrent, err := strconv.Atoi(anul)
 	if err != nil {
@@ -96,16 +92,12 @@ func CalculeazaPlatiCatreStat(venitNet float64, anul string) PlatiStat {
 
 	if anulCurrent <= 2022 {
 
-		// log.Println("Aplicare calcul INAINTE de 2023")
-
 		if venitNet > plafon12 {
 			CAS = 25 * plafon12 / 100
 			CASS = 10 * plafon12 / 100
 		}
 
 	} else {
-
-		// log.Println("Aplicare calcul DUPA de 2023")
 
 		if venitNet > plafon6 {
 			CASS = 10 * plafon6 / 100
@@ -122,10 +114,7 @@ func CalculeazaPlatiCatreStat(venitNet float64, anul string) PlatiStat {
 		}
 	}
 
-	// log.Println("CAS:", CAS)
-	// log.Println("CASS:", CASS)
-	// log.Println("IMPOZIT PE VENIT:", impozitPeVenit)
-	// log.Println("PLAFON:", plafon12)
+	impozitPeVenit = 10 * (venitNet - CAS) / 100
 
 	total = CAS + CASS + impozitPeVenit
 

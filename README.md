@@ -32,7 +32,7 @@ Aplicatia poate fi utila pentru oricine:
 - Generare factura in format PDF;
 
 Calcul automat impozite pentru declaratia unica (CAS/CASS/Impozit):
-- Calcul Venit Net: `venitNet = totalIncasari - totalCheltuieli`;
+- Calcul Venit Net: `venitNet = totalIncasari - totalCheltuieli - CAS`;
 - Calcul Impozit pe Venit: `impozitPeVenit = 10% din venitNet`;
 - Calcul CAS (Pensie): 
     * `bazaDeCalcul = salariuMinimBrut x 12` - daca `venitNet` mai mare de 12 salarii minime brute pana in anul 2022 inclusiv;
@@ -71,6 +71,7 @@ Rapoarte suplimentare:
 10. [Setari avansate](#setari-avansate)
 11. [Observatii](#observatii)
 12. [Pe viitor](#pe-viitor)
+13. [**Curs Programare**](#curs-programare)
 
 
 
@@ -244,4 +245,12 @@ Testati aplicatia inainte si vedeti daca raspunde nevoilor dvs. inainte de o ada
 
 
 Daca programul iti este si tie folositor, **[nu ezita sa faci o donatie!](https://www.buymeacoffee.com/climentea)**. 
+
+
+
+<a name="curs-programare"></a>
+# Curs programare
+
+Daca esti interesat(a) sa inveti programare pentru a face aplicatii software pentru afacerea ta sau vrei sa faci o reconversie profesionala (web: frontend, backend, devops, testare) [**click aici**](https://colegideapartament.ro/curs-programare-python-html-css-javascript-docker-docker-compose-vps). Pregatesc un curs pe intelesul tuturor. 
+
 

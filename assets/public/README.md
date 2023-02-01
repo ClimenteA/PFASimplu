@@ -1,53 +1,11 @@
+# Salut
 
-## Descriere 
+Daca esti interesat(a) sa inveti programare pentru a face aplicatii software pentru afacerea ta sau vrei sa faci o reconversie profesionala (web: frontend, backend, devops, testare) [**click aici**](https://colegideapartament.ro/curs-programare-python-html-css-javascript-docker-docker-compose-vps). Pregatesc un curs pe intelesul tuturor. 
 
-Aplicatia PFASimplu este utila pentru persoanele care isi tin contabilitatea in partida simpla.
-Este foarte simplu de folosit, poate fi rulata de pe un stick. 
-Aplicatia este de tip website asa ca poate fi accesata chiar si de pe un telefon aflat in aceeasi retea wifi (aplicatia trebuie sa ruleze pe un laptop/pc pentru asta). Acest lucru este folositor pentru adaugarea de bonuri/facturi care trebuie pozate.
-
-
-## Cine poate folosi aplicatia?
-Aplicatia poate fi utila pentru oricine:
-- tine contabilitatea in partida simpla;
-- cu sistem de venit real;
-- este neplatitor de TVA (daca castigi sub 5000 EUR in fiecare luna e ok);
-- nu are angajati (mai bine un SRL pentru asta); 
+**Daca ai observat orice greseala sau ai o intrebare poti deschide un [issue pe github](https://github.com/ClimenteA/PFASimplu) sau poti intra pe reddit grupul [r/PFASimplu](https://www.reddit.com/r/PFASimplu/).**
 
 
-
-## Facilitati 
-
-- Adaugare incasari (inregistrare facturi emise);
-- Adaugare cheltuieli deductibile (inregistrare facturi/bonuri/extrase bancare);
-- Generare automata a urmatoarelor registre contabile:
-    - Registru Jurnal;
-    - Registru Inventar; 
-    - Registru Fiscal;
-    - Fisa Mijloc Fix;
-- Descarca registre contabile in format CSV (pentru Microsoft Excel/Libre Office/Google Sheets etc);
-- Generare factura in format PDF;
-
-Calcul automat impozite pentru declaratia unica (CAS/CASS/Impozit):
-- Calcul Venit Net: `venitNet = totalIncasari - totalCheltuieli`;
-- Calcul Impozit pe Venit: `impozitPeVenit = 10% din venitNet`;
-- Calcul CAS (Pensie): 
-    * `bazaDeCalcul = salariuMinimBrut x 12` - daca `venitNet` mai mare de 12 salarii minime brute pana in anul 2022 inclusiv;
-    * `bazaDeCalcul = salariuMinimBrut x 12` - daca `venitNet` intre 12 si 24 salarii minime brute din anul 2023+;
-    * `bazaDeCalcul = salariuMinimBrut x 24` - daca `venitNet` mai mare de 24 salarii minime brute din anul 2023+;
-    * `CAS = 25% din bazaDeCalcul`;
-- Calcul CASS (Sanatate):
-    * `bazaDeCalcul = salariuMinimBrut x 12` - daca `venitNet` mai mare de 12 salarii minime brute pana in anul 2022 inclusiv;
-    * `bazaDeCalcul = salariuMinimBrut x 6` - daca `venitNet` mai mare de 6 salarii minime brute din anul 2023+;
-    * `bazaDeCalcul = salariuMinimBrut x 12` - daca `venitNet` intre 12 si 24 salarii minime brute din anul 2023+;
-    * `bazaDeCalcul = salariuMinimBrut x 24` - daca `venitNet` mai mare de 24 salarii minime brute din anul 2023+;
-    * `CASS = 10% din bazaDeCalcul`;
-
-
-Rapoarte suplimentare:
-- Tabel incasari - unde poti vedea/sterge incasarile;
-- Tabel cheltuieli - unde poti vedea/sterge cheltuielile;
-- Tabel declaratii - unde poti vedea/sterge declaratiile;
-- Grafic tip `bar chart` cu incasari vs cheltuieli pe luni;
+Daca programul iti este si tie folositor, **[nu ezita sa faci o donatie!](https://www.buymeacoffee.com/climentea)**. 
 
 
 
@@ -67,7 +25,6 @@ Rapoarte suplimentare:
 10. [Setari avansate](#setari-avansate)
 11. [Observatii](#observatii)
 12. [Pe viitor](#pe-viitor)
-
 
 
 <!-- /TOC -->
@@ -228,16 +185,7 @@ Testati aplicatia inainte si vedeti daca raspunde nevoilor dvs. inainte de o ada
 <a name="pe-viitor"></a>
 ## Pe viitor
 
-- posibilitate adaugare `bazaDeCalcul` pentru cei care au norma de venit;
 - generare model completare Declaratie 212; 
 - adaugare TVA in calcul;
 - declaratie pentru TVA;
-- modificare setari anuale (salariul minim pentru anul in curs, prag minim, tabel amortizare mijloc fix);
 - one-click update app; 
-- verificare aplicatie facuta de un specialist contabil;
-
-**Daca ai observat orice greseala sau ai o intrebare poti deschide un [issue pe github](https://github.com/ClimenteA/PFASimplu) sau poti intra pe reddit grupul [r/PFASimplu](https://www.reddit.com/r/PFASimplu/).**
-
-
-Daca programul iti este si tie folositor, **[nu ezita sa faci o donatie!](https://www.buymeacoffee.com/climentea)**. 
-
