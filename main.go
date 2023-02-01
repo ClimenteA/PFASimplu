@@ -22,6 +22,7 @@ import (
 	"github.com/ClimenteA/pfasimplu-go/landing"
 	"github.com/ClimenteA/pfasimplu-go/registre"
 	"github.com/ClimenteA/pfasimplu-go/staticdata"
+	"github.com/ClimenteA/pfasimplu-go/updates"
 	"github.com/ClimenteA/pfasimplu-go/utils"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -55,12 +56,13 @@ func main() {
 	clienti.HandleClientsRequests(*app, *store)
 	inventar.HandleInventarPage(*app, *store)
 	incasariextra.HandleIncasariExtra(*app, *store)
+	updates.HandleUpdatesPage(*app, *store)
 
 	hostIp := utils.GetHostIp()
 
 	config := staticdata.LoadPFAConfig()
 
-	fmt.Println("\nAplicatia PFASimplu v1.0.0!")
+	fmt.Println("\nAplicatia PFASimplu v" + config.VersiuneAplicatie)
 	fmt.Println("Pastreaza aceasta fereastra deschisa cat timp folosesti aplicatia!")
 
 	if config.Environment == "desktop" {

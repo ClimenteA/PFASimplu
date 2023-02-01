@@ -1,0 +1,25 @@
+<main class="container-fluid">
+
+    <hgroup class="container">
+        <h1>Actualizeaza aplicatia</h1>
+        <h2>
+            Verifica daca a mai aparut o versiune noua a aplicatiei.
+            O data pe an e suficient.
+        </h2>
+    </hgroup>
+
+    <form class="container" action="/actualizare-aplicatie" method="POST" enctype="multipart/form-data">
+
+        <article>
+            <h5 style="color: var(--secondary);">
+                Versiune currenta: {{.VersiuneAplicatie}}
+                <br>
+                Ultima versiune disponibila: {{.UltimaVersiuneAplicatie}}
+            </h5>
+            <button type="submit">CAUTA VERSIUNI NOI</button>
+        </article>
+
+    </form>
+
+
+</main>

@@ -13,12 +13,13 @@ type ConfigDetails struct {
 }
 
 type Config struct {
-	PragMijlocFix []ConfigDetails `json:"prag_mijloc_fix"`
-	EuroToRon     []ConfigDetails `json:"euro_to_ron"`
-	SalariiMinime []ConfigDetails `json:"salarii_minime"`
-	PlafonTVA     []ConfigDetails `json:"plafon_tva"`
-	Port          string          `json:"port"`
-	Environment   string          `json:"environment"`
+	VersiuneAplicatie string          `json:"versiune_aplicatie"`
+	PragMijlocFix     []ConfigDetails `json:"prag_mijloc_fix"`
+	EuroToRon         []ConfigDetails `json:"euro_to_ron"`
+	SalariiMinime     []ConfigDetails `json:"salarii_minime"`
+	PlafonTVA         []ConfigDetails `json:"plafon_tva"`
+	Port              string          `json:"port"`
+	Environment       string          `json:"environment"`
 }
 
 func LoadPFAConfig() Config {
