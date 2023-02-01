@@ -32,3 +32,15 @@ form {
 .none {
     display: none;
 }
+
+.text-ok {
+    color: lightseagreen;
+}
+
+.text-nok {
+    color: lightcoral;
+}
+
+.float-right {
+    float: right;
+}

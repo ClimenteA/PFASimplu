@@ -63,28 +63,22 @@ func handleUpdatesPage(app fiber.App, store session.Store) {
 		}
 		json.Unmarshal(byteValue, &latestPfaConfig)
 
+		updateNeeded := false
+		if config.VersiuneAplicatie != latestPfaConfig.VersiuneAplicatie {
+			updateNeeded = true
+		}
+
+		versionColor := "text-nok"
+		if updateNeeded {
+			versionColor = "text-nok"
+		}
+
 		return c.Render("update_app", fiber.Map{
 			"VersiuneAplicatie":       config.VersiuneAplicatie,
 			"UltimaVersiuneAplicatie": latestPfaConfig.VersiuneAplicatie,
+			"UpdateNeeded":            updateNeeded,
+			"VersionColor":            versionColor,
 		}, "base")
-
-	})
-
-	app.Post("/actualizare-aplicatie", func(c *fiber.Ctx) error {
-
-		sess, err := store.Get(c)
-		if err != nil {
-			panic(err)
-		}
-
-		currentUserPath := sess.Get("currentUser")
-		if currentUserPath == nil {
-			return c.Redirect("/login")
-		}
-
-		// user := GetCurrentUser(fmt.Sprint(currentUserPath))
-
-		return c.Render("update_app", fiber.Map{}, "base")
 
 	})
 

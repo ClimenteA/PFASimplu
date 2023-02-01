@@ -8,15 +8,35 @@
         </h2>
     </hgroup>
 
-    <form class="container" action="/actualizare-aplicatie" method="POST" enctype="multipart/form-data">
+    <form class="container">
 
         <article>
             <h5 style="color: var(--secondary);">
-                Versiune currenta: {{.VersiuneAplicatie}}
+                <span class="{{ .VersionColor }}">
+                    Versiune curenta: {{.VersiuneAplicatie}}
+                </span>
                 <br>
-                Ultima versiune disponibila: {{.UltimaVersiuneAplicatie}}
+                <span class="{{ .VersionColor }}">
+                    Ultima versiune disponibila: {{.UltimaVersiuneAplicatie}}
+                </span>
             </h5>
-            <button type="submit">CAUTA VERSIUNI NOI</button>
+
+            {{if .UpdateNeeded}}
+            <p>
+                Click pe button si descarca ultima versiune din github.
+                Odata descarcat extrage zip-ul si copie folderul `stocare` din aplicatia currenta in noua versiune.
+                In folderul `stocare` sunt toate datele tale salvate.
+            </p>
+
+            <a href="https://github.com/ClimenteA/PFASimplu/releases" target="_blank" role="button"
+                class="float-right">
+                DESCARCA ULTIMA VERSIUNE
+            </a>
+
+            {{else}}
+            <button disabled type="submit">APLICATIA ESTE ACTUALIZATA</button>
+            {{ end }}
+
         </article>
 
     </form>
