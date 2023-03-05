@@ -1,6 +1,7 @@
 package registre
 
 import (
+	"fmt"
 	"log"
 	"strconv"
 
@@ -126,5 +127,25 @@ func CalculeazaPlatiCatreStat(venitNet float64, anul string) PlatiStat {
 	}
 
 	return data
+
+}
+
+func GetPlatiCatreStatRounded(totalIncasariNet float64, filterYear string, declaratii []declaratii.Declaratie) (map[string]string, float64, float64) {
+
+	platiCatreStat := CalculeazaPlatiCatreStat(totalIncasariNet, filterYear)
+	platiFacuteAnaf := CalculPlatiFacuteAnaf(declaratii, filterYear)
+	totalPlatiCatreStat := platiCatreStat.Total - platiFacuteAnaf
+	if totalPlatiCatreStat < 1 {
+		totalPlatiCatreStat = 0
+	}
+	totalIncasariNet = totalIncasariNet - platiCatreStat.Total
+	platiCatreStatRounded := map[string]string{
+		"CASPensie":    fmt.Sprintf("%.2f", platiCatreStat.CASPensie),
+		"CASSSanatate": fmt.Sprintf("%.2f", platiCatreStat.CASSSanatate),
+		"ImpozitVenit": fmt.Sprintf("%.2f", platiCatreStat.ImpozitVenit),
+		"Total":        fmt.Sprintf("%.2f", platiCatreStat.Total),
+	}
+
+	return platiCatreStatRounded, totalPlatiCatreStat, totalIncasariNet
 
 }

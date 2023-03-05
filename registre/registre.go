@@ -135,7 +135,8 @@ func handleRegistre(app fiber.App, store session.Store) {
 			return c.Redirect("/registre-contabile?title=Anul fara date&content=Nu au fost gasite date pentru anul cerut.")
 		}
 
-		filterYear := strconv.Itoa(time.Now().Year())
+		intYear := time.Now().Year()
+		filterYear := strconv.Itoa(intYear)
 		if r.Anul != "" {
 			filterYear = r.Anul
 		}
@@ -153,15 +154,6 @@ func handleRegistre(app fiber.App, store session.Store) {
 		if totalIncasariBrut > 0 {
 			totalIncasariNet = totalIncasariBrut - totalCheltuieliDeductibile
 		}
-
-		platiCatreStat := CalculeazaPlatiCatreStat(totalIncasariNet, filterYear)
-
-		platiFacuteAnaf := CalculPlatiFacuteAnaf(declaratii, filterYear)
-		totalPlatiCatreStat := platiCatreStat.Total - platiFacuteAnaf
-		if totalPlatiCatreStat < 1 {
-			totalPlatiCatreStat = 0
-		}
-		totalIncasariNet = totalIncasariNet - platiCatreStat.Total
 
 		incasariPeLuni := inputs.AddIncasariPeLuni(incasari, filterYear)
 		cheltuieliPeLuni := outputs.AddCheltuieliPeLuni(cheltuieli, filterYear)
@@ -182,13 +174,6 @@ func handleRegistre(app fiber.App, store session.Store) {
 		registruInventar = tabelcsv.FullRegistruInventar(user.Stocare, filterYear)
 		CaleRegistruInventar := tabelcsv.CreeazaRegistruInventarCSV(filepath.Join(user.Stocare, "inventar"), "", registruInventar)
 
-		platiCatreStatRounded := map[string]string{
-			"CASPensie":    fmt.Sprintf("%.2f", platiCatreStat.CASPensie),
-			"CASSSanatate": fmt.Sprintf("%.2f", platiCatreStat.CASSSanatate),
-			"ImpozitVenit": fmt.Sprintf("%.2f", platiCatreStat.ImpozitVenit),
-			"Total":        fmt.Sprintf("%.2f", platiCatreStat.Total),
-		}
-
 		config := staticdata.LoadPFAConfig()
 
 		plafonTVA := 300000.0
@@ -204,6 +189,20 @@ func handleRegistre(app fiber.App, store session.Store) {
 			platitorTVA = true
 		}
 
+		platiCatreStatRounded, totalPlatiCatreStat, totalIncasariNet := GetPlatiCatreStatRounded(totalIncasariNet, filterYear, declaratii)
+		intfilterYear, _ := strconv.Atoi(filterYear)
+		months := 12.0
+		VenitNetLunar := totalIncasariNet / months
+		VenitBrutLunar := totalIncasariBrut / months
+		if intfilterYear == intYear {
+			partialMonths := float64(time.Now().Month() - 1)
+			VenitNetLunar = totalIncasariNet / partialMonths
+			VenitBrutLunar = totalIncasariBrut / partialMonths
+			CheltuieliEstimate := (totalCheltuieliDeductibile / partialMonths) * months
+			VenitEstimatNet := (VenitNetLunar * months) - CheltuieliEstimate
+			platiCatreStatRounded, totalPlatiCatreStat, _ = GetPlatiCatreStatRounded(VenitEstimatNet, filterYear, declaratii)
+		}
+
 		return c.Render("registre", fiber.Map{
 			"AniInregistrati":            aniInregistrati,
 			"Incasari":                   incasari,
@@ -213,6 +212,8 @@ func handleRegistre(app fiber.App, store session.Store) {
 			"RegistruInventar":           registruInventar,
 			"RegistruFiscal":             registruFiscal,
 			"PlatitorTVA":                platitorTVA,
+			"VenitNetLunar":              fmt.Sprintf("%.2f", VenitNetLunar),
+			"VenitBrutLunar":             fmt.Sprintf("%.2f", VenitBrutLunar),
 			"TotalIncasariBrut":          fmt.Sprintf("%.2f", totalIncasariBrut),
 			"TotalIncasariNet":           fmt.Sprintf("%.2f", totalIncasariNet),
 			"TotalCheltuieliDeductibile": fmt.Sprintf("%.2f", totalCheltuieliDeductibile),

@@ -64,7 +64,11 @@
 
       <article class="article-grid">
         <h4 style="color: var(--secondary)">Total Incasari (Brut)</h4>
-        <h1 style="color: green">{{.TotalIncasariBrut}} RON</h1>
+        <h1 style="color: green">{{.TotalIncasariBrut}} RON
+          <small style="color: var(--secondary);font-size:16px;display:block;">
+            Venit Brut Lunar: {{.VenitBrutLunar}}RON
+          </small>
+        </h1>
         {{if .PlatitorTVA}}
         <small style="color: indianred;">
           Atentie ai depasit plafonul TVA!
@@ -75,7 +79,11 @@
 
       <article class="article-grid">
         <h4 style="color: var(--secondary)">Total Incasari (Net)</h4>
-        <h1 style="color: green;">{{.TotalIncasariNet}} RON</h1>
+        <h1 style="color: green;">{{.TotalIncasariNet}} RON
+          <small style="color: var(--secondary);font-size:16px;display:block;">
+            Venit Net Lunar: {{.VenitNetLunar}}RON
+          </small>
+        </h1>
       </article>
 
     </div>
