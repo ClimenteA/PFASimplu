@@ -711,7 +711,7 @@
       document.getElementById(anul).setAttribute("selected", "")
     }
 
-    selectedYear.addEventListener("click", event => {
+    selectedYear.addEventListener("change", event => {
       let url = String(document.location).split("?")[0] + selectedYear.value;
       const link = document.createElement('a');
       link.href = url;

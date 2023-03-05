@@ -1,5 +1,9 @@
-run:
+start:
+	go run main.go
+
+debug:
 	nodemon --exec go run main.go --signal SIGTERM
+	
 build:
 	rm -rf dist 
 	GOOS=windows GOARCH=amd64 go build -o dist/PFASimplu-Windows-64bit/pfasimplu.exe main.go
