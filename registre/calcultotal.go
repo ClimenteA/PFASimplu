@@ -104,7 +104,7 @@ func CalculeazaPlatiCatreStat(venitNet float64, anul string) PlatiStat {
 			CASS = 10 * plafon6 / 100
 		}
 
-		if venitNet > plafon12 || venitNet <= plafon24 {
+		if venitNet > plafon12 && venitNet <= plafon24 {
 			CAS = 25 * plafon12 / 100
 			CASS = 10 * plafon12 / 100
 		}
@@ -131,6 +131,18 @@ func CalculeazaPlatiCatreStat(venitNet float64, anul string) PlatiStat {
 }
 
 func GetPlatiCatreStatRounded(totalIncasariNet float64, filterYear string, declaratii []declaratii.Declaratie) (map[string]string, float64, float64) {
+
+	if totalIncasariNet <= 0 {
+		platiCatreStatRounded := map[string]string{
+			"CASPensie":    "0.00",
+			"CASSSanatate": "0.00",
+			"ImpozitVenit": "0.00",
+			"Total":        "0.00",
+		}
+		totalPlatiCatreStat := 0.0
+		totalIncasariNet := 0.0
+		return platiCatreStatRounded, totalPlatiCatreStat, totalIncasariNet
+	}
 
 	platiCatreStat := CalculeazaPlatiCatreStat(totalIncasariNet, filterYear)
 	platiFacuteAnaf := CalculPlatiFacuteAnaf(declaratii, filterYear)

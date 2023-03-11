@@ -135,11 +135,12 @@ func handleRegistre(app fiber.App, store session.Store) {
 			return c.Redirect("/registre-contabile?title=Anul fara date&content=Nu au fost gasite date pentru anul cerut.")
 		}
 
-		intYear := time.Now().Year()
-		filterYear := strconv.Itoa(intYear)
+		intNowYear := time.Now().Year()
+		filterYear := strconv.Itoa(intNowYear)
 		if r.Anul != "" {
 			filterYear = r.Anul
 		}
+		intfilterYear, _ := strconv.Atoi(filterYear)
 
 		user := GetCurrentUser(fmt.Sprint(currentUserPath))
 		aniInregistrati := utils.GetAniInregistrati(user)
@@ -190,17 +191,12 @@ func handleRegistre(app fiber.App, store session.Store) {
 		}
 
 		platiCatreStatRounded, totalPlatiCatreStat, totalIncasariNet := GetPlatiCatreStatRounded(totalIncasariNet, filterYear, declaratii)
-		intfilterYear, _ := strconv.Atoi(filterYear)
-		months := 12.0
-		VenitNetLunar := totalIncasariNet / months
-		VenitBrutLunar := totalIncasariBrut / months
-		if intfilterYear == intYear {
-			partialMonths := float64(time.Now().Month() - 1)
-			VenitNetLunar = totalIncasariNet / partialMonths
-			VenitBrutLunar = totalIncasariBrut / partialMonths
-			CheltuieliEstimate := (totalCheltuieliDeductibile / partialMonths) * months
-			VenitEstimatNet := (VenitNetLunar * months) - CheltuieliEstimate
-			platiCatreStatRounded, totalPlatiCatreStat, _ = GetPlatiCatreStatRounded(VenitEstimatNet, filterYear, declaratii)
+
+		VenitNetLunar := 0.0
+		VenitBrutLunar := 0.0
+		if intfilterYear < intNowYear {
+			VenitNetLunar = totalIncasariNet / 12
+			VenitBrutLunar = totalIncasariBrut / 12
 		}
 
 		return c.Render("registre", fiber.Map{
@@ -212,8 +208,8 @@ func handleRegistre(app fiber.App, store session.Store) {
 			"RegistruInventar":           registruInventar,
 			"RegistruFiscal":             registruFiscal,
 			"PlatitorTVA":                platitorTVA,
-			"VenitNetLunar":              fmt.Sprintf("%.2f", VenitNetLunar),
-			"VenitBrutLunar":             fmt.Sprintf("%.2f", VenitBrutLunar),
+			"VenitNetLunar":              fmt.Sprintf("~%.2f", VenitNetLunar),
+			"VenitBrutLunar":             fmt.Sprintf("~%.2f", VenitBrutLunar),
 			"TotalIncasariBrut":          fmt.Sprintf("%.2f", totalIncasariBrut),
 			"TotalIncasariNet":           fmt.Sprintf("%.2f", totalIncasariNet),
 			"TotalCheltuieliDeductibile": fmt.Sprintf("%.2f", totalCheltuieliDeductibile),
