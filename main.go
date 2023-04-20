@@ -10,6 +10,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"runtime"
 	"sync"
 
 	"github.com/ClimenteA/pfasimplu-go/auth"
@@ -33,11 +34,72 @@ import (
 	"github.com/gofiber/template/html"
 )
 
-func startBrowser(wg *sync.WaitGroup, browserClosed chan bool) {
+func getExistingPath(paths []string) string {
+	for _, path := range paths {
+		if _, err := os.Stat(path); err == nil {
+			return path
+		}
+	}
+	return ""
+}
+
+func findBrowserOnLinux() string {
+	paths := []string{
+		"/usr/bin/google-chrome",
+		"/usr/bin/microsoft-edge-stable",
+		"/usr/bin/microsoft-edge",
+		"/usr/bin/brave-browser",
+	}
+	return getExistingPath(paths)
+}
+
+func findBrowserOnMac() string {
+	paths := []string{
+		"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+		"/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
+		"/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",
+	}
+	return getExistingPath(paths)
+}
+
+func findBrowserOnWindows() string {
+	paths := []string{
+		"C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+		"C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe",
+		"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+		"C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe",
+	}
+	return getExistingPath(paths)
+}
+
+func getBrowserPath() string {
+
+	var browserPath string
+
+	if runtime.GOOS == "windows" {
+		browserPath = findBrowserOnWindows()
+	}
+	if runtime.GOOS == "linux" {
+		browserPath = findBrowserOnLinux()
+	}
+	if runtime.GOOS == "darwin" {
+		browserPath = findBrowserOnMac()
+	}
+
+	return browserPath
+
+}
+
+func startBrowser(wg *sync.WaitGroup, browserClosed chan bool, port string) {
 	tempDir, _ := os.MkdirTemp("", "gowebgui")
 
-	url := "http://127.0.0.1:3000"
-	browserExecPath := "/usr/bin/google-chrome"
+	browserPath := getBrowserPath()
+	if browserPath == "" {
+		log.Panicln("browser path not found")
+	}
+
+	url := "http://127.0.0.1:" + port
+	browserExecPath := browserPath
 	userDataDir := "--user-data-dir=" + tempDir
 	newWindow := "--new-window"
 	noFirstRun := "--no-first-run"
@@ -114,7 +176,7 @@ func main() {
 		browserClosed := make(chan bool)
 		var wg sync.WaitGroup
 		wg.Add(2)
-		go startBrowser(&wg, browserClosed)
+		go startBrowser(&wg, browserClosed, config.Port)
 		go startServer(&wg, browserClosed, *app, "0.0.0.0:"+config.Port)
 		wg.Wait()
 
