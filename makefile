@@ -6,7 +6,7 @@ debug:
 	
 build:
 	rm -rf dist 
-	GOOS=windows GOARCH=amd64 go build -o dist/PFASimplu-Windows-64bit/pfasimplu.exe main.go
+	GOOS=windows GOARCH=amd64 go build -ldflags -H=windowsgui -o dist/PFASimplu-Windows-64bit/pfasimplu.exe main.go
 	GOOS=linux GOARCH=amd64 go build -o dist/PFASimplu-Linux-64bit/pfasimplu main.go
 	GOOS=darwin GOARCH=amd64 go build -o dist/PFASimplu-MacOS-64bit/pfasimplu main.go
 	cp -r assets dist/PFASimplu-Windows-64bit/
