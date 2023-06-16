@@ -1,4 +1,4 @@
-start:
+run:
 	go run main.go
 
 debug:
@@ -6,7 +6,7 @@ debug:
 	
 build:
 	rm -rf dist 
-	GOOS=windows GOARCH=amd64 go build -ldflags -H=windowsgui -o dist/PFASimplu-Windows-64bit/pfasimplu.exe main.go
+	GOOS=windows GOARCH=amd64 go build -o dist/PFASimplu-Windows-64bit/pfasimplu.exe main.go
 	GOOS=linux GOARCH=amd64 go build -o dist/PFASimplu-Linux-64bit/pfasimplu main.go
 	GOOS=darwin GOARCH=amd64 go build -o dist/PFASimplu-MacOS-64bit/pfasimplu main.go
 	cp -r assets dist/PFASimplu-Windows-64bit/
@@ -15,6 +15,9 @@ build:
 	cp -r INSTRUCTIUNI-WINDOWS.txt dist/PFASimplu-Windows-64bit/INSTRUCTIUNI.txt
 	cp -r INSTRUCTIUNI-LINUX.txt dist/PFASimplu-Linux-64bit/INSTRUCTIUNI.txt
 	cp -r INSTRUCTIUNI-MAC.txt dist/PFASimplu-MacOS-64bit/INSTRUCTIUNI.txt
+	cp -r LICENSE dist/PFASimplu-Windows-64bit/licenta.txt
+	cp -r LICENSE dist/PFASimplu-Linux-64bit/licenta.txt
+	cp -r LICENSE dist/PFASimplu-MacOS-64bit/licenta.txt
 	mkdir dist/PFASimplu
 	mkdir dist/PFASimplu/Instructiuni
 	cp dist/PFASimplu-Windows-64bit/pfasimplu.exe dist/PFASimplu/pfasimplu-win.exe

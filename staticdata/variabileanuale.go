@@ -18,7 +18,7 @@ type Config struct {
 	EuroToRon         []ConfigDetails `json:"euro_to_ron"`
 	SalariiMinime     []ConfigDetails `json:"salarii_minime"`
 	PlafonTVA         []ConfigDetails `json:"plafon_tva"`
-	Port              string          `json:"port"`
+	Port              int             `json:"port"`
 	Environment       string          `json:"environment"`
 }
 

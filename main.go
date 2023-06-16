@@ -8,11 +8,9 @@ package main
 import (
 	"fmt"
 	"log"
-	"os"
-	"os/exec"
-	"runtime"
-	"sync"
+	"strconv"
 
+	"github.com/ClimenteA/fiberwebgui"
 	"github.com/ClimenteA/pfasimplu-go/auth"
 	"github.com/ClimenteA/pfasimplu-go/cheltuieli"
 	"github.com/ClimenteA/pfasimplu-go/clienti"
@@ -33,107 +31,6 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/session"
 	"github.com/gofiber/template/html"
 )
-
-func getExistingPath(paths []string) string {
-	for _, path := range paths {
-		if _, err := os.Stat(path); err == nil {
-			return path
-		}
-	}
-	return ""
-}
-
-func findBrowserOnLinux() string {
-	paths := []string{
-		"/usr/bin/google-chrome",
-		"/usr/bin/microsoft-edge-stable",
-		"/usr/bin/microsoft-edge",
-		"/usr/bin/brave-browser",
-	}
-	return getExistingPath(paths)
-}
-
-func findBrowserOnMac() string {
-	paths := []string{
-		"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-		"/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
-		"/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",
-	}
-	return getExistingPath(paths)
-}
-
-func findBrowserOnWindows() string {
-	paths := []string{
-		"C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
-		"C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe",
-		"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-		"C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe",
-	}
-	return getExistingPath(paths)
-}
-
-func getBrowserPath() string {
-
-	var browserPath string
-
-	if runtime.GOOS == "windows" {
-		browserPath = findBrowserOnWindows()
-	}
-	if runtime.GOOS == "linux" {
-		browserPath = findBrowserOnLinux()
-	}
-	if runtime.GOOS == "darwin" {
-		browserPath = findBrowserOnMac()
-	}
-
-	return browserPath
-
-}
-
-func startBrowser(wg *sync.WaitGroup, browserClosed chan bool, port string) {
-	tempDir, _ := os.MkdirTemp("", "gowebgui")
-
-	browserPath := getBrowserPath()
-	if browserPath == "" {
-		log.Panicln("browser path not found")
-	}
-
-	url := "http://127.0.0.1:" + port
-	browserExecPath := browserPath
-	userDataDir := "--user-data-dir=" + tempDir
-	newWindow := "--new-window"
-	noFirstRun := "--no-first-run"
-	startMaximized := "--start-maximized"
-	appUrl := "--app=" + url
-
-	log.Println("Browser started with: ", browserExecPath, userDataDir, newWindow, noFirstRun, startMaximized, appUrl)
-
-	cmd := exec.Command(browserExecPath, userDataDir, newWindow, noFirstRun, startMaximized, appUrl)
-	err := cmd.Run()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	os.RemoveAll(tempDir)
-	log.Println("Browser stopped!")
-	browserClosed <- true
-	wg.Done()
-}
-
-func startServer(wg *sync.WaitGroup, browserClosed chan bool, app fiber.App, url string) {
-	log.Println("Server started...")
-
-	go func() {
-		closed := <-browserClosed
-		if closed {
-			log.Println("Server stopped!")
-			wg.Done()
-		}
-	}()
-
-	log.Fatal(app.Listen(url))
-
-}
 
 func main() {
 
@@ -170,20 +67,13 @@ func main() {
 	fmt.Println("Pastreaza aceasta fereastra deschisa cat timp folosesti aplicatia!")
 
 	if config.Environment == "desktop" {
-		fmt.Println("\n\nPoti vedea aplicatia in browser la addresa:\nhttp://localhost:" + config.Port + " (pe acest dispozitiv)")
-		fmt.Println("\nSau poti intra de pe telefon/tableta/laptop in browser pe addresa:\n" + "http://" + hostIp + ":" + config.Port)
-
-		browserClosed := make(chan bool)
-		var wg sync.WaitGroup
-		wg.Add(2)
-		go startBrowser(&wg, browserClosed, config.Port)
-		go startServer(&wg, browserClosed, *app, "0.0.0.0:"+config.Port)
-		wg.Wait()
-
+		portstr := strconv.Itoa(config.Port)
+		fmt.Println("\n\nPoti vedea aplicatia in browser la addresa:\nhttp://localhost:" + portstr + " (pe acest dispozitiv)")
+		fmt.Println("\nSau poti intra de pe telefon/tableta/laptop in browser pe addresa:\n" + "http://" + hostIp + ":" + portstr)
+		fiberwebgui.RunBrowserOnPort(app, config.Port)
 	} else {
 		fmt.Println("\n\nPoti vedea aplicatia in browser la addresa:\nhttp://localhost:3000 (pe acest dispozitiv)")
 		fmt.Println("\nSau poti intra de pe telefon/tableta/laptop in browser pe addresa:\n" + "http://" + hostIp + ":3000")
 		log.Fatal(app.Listen("0.0.0.0:3000"))
 	}
-
 }
