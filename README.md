@@ -244,10 +244,6 @@ Testati aplicatia inainte si vedeti daca raspunde nevoilor dvs. inainte de o ada
 **Daca ai observat orice greseala sau ai o intrebare poti deschide un [issue pe github](https://github.com/ClimenteA/PFASimplu) sau poti intra pe reddit grupul [r/PFASimplu](https://www.reddit.com/r/PFASimplu/).**
 
 
-Daca programul iti este si tie folositor, **[nu ezita sa faci o donatie!](https://www.buymeacoffee.com/climentea)**. 
-
-
-
 <a name="curs-programare"></a>
 # Curs programare
 
