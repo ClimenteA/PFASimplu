@@ -1,5 +1,5 @@
 {
-    "versiune_aplicatie": "1.0.3",
+    "versiune_aplicatie": "1.0.4",
     "prag_mijloc_fix": [
         {
             "an": 2022,
@@ -26,6 +26,30 @@
         {
             "an": 2024,
             "valoare": 3300
+        },
+        {
+            "an": 2025,
+            "valoare": 3600
+        },
+        {
+            "an": 2026,
+            "valoare": 3900
+        },
+        {
+            "an": 2027,
+            "valoare": 4200
+        },
+        {
+            "an": 2028,
+            "valoare": 4500
+        },
+        {
+            "an": 2029,
+            "valoare": 4800
+        },
+        {
+            "an": 2030,
+            "valoare": 5100
         }
     ],
     "port": 3000,
