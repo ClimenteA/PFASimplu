@@ -39,8 +39,8 @@ Cum se realizeaza calculul:
 
 ```go
 
-ProcentCAS          = 25 // % Sanatate
-ProcentCASS         = 10 // % Pensie
+ProcentCAS          = 25 // % Pensie
+ProcentCASS         = 10 // % Sanatate
 ProcentImpozitVenit = 10 // % Impozit pe venit
 
 
