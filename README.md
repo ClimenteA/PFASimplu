@@ -12,8 +12,7 @@ Aplicatia este de tip website asa ca poate fi accesata chiar si de pe un telefon
 
 ## Cine poate folosi aplicatia?
 Aplicatia poate fi utila pentru oricine:
-- tine contabilitatea in partida simpla;
-- cu sistem de venit real;
+- tine contabilitatea in partida simpla cu sistem de venit real;
 - este neplatitor de TVA (daca castigi sub 5000 EUR in fiecare luna e ok);
 - nu are angajati (mai bine un SRL pentru asta); 
 
@@ -31,27 +30,90 @@ Aplicatia poate fi utila pentru oricine:
 - Descarca registre contabile in format CSV (pentru Microsoft Excel/Libre Office/Google Sheets etc);
 - Generare factura in format PDF;
 
-Calcul automat impozite pentru declaratia unica (CAS/CASS/Impozit):
-- Calcul Venit Net: `venitNet = totalIncasari - totalCheltuieli - CAS`;
-- Calcul Impozit pe Venit: `impozitPeVenit = 10% din venitNet`;
-- Calcul CAS (Pensie): 
-    * `bazaDeCalcul = salariuMinimBrut x 12` - daca `venitNet` mai mare de 12 salarii minime brute pana in anul 2022 inclusiv;
-    * `bazaDeCalcul = salariuMinimBrut x 12` - daca `venitNet` intre 12 si 24 salarii minime brute din anul 2023+;
-    * `bazaDeCalcul = salariuMinimBrut x 24` - daca `venitNet` mai mare de 24 salarii minime brute din anul 2023+;
-    * `CAS = 25% din bazaDeCalcul`;
-- Calcul CASS (Sanatate):
-    * `bazaDeCalcul = salariuMinimBrut x 12` - daca `venitNet` mai mare de 12 salarii minime brute pana in anul 2022 inclusiv;
-    * `bazaDeCalcul = salariuMinimBrut x 6` - daca `venitNet` mai mare de 6 salarii minime brute din anul 2023+;
-    * `bazaDeCalcul = salariuMinimBrut x 12` - daca `venitNet` intre 12 si 24 salarii minime brute din anul 2023+;
-    * `bazaDeCalcul = salariuMinimBrut x 24` - daca `venitNet` mai mare de 24 salarii minime brute din anul 2023+;
-    * `CASS = 10% din bazaDeCalcul`;
-
-
 Rapoarte suplimentare:
 - Tabel incasari - unde poti vedea/sterge incasarile;
 - Tabel cheltuieli - unde poti vedea/sterge cheltuielile;
 - Tabel declaratii - unde poti vedea/sterge declaratiile;
 - Grafic tip `bar chart` cu incasari vs cheltuieli pe luni;
+
+Cum se realizeaza calculul:
+
+```go
+
+ProcentCAS          = 25 // % Sanatate
+ProcentCASS         = 10 // % Pensie
+ProcentImpozitVenit = 10 // % Impozit pe venit
+
+
+plafon6 = salariuMinimBrut * 6
+plafon12 = salariuMinimBrut * 12
+plafon24 = salariuMinimBrut * 24
+plafon60 = salariuMinimBrut * 60
+
+DACA anulCurrent <= 2022 {
+
+    DACA venitNet > plafon12 {
+        CAS = ProcentCAS * plafon12 / 100
+        CASS = ProcentCASS * plafon12 / 100
+    }
+
+    impozitPeVenit = ProcentImpozitVenit * (venitNet - CAS) / 100
+
+}
+
+DACA anulCurrent == 2023 {
+
+    DACA venitNet > plafon6 {
+        CASS = ProcentCASS * plafon6 / 100
+    }
+
+    DACA venitNet > plafon12 && venitNet <= plafon24 {
+        CAS = ProcentCAS * plafon12 / 100
+        CASS = ProcentCASS * plafon12 / 100
+    }
+
+    DACA venitNet > plafon24 {
+        CAS = ProcentCAS * plafon24 / 100
+        CASS = ProcentCASS * plafon24 / 100
+    }
+
+    impozitPeVenit = ProcentImpozitVenit * (venitNet - CAS) / 100
+}
+
+DACA anulCurrent >= 2024 {
+
+    DACA venitNet <= plafon6 {
+        CASS = ProcentCASS * plafon6 / 100
+    }
+
+    DACA venitNet > plafon12 && venitNet <= plafon24 {
+        CAS = ProcentCAS * plafon12 / 100
+        CASS = ProcentCASS * plafon12 / 100
+    }
+
+    DACA venitNet > plafon24 {
+        CAS = ProcentCAS * plafon24 / 100
+        CASS = ProcentCASS * plafon24 / 100
+    }
+
+    DACA venitNet > plafon60 {
+        CASS = ProcentCASS * plafon60 / 100
+    }
+
+    impozitPeVenit = ProcentImpozitVenit * (venitNet - CAS - CASS) / 100
+
+}
+
+total = CAS + CASS + impozitPeVenit
+
+PlatiStat{
+    CASPensie:    CAS,
+    CASSSanatate: CASS,
+    ImpozitVenit: impozitPeVenit,
+    Total:        total,
+}
+
+```
 
 
 
