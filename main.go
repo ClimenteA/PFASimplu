@@ -40,7 +40,8 @@ func main() {
 	store := session.New()
 
 	app := fiber.New(fiber.Config{
-		Views: htmlEngine,
+		Views:     htmlEngine,
+		BodyLimit: 100 * 1024 * 1024 * 1024, // 100 GB
 	})
 
 	app.Use(logger.New())
