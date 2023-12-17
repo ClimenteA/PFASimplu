@@ -1,3 +1,26 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [PFASimplu](#pfasimplu)
+  - [Descriere](#descriere)
+  - [Cine poate folosi aplicatia?](#cine-poate-folosi-aplicatia)
+  - [Facilitati](#facilitati)
+  - [Cum rulezi aplicatia](#cum-rulezi-aplicatia)
+  - [Creeare cont](#creeare-cont)
+  - [Adaugare incasari](#adaugare-incasari)
+  - [Adaugare cheltuieli](#adaugare-cheltuieli)
+  - [Adaugare declaratii/documente](#adaugare-declaratiidocumente)
+  - [Creeaza o factura](#creeaza-o-factura)
+  - [Registre contabile](#registre-contabile)
+  - [Scoate din inventar obiecte/mijloce fixe](#scoate-din-inventar-obiectemijloce-fixe)
+  - [Setari avansate](#setari-avansate)
+  - [Observatii](#observatii)
+  - [Pe viitor](#pe-viitor)
+- [Curs programare](#curs-programare)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # PFASimplu 
 ![GitHub all releases](https://img.shields.io/github/downloads/ClimenteA/PFASimplu/total?label=descarcari&style=for-the-badge)
 
@@ -28,7 +51,6 @@ Aplicatia poate fi utila pentru oricine:
     - Registru Fiscal;
     - Fisa Mijloc Fix;
 - Descarca registre contabile in format CSV (pentru Microsoft Excel/Libre Office/Google Sheets etc);
-- Generare factura in format PDF;
 
 Rapoarte suplimentare:
 - Tabel incasari - unde poti vedea/sterge incasarile;
@@ -115,29 +137,6 @@ PlatiStat{
 
 ```
 
-
-
-# Tutorial Aplicatie
-
-<!-- TOC -->
-
-1. [Cum rulezi aplicatia](#cum-rulezi-aplicatia)
-2. [Creeare cont](#creeare-cont)
-3. [Adaugare incasari](#adaugare-incasari)
-4. [Adaugare incasari din alte surse](#adaugare-alte-incasari)
-5. [Adaugare cheltuieli](#adaugare-cheltuieli)
-6. [Adaugare documente](#adaugare-documente)
-7. [Creeaza o factura](#creeaza-factura)
-8. [Registre contabile](#registre-contabile)
-9. [Scoate din inventar obiecte/mijloce fixe](#scoate-din-inventar)
-10. [Setari avansate](#setari-avansate)
-11. [Observatii](#observatii)
-12. [Pe viitor](#pe-viitor)
-13. [**Curs Programare**](#curs-programare)
-
-
-
-<!-- /TOC -->
 
 <a name="cum-rulezi-aplicatia"></a>
 ## Cum rulezi aplicatia
@@ -229,15 +228,16 @@ Poti oricand daca ai gresit sa stergi factura din pagina `Vezi registre contabil
 <a name="creeaza-factura"></a>
 ## Creeaza o factura
 
-- click pe `Creeaza o factura`;
-- completeaza campurile cerute (o parte din campuri vor fi completate automat pentru facturile viitoare);
-- click pe `Adauga livrabil` pentru a adauga un produs/serviciu;
-- click pe `Vezi factura` un nou tab se va deschide cu factura, o poti verifica apoi daca e in regula click pe linkul `GENEREAZA PDF DIN FACTURA` si apoi click pe `Save` in dialogul urmator; 
-- factura in format pdf va fi descarcata;
+[Tutorial pe facturis-online cum poti emite facturi folosind tool-urile ANAF](https://facturis-online.ro/e-factura/cum-sa-emiteti-singur-facturi-electronice-in-sistemul-anaf-ro-e-factura.html)
 
-Factura nu este automat adaugata la incasari, va trebui apoi sa o adaugi in sectiunea `Adauga incasari`.
 
-Daca esti platitor de TVA poti adauga inca o linie pentru produse/servicii (apasa `Adauga livrabil`) unde completezi valoarea TVA.
+- [Completezi factura online si descarci fisierul XML aici](https://www.anaf.ro/CompletareFactura/faces/factura/informatiigenerale.xhtml);
+- [Transformi fisierul XML in fisier PDF aici](https://www.anaf.ro/uploadxml/);
+- Incarci fiserul XML in SPV: `Factura electronica` > `Trimitere Factura` > `Trimitere XML factura`;
+- Creeaza un zip cu fisierele XML si PDF generate anterior si adauga-l in sectiunea `Adauga incasari`;
+
+
+[ANAF informatii e-factura aici](https://mfinante.gov.ro/web/efactura/acasa)
 
 
 <a name="registre-contabile"></a>
@@ -295,10 +295,7 @@ Testati aplicatia inainte si vedeti daca raspunde nevoilor dvs. inainte de o ada
 <a name="pe-viitor"></a>
 ## Pe viitor
 
-- posibilitate adaugare `bazaDeCalcul` pentru cei care au norma de venit;
-- generare model completare Declaratie 212; 
-- adaugare TVA in calcul;
-- declaratie pentru TVA;
+- e-factura;
 - modificare setari anuale (salariul minim pentru anul in curs, prag minim, tabel amortizare mijloc fix);
 - one-click update app; 
 - verificare aplicatie facuta de un specialist contabil;
@@ -309,6 +306,4 @@ Testati aplicatia inainte si vedeti daca raspunde nevoilor dvs. inainte de o ada
 <a name="curs-programare"></a>
 # Curs programare
 
-Daca esti interesat(a) sa inveti programare pentru a face aplicatii software pentru afacerea ta sau vrei sa faci o reconversie profesionala (web: frontend, backend, devops, testare) [**click aici**](https://colegideapartament.ro/curs-programare-python-html-css-javascript-docker-docker-compose-vps). Pregatesc un curs pe intelesul tuturor. 
-
-
+Daca esti interesat(a) sa inveti programare (web development) pentru a face aplicatii software pentru afacerea ta sau vrei sa faci o reconversie profesionala (web: frontend, backend, devops, testare) [**click aici**](https://curs.softgata.com/crs/landing).
