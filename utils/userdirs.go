@@ -7,6 +7,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/ClimenteA/pfasimplu-go/auth"
 )
@@ -257,6 +258,12 @@ func GetAniInregistrati(user auth.Account) []string {
 		if !SliceContains(yearsUnique, year) {
 			yearsUnique = append(yearsUnique, year)
 		}
+	}
+
+	currentYear, _, _ := time.Now().Date()
+	currentYearStr := strconv.Itoa(currentYear)
+	if !SliceContains(yearsUnique, currentYearStr) {
+		yearsUnique = append(yearsUnique, currentYearStr)
 	}
 
 	sort.Slice(yearsUnique, func(i, j int) bool {
