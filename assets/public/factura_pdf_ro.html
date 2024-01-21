@@ -100,6 +100,11 @@
             margin-top: 50px;
             margin-bottom: 50px;
         }
+
+        th {
+            text-align: left;
+        }
+
     </style>
 
     <script>
@@ -197,14 +202,14 @@
 
     <section class="detalii-factura">
 
-        <h1 class="underline">Factura</h1>
+        <h1 class="underline">Invoice/Factura</h1>
 
         <table>
             <thead>
-                <th>Serie</th>
-                <th>Numar</th>
-                <th>Data emiterii</th>
-                <th>Data scadenta</th>
+                <th>Serie <br> Series</th>
+                <th>Numar <br> Number</th>
+                <th>Data emiterii(A, L, Z) <br> Date emitted(Y, M, D)</th>
+                <th>Data scadenta (A, L, Z) <br> Due date(Y, M, D)</th>
             </thead>
             <tbody>
                 <tr>
@@ -221,36 +226,36 @@
     <section class="detalii-furnizor-client">
         <table class="full-width">
             <thead>
-                <th>DETALII</th>
-                <th>FURNIZOR</th>
+                <th>DETALII <br> DETAILS</th>
+                <th>FURNIZOR / SUPPLIER</th>
                 <th>CLIENT</th>
             </thead>
             <tbody>
 
                 <tr>
-                    <th>Nume</th>
+                    <th>Nume <br> Name</th>
                     <td id="NumeFurnizor"></td>
                     <td id="NumeClient"></td>
                 <tr>
 
                 <tr>
-                    <th>Nr. Reg. Com.</th>
+                    <th>Nr. Reg. Com. <br> Registration No.</th>
                     <td id="NrRegComFurnizor"></td>
                     <td id="NrRegComClient"></td>
                 <tr>
-                    <th>CIF/VAT</th>
+                    <th>CIF/UIC <br> TVA/VAT</th>
                     <td id="CifVatFurnizor"></td>
                     <td id="CifVatClient"></td>
                 </tr>
 
                 <tr>
-                    <th>Adresa</th>
+                    <th>Adresa <br> Address</th>
                     <td id="AdresaFurnizor"></td>
                     <td id="AdresaClient"></td>
                 </tr>
 
                 <tr>
-                    <th>Telefon</th>
+                    <th>Telefon <br> Phone</th>
                     <td id="TelefonFurnizor"></td>
                     <td id="TelefonClient"></td>
                 </tr>
@@ -275,10 +280,10 @@
     <section class="servicii-oferite">
         <table class="full-width text-center">
             <thead>
-                <th>Denumire produse sau servicii</th>
+                <th>Produse/Servicii Descriere <br> Products/Services Description</th>
                 <th>U.M</th>
-                <th>Cant.</th>
-                <th>Pret Unitar</th>
+                <th>Cantitate <br> Quantity</th>
+                <th>Pret Unitar <br> Price per unit</th>
                 <th>Total</th>
             </thead>
             <tbody id="ServiciiProduse">
@@ -290,7 +295,7 @@
     <section class="total">
         <table>
             <thead>
-                <th>Total de plata:</th>
+                <th>TOTAL</th>
                 <th id="TotalDePlata"></th>
             </thead>
         </table>
