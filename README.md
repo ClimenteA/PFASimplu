@@ -199,6 +199,7 @@ Contul este creat doar in PC-ul/Laptopul tau, datele personale nu se transmit ni
 Factura va fi salvata in folderul `stocare`. 
 Poti oricand daca ai gresit sa stergi factura fie din pagina `Adauga incasari` fie din pagina `Vezi registre contabile`. 
 
+![](https://miro.medium.com/v2/resize:fit:720/format:webp/1*Fe4iahH3oq0QRlS_b-H4uA.gif)
 
 <a name="adaugare-cheltuieli"></a>
 ## Adaugare cheltuieli
@@ -214,6 +215,7 @@ Poti oricand daca ai gresit sa stergi factura fie din pagina `Adauga incasari` f
 Bonul/Factura va fi salvata in folderul `stocare`. 
 Poti oricand daca ai gresit sa stergi documentul fie din pagina `Adauga cheltuieli` fie din pagina `Vezi registre contabile`. 
 
+![](https://miro.medium.com/v2/resize:fit:720/format:webp/1*MPMjqkHRLzDsYIbU3t6n4A.gif)
 
 
 <a name="adaugare-documente"></a>
@@ -254,6 +256,7 @@ Poti oricand daca ai gresit sa stergi factura din pagina `Vezi registre contabil
 - descarca documente introduse;
 - descarca tabele in format CSV;
 
+![](https://miro.medium.com/v2/resize:fit:720/format:webp/1*iFp9CZDsFnSCXPUo31tL-Q.gif)
 
 <a name="scoate-din-inventar"></a>
 ## Scoate din inventar obiecte/mijloce fixe
