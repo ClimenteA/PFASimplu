@@ -26,6 +26,10 @@
 
 Aplicatie pentru simplificarea gestiunii contabilitatii facuta in partida simpla.
 
+[Click aici pentru articol cu cateva capturi de ecran](https://climente-alin.medium.com/pfasimplu-aplicatie-pentru-pfa-gratis-1ab24ad3c179)
+[Click aici pentru tutorial video pe youtube](https://www.youtube.com/watch?v=2X7zV_-A3oU)
+
+
 ## Descriere 
 
 Aplicatia PFASimplu este utila pentru persoanele care isi tin contabilitatea in partida simpla.
