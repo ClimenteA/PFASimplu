@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/ClimenteA/fiberwebgui v0.0.3
-	github.com/gofiber/fiber/v2 v2.52.1
+	github.com/gofiber/fiber/v2 v2.52.5
 	github.com/gofiber/template v1.7.5
 	github.com/lithammer/shortuuid v3.0.0+incompatible
 	github.com/lithammer/shortuuid/v4 v4.0.0
