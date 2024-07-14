@@ -1,0 +1,14 @@
+{
+  "name": "pfasimplu",
+  "module": "main.ts",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "type": "module",
+  "dependencies": {
+    "hono": "^4.4.13"
+  }
+}
