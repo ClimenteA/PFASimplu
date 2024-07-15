@@ -18,7 +18,7 @@ export const Layout: FC = (props) => {
                 <main class="px-4">
                     {props.children}
                 </main>
-
+                
             </body>
         </html>
     )

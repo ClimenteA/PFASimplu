@@ -53,7 +53,6 @@ app.get('/setari-aplicatie', (c) => {
 })
 
 
-
 console.info("\nHono server started...\n")
 
 Bun.serve({
