@@ -9,6 +9,11 @@ import { ObiecteDeInventar } from './src/pages/ObiecteDeInventar'
 import { CreeazaDeclaratii } from './src/pages/CreeazaDeclaratii'
 import { SetariAplicatie } from './src/pages/SetariAplicatie'
 
+// Embed static files in binary
+// @ts-ignore
+import css from "./static/output.css" with { type: "file" } 
+
+
 
 const app = new Hono()
 

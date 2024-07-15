@@ -1587,6 +1587,10 @@ html {
   padding-bottom: 0.5rem;
 }
 
+.static {
+  position: static;
+}
+
 .z-\[1\] {
   z-index: 1;
 }
