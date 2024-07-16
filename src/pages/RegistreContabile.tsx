@@ -7,8 +7,9 @@ export const RegistreContabile: FC = () => {
     return (
         <Layout>
 
-            <h1 className="text-2xl text-center">Registre contabile</h1>
-
+            <h1 className="text-2xl text-center">
+                Registre contabile
+            </h1>
         </Layout>
     )
 }

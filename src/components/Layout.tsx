@@ -19,6 +19,7 @@ export const Layout: FC = (props) => {
                     {props.children}
                 </main>
                 
+                <script src="/static/reload.js"></script>
             </body>
         </html>
     )
