@@ -3,6 +3,7 @@
   "module": "server.tsx",
   "type": "module",
   "scripts": {
+    "dev": "vite",
     "watch": "bun --watch server.tsx",
     "hot": "bun --hot server.tsx",
     "browser": "bun reloader.js",
@@ -10,6 +11,7 @@
     "build": "bun build ./server.tsx --compile --outfile ./build/server"
   },
   "devDependencies": {
+    "@hono/vite-dev-server": "^0.13.1",
     "@types/bun": "latest",
     "daisyui": "^4.12.10",
     "tailwindcss": "^3.4.4"
