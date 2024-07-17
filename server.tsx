@@ -8,6 +8,8 @@ import { AdaugaDeclaratii } from './src/pages/AdaugaDeclaratii'
 import { ObiecteDeInventar } from './src/pages/ObiecteDeInventar'
 import { CreeazaDeclaratii } from './src/pages/CreeazaDeclaratii'
 import { SetariAplicatie } from './src/pages/SetariAplicatie'
+import { SetariPragMijlocFix } from './src/pages/SetariPragMijlocFix'
+
 
 // Embed static files in binary
 // @ts-ignore
@@ -55,6 +57,10 @@ app.get('/creeaza-declaratii', (c) => {
 
 app.get('/setari-aplicatie', (c) => {
   return c.html(<SetariAplicatie />)
+})
+
+app.get('/seteaza-prag-mijloc-fix', (c) => {
+  return c.html(<SetariPragMijlocFix />)
 })
 
 

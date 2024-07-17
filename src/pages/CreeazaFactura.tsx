@@ -10,7 +10,8 @@ export const CreeazaFactura: FC = () => {
 
             <PageHeader
                 title='Creeaza Factura'
-                description='Creeaza o factura PDF + XML necesar pentru E-Factura. Aplicatia va incerca sa o trimita catre ANAF.'
+                description='Creeaza o factura PDF + XML necesar pentru E-Factura. 
+                Aplicatia va incerca sa o trimita catre ANAF.'
             />
 
         </Layout>
