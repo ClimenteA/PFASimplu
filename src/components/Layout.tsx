@@ -13,7 +13,7 @@ export const Layout: FC = (props) => {
             </head>
             <body class="container mx-auto">
 
-                <NavBar />
+                <NavBar/>
 
                 <main class="px-4">
                     {props.children}

@@ -84,7 +84,7 @@ export const NavBar: FC = () => {
                 </div>
             </div>
             <div className="navbar-center">
-                <a href='/' className="btn btn-ghost text-xl">PFASimplu</a>
+                <a href='/' className="btn btn-ghost text-xl text-blue-600">PFASimplu</a>
             </div>
             <div className="navbar-end">
                 <button className="btn btn-ghost btn-circle">

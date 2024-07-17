@@ -5,8 +5,9 @@
   "scripts": {
     "watch": "bun --watch server.tsx",
     "hot": "bun --hot server.tsx",
-    "build": "bun build ./server.tsx --compile --outfile ./build/server",
-    "css": "npx tailwindcss -i ./static/input.css -o ./static/output.css --watch"
+    "browser": "bun reloader.js",
+    "css": "npx tailwindcss -i ./static/input.css -o ./static/output.css --watch",
+    "build": "bun build ./server.tsx --compile --outfile ./build/server"
   },
   "devDependencies": {
     "@types/bun": "latest",
