@@ -11,11 +11,11 @@ export const Layout: FC = (props) => {
                 <link rel="stylesheet" href="/static/output.css" />
                 <title>PFASimplu</title>
             </head>
-            <body class="container mx-auto">
+            <body className="container mx-auto">
 
                 <NavBar/>
 
-                <main class="px-4">
+                <main className="px-4">
                     {props.children}
                 </main>
                 

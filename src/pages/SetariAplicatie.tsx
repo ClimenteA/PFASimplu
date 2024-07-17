@@ -13,9 +13,14 @@ export const SetariAplicatie: FC = () => {
                 impozitelor, taxelor, creearea de declaratii, date PFA, etc. (salariul minim brut, procente taxe etc.)'
             />
 
-            <a href='/seteaza-prag-mijloc-fix' className="inline-block badge badge-lg badge-neutral hover:underline">
-                Seteaza prag mijloc fix
-            </a>
+            <div className="mt-12">
+
+                <a href='/seteaza-prag-mijloc-fix' className="btn">
+                    Seteaza prag mijloc fix
+                </a>
+
+            </div>
+
 
         </Layout>
     )
