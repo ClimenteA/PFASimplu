@@ -3,3 +3,4 @@ dist/
 .vscode
 .ipynb_checkpoints
 .venv
+__pycache__
