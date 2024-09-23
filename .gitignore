@@ -4,3 +4,5 @@ dist/
 .ipynb_checkpoints
 .venv
 __pycache__
+media/*
+db.sqlite3

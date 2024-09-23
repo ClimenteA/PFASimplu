@@ -184,7 +184,7 @@
                         <td>{{ item.data }}</td>
                         <td x-data="{ downloaded: false }">
                             <a @click="downloaded = true" :class="downloaded ? 'px-1 pico-color-purple-500': 'px-1'" href="{{ item.documentul.url }}" download>
-                                Doc. justificativ ({{ item.documentId }})
+                                Doc: {{ item.documentId }}
                             </a>
                         </td>
                         <td>{{ item.felul_operatiunii }}</td>
