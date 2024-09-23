@@ -3,7 +3,7 @@
 
 # Instalare pt. developeri
 
-Aplicatia este facuta in Python, Django cu SQLite DB. 
+Aplicatia este facuta in Python, Django cu SQLiteDB. 
 
 - clone repo;
 - `virtualenv .venv`;
@@ -13,7 +13,7 @@ Aplicatia este facuta in Python, Django cu SQLite DB.
 - `python manage.py migrate`;
 - `make migrate-all` - pt. Ubuntu pentru a face toate migrarile;
 - `make run` - pt. a porni Django dev. server (aka `python manage.py runserver`);
-
+- `purge-db` - pt. a sterge `stocare.db` (sqlite db) si toate folderele `migrations`;
 
 <!-- 
 - https://blog.factureaza.ro/campurile-obligatorii-e-factura/

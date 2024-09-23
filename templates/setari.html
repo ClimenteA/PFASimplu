@@ -146,17 +146,15 @@
 
 <div class="grid container" style="margin-top: 6rem;">
 
-    <form action="{% url 'setari-import-v1' %}" method="post">
+    <form x-data="{importing: false}" action="{% url 'setari-import-v1' %}" method="post">
         {% csrf_token %}
-        <button class="secondary" type="submit">
-            <i class="bi bi-database-add"></i> Importa datele din PFASimplu V1
+        <button @click="importing = true;" x-text="importing ? 'Datele se adauga...': 'Adauga datele din PFASimplu V1';" class="secondary" type="submit">
         </button>
     </form>
 
-    <form action="{% url 'setari-drop-data' %}" method="post">
+    <form x-data="{deleting: false}" action="{% url 'setari-drop-data' %}" method="post">
         {% csrf_token %}
-        <button class="pico-background-red-550" type="submit">
-            <i class="bi bi-trash"></i> Sterge toate datele
+        <button @click="deleting = true;" x-text="deleting ? 'Datele se sterg...': 'Sterge toate datele';" class="pico-background-red-550" type="submit">
         </button>
     </form>
 

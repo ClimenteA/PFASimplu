@@ -30,10 +30,11 @@
             venituri vs cheltuieli pe ani,
             notificari facturi neincasate, declaratii de urcat in SPV etc.
             Totodata ai disponibile si registrele contabile obligatorii pe care trebuie sa le ai in relatia cu ANAF.
-            Nu trebuie sa plateasca CASS: cei care cu profesii liberale (avocat, notar etc.) care au venituri nete sub 6 salarii minime.            
+            Nu trebuie sa plateasca CASS: cei care cu profesii liberale (avocat, notar etc.) care au venituri nete sub 6
+            salarii minime.
             Total plati catre stat pana acum: {{total_platite_la_stat_pe_toti_anii}} {{valuta}}.
             Total incasari net pana acum: {{total_incasari_net_pe_toti_anii}} {{valuta}}.
-            Rest de plata: {{rest_de_plata_catre_stat}} {{valuta}}. 
+            Rest de plata: {{rest_de_plata_catre_stat}} {{valuta}}.
         </p>
     </hgroup>
 
@@ -114,7 +115,7 @@
 
     <div style="display: flex; justify-content: center; margin-top: 2rem;">
         <img src="{{media_url_chart_incasari_cheltuieli}}" style="border-radius: 0.5rem;"
-            alt="Incasari vs Cheltuieli {{valuta}}" />        
+            alt="Incasari vs Cheltuieli {{valuta}}" />
     </div>
 
 
@@ -131,7 +132,7 @@
 
 
 <div x-data="{active: 'rjip'}" class="mt-4">
-    
+
     <div class="container">
         <div role="group">
             <button @click="active = 'ref'" :class="active == 'ref' ? '': 'outline'">Registru fiscal</button>
@@ -141,16 +142,18 @@
     </div>
 
     <div x-show="active == 'rjip'" class="overflow-auto mt-2 mb-6">
-    
+
         <div style="display: flex; justify-content: end; overflow: hidden;">
-            <a href="{% url 'descarca-registru-jurnal' %}?filetype=CSV" class="px-1 secondary" data-tooltip="Descarca CSV">
+            <a href="{% url 'descarca-registru-jurnal' %}?filetype=CSV" class="px-1 secondary"
+                data-tooltip="Descarca CSV">
                 <i class="bi bi-filetype-csv"></i>
             </a>
-            <a href="{% url 'descarca-registru-jurnal' %}?filetype=XLSX" class="px-1 secondary" data-tooltip="Descarca XLSX">
+            <a href="{% url 'descarca-registru-jurnal' %}?filetype=XLSX" class="px-1 secondary"
+                data-tooltip="Descarca XLSX">
                 <i class="bi bi-filetype-xlsx"></i>
             </a>
         </div>
-    
+        
         <table>
             <thead>
                 <tr>
@@ -166,51 +169,54 @@
             </thead>
             <tbody>
                 {% for item in rjip %}
-    
+
                 {% if item.end_of_month %}
-                    <tr>
-                        <td>{{ item.nr_crt }}</td>
-                        <td>{{ item.data }}</td>
-                        <td>{{ item.documentul }}</td>
-                        <td class="pico-background-grey">{{ item.felul_operatiunii }}</td>
-                        <td class="pico-background-grey">{{ item.incasari_numerar }}</td>
-                        <td class="pico-background-grey">{{ item.incasari_banca }}</td>
-                        <td class="pico-background-grey">{{ item.plati_numerar }}</td>
-                        <td class="pico-background-grey">{{ item.plati_banca }}</td>
-                    </tr>
+                <tr>
+                    <td>{{ item.nr_crt }}</td>
+                    <td>{{ item.data }}</td>
+                    <td>{{ item.documentul }}</td>
+                    <td class="pico-background-grey">{{ item.felul_operatiunii }}</td>
+                    <td class="pico-background-grey">{{ item.incasari_numerar }}</td>
+                    <td class="pico-background-grey">{{ item.incasari_banca }}</td>
+                    <td class="pico-background-grey">{{ item.plati_numerar }}</td>
+                    <td class="pico-background-grey">{{ item.plati_banca }}</td>
+                </tr>
                 {% else %}
-                    <tr>
-                        <td>{{ item.nr_crt }}</td>
-                        <td>{{ item.data }}</td>
-                        <td x-data="{ downloaded: false }">
-                            <a @click="downloaded = true" :class="downloaded ? 'px-1 pico-color-purple-500': 'px-1'" href="{{ item.documentul.url }}" download>
-                                Doc: {{ item.documentId }}
-                            </a>
-                        </td>
-                        <td>{{ item.felul_operatiunii }}</td>
-                        <td>{{ item.incasari_numerar }}</td>
-                        <td>{{ item.incasari_banca }}</td>
-                        <td>{{ item.plati_numerar }}</td>
-                        <td>{{ item.plati_banca }}</td>
-                    </tr>
+                <tr>
+                    <td>{{ item.nr_crt }}</td>
+                    <td>{{ item.data }}</td>
+                    <td x-data="{ downloaded: false }">
+                        <a @click="downloaded = true" :class="downloaded ? 'px-1 pico-color-purple-500': 'px-1'"
+                            href="{{ item.documentul.url }}" download>
+                            Doc: {{ item.documentId }}
+                        </a>
+                    </td>
+                    <td>{{ item.felul_operatiunii }}</td>
+                    <td>{{ item.incasari_numerar }}</td>
+                    <td>{{ item.incasari_banca }}</td>
+                    <td>{{ item.plati_numerar }}</td>
+                    <td>{{ item.plati_banca }}</td>
+                </tr>
                 {% endif %}
-                
+
                 {% endfor %}
             </tbody>
         </table>
     </div>
-    
+
     <div x-show="active == 'ref'" class="overflow-auto mt-2 mb-6">
-    
+
         <div style="display: flex; justify-content: end; overflow: hidden;">
-            <a href="{% url 'descarca-registru-fiscal' %}?filetype=CSV" class="px-1 secondary" data-tooltip="Descarca CSV">
+            <a href="{% url 'descarca-registru-fiscal' %}?filetype=CSV" class="px-1 secondary"
+                data-tooltip="Descarca CSV">
                 <i class="bi bi-filetype-csv"></i>
             </a>
-            <a href="{% url 'descarca-registru-fiscal' %}?filetype=XLSX" class="px-1 secondary" data-tooltip="Descarca XLSX">
+            <a href="{% url 'descarca-registru-fiscal' %}?filetype=XLSX" class="px-1 secondary"
+                data-tooltip="Descarca XLSX">
                 <i class="bi bi-filetype-xlsx"></i>
             </a>
         </div>
-    
+
         <table class="striped">
             <thead>
                 <tr>
@@ -232,18 +238,20 @@
             </tbody>
         </table>
     </div>
-    
+
     <div x-show="active == 'rinv'" class="overflow-auto mt-2 mb-6">
-    
+
         <div style="display: flex; justify-content: end; overflow: hidden;">
-            <a href="{% url 'descarca-registru-inventar' %}?filetype=CSV" class="px-1 secondary" data-tooltip="Descarca CSV">
+            <a href="{% url 'descarca-registru-inventar' %}?filetype=CSV" class="px-1 secondary"
+                data-tooltip="Descarca CSV">
                 <i class="bi bi-filetype-csv"></i>
             </a>
-            <a href="{% url 'descarca-registru-inventar' %}?filetype=XLSX" class="px-1 secondary" data-tooltip="Descarca XLSX">
+            <a href="{% url 'descarca-registru-inventar' %}?filetype=XLSX" class="px-1 secondary"
+                data-tooltip="Descarca XLSX">
                 <i class="bi bi-filetype-xlsx"></i>
             </a>
         </div>
-    
+
         <table class="striped">
             <thead>
                 <tr>
@@ -268,7 +276,8 @@
                         {% endif %}
                     </td>
                     <td x-data="{ downloaded: false }">
-                        <a @click="downloaded = true" :class="downloaded ? 'px-1 pico-color-purple-500': 'px-1'" href="{{ item.fisier.url }}" download>
+                        <a @click="downloaded = true" :class="downloaded ? 'px-1 pico-color-purple-500': 'px-1'"
+                            href="{{ item.fisier.url }}" download>
                             <i class="bi bi-file-earmark-arrow-down"></i>
                         </a>
                     </td>
@@ -278,7 +287,7 @@
         </table>
     </div>
 
-</div>    
+</div>
 
 
 {% endblock %}
