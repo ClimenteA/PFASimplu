@@ -1,3 +1,8 @@
+PFASimpluV1 - built in GO as learning experience (good for accounting legislation changes until 2025 - if other changes appear after that this is no longer available).
+
+Moved the app to Django/Python/SQLITE stack on main branch.
+
+
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
