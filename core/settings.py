@@ -1,4 +1,5 @@
 import os
+import json
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -9,12 +10,24 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-h9h$b5x+u#h%pqusqr3t_ln5u^qmzdpcm+4tn50e!&h0zjl-9="
+with open("./pfasimplu.config.json") as f:
+    CONFIG = json.load(f)
+
+SECRET_KEY = CONFIG.get("APP_SECRET", "aplicatie-desktop-nu-conteaza-secret-trebuie-sa-fie-peste-50-de-caractere-sa-fie-considerata-sigura")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = CONFIG.get("DEBUG", True)
+
 
 ALLOWED_HOSTS = ["*"]
+
+# Desktop app doesn't need SSL
+# CSRF_COOKIE_SECURE = False
+# SESSION_COOKIE_SECURE = False
+# SECURE_HSTS_SECONDS = 3600
+# SECURE_HSTS_PRELOAD = False
+# SECURE_SSL_REDIRECT = False
+# SECURE_HSTS_INCLUDE_SUBDOMAINS = False
 
 
 # Application definition
@@ -127,6 +140,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "public"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
 MEDIA_URL = "/media/"

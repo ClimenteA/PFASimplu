@@ -1,0 +1,4 @@
+{
+    "APP_SECRET": "aplicatie-desktop-nu-conteaza-secret-trebuie-sa-fie-peste-50-de-caractere-sa-fie-considerata-sigura",
+    "DEBUG": false
+}

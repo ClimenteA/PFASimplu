@@ -1,3 +1,6 @@
+run:
+	python manage.py runserver
+
 migrate-all:
 	python manage.py makemigrations
 	python manage.py migrate
@@ -20,5 +23,8 @@ purge-db:
 	rm -rf setari/migrations
 	rm stocare.db
 
-run:
-	python manage.py runserver
+package:
+	rm -rf public
+	mkdir public
+	python manage.py collectstatic
+	
