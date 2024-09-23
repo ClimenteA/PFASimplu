@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:ns4="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2 http://docs.oasis-open.org/ubl/os-UBL-2.1/xsd/maindoc/UBL-Invoice-2.1.xsd">
+    <cbc:CustomizationID>urn:cen.eu:en16931:2017#compliant#urn:efactura.mfinante.ro:CIUS-RO:1.0.1</cbc:CustomizationID>
+    <cbc:ID>{{ serie_numar }}</cbc:ID>
+    <cbc:IssueDate>{{ data_emitere }}</cbc:IssueDate>
+    <cbc:DueDate>{{ data_scadenta }}</cbc:DueDate>
+    <cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>
+    <cbc:Note>{{ nota }}</cbc:Note>
+    <cbc:DocumentCurrencyCode>RON</cbc:DocumentCurrencyCode>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cac:PostalAddress>
+                <cbc:StreetName>{{ adresa_furnizor }}</cbc:StreetName>
+                <cbc:CityName>{{ localitate_furnizor }}</cbc:CityName>
+                <cbc:CountrySubentity>{{ cod_judet_furnizor }}</cbc:CountrySubentity>
+                <cac:Country>
+                    <cbc:IdentificationCode>RO</cbc:IdentificationCode>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cbc:CompanyID>{{ cif_furnizor }}</cbc:CompanyID>
+                <cac:TaxScheme/>
+            </cac:PartyTaxScheme>
+            <cac:PartyLegalEntity>
+                <cbc:RegistrationName>{{ nume_furnizor }}</cbc:RegistrationName>
+                <cbc:CompanyID>{{ cif_furnizor }}</cbc:CompanyID>
+            </cac:PartyLegalEntity>
+            <cac:Contact>
+                <cbc:Name>{{ email_furnizor }} {{ telefon_furnizor }}</cbc:Name>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PostalAddress>
+                <cbc:StreetName>{{ adresa_client }}</cbc:StreetName>
+                <cbc:CityName>{{ localitate_client }}</cbc:CityName>
+                <cbc:CountrySubentity>{{ cod_judet_client }}</cbc:CountrySubentity>
+                <cac:Country>
+                    <cbc:IdentificationCode>RO</cbc:IdentificationCode>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyLegalEntity>
+                <cbc:RegistrationName>{{ nume_client }}</cbc:RegistrationName>
+                <cbc:CompanyID>{{ cif_client }}</cbc:CompanyID>
+            </cac:PartyLegalEntity>
+            <cac:Contact>
+                <cbc:Name>{{ email_client }} {{ telefon_client }}</cbc:Name>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode>{{ cod_modalitate_plata }}</cbc:PaymentMeansCode>
+        {% if show_iban_furnizor %}
+        <cac:PayeeFinancialAccount>
+            <cbc:ID>{{ iban_furnizor }}</cbc:ID>
+        </cac:PayeeFinancialAccount>
+        {% endif %}
+    </cac:PaymentMeans>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="RON">0.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="RON">{{ total_de_plata }}</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="RON">0.00</cbc:TaxAmount>
+            <cac:TaxCategory>
+                <cbc:ID>O</cbc:ID>
+                <cbc:Percent>0.00</cbc:Percent>
+                <cbc:TaxExemptionReasonCode>VATEX-EU-O</cbc:TaxExemptionReasonCode>
+                <cac:TaxScheme>
+                    <cbc:ID>VAT</cbc:ID>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="RON">{{ total_de_plata }}</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="RON">{{ total_de_plata }}</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="RON">{{ total_de_plata }}</cbc:TaxInclusiveAmount>
+        <cbc:PrepaidAmount currencyID="RON">{{ total_de_plata }}</cbc:PrepaidAmount>
+        <cbc:PayableRoundingAmount currencyID="RON">{{ total_de_plata }}</cbc:PayableRoundingAmount>
+        <cbc:PayableAmount currencyID="RON">{{ total_de_plata }}</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    {% for item in produse_sau_servicii %}
+    <cac:InvoiceLine>
+        <cbc:ID>{{ item.id }}</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="{{ item.cod_unitate }}">{{ item.numar_unitati }}</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="RON">{{ item.subtotal }}</cbc:LineExtensionAmount>
+        <cac:Item>
+            <cbc:Name>{{ item.nume_produs_sau_serviciu|title }}</cbc:Name>
+            <cac:ClassifiedTaxCategory>
+                <cbc:ID>O</cbc:ID>
+                <cac:TaxScheme>
+                    <cbc:ID>VAT</cbc:ID>
+                </cac:TaxScheme>
+            </cac:ClassifiedTaxCategory>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="RON">{{ item.pret_pe_unitate }}</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>
+    {% endfor %}
+</Invoice>
+<!--XML generat cu PFASimplu aplicatie creata de Alin Climente-->

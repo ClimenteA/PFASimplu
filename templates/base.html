@@ -1,0 +1,97 @@
+{% load django_browser_reload %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'pico.jade.min.css' %}">
+    <link rel="stylesheet" href="{% static 'pico.colors.min.css' %}">
+    <link rel="stylesheet" href="{% static 'bootstrap-icons.min.css' %}">
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <script defer src="{% static 'typeahead-standalone.js' %}"></script>
+    <script defer src="{% static 'alpinejs3xx.min.js' %}"></script>
+    <title>{% block page-title %} PFASimplu {% endblock %}</title>
+</head>
+
+<body class="container-fluid">
+    <nav style="border-bottom: 1px solid #696868; padding-left: 1rem; padding-right: 1rem;">
+        <ul>
+            <li>
+                <a href="/" role="button">
+                    <strong>PFASimplu</strong>
+                </a>
+            </li>
+        </ul>
+        <ul>
+            <li>
+                <a href="{% url 'registre' %}">
+                    Registre
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'facturi' %}">
+                    Facturi
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'incasari' %}">
+                    Incasari
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'cheltuieli' %}">
+                    Cheltuieli
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'documente' %}">
+                    Documente
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'inventar' %}">
+                    Inventar
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'setari' %}">
+                    Setari
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+
+    <main class="container-fluid">
+
+        {% block body %}
+
+        {% endblock %}
+
+    </main>
+
+
+    {% if messages %}
+    <div x-data="{modalOpen: true}">
+        <dialog :open="modalOpen">
+            <article @click.outside="modalOpen = false">
+                <header>
+                    <button @click="modalOpen = false" aria-label="Close" rel="prev"></button>
+                    <p>
+                        <strong>{% for message in messages %} {{ message.extra_tags }} {% endfor %}</strong>
+                    </p>
+                </header>
+                <p>
+                    {% for message in messages %} {{ message }} {% endfor %}
+                </p>
+            </article>
+        </dialog>
+    </div>
+    {% endif %}
+
+    {% django_browser_reload_script %}
+</body>
+
+</html>

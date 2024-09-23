@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block page-title %} Cheltuieli {% endblock %}
+
+
+{% block body %}
+
+<script defer src="{% static 'coduri_classificare.js' %}"></script>
+
+<hgroup class="title-description container">
+    <h1>🛒 Cheltuieli</h1>
+    <p>
+        Aici poti aduga documentele justificative (facturi, chitante) pentru
+        cheltuielile pe care le-ai facut in scopul prestarii activitatii tale de PFA.
+
+        Unele cheltuieli sunt integral deductibile: consumabile, plati servicii, achizitii bunuri sub 2500 RON etc.
+        Altele sunt partial deductibile:
+        2% din baza de calcul pentru cheltuielile cu potentialii clienti (mancare, cadouri sub 100 RON, etc),
+        50% cheltuieli cu autovehicul/chirii/utilitati daca sunt folosite si in scop personal.
+
+        Unele cheltuieli au nevoie de documente justificative in plus
+        pe langa bonul sau factura care justifica cheltuiala.
+
+        Cheltuielile care depasesc prag mijloc fix vor trebui amortizate
+        in functie de codul de clasificare din tabelul de amortizare mijloace fixe.
+
+        Achizitiile/Cheltuielile care nu isi pierd valoarea in timp cum ar fi terenuri, aur, case nu sunt deductibile.
+
+    </p>
+</hgroup>
+
+
+<article id="formular-cheltuieli" class="article-form mt-4 container">
+
+    <form action={% if item_id %} "{% url 'cheltuieli' %}?id={{ item_id }}" {% else %} "{% url 'cheltuieli' %}" {% endif %} method="POST" enctype="multipart/form-data">
+
+        <p class="text-bold">Datele cheltuielii:</p>
+
+        {% csrf_token %}
+    
+        <label for="{{ cheltuieli_form.deductibila.id_for_label }}">
+            {{ cheltuieli_form.deductibila.label }}:
+            {{ cheltuieli_form.deductibila }}
+            {{ cheltuieli_form.deductibila.errors }}
+        </label>
+
+
+        <div class="grid">
+
+
+            <label for="{{ cheltuieli_form.nume_cheltuiala.id_for_label }}">
+                {{ cheltuieli_form.nume_cheltuiala.label }}:
+                {{ cheltuieli_form.nume_cheltuiala }}
+                {{ cheltuieli_form.nume_cheltuiala.errors }}
+            </label>
+
+            <div>
+                <div id="amortizare" class="grid">
+
+                    <div class="grid">
+                        <label for="{{ cheltuieli_form.cod_de_clasificare.id_for_label }}">
+                            Cod:
+                            {{ cheltuieli_form.cod_de_clasificare }}
+                            {{ cheltuieli_form.cod_de_clasificare.errors }}
+                        </label>
+    
+                        <label for="{{ cheltuieli_form.ani_amortizare.id_for_label }}">
+                            Amortizare:
+                            {{ cheltuieli_form.ani_amortizare }}
+                            {{ cheltuieli_form.ani_amortizare.errors }}
+                        </label>
+                    </div>
+
+                    <label for="{{ cheltuieli_form.data_punerii_in_functiune.id_for_label }}">
+                        Utilizat din:
+                        <input type="date" name="{{ cheltuieli_form.data_punerii_in_functiune.name }}"
+                            id="{{ cheltuieli_form.data_punerii_in_functiune.id_for_label }}"
+                            value="{{ cheltuieli_form.data_punerii_in_functiune.value|date:'Y-m-d' }}">
+                        {{ cheltuieli_form.data_punerii_in_functiune.errors }}
+                    </label>
+                    
+                </div>
+            </div>
+        </div>
+
+        <details open id="display-coduri-clasificare">
+            <summary>Coduri de clasificare mijloace fixe</summary>
+            <ul id="lista-coduri-de-clasificare" style="max-height: 400px; overflow: auto; font-size: 14px;">
+            </ul>
+        </details>
+
+        <div class="grid mt-2">
+
+            <label for="{{ cheltuieli_form.suma.id_for_label }}">
+                {{ cheltuieli_form.suma.label }}:
+                {{ cheltuieli_form.suma }}
+                {{ cheltuieli_form.suma.errors }}
+            </label>
+
+            <label for="{{ cheltuieli_form.valuta.id_for_label }}">
+                {{ cheltuieli_form.valuta.label }}:
+                {{ cheltuieli_form.valuta }}
+                {{ cheltuieli_form.valuta.errors }}
+            </label>
+
+            <label for="{{ cheltuieli_form.tip_tranzactie.id_for_label }}">
+                {{ cheltuieli_form.tip_tranzactie.label }}:
+                {{ cheltuieli_form.tip_tranzactie }}
+                {{ cheltuieli_form.tip_tranzactie.errors }}
+            </label>
+
+            <label for="{{ cheltuieli_form.data_inserarii.id_for_label }}">
+                Data cheltuielii:
+                <input type="date" name="{{ cheltuieli_form.data_inserarii.name }}"
+                    id="{{ cheltuieli_form.data_inserarii.id_for_label }}"
+                    value="{{ cheltuieli_form.data_inserarii.value|date:'Y-m-d' }}">
+                {{ cheltuieli_form.data_inserarii.errors }}
+            </label>
+
+        </div>
+
+        <label class="max-w-fit" for="{{ cheltuieli_form.fisier.id_for_label }}">
+            {{ cheltuieli_form.fisier.label }}:
+            {{ cheltuieli_form.fisier }}
+            {{ cheltuieli_form.fisier.errors }}
+        </label>
+
+        <div class="mt-2">
+            <button type="submit">
+                <i class="bi bi-save"></i>
+
+                {% if item_id %}
+                Modifica
+                {% else %}
+                Salveaza
+                {% endif %}
+                cheltuiala
+            </button>
+        </div>
+
+    </form>
+</article>
+
+
+<div id="tabel-cheltuieli" class="mt-4">
+
+    <div style="display: flex; justify-content: end; overflow: hidden;">
+        <a href="{% url 'descarca-cheltuieli' %}?filetype=CSV" class="px-1 secondary" data-tooltip="Descarca CSV">
+            <i class="bi bi-filetype-csv"></i>
+        </a>
+        <a href="{% url 'descarca-cheltuieli' %}?filetype=XLSX" class="px-1 secondary" data-tooltip="Descarca XLSX">
+            <i class="bi bi-filetype-xlsx"></i>
+        </a>
+    </div>
+
+    <div class="overflow-auto mb-2">
+        <table class="striped">
+            <thead>
+                <tr>
+                    <th>Mod.</th>
+                    <th>Nume</th>
+                    <th>Total</th>
+                    <th>Valuta</th>
+                    <th>In RON</th>
+                    <th>Dedus RON</th>
+                    <th>Tranz.</th>
+                    <th>Cheltuit la</th>
+                    <th>Tip Deductibil</th>
+                    <th>Data Modificare</th>
+                    <th>Doc.</th>
+                    <th>Del.</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in page_items %}
+                <tr>
+                    <td>
+                        <a href="?id={{item.id}}#formular-cheltuieli" class="pico-color-green-500 px-1">
+                            <i class="bi bi-pencil-square"></i>
+                        </a>
+                    </td>
+                    <td>{{ item.nume_cheltuiala }}</td>
+                    <td>{{ item.suma }}</td>
+                    <td>
+                        {{ item.valuta }}
+                    </td>
+                    <td>{{ item.suma_in_ron }}</td>
+                    <td>{{ item.deducere_in_ron }}</td>
+                    <td>
+                        {% if item.tip_tranzactie == 'BANCAR' %}
+                        💳
+                        {% else %}
+                        💵
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if item.data_inserarii %}
+                        {{ item.data_inserarii }}
+                        {% else %}
+                        <span class="pico-color-amber-250">Lipsa</span>
+                        {% endif %}
+                    </td>
+                    <td style="font-size: 12px;" data-tooltip="{{ item.deductibila }}">{{ item.deductibila }}</td>
+                    <td>{{ item.actualizat_la }}</td>
+                    <td x-data="{ downloaded: false }">
+                        <a @click="downloaded = true" :class="downloaded ? 'px-1 pico-color-purple-500': 'px-1'" href="{{ item.fisier.url }}" download>
+                            <i class="bi bi-file-earmark-arrow-down"></i>
+                        </a>
+                    </td>
+                    <td>
+                        <a href="?delete_id={{item.id}}" class="pico-color-red-500 px-1">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pagination">
+        <div role="group">
+            {% if page_items.has_previous %}
+            <a href="?page={{ page_items.previous_page_number }}#tabel-cheltuieli" class="outline secondary"
+                role="button">
+                <i class="bi bi-chevron-left"></i>
+            </a>
+            {% else %}
+            <a href="?page=1#tabel-cheltuieli" class="outline secondary" role="button" aria-disabled="true" disabled>
+                <i class="bi bi-chevron-left"></i>
+            </a>
+            {% endif %}
+
+            {% if page_items.has_next %}
+            <a href="?page={{ page_items.next_page_number }}#tabel-cheltuieli" class="outline secondary" role="button">
+                <i class="bi bi-chevron-right"></i>
+            </a>
+            {% else %}
+            <a href="?page=1#tabel-cheltuieli" class="outline secondary" role="button" aria-disabled="true" disabled>
+                <i class="bi bi-chevron-right"></i>
+            </a>
+            {% endif %}
+        </div>
+        <p class="pico-color-zinc-450">Pagina {{ page_items.number }} din {{ page_items.paginator.num_pages }}.</p>
+    </div>
+
+</div>
+
+
+
+
+{% endblock %}

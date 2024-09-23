@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block page-title %} Setari {% endblock %}
+
+
+{% block body %}
+
+
+<hgroup class="title-description container">
+    <h1>⚙️ Setari</h1>
+    <p>
+        Aici poti modifica variabilele care stau la baza calculelor pentru
+        impozite, taxe, crearea de declaratii, facturi samd.
+    </p>
+</hgroup>
+
+
+<article class="article-form mt-4 container">
+
+    <form action="{% url 'setari' %}" method="POST">
+        {% csrf_token %}
+
+        <p class="text-bold">Datele PFA-ului tau:</p>
+
+        <div class="grid">
+            <label for="{{ setari_form.nume.id_for_label }}">
+                {{ setari_form.nume.label }}:
+                {{ setari_form.nume }}
+                {{ setari_form.nume.errors }}
+            </label>
+
+            <div class="grid">
+                <label for="{{ setari_form.cif.id_for_label }}">
+                    CIF:
+                    {{ setari_form.cif }}
+                    {{ setari_form.cif.errors }}
+                </label>
+
+                <label for="{{ setari_form.nr_reg_com.id_for_label }}">
+                    Nr.Reg.Com.:
+                    {{ setari_form.nr_reg_com }}
+                    {{ setari_form.nr_reg_com.errors }}
+                </label>
+            </div>
+        </div>
+
+        <div class="grid">
+
+            <div x-data="{
+                localitati: {{ lista_localitati }},
+            }" x-init="typeahead({
+                input: $refs.searchInputEl,
+                source: { local: localitati }
+            });">
+                <label>
+                    Alege localitatea:
+                    <input name="localitate" {% if setari_form.localitate.value %} value="{{setari_form.localitate.value}}" {% endif %} x-ref="searchInputEl" autocomplete="off" type="text" placeholder="Iasi...">
+                </label>
+            </div>
+
+            <label for="{{ setari_form.adresa.id_for_label }}">
+                {{ setari_form.adresa.label }}:
+                {{ setari_form.adresa }}
+                {{ setari_form.adresa.errors }}
+            </label>
+        </div>
+
+        <div class="grid">
+            <label for="{{ setari_form.telefon.id_for_label }}">
+                {{ setari_form.telefon.label }}:
+                {{ setari_form.telefon }}
+                {{ setari_form.telefon.errors }}
+            </label>
+
+            <label for="{{ setari_form.email.id_for_label }}">
+                {{ setari_form.email.label }}:
+                {{ setari_form.email }}
+                {{ setari_form.email.errors }}
+            </label>
+        </div>
+
+        <div class="grid">
+
+            <label for="{{ setari_form.iban.id_for_label }}">
+                IBAN:
+                {{ setari_form.iban }}
+                {{ setari_form.iban.errors }}
+            </label>
+
+            <label for="{{ setari_form.caen_principal.id_for_label }}">
+                Cod CAEN Principal:
+                {{ setari_form.caen_principal }}
+                {{ setari_form.caen_principal.errors }}
+            </label>
+        </div>
+
+        <div x-data="{show: {% if setari_form.caen_secondar_1.value %} true {% else %} false {% endif %} }">
+
+            <button @click="show = !show" type="button" class="outline secondary">
+                <i :class="show ? 'bi bi-dash-lg': 'bi bi-plus-lg'"></i> Adauga CAEN-uri Secundare
+            </button>
+
+            <div x-show="show" class="grid mt-2">
+
+                <label for="{{ setari_form.caen_secondar_1.id_for_label }}">
+                    CAEN 1:
+                    {{ setari_form.caen_secondar_1 }}
+                    {{ setari_form.caen_secondar_1.errors }}
+                </label>
+
+                <label for="{{ setari_form.caen_secondar_2.id_for_label }}">
+                    CAEN 2:
+                    {{ setari_form.caen_secondar_2 }}
+                    {{ setari_form.caen_secondar_2.errors }}
+                </label>
+
+                <label for="{{ setari_form.caen_secondar_3.id_for_label }}">
+                    CAEN 3:
+                    {{ setari_form.caen_secondar_3 }}
+                    {{ setari_form.caen_secondar_3.errors }}
+                </label>
+
+                <label for="{{ setari_form.caen_secondar_4.id_for_label }}">
+                    CAEN 4:
+                    {{ setari_form.caen_secondar_4 }}
+                    {{ setari_form.caen_secondar_4.errors }}
+                </label>
+
+                <label for="{{ setari_form.caen_secondar_5.id_for_label }}">
+                    CAEN 5:
+                    {{ setari_form.caen_secondar_5 }}
+                    {{ setari_form.caen_secondar_5.errors }}
+                </label>
+            </div>
+
+        </div>
+
+        <div class="mt-2">
+            <button type="submit">
+                <i class="bi bi-save"></i> Salveaza datele PFA
+            </button>
+        </div>
+    </form>
+</article>
+
+
+<div class="grid container" style="margin-top: 6rem;">
+
+    <form action="{% url 'setari-import-v1' %}" method="post">
+        {% csrf_token %}
+        <button class="secondary" type="submit">
+            <i class="bi bi-database-add"></i> Importa datele din PFASimplu V1
+        </button>
+    </form>
+
+    <form action="{% url 'setari-drop-data' %}" method="post">
+        {% csrf_token %}
+        <button class="pico-background-red-550" type="submit">
+            <i class="bi bi-trash"></i> Sterge toate datele
+        </button>
+    </form>
+
+</div>
+
+
+{% endblock %}

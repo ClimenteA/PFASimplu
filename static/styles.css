@@ -1,0 +1,155 @@
+[x-cloak] {
+  display: none !important;
+}
+
+.typeahead-standalone {
+  margin-top: 5px;
+  width: 100%;
+  border-radius: 3px;
+}
+
+.tt-hint {
+  display: none;
+}
+
+.tt-hide {
+  display: none;
+}
+
+.tt-list {
+  background: white;
+  margin-top: -14px !important;
+}
+
+.tt-suggestion {
+  color: black;
+}
+
+.tt-highlight {
+  color: green;
+  cursor: pointer;
+}
+
+.title-description {
+  text-align: left;
+  margin-top: 2rem;
+}
+
+.title-description > p {
+  font-size: 14px;
+  margin-top: 0.5rem;
+}
+
+.article-form {
+  margin-top: 4rem;
+  border-radius: 0.375rem;
+  padding: 2rem 2rem 1rem 2rem;
+}
+
+.article-form > hgroup {
+  text-align: left;
+  margin-bottom: 2rem;
+}
+
+.article-form > hgroup > p {
+  margin-top: 0.5rem;
+  font-size: 12px;
+}
+
+.mt-2 {
+  margin-top: 2rem;
+}
+
+.mb-2 {
+  margin-bottom: 2rem;
+}
+
+.mb-6 {
+  margin-bottom: 6rem;
+}
+
+.mt-6 {
+  margin-top: 6rem;
+}
+
+.mt-4 {
+  margin-top: 4rem;
+}
+
+.px-1 {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+
+.text-bold {
+  font-weight: bold;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.underline {
+  text-decoration: underline !important;
+}
+
+.hidden {
+  display: none;
+}
+
+.block {
+  display: block;
+}
+
+.suggestions {
+  position: absolute;
+  background: whitesmoke;
+  color: black;
+  padding: 10px;
+  border-radius: 3px;
+  margin-top: -20px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.relative {
+  position: relative;
+}
+
+.suggestions > li {
+  cursor: pointer;
+  list-style-type: none;
+  margin: 0;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.suggestions > li:hover {
+  color: darkorange;
+}
+
+ul.errorlist {
+  padding: 0;
+  margin-top: -16px;
+}
+
+ul.errorlist > li {
+  list-style-type: none !important;
+  color: var(--pico-color-red-450) !important;
+}
+
+.pagination {
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-width: 200px;
+}
+
+.pagination > p {
+  text-align: center;
+}
+
+.max-w-fit {
+  max-width: fit-content;
+}

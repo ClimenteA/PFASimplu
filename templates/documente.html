@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block page-title %} Documente {% endblock %}
+
+{% block body %}
+
+
+<hgroup class="title-description container">
+    <h1>🗂️ Documente</h1>
+    <p>
+        Aici poti introduce documentele create in relatia cu ANAF.
+        Declaratii, dovezi plati taxe si impozite si alte documente pe care le consideri importante.
+        Daca nu ai depasit plafonul TVA de 300000 RON pe an (cca. 60.000 EUR, 5440 Euro/luna, 31 Eur/Ora, 6 saptamani
+        libere)
+        si nu ai angajati (poti avea 3 angajati) singura declaratie pe care trebuie sa o completezi este Declaratia
+        Unica 212.
+        Daca ai depasit plafonul TVA sau ai angajati poate un SRL ar fi mai potrivit.
+        Daca nu gasesti tipul declaratiei alege 'Document' si completeaza in campul 'Mentiuni' detalii despre documentul
+        incarcat.
+    </p>
+</hgroup>
+
+<article id="formular-documente" class="article-form mt-4 container">
+
+    <form action={% if item_id %} "{% url 'documente' %}?id={{ item_id }}" {% else %} "{% url 'documente' %}" {% endif %} method="POST" enctype="multipart/form-data">
+
+        <p class="text-bold">Adauga documente:</p>
+
+        {% csrf_token %}
+
+        <div class="grid">
+            <label for="{{ documente_form.tip_document.id_for_label }}">
+                {{ documente_form.tip_document.label }}:
+                {{ documente_form.tip_document }}
+                {{ documente_form.tip_document.errors }}
+            </label>
+
+            <label for="{{ documente_form.tip_document.id_for_label }}">
+                {{ documente_form.document_pentru_anul.label }}:
+                {{ documente_form.document_pentru_anul }}
+                {{ documente_form.document_pentru_anul.errors }}
+            </label>
+        </div>
+
+        <label for="{{ documente_form.mentiuni.id_for_label }}">
+            {{ documente_form.mentiuni.label }}:
+            {{ documente_form.mentiuni }}
+            {{ documente_form.mentiuni.errors }}
+        </label>
+
+        <label for="{{ documente_form.fisier.id_for_label }}">
+            {{ documente_form.fisier.label }}:
+            {{ documente_form.fisier }}
+            {{ documente_form.fisier.errors }}
+        </label>
+
+
+        <div class="mt-2">
+            <button type="submit">
+                <i class="bi bi-save"></i>
+                Adauga document
+            </button>
+        </div>
+
+    </form>
+</article>
+
+
+<div id="tabel-documente" class="mt-4">
+
+    {% comment %}
+    <div style="display: flex; justify-content: end; overflow: hidden;">
+        <a href="{% url 'descarca-documente' %}?filetype=CSV" class="px-1 secondary" data-tooltip="Descarca CSV">
+            <i class="bi bi-filetype-csv"></i>
+        </a>
+        <a href="{% url 'descarca-documente' %}?filetype=XLSX" class="px-1 secondary" data-tooltip="Descarca XLSX">
+            <i class="bi bi-filetype-xlsx"></i>
+        </a>
+    </div>
+    {% endcomment %}
+
+    <div class="overflow-auto mb-2">
+        <table class="striped">
+            <thead>
+                <tr>
+                    <th>Mod.</th>
+                    <th>Tip document</th>
+                    <th>Mentiuni</th>
+                    <th>Doc. Anul</th>
+                    <th>Data Modificare</th>
+                    <th>Doc.</th>
+                    <th>Del.</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in page_items %}
+                <tr>
+                    <td>
+                        <a href="?id={{item.id}}#formular-documente" class="pico-color-green-500 px-1">
+                            <i class="bi bi-pencil-square"></i>
+                        </a>
+                    </td>
+                    <td>{{ item.tip_document }}</td>
+                    <td>
+                        {% if item.mentiuni %}
+                            {{ item.mentiuni }}
+                        {% else %}
+                        -
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if item.document_pentru_anul %}
+                        {{ item.document_pentru_anul }}
+                        {% else %}
+                        -
+                        {% endif %}
+                    </td>
+                    <td>{{ item.actualizat_la }}</td>
+                    <td x-data="{ downloaded: false }">
+                        <a @click="downloaded = true" :class="downloaded ? 'px-1 pico-color-purple-500': 'px-1'" href="{{ item.fisier.url }}" download>
+                            <i class="bi bi-file-earmark-arrow-down"></i>
+                        </a>
+                    </td>
+                    <td>
+                        <a href="?delete_id={{item.id}}" class="pico-color-red-500 px-1">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pagination">
+        <div role="group">
+            {% if page_items.has_previous %}
+            <a href="?page={{ page_items.previous_page_number }}#tabel-documente" class="outline secondary"
+                role="button">
+                <i class="bi bi-chevron-left"></i>
+            </a>
+            {% else %}
+            <a href="?page=1#tabel-documente" class="outline secondary" role="button" aria-disabled="true" disabled>
+                <i class="bi bi-chevron-left"></i>
+            </a>
+            {% endif %}
+
+            {% if page_items.has_next %}
+            <a href="?page={{ page_items.next_page_number }}#tabel-documente" class="outline secondary" role="button">
+                <i class="bi bi-chevron-right"></i>
+            </a>
+            {% else %}
+            <a href="?page=1#tabel-documente" class="outline secondary" role="button" aria-disabled="true" disabled>
+                <i class="bi bi-chevron-right"></i>
+            </a>
+            {% endif %}
+        </div>
+        <p class="pico-color-zinc-450">Pagina {{ page_items.number }} din {{ page_items.paginator.num_pages }}.</p>
+    </div>
+
+</div>
+
+
+{% endblock %}

@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block page-title %} Inventar {% endblock %}
+
+
+{% block body %}
+
+<hgroup class="title-description container">
+    <h1>📦 Inventar</h1>
+    <p>
+        Aici gasesti tabelul cu toate obiectele de inventar si mijloacele/activele fixe achizitionate pana acum.
+        Tot aici poti scoate din inventar un obiect de inventar sau mijloc fix. 
+        Daca ai vandut obiectul de inventar/mijlocul fix va trebui sa-l introduci si la incasari la Sursa venit: 'Venit din alte surse'.
+    </p>
+</hgroup>
+
+{% if item_id %}
+
+<article id="formular-inventar" class="article-form mt-4 container">
+
+    <form action={% if item_id %} "{% url 'inventar' %}?id={{ item_id }}" {% else %} "{% url 'inventar' %}" {% endif %} method="POST" enctype="multipart/form-data">
+
+        <p class="text-bold">Actualizeaza inventar:</p>
+
+        {% csrf_token %}
+
+        <label for="{{ inventar_form.nume_cheltuiala.id_for_label }}">
+            {{ inventar_form.nume_cheltuiala.label }}:
+            {{ inventar_form.nume_cheltuiala }}
+            {{ inventar_form.nume_cheltuiala.errors }}
+        </label>
+
+        <div class="grid">
+            <label for="{{ inventar_form.modalitate_iesire_din_uz.id_for_label }}">
+                {{ inventar_form.modalitate_iesire_din_uz.label }}:
+                {{ inventar_form.modalitate_iesire_din_uz }}
+                {{ inventar_form.modalitate_iesire_din_uz.errors }}
+            </label>
+
+            <label for="{{ inventar_form.data_iesirii_din_uz.id_for_label }}">
+                {{ inventar_form.data_iesirii_din_uz.label }}:
+                <input type="date" name="{{ inventar_form.data_iesirii_din_uz.name }}"
+                    id="{{ inventar_form.data_iesirii_din_uz.id_for_label }}"
+                    value="{{ inventar_form.data_iesirii_din_uz.value|date:'Y-m-d' }}" required>
+                {{ inventar_form.data_iesirii_din_uz.errors }}
+            </label>
+        </div>
+
+        <label for="{{ inventar_form.document_justificativ_iesire_din_uz.id_for_label }}">
+            {{ inventar_form.document_justificativ_iesire_din_uz.label }}:
+            {{ inventar_form.document_justificativ_iesire_din_uz }}
+            {{ inventar_form.document_justificativ_iesire_din_uz.errors }}
+        </label>
+
+
+        <div class="mt-2">
+            <button type="submit">
+                <i class="bi bi-box-arrow-down"></i>
+                Scoate din uz
+            </button>
+        </div>
+
+    </form>
+</article>
+
+{% endif %}
+
+<div id="tabel-inventar" class="mt-4">
+
+    {% comment %}
+    <div style="display: flex; justify-content: end; overflow: hidden;">
+        <a href="{% url 'descarca-inventar' %}?filetype=CSV" class="px-1 secondary" data-tooltip="Descarca CSV">
+            <i class="bi bi-filetype-csv"></i>
+        </a>
+        <a href="{% url 'descarca-inventar' %}?filetype=XLSX" class="px-1 secondary" data-tooltip="Descarca XLSX">
+            <i class="bi bi-filetype-xlsx"></i>
+        </a>
+    </div>
+    {% endcomment %}
+
+    <div class="overflow-auto mb-2">
+        <table class="striped">
+            <thead>
+                <tr>
+                    <th>Mod.</th>
+                    <th>Denumirea elementelor inventariate</th>
+                    <th>Valoare inventar</th>
+                    <th>Data</th>
+                    <th>In uz?</th>
+                    <th>Justif.</th>
+                    <th>Data Modificare</th>
+                    <th>Doc.</th>
+                    <th>Del.</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in page_items %}
+                <tr>
+                    <td>
+                        <a href="?id={{item.id}}#formular-inventar" class="pico-color-green-500 px-1">
+                            <i class="bi bi-pencil-square"></i>
+                        </a>
+                    </td>
+                    <td>{{ item.nume_cheltuiala }}</td>
+                    <td>{{ item.deducere_in_ron }}</td>
+                    <td>
+                        {% if item.data_inserarii %}
+                        {{ item.data_inserarii }}
+                        {% else %}
+                        <span class="pico-color-amber-250">Lipsa</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if item.modalitate_iesire_din_uz %}
+                        {{ item.modalitate_iesire_din_uz }} la {{ item.data_iesirii_din_uz }} 
+                        {% else %}
+                        Da
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        {% if item.modalitate_iesire_din_uz %}
+                        <a class="px-1" href="{{ item.document_justificativ_iesire_din_uz.url }}" download>
+                            <i class="bi bi-file-earmark-arrow-down"></i>
+                        </a>
+                        {% else %}
+                        -
+                        {% endif %}
+                    </td>
+                    <td>{{ item.actualizat_la }}</td>
+                    <td x-data="{ downloaded: false }">
+                        <a @click="downloaded = true" :class="downloaded ? 'px-1 pico-color-purple-500': 'px-1'" href="{{ item.fisier.url }}" download>
+                            <i class="bi bi-file-earmark-arrow-down"></i>
+                        </a>
+                    </td>
+                    <td>
+                        <a href="?delete_id={{item.id}}" class="pico-color-red-500 px-1">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pagination">
+        <div role="group">
+            {% if page_items.has_previous %}
+            <a href="?page={{ page_items.previous_page_number }}#tabel-inventar" class="outline secondary"
+                role="button">
+                <i class="bi bi-chevron-left"></i>
+            </a>
+            {% else %}
+            <a href="?page=1#tabel-inventar" class="outline secondary" role="button" aria-disabled="true" disabled>
+                <i class="bi bi-chevron-left"></i>
+            </a>
+            {% endif %}
+
+            {% if page_items.has_next %}
+            <a href="?page={{ page_items.next_page_number }}#tabel-inventar" class="outline secondary" role="button">
+                <i class="bi bi-chevron-right"></i>
+            </a>
+            {% else %}
+            <a href="?page=1#tabel-inventar" class="outline secondary" role="button" aria-disabled="true" disabled>
+                <i class="bi bi-chevron-right"></i>
+            </a>
+            {% endif %}
+        </div>
+        <p class="pico-color-zinc-450">Pagina {{ page_items.number }} din {{ page_items.paginator.num_pages }}.</p>
+    </div>
+
+</div>
+
+
+{% endblock %}

@@ -1,0 +1,284 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block page-title %} Registre {% endblock %}
+
+{% block body %}
+
+
+<div>
+
+    <hgroup class="title-description container">
+        <h1 style="display: flex; align-items: center; gap: 1rem;">
+            <span>📊 Registre</span>
+
+            <select id="anul" class="mb-2" style="margin: 0; width: fit-content;" onclick="redirectToYear()">
+                {% for an in ani_inregistrati %}
+                <option value="{{ an }}" {% if anul == an %} selected {% endif %}>{{ an }}</option>
+                {% endfor %}
+            </select>
+
+            <select id="valuta" class="mb-2" style="margin: 0; width: fit-content;" onclick="redirectToYear()">
+                <option value="RON" {% if valuta == "RON" %} selected {% endif %}>In RON</option>
+                <option value="EUR" {% if valuta == "EUR" %} selected {% endif %}>In EUR</option>
+            </select>
+
+        </h1>
+        <p>
+            Aici ai o vedere de ansamblu asupra
+            incasarilor, cheltuielilor precum si taxele/impozitele de platit pentru anul curent,
+            venituri vs cheltuieli pe ani,
+            notificari facturi neincasate, declaratii de urcat in SPV etc.
+            Totodata ai disponibile si registrele contabile obligatorii pe care trebuie sa le ai in relatia cu ANAF.
+            Nu trebuie sa plateasca CASS: cei care cu profesii liberale (avocat, notar etc.) care au venituri nete sub 6 salarii minime.            
+            Total plati catre stat pana acum: {{total_platite_la_stat_pe_toti_anii}} {{valuta}}.
+            Total incasari net pana acum: {{total_incasari_net_pe_toti_anii}} {{valuta}}.
+            Rest de plata: {{rest_de_plata_catre_stat}} {{valuta}}. 
+        </p>
+    </hgroup>
+
+
+    <div class="container mt-2">
+
+        <div class="grid">
+            {% if total_neincasate > 0 %}
+            <article class="text-center pico-background-cyan-900">
+                <strong class="pico-color-zinc-350">Total neincasate</strong>
+
+                <h3 class="pico-color-amber-250">
+                    🫰 {{total_neincasate}} {{valuta}}
+                </h3>
+
+            </article>
+            {% else %}
+            <article class="text-center pico-background-cyan-900">
+                <strong class="pico-color-zinc-350">Total neincasate</strong>
+                <h3 class="pico-color-amber-250">E ok 👍</h3>
+            </article>
+            {% endif %}
+
+            <article class="text-center pico-background-cyan-900">
+                <strong class="pico-color-zinc-450">Total incasari brut</strong>
+                <h3 class="pico-color-zinc-50">
+                    💰 {{ total_incasari_brut }} {{valuta}}
+                </h3>
+            </article>
+
+            <article class="text-center pico-background-cyan-900">
+                <strong class="pico-color-zinc-450">Total incasari net</strong>
+                <h3 class="pico-color-zinc-50">
+                    💵 {{ total_incasari_net }} {{valuta}}
+                </h3>
+            </article>
+
+            <article class="text-center pico-background-cyan-900">
+                <strong class="pico-color-zinc-450">Total cheltuieli</strong>
+                <h3 class="pico-color-zinc-50">
+                    💵 {{ total_cheltuieli }} {{valuta}}
+                </h3>
+            </article>
+
+        </div>
+
+        <div class="grid">
+            <article class="text-center pico-background-yellow-900">
+                <strong class="pico-color-zinc-450">Total taxe/impozite</strong>
+                <h3 class="pico-color-zinc-50">
+                    🏛️ {{ total_taxe_impozite }} {{valuta}}
+                </h3>
+            </article>
+
+            <article class="text-center pico-background-yellow-900">
+                <strong class="pico-color-zinc-450">Pensie (CAS)</strong>
+                <h3 class="pico-color-zinc-50">
+                    🏡 {{ cas_pensie }} {{valuta}}
+                </h3>
+            </article>
+
+            <article class="text-center pico-background-yellow-900">
+                <strong class="pico-color-zinc-450">Sanatate (CASS)</strong>
+                <h3 class="pico-color-zinc-50">
+                    🏥 {{ cass_sanatate }} {{valuta}}
+                </h3>
+            </article>
+
+            <article class="text-center pico-background-yellow-900">
+                <strong class="pico-color-zinc-450">Impozit pe venit</strong>
+                <h3 class="pico-color-zinc-50">
+                    🏢 {{ impozit_pe_venit }} {{valuta}}
+                </h3>
+            </article>
+        </div>
+
+    </div>
+
+    <div style="display: flex; justify-content: center; margin-top: 2rem;">
+        <img src="{{media_url_chart_incasari_cheltuieli}}" style="border-radius: 0.5rem;"
+            alt="Incasari vs Cheltuieli {{valuta}}" />        
+    </div>
+
+
+    <script defer>
+        function redirectToYear() {
+            const valuta = document.getElementById('valuta');
+            const anul = document.getElementById('anul');
+            const currentUrl = window.location.href.split('?')[0];
+            window.location.href = `${currentUrl}?anul=${anul.value}&valuta=${valuta.value}`;
+        }
+    </script>
+
+</div>
+
+
+<div x-data="{active: 'rjip'}" class="mt-4">
+    
+    <div class="container">
+        <div role="group">
+            <button @click="active = 'ref'" :class="active == 'ref' ? '': 'outline'">Registru fiscal</button>
+            <button @click="active = 'rjip'" :class="active == 'rjip' ? '': 'outline'">Registru jurnal</button>
+            <button @click="active = 'rinv'" :class="active == 'rinv' ? '': 'outline'">Registru inventar</button>
+        </div>
+    </div>
+
+    <div x-show="active == 'rjip'" class="overflow-auto mt-2 mb-6">
+    
+        <div style="display: flex; justify-content: end; overflow: hidden;">
+            <a href="{% url 'descarca-registru-jurnal' %}?filetype=CSV" class="px-1 secondary" data-tooltip="Descarca CSV">
+                <i class="bi bi-filetype-csv"></i>
+            </a>
+            <a href="{% url 'descarca-registru-jurnal' %}?filetype=XLSX" class="px-1 secondary" data-tooltip="Descarca XLSX">
+                <i class="bi bi-filetype-xlsx"></i>
+            </a>
+        </div>
+    
+        <table>
+            <thead>
+                <tr>
+                    <th>Nr.Crt.</th>
+                    <th>Data</th>
+                    <th>Documentul (fel, numar)</th>
+                    <th>Felul operatiunii (explicatii)</th>
+                    <th>Incasari Numerar</th>
+                    <th>Incasari Banca</th>
+                    <th>Plati Numerar</th>
+                    <th>Plati Banca</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in rjip %}
+    
+                {% if item.end_of_month %}
+                    <tr>
+                        <td>{{ item.nr_crt }}</td>
+                        <td>{{ item.data }}</td>
+                        <td>{{ item.documentul }}</td>
+                        <td class="pico-background-grey">{{ item.felul_operatiunii }}</td>
+                        <td class="pico-background-grey">{{ item.incasari_numerar }}</td>
+                        <td class="pico-background-grey">{{ item.incasari_banca }}</td>
+                        <td class="pico-background-grey">{{ item.plati_numerar }}</td>
+                        <td class="pico-background-grey">{{ item.plati_banca }}</td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td>{{ item.nr_crt }}</td>
+                        <td>{{ item.data }}</td>
+                        <td x-data="{ downloaded: false }">
+                            <a @click="downloaded = true" :class="downloaded ? 'px-1 pico-color-purple-500': 'px-1'" href="{{ item.documentul.url }}" download>
+                                Doc. justificativ ({{ item.documentId }})
+                            </a>
+                        </td>
+                        <td>{{ item.felul_operatiunii }}</td>
+                        <td>{{ item.incasari_numerar }}</td>
+                        <td>{{ item.incasari_banca }}</td>
+                        <td>{{ item.plati_numerar }}</td>
+                        <td>{{ item.plati_banca }}</td>
+                    </tr>
+                {% endif %}
+                
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <div x-show="active == 'ref'" class="overflow-auto mt-2 mb-6">
+    
+        <div style="display: flex; justify-content: end; overflow: hidden;">
+            <a href="{% url 'descarca-registru-fiscal' %}?filetype=CSV" class="px-1 secondary" data-tooltip="Descarca CSV">
+                <i class="bi bi-filetype-csv"></i>
+            </a>
+            <a href="{% url 'descarca-registru-fiscal' %}?filetype=XLSX" class="px-1 secondary" data-tooltip="Descarca XLSX">
+                <i class="bi bi-filetype-xlsx"></i>
+            </a>
+        </div>
+    
+        <table class="striped">
+            <thead>
+                <tr>
+                    <th>Nr.Crt.</th>
+                    <th>Elemente de calcul pentru stabilirea venitului net annual/pierderii nete anuale</th>
+                    <th>Valoare</th>
+                    <th>Anul</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in ref %}
+                <tr>
+                    <td>{{ item.nr_crt }}</td>
+                    <td>{{ item.elemente_de_calcul }}</td>
+                    <td>{{ item.valoare }}</td>
+                    <td>{{ item.anul }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <div x-show="active == 'rinv'" class="overflow-auto mt-2 mb-6">
+    
+        <div style="display: flex; justify-content: end; overflow: hidden;">
+            <a href="{% url 'descarca-registru-inventar' %}?filetype=CSV" class="px-1 secondary" data-tooltip="Descarca CSV">
+                <i class="bi bi-filetype-csv"></i>
+            </a>
+            <a href="{% url 'descarca-registru-inventar' %}?filetype=XLSX" class="px-1 secondary" data-tooltip="Descarca XLSX">
+                <i class="bi bi-filetype-xlsx"></i>
+            </a>
+        </div>
+    
+        <table class="striped">
+            <thead>
+                <tr>
+                    <th>Nr.Crt.</th>
+                    <th>Denumirea elementelor inventariate</th>
+                    <th>Valoare inventar</th>
+                    <th>Data</th>
+                    <th>Doc.</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in ri %}
+                <tr>
+                    <td>{{ item.nr_crt }}</td>
+                    <td>{{ item.nume_cheltuiala }}</td>
+                    <td>{{ item.deducere_in_ron }}</td>
+                    <td>
+                        {% if item.data_inserarii %}
+                        {{ item.data_inserarii }}
+                        {% else %}
+                        <span class="pico-color-amber-250">Lipsa</span>
+                        {% endif %}
+                    </td>
+                    <td x-data="{ downloaded: false }">
+                        <a @click="downloaded = true" :class="downloaded ? 'px-1 pico-color-purple-500': 'px-1'" href="{{ item.fisier.url }}" download>
+                            <i class="bi bi-file-earmark-arrow-down"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>    
+
+
+{% endblock %}

@@ -1,0 +1,541 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block page-title %} Facturi {% endblock %}
+
+{% block body %}
+
+<div>
+
+    <hgroup class="title-description container">
+        <h1>
+            <span>🧾 Facturi</span>
+        </h1>
+        <p>
+            Aici poti creea facturi pentru clienti din afara tarii, precum si e-factura pentru B2B in Romania.
+            Factura generata aici este valabila pentru PFA-urile neplatitore de TVA.
+            Mai bine un SRL odata trecut de pragul TVA sau una din aplicatiile:
+            <a target="_blank" href="https://www.sagasoft.ro/saga-ps.php">saga-ps</a>,
+            <a target="_blank" href="https://contapp.ro/">contapp</a>.
+            <a target="_blank" href="https://www.solo.ro/">solo</a>,
+            <a target="_blank" href="https://www.smartbill.ro/">smartbill</a>,
+            Odata ce datele sunt completate in formular ele vor putea fi folosite si pentru facturi viitoare.
+            Pentru e-factura valoarea din campul 'Alege localitatea' trebuie sa fie una din valorile sugerate pe masura
+            ce tastezi.
+
+            Fisierul generat XML este conform
+            <a target="_blank"
+                href="https://www.anaf.ro/CompletareFacturaSimplificat/faces/factura/informatiigenerale.xhtml">XML-UBL
+                versiunea 1.0.3</a>.
+            Validarea fisierului XML a fost facuta pentru standard <a target="_blank"
+                href="https://www.anaf.ro/uploadxmi/">FACT1</a>.
+            Poti prelua date CUI firma <a target="_blank"
+                href="https://mfinante.gov.ro/apps/agenticod.html?pagina=domenii">de aici.</a>
+        </p>
+    </hgroup>
+
+
+    <article class="article-form mt-4 container" x-data="{
+        numeClient: '',
+        suggestedNames: [], 
+        suggestName: async function(){
+            let name = this.numeClient.trim();
+            if (name.length < 3) return
+
+            let baseUrl = document.location.href.replace(document.location.pathname, '');
+            let searchUrl = `${baseUrl}/facturi/search/${name}`;
+
+            let response = await fetch(searchUrl);
+            this.suggestedNames = await response.json();
+            console.log('raspuns cautare:', this.suggestedNames);
+
+        },
+        setSuggested: function(selectedId) {
+            let selected = this.suggestedNames.filter(i => i.id == selectedId)[0];
+            document.getElementById('id_nume').value = selected.nume;
+            document.getElementById('id_cif').value = selected.cif;
+            document.getElementById('id_nr_reg_com').value = selected.nr_reg_com;
+            document.getElementById('alege-localitatea').value = selected.localitate;
+            document.getElementById('id_adresa').value = selected.adresa;
+            document.getElementById('id_email').value = selected.email;
+            document.getElementById('id_telefon').value = selected.telefon;
+            this.suggestedNames = [];
+        },
+        moreFields: false,    
+        collection: [{
+            id: 1,
+            nume_produs_sau_serviciu: '', 
+            cod_unitate: 'HUR',
+            numar_unitati: null, 
+            pret_pe_unitate: null,
+            subtotal: null,
+            total_de_plata: null,
+        }],
+        addEmptyItem: function() {
+            let empty_item = {
+                id: this.collection.length + 1,
+                nume_produs_sau_serviciu: '', 
+                cod_unitate: 'HUR',
+                numar_unitati: null, 
+                pret_pe_unitate: null,
+                subtotal: null,
+                total_de_plata: null,
+            };
+            this.collection.push(empty_item);
+        },
+        updateTextarea: function() {
+            this.$refs.prod_servicii_el.value = JSON.stringify(this.collection, null, 2);
+            console.log(this.$refs.prod_servicii_el.value);
+        },
+        removeItem: function(id) {
+            if (this.collection.length > 1) {
+                this.collection = this.collection.filter(item => item.id != id);
+            } else {
+                this.collection = [];
+                this.addEmptyItem();
+            }
+            
+            this.updateTextarea();
+        },
+        addItem: function() {
+            let items = JSON.parse(JSON.stringify(this.collection));
+            
+            let total_de_plata = 0;
+            let newCollection = [];
+            for (let i of items) {
+                if (!(i.numar_unitati && i.pret_pe_unitate)) {
+                    continue
+                } 
+                let unitati = parseInt(i.numar_unitati);
+                let pret_unitate = parseFloat(i.pret_pe_unitate);
+                let subtotal = unitati * pret_unitate; 
+                total_de_plata += subtotal;
+                let item = {
+                    id: i.id,
+                    subtotal: subtotal.toFixed(2),
+                    nume_produs_sau_serviciu: i.nume_produs_sau_serviciu, 
+                    cod_unitate: i.cod_unitate,
+                    numar_unitati: unitati.toFixed(2), 
+                    pret_pe_unitate: pret_unitate.toFixed(2),
+                    total_de_plata: total_de_plata.toFixed(2),
+                } 
+                newCollection.push(item);
+            }
+            
+            this.collection = newCollection;
+            this.updateTextarea();
+            this.addEmptyItem();
+            console.log(newCollection);
+        },
+        handleSubmit: function(){
+            this.addItem();
+            //const data = new FormData(this.$refs.factura_form_el);
+            //const value = Object.fromEntries(data.entries());
+            //console.log('submit:', value);
+            this.moreFields = true;
+            document.getElementById('id_valuta').disabled = false;
+            this.$refs.factura_form_el.submit();
+        },
+    }" x-init="$watch('collection', (currentCol) => {
+        let currentColList = JSON.parse(JSON.stringify(currentCol));
+        let total = 0
+        for (let i of currentCol) {
+            if (i.numar_unitati && i.pret_pe_unitate) {
+                let unitati = parseInt(i.numar_unitati);
+                let pret_unitate = parseFloat(i.pret_pe_unitate);
+                let subtotal = unitati * pret_unitate; 
+                total += subtotal;
+            }
+        }
+        $refs.total_de_plata_el.value = total.toFixed(2);
+    })">
+
+        <form @submit.prevent="handleSubmit" id="factura-form" x-ref="factura_form_el" action="{% url 'facturi' %}"
+            method="POST" autocomplete="off">
+            {% csrf_token %}
+
+            <div class="grid">
+
+                <label class="text-bold relative" for="id_nume">
+                    Nume Client:
+                    <input x-on:input="suggestName" x-model="numeClient" type="text" name="nume" maxlength="200"
+                        required="" id="id_nume" style="text-transform: uppercase;">
+
+                    <ul @click.outside="suggestedNames = [];" x-cloak x-show="suggestedNames.length > 0;" class="suggestions">
+                        <template x-for="i in suggestedNames">
+                            <li @click="setSuggested(i.id);" x-text="i.nume"></li>
+                        </template>
+                    </ul>
+                    
+                    {{ facturi_form.nume.errors }}
+                </label>
+
+                <div class="grid">
+
+                    <label class="text-bold" for="{{ facturi_form.cif.id_for_label }}">
+                        CIF/CUI/VAT:
+                        {{ facturi_form.cif }}
+                        {{ facturi_form.cif.errors }}
+                    </label>
+
+                    <label class="text-bold" for="{{ facturi_form.serie.id_for_label }}">
+                        Serie fact.:
+                        {{ facturi_form.serie }}
+                        {{ facturi_form.serie.errors }}
+                    </label>
+
+                    <label class="text-bold" for="{{ facturi_form.numar.id_for_label }}">
+                        Nr.fact.:
+                        {{ facturi_form.numar }}
+                        {{ facturi_form.numar.errors }}
+                    </label>
+
+                </div>
+
+            </div>
+
+
+            <div class="grid">
+
+                <label class="text-bold" for="{{ facturi_form.tip_factura.id_for_label }}">
+                    {{ facturi_form.tip_factura.label }}:
+                    {{ facturi_form.tip_factura }}
+                    {{ facturi_form.tip_factura.errors }}
+                </label>
+
+                <label class="text-bold" for="{{ facturi_form.tip_tranzactie.id_for_label }}">
+                    {{ facturi_form.tip_tranzactie.label }}:
+                    {{ facturi_form.tip_tranzactie }}
+                    {{ facturi_form.tip_tranzactie.errors }}
+                </label>
+
+                <label class="text-bold" for="{{ facturi_form.valuta.id_for_label }}">
+                    {{ facturi_form.valuta.label }}:
+                    {{ facturi_form.valuta }}
+                    {{ facturi_form.valuta.errors }}
+                </label>
+
+            </div>
+
+            <div class="grid">
+
+                <div x-data="{
+                    localitati: {{ lista_localitati }},
+                }" x-init="typeahead({
+                    input: $refs.searchInputEl,
+                    source: { local: localitati }
+                });">
+                    <label class="text-bold">
+                        Alege localitatea:
+                        <input name="localitate" x-ref="searchInputEl" id="alege-localitatea" autocomplete="off"
+                            type="text" placeholder="Iasi...">
+                    </label>
+                </div>
+
+                <label class="text-bold" for="{{ facturi_form.adresa.id_for_label }}">
+                    {{ facturi_form.adresa.label }}:
+                    {{ facturi_form.adresa }}
+                    {{ facturi_form.adresa.errors }}
+                </label>
+
+            </div>
+
+
+            <div class="mt-1">
+
+                <label class="mb-2">
+                    <input x-model="moreFields" type="checkbox" role="switch" />
+                    <span x-text="moreFields ? 'Mai putin': 'Mai mult'"></span>
+                </label>
+
+                <div :class="moreFields ? 'block': 'hidden';">
+
+                    <div class="grid">
+
+                        <label for="{{ facturi_form.nr_reg_com.id_for_label }}">
+                            Nr.Reg.Com.:
+                            {{ facturi_form.nr_reg_com }}
+                            {{ facturi_form.nr_reg_com.errors }}
+                        </label>
+
+                        <label for="{{ facturi_form.telefon.id_for_label }}">
+                            {{ facturi_form.telefon.label }}:
+                            {{ facturi_form.telefon }}
+                            {{ facturi_form.telefon.errors }}
+                        </label>
+
+                        <label for="{{ facturi_form.email.id_for_label }}">
+                            {{ facturi_form.email.label }}:
+                            {{ facturi_form.email }}
+                            {{ facturi_form.email.errors }}
+                        </label>
+
+                        <label for="{{ facturi_form.data_emitere.id_for_label }}">
+                            {{ facturi_form.data_emitere.label }}:
+                            <input type="date" name="{{ facturi_form.data_emitere.name }}"
+                                id="{{ facturi_form.data_emitere.id_for_label }}"
+                                value="{{ facturi_form.data_emitere.value|date:'Y-m-d' }}">
+                            {{ facturi_form.data_emitere.errors }}
+                        </label>
+
+                        <label for="{{ facturi_form.data_scadenta.id_for_label }}">
+                            {{ facturi_form.data_scadenta.label }}:
+                            <input type="date" name="{{ facturi_form.data_scadenta.name }}"
+                                id="{{ facturi_form.data_scadenta.id_for_label }}"
+                                value="{{ facturi_form.data_scadenta.value|date:'Y-m-d' }}">
+                            {{ facturi_form.data_scadenta.errors }}
+                        </label>
+
+                    </div>
+
+                    <label for="{{ facturi_form.nota.id_for_label }}">
+                        {{ facturi_form.nota.label }}:
+                        {{ facturi_form.nota }}
+                        {{ facturi_form.nota.errors }}
+                    </label>
+                </div>
+
+            </div>
+
+
+            <strong class="mt-2 block">Produse sau servicii:</strong>
+
+            <!-- id, numar_unitati, total_de_plata, nume_produs_sau_serviciu, cod_unitate, pret_pe_unitate, subtotal -->
+            <div class="mt-2">
+
+                <template x-for="(item, index) in collection" :key="index">
+                    <article style="position: relative; border: 1px solid lightslategray;">
+                        <input type="hidden" x-model="item.id">
+
+                        <div>
+
+                            <button style="all: unset; cursor: pointer; position: absolute; right: 7px; top: 2px;"
+                                @click="() => removeItem(item.id)" class="secondary" type="button">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+
+                            <label>
+                                Nume produs/serviciu <span x-text="item.id"></span>:
+                                <input type="text" x-model="item.nume_produs_sau_serviciu">
+                            </label>
+
+                            <div class="grid">
+
+                                <label>
+                                    Cod unitate:
+                                    <select>
+                                        {% for code, name in unitati_de_masura.items %}
+                                        <option value="{{code}}" selected>{{name}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </label>
+
+                                <label>
+                                    Nr. unitati:
+                                    <input step="1" type="number" x-model="item.numar_unitati">
+                                </label>
+
+                                <label>
+                                    Pret pe unitate:
+                                    <input step="any" type="number" x-model="item.pret_pe_unitate">
+                                </label>
+
+                                <label>
+                                    Subtotal:
+                                    <input readonly step="any" type="number"
+                                        :value="(item.pret_pe_unitate * item.numar_unitati).toFixed(2)"
+                                        x-model="item.subtotal">
+                                </label>
+                            </div>
+
+                        </div>
+
+                    </article>
+                </template>
+
+                <div class="grid" style="align-items: center; justify-content: space-between;">
+
+                    <button style="max-width: fit-content; margin-top: 25px;" @click="addItem" type="button"
+                        class="secondary">
+                        <i class="bi bi-plus-lg"></i> Adauga
+                    </button>
+
+                    <label for="{{ facturi_form.total_de_plata.id_for_label }}">
+                        {{ facturi_form.total_de_plata.label }}:
+                        <input type="number" x-ref="total_de_plata_el" name="total_de_plata" step="any" readonly
+                            required="" id="id_total_de_plata">
+                        {{ facturi_form.total_de_plata.errors }}
+                    </label>
+                </div>
+
+                <label for="id_produse_sau_servicii" style="display: none;">
+                    Produse sau servicii:
+                    <textarea x-ref="prod_servicii_el" name="produse_sau_servicii" cols="40" rows="10" required=""
+                        id="id_produse_sau_servicii">[]</textarea>
+                    <input type="hidden" name="initial-produse_sau_servicii" value='[]'
+                        id="initial-id_produse_sau_servicii">
+                </label>
+
+            </div>
+
+            <div class="mt-2">
+                <button type="submit">
+                    <i class="bi bi-save"></i> Creeaza factura
+                </button>
+            </div>
+        </form>
+    </article>
+
+</div>
+
+
+
+<div id="tabel-facturi" class="mt-4">
+
+
+    <div style="display: flex; justify-content: end; overflow: hidden;">
+        <a href="{% url 'descarca-facturi' %}?filetype=CSV" class="px-1 secondary" data-tooltip="Descarca CSV">
+            <i class="bi bi-filetype-csv"></i>
+        </a>
+        <a href="{% url 'descarca-facturi' %}?filetype=XLSX" class="px-1 secondary" data-tooltip="Descarca XLSX">
+            <i class="bi bi-filetype-xlsx"></i>
+        </a>
+    </div>
+
+    <div class="overflow-auto mb-2">
+        <table class="striped">
+            <thead>
+                <tr>
+                    <th>XML</th>
+                    <th>PDF</th>
+                    <th>CIF/CUI/VAT</th>
+                    <th>Nume</th>
+                    <th>Total</th>
+                    <th>Valuta</th>
+                    <th>Tranz.</th>
+                    <th>Serie</th>
+                    <th>Numar</th>
+                    <th>Email</th>
+                    <th>Telefon</th>
+                    <th>Scadenta</th>
+                    <th>Del.</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                {% for item in page_items %}
+                <tr>
+                    {% if item.fisier_efactura_xml %}
+                    <td x-data="{ downloaded: false }">
+                        <a @click="downloaded = true" :class="downloaded ? 'px-1 pico-color-purple-500': 'px-1'"
+                            href="{{ item.fisier_efactura_xml.url }}" download>
+                            <i class="bi bi-file-earmark-arrow-down"></i>
+                        </a>
+                    </td>
+                    {% else %}
+                    <td>
+                        <i class="px-1 pico-color-slate-700 bi bi-file-earmark-arrow-down"></i>
+                    </td>
+                    {% endif %}
+                    <td x-data="{ downloaded: false }">
+                        <a @click="downloaded = true" :class="downloaded ? 'px-1 pico-color-purple-500': 'px-1'"
+                            href="{{ item.fisier_factura_pdf.url }}" download>
+                            <i class="bi bi-file-earmark-arrow-down"></i>
+                        </a>
+                    </td>
+                    <td>{{ item.cif }}</td>
+                    <td>{{ item.nume }}</td>
+                    <td>{{ item.total_de_plata }}</td>
+                    <td>{{ item.valuta }}</td>
+                    <td>
+                        {% if item.tip_tranzactie == '42' %}
+                        💳
+                        {% else %}
+                        💵
+                        {% endif %}
+                    </td>
+                    <td>{{ item.serie }}</td>
+                    <td>{{ item.numar }}</td>
+                    <td>{{ item.email }}</td>
+                    <td>{{ item.telefon }}</td>
+                    <td>{{ item.data_scadenta|date:"Y-m-d" }}</td>
+                    <td>
+                        <a href="?delete_id={{item.id}}" class="pico-color-red-500 px-1">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pagination">
+        <div role="group">
+            {% if page_items.has_previous %}
+            <a href="?page={{ page_items.previous_page_number }}#tabel-facturi" class="outline secondary" role="button">
+                <i class="bi bi-chevron-left"></i>
+            </a>
+            {% else %}
+            <a href="?page=1#tabel-facturi" class="outline secondary" role="button" aria-disabled="true" disabled>
+                <i class="bi bi-chevron-left"></i>
+            </a>
+            {% endif %}
+
+            {% if page_items.has_next %}
+            <a href="?page={{ page_items.next_page_number }}#tabel-facturi" class="outline secondary" role="button">
+                <i class="bi bi-chevron-right"></i>
+            </a>
+            {% else %}
+            <a href="?page=1#tabel-facturi" class="outline secondary" role="button" aria-disabled="true" disabled>
+                <i class="bi bi-chevron-right"></i>
+            </a>
+            {% endif %}
+        </div>
+        <p class="pico-color-zinc-450">Pagina {{ page_items.number }} din {{ page_items.paginator.num_pages }}.</p>
+    </div>
+
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("id_serie").style = "text-transform: uppercase;";
+
+        let tipFactSelectEl = document.getElementById("id_tip_factura");
+        let valutaSelectEl = document.getElementById("id_valuta");
+        let alegeLocalitateaEl = document.getElementById("alege-localitatea");
+
+        valutaSelectEl.disabled = true;
+
+        function switchValuta(val, text) {
+            valutaSelectEl.value = val
+            for (let i = 0; i < valutaSelectEl.options.length; i++) {
+                if (valutaSelectEl.options[i].text === text) {
+                    valutaSelectEl.selectedIndex = i;
+                    break;
+                }
+            }
+        }
+
+        tipFactSelectEl.addEventListener("change", (event) => {
+
+            if (tipFactSelectEl.value == "e-factura") {
+                valutaSelectEl.disabled = true;
+            } else {
+                valutaSelectEl.disabled = false;
+            }
+
+            if (["e-factura", "factura-romana"].includes(tipFactSelectEl.value)) {
+                switchValuta("RON", "🇷🇴 RON - Romania");
+                alegeLocalitateaEl.disabled = false;
+            } else {
+                switchValuta("EUR", "🇪🇺 EUR - European Union Zone");
+                alegeLocalitateaEl.disabled = true;
+            }
+        });
+
+    });
+</script>
+
+
+{% endblock %}
