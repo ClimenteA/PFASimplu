@@ -5,16 +5,16 @@ from cursvalutarbnr import ron_exchange_rate
 from functools import lru_cache
 
 @lru_cache(maxsize=None)
-def to_ron(ammount: float, currency: str, dateValue: datetime.date):
+def to_ron(amount: float, currency: str, dateValue: datetime.date):
     return ron_exchange_rate(
-        ammount, currency, None if dateValue == "" else dateValue.isoformat()
+        amount, currency, None if dateValue == "" else dateValue.isoformat()
     )
 
 @lru_cache(maxsize=None)
-def ron_to_eur(ammount: float, year: int):
+def ron_to_eur(amount: float, year: int):
     january = datetime.date(year, 1, 5).isoformat()
     return round(
-        (ammount / ron_exchange_rate(1, "EUR", january)),
+        (amount / ron_exchange_rate(1, "EUR", january)),
         2,
     )
 
