@@ -1,14 +1,13 @@
+import os
 import itertools
 from copy import copy
 import pandas as pd
 import matplotlib.pyplot as plt
-
 from django.shortcuts import render
 from django.views import View
 from django.shortcuts import render
 from django.utils import timezone
 from django.db.models import Sum, Q
-
 from cheltuieli.models import CheltuialaModel, Deductibilitate
 from incasari.models import IncasariModel, SursaVenit
 from documente.models import DocumenteModel
@@ -744,7 +743,7 @@ def create_bar_plot(
     cheltuieli_pe_luni: list[float],
     currency: str = "RON",
 ):
-
+    
     if currency == "EUR":
         incasari_pe_luni = [ron_to_eur(i, anul) for i in incasari_pe_luni]
         cheltuieli_pe_luni = [ron_to_eur(c, anul) for c in cheltuieli_pe_luni]
