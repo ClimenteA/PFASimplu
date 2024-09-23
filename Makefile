@@ -12,5 +12,13 @@ migrate-all:
 	python manage.py migrate incasari
 	python manage.py migrate setari
 
+purge-db:
+	rm -rf cheltuieli/migrations
+	rm -rf documente/migrations
+	rm -rf facturi/migrations
+	rm -rf incasari/migrations
+	rm -rf setari/migrations
+	rm stocare.db
+
 run:
 	python manage.py runserver

@@ -95,7 +95,7 @@ def calcul_taxe_impozite_local(venit_net: float, anul: int):
 
         impozitPeVenit = ProcentImpozitVenit * (venit_net - CAS - CASS) / 100
 
-    if venit_net <= 0:
+    if venit_net <= plafon6:
         impozitPeVenit = 0
 
     total = CAS + CASS + impozitPeVenit

@@ -677,6 +677,8 @@ def get_cards_and_charts_data(request):
     if total_incasari_net_pe_toti_anii <= 0:
         total_incasari_net_pe_toti_anii = 0
 
+    total_incasari_net_pe_toti_anii = round(total_incasari_net_pe_toti_anii, 2)
+
     rest_de_plata_catre_stat = round(
         abs(total_platite_la_stat_pe_toti_anii - total_de_platit_la_stat_pe_toti_anii),
         2,

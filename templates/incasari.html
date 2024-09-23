@@ -139,13 +139,13 @@
                     </td>
                     <td>
                         {% if item.data_inserarii %}
-                        {{ item.data_inserarii }}
+                        {{ item.data_inserarii|date:"Y-m-d" }}
                         {% else %}
                         <span class="pico-color-amber-250">Neincasata</span>
                         {% endif %}
                     </td>
                     <td data-tooltip="{{ item.sursa_venit }}">...{{ item.sursa_venit|slice:"10:35" }}</td>
-                    <td>{{ item.actualizat_la }}</td>
+                    <td>{{ item.actualizat_la|date:"Y-m-d" }}</td>
                     <td x-data="{ downloaded: false }">
                         <a @click="downloaded = true" :class="downloaded ? 'px-1 pico-color-purple-500': 'px-1'" href="{{ item.fisier.url }}" download>
                             <i class="bi bi-file-earmark-arrow-down"></i>

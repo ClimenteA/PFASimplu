@@ -5,4 +5,5 @@ dist/
 .venv
 __pycache__
 media/*
-db.sqlite3
+stocare.db
+
