@@ -1,6 +1,16 @@
 # PFASimplu V2 in progress
 
 
+
+# Setari
+
+In pagina `Setari` trebuie sa adaugi datele pfa-ului tau. Poti importa datele din versiunea 1.
+Poti sterge toate datele. Aceasta pagina trebuie completata la prima deschidere a aplicatiei.
+Cam rar vei schimba datele din aceasta pagina.
+
+![setari](readmepics/setari.jpeg)
+
+
 # Pentru cine este de folos aceasta aplicatie?
 
 - Pentru cei care detin PFA, PFI, II, etc si pot tine contabilitatea in partida simpla;

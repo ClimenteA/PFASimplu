@@ -45,9 +45,15 @@ class SetariView(View):
         form = SetariForm(request.POST)
 
         if not form.is_valid():
-            return render(request, "setari.html", {"setari_form": form, "lista_localitati": lista_localitati})
+            print("------", form.errors)
+            return render(
+                request,
+                "setari.html",
+                {"setari_form": form, "lista_localitati": lista_localitati},
+            )
 
         SetariModel.objects.all().delete()
+
         form.save()
         messages.add_message(
             request,
@@ -69,4 +75,3 @@ class SetariViewDropData(View):
         FacturaModel.objects.all().delete()
 
         return HttpResponseRedirect("/setari/")
-

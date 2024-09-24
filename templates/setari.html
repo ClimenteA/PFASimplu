@@ -11,6 +11,14 @@
     <p>
         Aici poti modifica variabilele care stau la baza calculelor pentru
         impozite, taxe, crearea de declaratii, facturi samd.
+        Trebuie sa introduci datele PFA-ului tau (nume, CIF etc.). 
+        Ai si optiunea de a adauga CAEN-uri secondare.
+        Ai disponibile si 2 butoane sub formular care te pot ajuta sa importi datele din versiunea 1.
+        Inainte de a apasa butonul "Adauga datele din PFASimplu V1" 
+        trebuie sa ai folderul "stocare" langa executabilul "pfasimplu.exe".
+        Butonul "Sterge toate datele" va sterge toate datele din aplicatie.
+        <strong>Atentie!</strong> odata ce ai apasat pe butonul "Sterge toate datele"
+        datele vor fi sterse imediat!
     </p>
 </hgroup>
 
@@ -55,6 +63,7 @@
                 <label>
                     Alege localitatea:
                     <input name="localitate" {% if setari_form.localitate.value %} value="{{setari_form.localitate.value}}" {% endif %} x-ref="searchInputEl" autocomplete="off" type="text" placeholder="Iasi...">
+                    {{ setari_form.localitate.errors }}
                 </label>
             </div>
 
