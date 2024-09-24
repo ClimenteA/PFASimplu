@@ -89,10 +89,15 @@ WSGI_APPLICATION = "core.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+DB_DIR = os.path.join(BASE_DIR, "dbsqlite")
+
+if not os.path.exists(DB_DIR):
+    os.makedirs(DB_DIR)
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "stocare.db",
+        "NAME": os.path.join(DB_DIR, "stocare.db"),
     },
     "OPTIONS": {
         "timeout": 20,

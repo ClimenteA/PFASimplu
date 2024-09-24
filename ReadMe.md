@@ -28,7 +28,11 @@ pyinstaller -w -F --add-data "templates:templates" --add-data "static:static" --
 ```
 
 ```shell
-pyinstaller -w -F --add-data "templates:templates" --add-data "static:static" --hidden-import django_cleanup --hidden-import django_cleanup.apps gui.py
+pyinstaller --windowed --onefile --add-data "templates:templates" --add-data "static:static" --collect-all django_cleanup --collect-all whitenoise --collect-all matplotlib --collect-all django_browser_reload gui.py
+```
+
+```shell
+pyinstaller --windowed --onefile --add-data "templates:templates" --add-data "static:static" --collect-all django_cleanup --collect-all whitenoise --collect-all matplotlib --collect-all django_browser_reload gui.py
 ```
 
 

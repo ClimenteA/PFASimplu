@@ -15,16 +15,24 @@ migrate-all:
 	python manage.py migrate incasari
 	python manage.py migrate setari
 
-purge-db:
+purge-migration-dirs:
 	rm -rf cheltuieli/migrations
 	rm -rf documente/migrations
 	rm -rf facturi/migrations
 	rm -rf incasari/migrations
 	rm -rf setari/migrations
-	rm stocare.db
+
+purge-db:
+	make purge-migration-dirs
+	rm dbsqlite/stocare.db
 
 package:
-	rm -rf public
-	mkdir public
-	python manage.py collectstatic
+	rm -rf build
+	rm -rf dist
+	rm -f pfasimplu.spec
+	make purge-db
+	make migrate-all
+	make purge-migration-dirs
+	pyinstaller --name pfasimplu --add-data "dbsqlite:dbsqlite" --add-data "templates:templates" --add-data "static:static" --collect-all django_cleanup --collect-all whitenoise --collect-all matplotlib --collect-all django_browser_reload gui.py
+	mkdir /dist/pfasimplu/_internal/media
 	

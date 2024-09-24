@@ -14,6 +14,7 @@ from documente.models import DocumenteModel
 from utils.calcule import calculeaza_taxe_si_impozite
 from utils.valuta import ron_to_eur
 from utils.views import download_csv_or_xlsx
+from core.settings import MEDIA_ROOT
 
 
 class RegistruJurnalDescarcaView(View):
@@ -811,8 +812,9 @@ def create_bar_plot(
     plt.tight_layout(pad=3.0)
 
     # Save the plot as an SVG file
-    svgfp = f"media/incasari_vs_cheltuieli_bar_chart_{currency}.svg"
+    svgname = f"incasari_vs_cheltuieli_bar_chart_{currency}.svg"
+    svgfp = os.path.join(MEDIA_ROOT, svgname)
     plt.savefig(svgfp, format="svg")
     plt.close(fig)
 
-    return "/" + svgfp
+    return "/media/" + svgname
