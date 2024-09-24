@@ -6,5 +6,5 @@ __pycache__
 media/*
 stocare.db
 build
-gui.spec
 dist
+*.spec
