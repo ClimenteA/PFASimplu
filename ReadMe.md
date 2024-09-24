@@ -15,6 +15,23 @@ Aplicatia este facuta in Python, Django cu SQLiteDB.
 - `make run` - pt. a porni Django dev. server (aka `python manage.py runserver`);
 - `purge-db` - pt. a sterge `stocare.db` (sqlite db) si toate folderele `migrations`;
 
+Windows:
+
+```shell
+pyinstaller -w -F --add-data "templates;templates" --add-data "static;static" --icon=app.ico gui.py
+```
+
+Linux:
+
+```shell
+pyinstaller -w -F --add-data "templates:templates" --add-data "static:static" --icon=app.ico gui.py
+```
+
+```shell
+pyinstaller -w -F --add-data "templates:templates" --add-data "static:static" --hidden-import django_cleanup --hidden-import django_cleanup.apps gui.py
+```
+
+
 <!-- 
 - https://blog.factureaza.ro/campurile-obligatorii-e-factura/
 - https://mfinante.gov.ro/web/efactura/aplicatii-web-ro-efactura

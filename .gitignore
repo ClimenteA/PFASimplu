@@ -1,9 +1,10 @@
 stocare
-dist/
 .vscode
 .ipynb_checkpoints
 .venv
 __pycache__
 media/*
 stocare.db
-public
+build
+gui.spec
+dist
