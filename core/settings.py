@@ -10,13 +10,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-with open("./pfasimplu.config.json") as f:
-    CONFIG = json.load(f)
 
-SECRET_KEY = CONFIG.get("APP_SECRET", "aplicatie-desktop-nu-conteaza-secret-trebuie-sa-fie-peste-50-de-caractere-sa-fie-considerata-sigura")
+SECRET_KEY = "aplicatie-desktop-nu-conteaza-secret-trebuie-sa-fie-peste-50-de-caractere-sa-fie-considerata-sigura"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = CONFIG.get("DEBUG", True)
+DEBUG = True
 
 
 ALLOWED_HOSTS = ["*"]
