@@ -63,7 +63,6 @@ class RegistruFiscalDescarcaView(View):
         return download_csv_or_xlsx(request, df, "registrul_de_evidenta_fiscala")
 
 
-
 class RegistruInventarDescarcaView(View):
 
     def get(self, request):
@@ -75,11 +74,10 @@ class RegistruInventarDescarcaView(View):
                 "nume_cheltuiala": "Denumirea elementelor inventariate",
                 "deducere_in_ron": "Valoare inventar",
                 "data_inserarii": "Data",
-                "fisier": "Document"
+                "fisier": "Document",
             }
         )
         return download_csv_or_xlsx(request, df, "registru_inventar")
-
 
 
 class RegistreView(View):
@@ -412,7 +410,7 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
 
 def get_registru_de_evidenta_fiscala(
     request, total_incasari_brut, total_incasari_net, total_cheltuieli
-):    
+):
     anul = request.GET.get("anul")
     anul = int(anul) if anul else timezone.now().year
 
@@ -441,7 +439,6 @@ def get_registru_de_evidenta_fiscala(
                 }
             )
         idx += 1
-
 
     idx = idx or 2
     rows.append(
@@ -610,27 +607,38 @@ def get_cards_and_charts_data(request):
     try:
         total_neincasate = IncasariModel.get_total_neincasate(anul)
         total_incasari_brut = IncasariModel.get_total_incasari(anul)
-        total_cheltuieli = CheltuialaModel.get_total_cheltuieli(anul)
+        try:
+            total_cheltuieli = CheltuialaModel.get_total_cheltuieli(anul)
+        except Exception as err:
+            print("0 total cheltuieli", err)
+            total_cheltuieli = 0
+
         total_incasari_net = round((total_incasari_brut - total_cheltuieli), 2)
 
         if total_incasari_net <= 0:
             total_incasari_net = 0
 
         cheltuieli = CheltuialaModel.objects.all()
-        c_newest_date = cheltuieli.latest("data_inserarii")
-        c_oldest_date = cheltuieli.earliest("data_inserarii")
+        if cheltuieli:
+            c_newest_date = cheltuieli.latest("data_inserarii")
+            c_oldest_date = cheltuieli.earliest("data_inserarii")
 
         incasari = IncasariModel.objects.all()
-        i_newest_date = incasari.latest("data_inserarii")
-        i_oldest_date = incasari.earliest("data_inserarii")
+        if incasari:
+            i_newest_date = incasari.latest("data_inserarii")
+            i_oldest_date = incasari.earliest("data_inserarii")
 
-        years_list = [
-            c_newest_date.data_inserarii.year,
-            i_newest_date.data_inserarii.year,
-            c_oldest_date.data_inserarii.year,
-            i_oldest_date.data_inserarii.year,
-            current_year,
-        ]
+        if cheltuieli and incasari:
+            years_list = [
+                c_newest_date.data_inserarii.year,
+                i_newest_date.data_inserarii.year,
+                c_oldest_date.data_inserarii.year,
+                i_oldest_date.data_inserarii.year,
+                current_year,
+            ]
+        else:
+            years_list = [current_year]
+
         ani_inregistrati = reversed(range(min(years_list), max(years_list) + 1))
 
         incasari_pe_luni = IncasariModel.get_total_incasari_pe_luni(anul)
@@ -641,7 +649,7 @@ def get_cards_and_charts_data(request):
         )
 
     except Exception as err:
-        print(err)
+        print("all-zero", err)
         total_neincasate = 0
         total_incasari_brut = 0
         total_incasari_net = 0
@@ -746,7 +754,9 @@ def create_bar_plot(
     cheltuieli_pe_luni: list[float],
     currency: str = "RON",
 ):
-    
+
+    print("valori pentru chart:", incasari_pe_luni, cheltuieli_pe_luni)
+
     if currency == "EUR":
         incasari_pe_luni = [ron_to_eur(i, anul) for i in incasari_pe_luni]
         cheltuieli_pe_luni = [ron_to_eur(c, anul) for c in cheltuieli_pe_luni]

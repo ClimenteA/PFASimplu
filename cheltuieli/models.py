@@ -171,7 +171,7 @@ class CheltuialaModel(CommonIncasariCheltuieliModel):
 
     @staticmethod
     def get_total_cheltuieli(year: int):
-
+        
         total_cheltuieli_result = CheltuialaModel.objects.filter(
             mijloc_fix=False, data_inserarii__year=year
         ).aggregate(totalc=Sum("deducere_in_ron"))
