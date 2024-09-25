@@ -181,4 +181,8 @@ Aplicatia este oferita ca atare, nu are nici o garantie asociata. Nu imi asumam 
 Daca gasesti erori in aplicatie poti deschide un [`New issue`](https://github.com/ClimenteA/PFASimplu/issues/new) in tabul `Issues` din acesta pagina sau poti [posta pe reddit](https://www.reddit.com/r/PFASimplu/submit/?type=TEXT) in subredditul [PFASimplu](https://www.reddit.com/r/PFASimplu/).
 
 
+😁 Daca ai de unde, nu ma supar sa primesc donatii:
 
+<a href="https://www.buymeacoffee.com/climentea" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
+
+Daca ai nevoie de o aplicatie web sau o automatizare a unui process de business ma poti contacta pe [ro.softgata.com](https://ro.softgata.com/). Imi poti trimite si un mesaj pe [linkedin](https://www.linkedin.com/in/climente-alin/) in caz de a picat hosting-ul pentru softgata.com 😅 sau daca vrei sa vezi ce mai postez acolo din cand in cand. 
