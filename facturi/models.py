@@ -27,6 +27,33 @@ class TipFactura(models.TextChoices):
     FACTURA_GERMANA = "factura-germana", _("Factura in germana")
     FACTURA_FRANCEZA = "factura-franceza", _("Factura in franceza")
     FACTURA_SPANIOLA = "factura-spaniola", _("Factura in spaniola")
+    FACTURA_ITALIANA = "factura-italiana", _("Factura in italiana")
+    FACTURA_DANEZA = "factura-daneza", _("Factura in daneza")
+    FACTURA_OLANDEZA = "factura-olandeza", _("Factura in olandeza")
+    FACTURA_SUEDEZA = "factura-suedeza", _("Factura in suedeza")
+    FACTURA_FINLANDEZA = "factura-finlandeza", _("Factura in finlandeza")
+    # FACTURA_POLONEZA = "factura-poloneza", _("Factura in poloneza")
+    # FACTURA_CEHA = "factura-ceha", _("Factura in ceha")
+    # FACTURA_MAGHIARA = "factura-maghiara", _("Factura in maghiara")
+    # FACTURA_GREACA = "factura-greaca", _("Factura in greaca")
+    # FACTURA_BULGARA = "factura-bulgara", _("Factura in bulgara")
+    # FACTURA_CROATA = "factura-croata", _("Factura in croata")
+    # FACTURA_PORTUGHEZA = "factura-portugheza", _("Factura in portugheza")
+
+
+pdf_template_mapper = {
+    "e-factura": "facturi_pdf/factura_romana_pdf.html",
+    "factura-romana": "facturi_pdf/factura_romana_pdf.html",
+    "factura-engleza": "facturi_pdf/factura_engleza_pdf.html",
+    "factura-germana": "facturi_pdf/factura_germana_pdf.html",
+    "factura-franceza": "facturi_pdf/factura_franceza_pdf.html",
+    "factura-spaniola": "facturi_pdf/factura_spaniola_pdf.html",
+    "factura-italiana": "facturi_pdf/factura_italiana_pdf.html",
+    "factura-daneza": "facturi_pdf/factura_daneza_pdf.html",
+    "factura-olandeza": "facturi_pdf/factura_olandeza_pdf.html",
+    "factura-suedeza": "facturi_pdf/factura_suedeza_pdf.html",
+    "factura-finlandeza": "facturi_pdf/factura_finlandeza_pdf.html",
+}
 
 
 class FacturaModel(models.Model):
@@ -92,7 +119,7 @@ class FacturaModel(models.Model):
         if not localitate:
             return Localitati.LOCALITATE_GENERIC.value
 
-        if localitate.startswith("RO-B"):
+        if localitate.startswith("RO-B,"):
             return localitate.split("Bucuresti,")[1].strip().upper().replace(" ", "")
 
         loc = ""
@@ -179,7 +206,7 @@ class FacturaModel(models.Model):
                 "efactura.xml", ContentFile(xml_content), save=False
             )
 
-        factura_content = render_to_string("factura_pdf.html", context)
+        factura_content = render_to_string(pdf_template_mapper[self.tip_factura], context)
         save_pdf_path = os.path.join(MEDIA_ROOT, "factura_invoice.pdf")
         save_pdf_path = create_pdf_from_html(factura_content, save_pdf_path)
         with open(save_pdf_path, "rb") as pdf:

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        @media print {
+            @page {
+                margin: 0;
+            }
+
+            body {
+                margin: 0;
+            }
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f9f9f9;
+            padding: 20px;
+        }
+
+        .container-fluid {
+            max-width: 800px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+        }
+
+        h3 {
+            color: #007bff;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .text-bold {
+            font-weight: bold;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        .font-12 {
+            font-size: 12px;
+        }
+
+        .underline {
+            text-decoration: underline;
+        }
+    </style>
+    <title>Factura/Invoice</title>
+</head>
+
+<body class="container-fluid">
+
+    <div class="grid">
+        <h3 style="margin-top: 1rem;">FACTURA/LASKU</h3>
+        <table class="font-12">
+            <thead>
+                <tr>
+                    <th>Serie/Sarja</th>
+                    <th>Numar/Numero</th>
+                    <th>Data factura/Laskun päivämäärä</th>
+                    <th>Data scadenta/Vanhentumispäivä</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th style="background-color: white; font-weight: normal;">{{ serie }}</th>
+                    <td>{{ numar }}</td>
+                    <td>{{ data_emitere }}</td>
+                    <td>{{ data_scadenta }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+    </div>
+
+    <main>
+        <div>
+            <p class="underline">Date furnizor si client/Toimittaja- ja asiakastiedot</p>
+            <table class="font-12">
+                <thead>
+                    <tr>
+                        <th>Detalii/Tiedot</th>
+                        <th>Furnizor/Toimittaja</th>
+                        <th>Client/Asiakas</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td class="text-bold">Nume/Nimi</td>
+                        <td>{{ nume_furnizor }}</td>
+                        <td>{{ nume_client }}</td>
+                    </tr>
+
+                    <tr>
+                        <td class="text-bold">Nr.Reg.Com.</td>
+                        <td>{{ nr_reg_com_furnizor }}</td>
+                        <td>{{ nr_reg_com_client }}</td>
+                    </tr>
+
+                    <tr>
+                        <td class="text-bold">CUI/CIF/VAT</td>
+                        <td>{{ cif_furnizor }}</td>
+                        <td>{{ cif_client }}</td>
+                    </tr>
+
+                    <tr>
+                        <td class="text-bold">Adresa/Osoite</td>
+                        <td>{{ adresa_furnizor }}</td>
+                        <td>{{ adresa_client }}</td>
+                    </tr>
+
+                    <tr>
+                        <td class="text-bold">Email</td>
+                        <td>{{ email_furnizor }}</td>
+                        <td>{{ email_client }}</td>
+                    </tr>
+
+                    <tr>
+                        <td class="text-bold">Telefon/Puhelin</td>
+                        <td>{{ telefon_furnizor }}</td>
+                        <td>{{ telefon_client }}</td>
+                    </tr>
+
+                    <tr>
+                        <td class="text-bold">IBAN</td>
+                        <td>{{ iban_furnizor }}</td>
+                        <td>-</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div style="margin-top: 2rem;">
+            <p class="underline">Date produse sau servicii/Data, tuotteet tai palvelut</p>
+            <table class="font-12">
+                <thead>
+                    <tr>
+                        <th>Nr.Crt./No.</th>
+                        <th>Denumire produse sau servicii/Tuotteiden tai palveluiden nimet</th>
+                        <th>U.M./Mittayksikkö</th>
+                        <th>Cantitate/Määrä</th>
+                        <th>Pret unitar fara T.V.A./Yksikköhinta ilman arvonlisäveroa.</th>
+                        <th>Valoarea ({{ valuta }})/Arvo ({{ valuta }})</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in produse_sau_servicii %}
+                    <tr>
+                        <td>{{ item.id }}.</td>
+                        <td>{{ item.nume_produs_sau_serviciu|title }}</td>
+                        <td>{{ item.cod_unitate }}</td>
+                        <td>{{ item.numar_unitati }}</td>
+                        <td>{{ item.pret_pe_unitate }}</td>
+                        <td>{{ item.subtotal }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <div style="display: flex; justify-content: end; margin-top: 4rem; margin-bottom: 4rem;">
+        <p class="underline">
+            <span>Total de plata/Maksu yhteensä:</span>
+            <strong>{{ total_de_plata }} {{ valuta }}</strong>
+        </p>
+    </div>
+
+    <p style="margin-bottom: 2rem;">{{ nota }}</p>
+
+</body>
+
+</html>
