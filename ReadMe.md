@@ -1,88 +1,28 @@
 # PFASimplu V2 in progress
 
 
-## Registre
-
-Aici ai o vedere de ansamblu asupra incasarilor, cheltuielilor precum si taxele/impozitele de platit pentru anul curent, venituri vs cheltuieli pe ani, notificari facturi neincasate, declaratii de urcat in SPV etc. Totodata ai disponibile si registrele contabile obligatorii pe care trebuie sa le ai in relatia cu ANAF. Nu trebuie sa plateasca CASS: cei care cu profesii liberale (avocat, notar etc.) care au venituri nete sub 6 salarii minime. 
-
-Poti alege sa vezi sumele din grafic si total carduri in EUR sau RON. 
-Si da nu e gresit chiar daca ai 0 incasari (sau sub 6 salarii minime) trebuie sa platesti CASS ~2000 RON. 
 
 
-![registre](readmepics/registre.jpeg)
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
+- [Pentru cine este de folos aceasta aplicatie?](#pentru-cine-este-de-folos-aceasta-aplicatie)
+- [Poate aplicatia sa faca X,Y,Z?](#poate-aplicatia-sa-faca-xyz)
+- [Ce fac cu versiunea veche a aplicatiei (v1)?](#ce-fac-cu-versiunea-veche-a-aplicatiei-v1)
+- [Instalare pt. utilizatori](#instalare-pt-utilizatori)
+- [Instalare pt. developeri](#instalare-pt-developeri)
+- [Setari](#setari)
+- [Facturi](#facturi)
+- [Incasari](#incasari)
+- [Cheltuieli](#cheltuieli)
+- [Documente](#documente)
+- [Inventar](#inventar)
+- [Registre](#registre)
+- [Observatii](#observatii)
 
-## Inventar
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-Aici gasesti tabelul cu toate obiectele de inventar si mijloacele/activele fixe achizitionate pana acum. Tot aici poti scoate din inventar un obiect de inventar sau mijloc fix. Daca ai vandut obiectul de inventar/mijlocul fix va trebui sa-l introduci si la incasari la Sursa venit: 'Venit din alte surse'. 
-
-Pentru a scoate un obiect de inventar din uz trebuie sa dai click in coloana Mod. pe iconita de modificare.
-
-
-![inventar](readmepics/inventar.jpeg)
-
-
-## Documente
-
-Aici poti introduce documentele create in relatia cu ANAF. Declaratii, dovezi plati taxe si impozite si alte documente pe care le consideri importante. Daca nu ai depasit plafonul TVA de 300000 RON pe an (cca. 60.000 EUR, 5440 Euro/luna, 31 Eur/Ora, 6 saptamani libere) si nu ai angajati (poti avea 3 angajati) singura declaratie pe care trebuie sa o completezi este Declaratia Unica 212. Daca ai depasit plafonul TVA sau ai angajati poate un SRL ar fi mai potrivit. Daca nu gasesti tipul declaratiei alege 'Document' si completeaza in campul 'Mentiuni' detalii despre documentul incarcat.
-
-In cazul dovezii platii de impozite (pdf-ul primit de la ghiseul.ro) si al declaratiei unice datele relevante sunt automat extrase din PDF-ul incarcat.
-
-![documente](readmepics/documente.jpeg)
-
-
-## Cheltuieli
-
-Aici poti aduga documentele justificative (facturi, chitante) pentru cheltuielile pe care le-ai facut in scopul prestarii activitatii tale de PFA. Unele cheltuieli sunt integral deductibile: consumabile, plati servicii, achizitii bunuri sub 2500 RON etc. Altele sunt partial deductibile: 2% din baza de calcul pentru cheltuielile cu potentialii clienti (mancare, cadouri sub 100 RON, etc), 50% cheltuieli cu autovehicul/chirii/utilitati daca sunt folosite si in scop personal. Unele cheltuieli au nevoie de documente justificative in plus pe langa bonul sau factura care justifica cheltuiala. Cheltuielile care depasesc prag mijloc fix vor trebui amortizate in functie de codul de clasificare din tabelul de amortizare mijloace fixe. Achizitiile/Cheltuielile care nu isi pierd valoarea in timp cum ar fi terenuri, aur, case nu sunt deductibile. Daca trebuie sa adaugi mai mult de un document poti crea un zip cu toate documentele necesare.
-
-Campul Deductibila contine si cheltuielile deductibile partial care vor fi calculate automat in functie de datele existente in aplicatie.
-
-![cheltuieli](readmepics/cheltuieli.jpeg)
-
-
-## Incasari
-
-Aici poti aduga documentele justificative (facturi, chitante) prin care ai incasat bani oferind produse sau servicii cu PFA-ul tau. Daca ai incasari din alte surse decat din emitere facturi/bonuri selecteaza o alta sursa a venitului. In cazul incasarilor in alta moneda decat RON conversia va fi facuta automat la cursul zilei anterioare setata in campul 'Data incasarii'. Completeaza 'Data incasare' doar daca ai incasat banii, lasa campul gol daca nu ai incasat inca (vei putea modifica mai tarziu). Sumele incasate in alta valuta (EUR,USD etc) - sumele sunt convertite in RON in functie de 'Data incasare'.
-
-Cu un click intr-o celula din coloana Mod. poti modifica o incasare. Din coloana Doc. poti descarca o incasare si in coloana Del. poti sterge o incasare. Daca trebuie sa adaugi mai mult de un document poti crea un zip cu toate documentele necesare.
-
-
-![incasari](readmepics/incasari.jpeg)
-
-
-## Facturi
-
-In pagina `Facturi` poti crea facturi pentru clienti din afara tarii, precum si e-factura pentru B2B in Romania. 
-Factura generata aici este valabila pentru **PFA-urile neplatitore de TVA**.
-Odata ce datele sunt completate in formular ele vor putea fi folosite si pentru facturi viitoare.
-Pentru e-factura valoarea din campul 'Alege localitatea' trebuie sa fie una din valorile sugerate pe masura ce tastezi.
-Fisierul generat XML este conform [XML-UBL versiunea 1.0.3](https://www.anaf.ro/CompletareFacturaSimplificat/faces/factura/informatiigenerale.xhtml).
-Validarea fisierului XML a fost facuta pentru standard [FACT1](https://www.anaf.ro/uploadxmi/).
-Poti prelua date CUI firma [de aici.](https://mfinante.gov.ro/apps/agenticod.html?pagina=domenii).
-
-Campurile: Serie, Numar factura vor fi completate automat in functie de facturile din trecut. 
-Seria + numarul facturii sunt verificate sa fie unice in baza de date.
-Pe masura ce completezi campul Nume Client vor aparea sugestii de clienti existenti - 
-cu un click poti selecta clientul si formularul va fi completat automat.
-In campul Tip factura poti alege sa generezi factura in alta limba (non e-factura). 
-Poti schimba si valuta in care emiti factura.
-
-Din coloanele XML si PDF poti descarca facturile generate. In dreapta sus a tabelului sunt 2 butoane pentru a descarca toate facturile in format CSV sau XLSX. In coloana Del. poti sterge o factura.
-
-Optional: Daca dai click pe Mai mult vei putea completa si alte date alte clientului precum:
-Nr.Registru Comertului, Telefon, Email, Data Emitere factura (completata automat pentru ziua curenta), Data scadenta (calculata automat la 30 in viitor fata de ziua curenta) si Nota (unde poti adauga niste mentiuni in factura).
-
-
-![facturi](readmepics/facturi.jpeg)
-
-
-## Setari
-
-In pagina `Setari` trebuie sa adaugi datele pfa-ului tau. Poti importa datele din versiunea 1.
-Poti sterge toate datele. Aceasta pagina trebuie completata la prima deschidere a aplicatiei.
-Cam rar vei schimba datele din aceasta pagina.
-
-![setari](readmepics/setari.jpeg)
 
 
 ## Pentru cine este de folos aceasta aplicatie?
@@ -92,10 +32,19 @@ Cam rar vei schimba datele din aceasta pagina.
 - Nu au depasit pragul TVA (venituri sub 5k euro pe luna);
 - Sunt prestatori de servicii (freelanceri, instalatori, curieri glovo, tazz, soferi taxi, bold, uber etc.);
 
+Aplicatia te ajuta sa:
+- creezi facturi: e-factura (fara TVA), facturi PDF in mai multe limbi si valute;
+- tii la curent toate registrele obligatorii pentru PFA (Registru Jurnal, Registru Fiscal, Registru Inventar);
+- calculeaza automat cheltuielile deductibile partial si mijloacele fixe;
+- arhivezi declaratiile depuse la ANAF;
+- calculeaza automat taxele si impozitele datorate in functie de incasari/cheltuieli;
+
 
 ## Poate aplicatia sa faca X,Y,Z?
 
 Aplicatia am facut-o potrivita pentru nevoile mele. Daca pe parcurs voi avea nevoie de X,Y,Z atunci poate voi actualiza aplicatia sa contina si X,Y,Z (cum am facut cu e-factura). 
+
+Nu am cunostinte solide de contabilitate, dar daca deschizi un `New issue` din tabul `Issues` din aceasta pagina si spui pas cu pas care sunt cerintele voi lua in considerare sa adaug in aplicatie o noua functionalitate (in functie de timp si cunostinte).
 
 
 ## Ce fac cu versiunea veche a aplicatiei (v1)?
@@ -133,3 +82,103 @@ Aplicatia este facuta in Python, Django cu SQLiteDB.
 - `make package` - creeaza aplicatia pfasimplu ca executabil pentru sistemul de operare pe care a fost rulat;
 
 Daca esti pe Windows fie poti muta comenzile din Makefile intr-un fisier bash (.bat), fie instalezi ceva [sa poti rula Makefile](https://stackoverflow.com/questions/2532234/how-to-run-a-makefile-in-windows). 
+
+
+## Setari 
+
+In pagina `Setari` trebuie sa adaugi datele pfa-ului tau. Poti importa datele din versiunea 1.
+Poti sterge toate datele. Aceasta pagina trebuie completata la prima deschidere a aplicatiei.
+Cam rar vei schimba datele din aceasta pagina.
+
+![setari](readmepics/setari.jpeg)
+
+
+
+## Facturi
+
+In pagina `Facturi` poti crea facturi pentru clienti din afara tarii, precum si e-factura pentru B2B in Romania. 
+Factura generata aici este valabila pentru **PFA-urile neplatitore de TVA**.
+Odata ce datele sunt completate in formular ele vor putea fi folosite si pentru facturi viitoare.
+Pentru e-factura valoarea din campul 'Alege localitatea' trebuie sa fie una din valorile sugerate pe masura ce tastezi.
+Fisierul generat XML este conform [XML-UBL versiunea 1.0.3](https://www.anaf.ro/CompletareFacturaSimplificat/faces/factura/informatiigenerale.xhtml).
+Validarea fisierului XML a fost facuta pentru standard [FACT1](https://www.anaf.ro/uploadxmi/).
+Poti prelua date CUI firma [de aici.](https://mfinante.gov.ro/apps/agenticod.html?pagina=domenii).
+
+Campurile: Serie, Numar factura vor fi completate automat in functie de facturile din trecut. 
+Seria + numarul facturii sunt verificate sa fie unice in baza de date.
+Pe masura ce completezi campul Nume Client vor aparea sugestii de clienti existenti - 
+cu un click poti selecta clientul si formularul va fi completat automat.
+In campul Tip factura poti alege sa generezi factura in alta limba (non e-factura). 
+Poti schimba si valuta in care emiti factura.
+
+Din coloanele XML si PDF poti descarca facturile generate. In dreapta sus a tabelului sunt 2 butoane pentru a descarca toate facturile in format CSV sau XLSX. In coloana Del. poti sterge o factura.
+
+Optional: Daca dai click pe Mai mult vei putea completa si alte date alte clientului precum:
+Nr.Registru Comertului, Telefon, Email, Data Emitere factura (completata automat pentru ziua curenta), Data scadenta (calculata automat la 30 in viitor fata de ziua curenta) si Nota (unde poti adauga niste mentiuni in factura).
+
+
+![facturi](readmepics/facturi.jpeg)
+
+
+
+## Incasari
+
+Aici poti aduga documentele justificative (facturi, chitante) prin care ai incasat bani oferind produse sau servicii cu PFA-ul tau. Daca ai incasari din alte surse decat din emitere facturi/bonuri selecteaza o alta sursa a venitului. In cazul incasarilor in alta moneda decat RON conversia va fi facuta automat la cursul zilei anterioare setata in campul 'Data incasarii'. Completeaza 'Data incasare' doar daca ai incasat banii, lasa campul gol daca nu ai incasat inca (vei putea modifica mai tarziu). Sumele incasate in alta valuta (EUR,USD etc) - sumele sunt convertite in RON in functie de 'Data incasare'.
+
+Cu un click intr-o celula din coloana Mod. poti modifica o incasare. Din coloana Doc. poti descarca o incasare si in coloana Del. poti sterge o incasare. Daca trebuie sa adaugi mai mult de un document poti crea un zip cu toate documentele necesare.
+
+
+![incasari](readmepics/incasari.jpeg)
+
+
+
+## Cheltuieli
+
+Aici poti aduga documentele justificative (facturi, chitante) pentru cheltuielile pe care le-ai facut in scopul prestarii activitatii tale de PFA. Unele cheltuieli sunt integral deductibile: consumabile, plati servicii, achizitii bunuri sub 2500 RON etc. Altele sunt partial deductibile: 2% din baza de calcul pentru cheltuielile cu potentialii clienti (mancare, cadouri sub 100 RON, etc), 50% cheltuieli cu autovehicul/chirii/utilitati daca sunt folosite si in scop personal. Unele cheltuieli au nevoie de documente justificative in plus pe langa bonul sau factura care justifica cheltuiala. Cheltuielile care depasesc prag mijloc fix vor trebui amortizate in functie de codul de clasificare din tabelul de amortizare mijloace fixe. Achizitiile/Cheltuielile care nu isi pierd valoarea in timp cum ar fi terenuri, aur, case nu sunt deductibile. Daca trebuie sa adaugi mai mult de un document poti crea un zip cu toate documentele necesare.
+
+Campul Deductibila contine si cheltuielile deductibile partial care vor fi calculate automat in functie de datele existente in aplicatie.
+
+![cheltuieli](readmepics/cheltuieli.jpeg)
+
+
+## Documente
+
+Aici poti introduce documentele create in relatia cu ANAF. Declaratii, dovezi plati taxe si impozite si alte documente pe care le consideri importante. Daca nu ai depasit plafonul TVA de 300000 RON pe an (cca. 60.000 EUR, 5440 Euro/luna, 31 Eur/Ora, 6 saptamani libere) si nu ai angajati (poti avea 3 angajati) singura declaratie pe care trebuie sa o completezi este Declaratia Unica 212. Daca ai depasit plafonul TVA sau ai angajati poate un SRL ar fi mai potrivit. Daca nu gasesti tipul declaratiei alege 'Document' si completeaza in campul 'Mentiuni' detalii despre documentul incarcat.
+
+In cazul dovezii platii de impozite (pdf-ul primit de la ghiseul.ro) si al declaratiei unice datele relevante sunt automat extrase din PDF-ul incarcat.
+
+![documente](readmepics/documente.jpeg)
+
+
+
+## Inventar
+
+Aici gasesti tabelul cu toate obiectele de inventar si mijloacele/activele fixe achizitionate pana acum. Tot aici poti scoate din inventar un obiect de inventar sau mijloc fix. Daca ai vandut obiectul de inventar/mijlocul fix va trebui sa-l introduci si la incasari la Sursa venit: 'Venit din alte surse'. 
+
+Pentru a scoate un obiect de inventar din uz trebuie sa dai click in coloana Mod. pe iconita de modificare.
+
+
+![inventar](readmepics/inventar.jpeg)
+
+
+
+## Registre
+
+Aici ai o vedere de ansamblu asupra incasarilor, cheltuielilor precum si taxele/impozitele de platit pentru anul curent, venituri vs cheltuieli pe ani, notificari facturi neincasate, declaratii de urcat in SPV etc. Totodata ai disponibile si registrele contabile obligatorii pe care trebuie sa le ai in relatia cu ANAF. Nu trebuie sa plateasca CASS: cei care cu profesii liberale (avocat, notar etc.) care au venituri nete sub 6 salarii minime. 
+
+Poti alege sa vezi sumele din grafic si total carduri in EUR sau RON. 
+Si da nu e gresit chiar daca ai 0 incasari (sau sub 6 salarii minime) trebuie sa platesti CASS ~2000 RON. 
+
+
+![registre](readmepics/registre.jpeg)
+
+
+
+## Observatii
+
+Aplicatia este oferita ca atare, nu are nici o garantie asociata. Nu imi asumam raspunderea pentru eventuale erori in procesare date contabilitate, daune provocate dispozitivelor etc. Testeaza aplicatia inainte si vezi daca raspunde nevoilor tale inainte de o adauga in rutina de lucru.
+
+Daca gasesti erori in aplicatie poti deschide un [`New issue`](https://github.com/ClimenteA/PFASimplu/issues/new) in tabul `Issues` din acesta pagina sau poti [posta pe reddit](https://www.reddit.com/r/PFASimplu/submit/?type=TEXT) in subredditul [PFASimplu](https://www.reddit.com/r/PFASimplu/).
+
+
+
