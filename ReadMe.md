@@ -140,6 +140,20 @@ Campul Deductibila contine si cheltuielile deductibile partial care vor fi calcu
 
 ![cheltuieli](readmepics/cheltuieli.jpeg)
 
+Atunci cand ai de adaugat un obiect de inventar cu valoarea peste 2500 RON trebuie sa selectezi `Mijloc fix peste 2500 RON (ded. integral cu amortizare)`. In campul nume cheltuiala poti vedea valorile pentru mijloace fixe. Campul Nume cheltuiala poate fi folosit pentru a filtra tipul cheltuielii.
+
+Uite un exemplu pentru a amortiza o cheltuiala amortizabila cu un Laptop. 
+Cel mai apropiat de un laptop in tabel este valoarea `Calculatoare electronice` care are codul `2.2.9.` 
+si o perioada de amortizare intre 2 si 4 ani. 
+
+```
+Amortizare: 2-4 ani. COD: '2.2.9.' din GRUPA 2. INSTALATII TEHNICE, MIJLOACE DE TRANSPORT, ANIMALE SI PLANTATII - 2.2. APARATE SI INSTALATII DE MASURARE, CONTROL SI REGLARE.. Active fixe: Calculatoare electronice si echipamente periferice. Masini si aparate de casa, control si facturat.
+```
+
+Odata introduse aceste date, aplicatia va calcula automat amortizarea acelui activ fix.
+
+![cheltuieli_amortizare](readmepics/cheltuieli_amortizare.png)
+
 
 ## Documente
 
