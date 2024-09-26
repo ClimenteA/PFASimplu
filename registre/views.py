@@ -118,11 +118,13 @@ def get_registru_inventar():
     for item in results:
         rows.append(
             {
+                "db_id": item.id,
                 "nr_crt": idx,
                 "nume_cheltuiala": item.nume_cheltuiala,
                 "deducere_in_ron": item.deducere_in_ron,
                 "data_inserarii": item.data_inserarii.isoformat(),
                 "fisier": item.fisier,
+                "mijloc_fix": item.mijloc_fix,
             }
         )
         idx += 1

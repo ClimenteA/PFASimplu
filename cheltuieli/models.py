@@ -1,17 +1,17 @@
 import datetime
+from dateutil.relativedelta import relativedelta
 from django.db import models
 from django.db.models import Sum
 from django.utils.translation import gettext_lazy as _
-from utils.models import CommonIncasariCheltuieliModel
-from utils.files import get_save_path
-from dateutil.relativedelta import relativedelta
-from utils.valuta import to_ron
 from django.core.exceptions import ValidationError
-from utils.calcule import get_venit_net, get_venit_brut
 from django.utils import timezone
-from utils.validators import validate_not_future_date
 from django.db.models.functions import TruncMonth
 from django.db.models import Q
+from utils.valuta import to_ron
+from utils.files import get_save_path
+from utils.validators import validate_not_future_date
+from utils.models import CommonIncasariCheltuieliModel
+from utils.calcule import get_venit_net, get_venit_brut
 
 
 
@@ -397,6 +397,11 @@ class CheltuialaModel(CommonIncasariCheltuieliModel):
 
     def __str__(self):
         return self.deductibila + " " + str(self.deducere_in_ron) + "RON " + self.actualizat_la.isoformat()
+
+
+
+
+
 
 
 CODURI_CLASIFICARE = [

@@ -82,7 +82,7 @@
         <div style="border: 1px solid black; padding: 20px;">
             <p class="text-bold" style="text-align: center; color: #18497d;">FIŞA MIJLOCULUI FIX</p>
 
-            <p>Nr. Inventar: <span class="underline">{{ numar_inventar }}</span></p>
+            <p>Nr. Inventar: <span>{{ numar_inventar }}</span></p>
 
             <p class="border-bottom">
                 Fel, serie, nr. data document provenienţă: <br>
@@ -124,11 +124,11 @@
                 <p>Data dării în folosinţă:</p>
 
                 <p>
-                    Anul <span>{{ anul_darii_in_folosinta }}</span>
+                    Anul: <span>{{ anul_darii_in_folosinta }}</span>
                 </p>
 
                 <p>
-                    Luna <span>{{ luna_darii_in_folosinta }}</span>
+                    Luna: <span>{{ luna_darii_in_folosinta }}</span>
                 </p>
             </div>
 
@@ -136,11 +136,11 @@
                 <p>Data amortizării complete:</p>
 
                 <p>
-                    Anul <span>{{ anul_amortizarii_complete }}</span>
+                    Anul: <span>{{ anul_amortizarii_complete }}</span>
                 </p>
 
                 <p>
-                    Luna <span>{{ luna_amortizarii_complete }}</span>
+                    Luna: <span>{{ luna_amortizarii_complete }}</span>
                 </p>
 
             </div>
@@ -159,7 +159,7 @@
 
     <p style="float: right; color: gray; font-size: 12px;">14.2.2</p>
 
-    <div style="margin-top: 150px;">
+    <div style="margin-top: 2200px;">
         <p style="float: right; color: gray; font-size: 12px; font-style: italic;">(verso)</p>
         <table style="font-size: 12px;">
             <thead>
@@ -197,6 +197,7 @@
             </thead>
     
             <tbody>
+                {% for i in blank_rows %}
                 <tr>
                     <td></td>
                     <td></td>
@@ -207,196 +208,7 @@
                     <td></td>
                     <td></td>
                 </tr>
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
+                {% endfor %}
             </tbody>
         </table>
     </div>
