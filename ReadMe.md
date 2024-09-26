@@ -73,7 +73,7 @@ Aplicatia este facuta in Python, Django cu SQLiteDB.
 
 - clone repo;
 - `virtualenv .venv`;
-- `source .venv/bin/activate`;
+- `source .venv/bin/activate` (pt. windows `Set-ExecutionPolicy Unrestricted -Scope Process` si `.\.venv\Scripts\activate`);
 - `pip install -r requirements.txt`;
 - `make migrate-all` - pt. Ubuntu pentru a face toate migrarile;
 - `make run` - pt. a porni Django dev. server (aka `python manage.py runserver`);
@@ -81,8 +81,7 @@ Aplicatia este facuta in Python, Django cu SQLiteDB.
 - `make purge-migration-dirs` - pt. a sterge toate folderele `migrations`;
 - `make package` - creeaza aplicatia pfasimplu ca executabil pentru sistemul de operare pe care a fost rulat;
 
-Daca esti pe Windows fie poti muta comenzile din Makefile intr-un fisier bash (.bat), fie instalezi ceva [sa poti rula Makefile](https://stackoverflow.com/questions/2532234/how-to-run-a-makefile-in-windows). 
-
+Pe windows comenzile make for avea prefixul `.\makefile.bat X` - unde X poate fi una din comenzile make linux de mai sus (ex: `.\makefile.bat run`).
 
 ## Setari 
 

@@ -157,7 +157,7 @@ def download_zip(request, theModel: Model, order_by: str = "-data_inserarii"):
 
         page_number += 1
 
-    zip_filename = os.path.join(extracts_folder, f"{theModel.__qualname__.replace("Model", "")}.zip")
+    zip_filename = os.path.join(extracts_folder, f"{theModel.__qualname__.replace('Model', '')}.zip")
     with ZipFile(zip_filename, "w") as zipf:
         for file in files:
             zipf.write(file, os.path.basename(file))
