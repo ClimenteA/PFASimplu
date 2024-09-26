@@ -66,7 +66,7 @@ class RegistruFiscalDescarcaView(View):
 class RegistruInventarDescarcaView(View):
 
     def get(self, request):
-        data = get_registru_inventar()
+        data = get_registru_inventar(dbid=False)
         df = pd.DataFrame(data)
         df = df.rename(
             columns={
@@ -107,7 +107,7 @@ class RegistreView(View):
         )
 
 
-def get_registru_inventar():
+def get_registru_inventar(dbid: bool = True):
 
     results = CheltuialaModel.objects.filter(
         (Q(obiect_de_inventar=True) | Q(mijloc_fix=True)) & Q(scos_din_uz=False)
@@ -116,17 +116,20 @@ def get_registru_inventar():
     idx = 1
     rows = []
     for item in results:
-        rows.append(
-            {
-                "db_id": item.id,
-                "nr_crt": idx,
-                "nume_cheltuiala": item.nume_cheltuiala,
-                "deducere_in_ron": item.deducere_in_ron,
-                "data_inserarii": item.data_inserarii.isoformat(),
-                "fisier": item.fisier,
-                "mijloc_fix": item.mijloc_fix,
-            }
-        )
+
+        data = {
+            "nr_crt": idx,
+            "nume_cheltuiala": item.nume_cheltuiala,
+            "deducere_in_ron": item.deducere_in_ron,
+            "data_inserarii": item.data_inserarii.isoformat(),
+            "fisier": item.fisier,
+            "mijloc_fix": item.mijloc_fix,
+        }
+
+        if dbid:
+            data.update({"db_id": item.id})
+
+        rows.append(data)
         idx += 1
 
     return rows
