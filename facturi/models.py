@@ -389,7 +389,7 @@ class FacturaModel(models.Model):
             "valuta": self.valuta,
             "show_iban_furnizor": show_iban_furnizor,
             "serie": self.serie,
-            "numar": self.numar,
+            "numar": str(self.numar),
             "serie_numar": f"{self.serie}-{self.numar}",
             "data_emitere": self.data_emitere.date().isoformat(),
             "data_scadenta": self.data_scadenta.date().isoformat(),
@@ -403,17 +403,26 @@ class FacturaModel(models.Model):
             "email_furnizor": furnizor.email,
             "telefon_furnizor": furnizor.telefon,
             "iban_furnizor": furnizor.iban,
+            "iban_client": "",
             "adresa_client": self.adresa,
             "localitate_client": self.get_localitate(self.localitate),
             "cod_judet_client": self.get_cod_judet(self.localitate),
             "nume_client": self.nume,
-            "cif_client": self.cif,
+            "cif_client": str(self.cif),
             "nr_reg_com_client": self.nr_reg_com,
             "email_client": self.email,
             "telefon_client": self.telefon,
             "cod_modalitate_plata": self.tip_tranzactie,
-            "total_de_plata": self.total_de_plata,
-            "produse_sau_servicii": self.produse_sau_servicii,
+            "total_de_plata": str(self.total_de_plata),
+            "produse_sau_servicii": [
+                {
+                **i, 
+                'id': str(i['id']), 
+                'numar_unitati': str(i['numar_unitati']), 
+                'pret_pe_unitate': str(i['pret_pe_unitate']),
+                'subtotal': str(i['subtotal']),
+                } for i in self.produse_sau_servicii
+            ],
         }
 
         if self.tip_factura == TipFactura.E_FACTURA.value:
