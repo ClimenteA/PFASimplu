@@ -52,10 +52,34 @@
         },
         setSuggested: function(selectedId) {
             let selected = this.suggestedNames.filter(i => i.id == selectedId)[0];
+
+            let tipFacturaSelectEl = document.getElementById('id_tip_factura');
+            const tfoptions = tipFacturaSelectEl.options;
+            for (let i = 0; i < tfoptions.length; i++) {
+                if (tfoptions[i].value === selected.tip_factura) {
+                    tfoptions[i].selected = true;
+                    tipFacturaSelectEl.value = selected.tip_factura;
+                } else {
+                    tfoptions[i].selected = false;
+                }
+            }
+
+            let tipTranzSelectEl = document.getElementById('id_tip_tranzactie');
+            const options = tipTranzSelectEl.options;
+            for (let i = 0; i < options.length; i++) {
+                if (options[i].value === selected.tip_tranzactie) {
+                    options[i].selected = true;
+                    tipTranzSelectEl.value = selected.tip_tranzactie;
+                } else {
+                    options[i].selected = false;
+                }
+            }
+
+            document.getElementById('alege-localitatea').value = selected.localitate;
+            document.getElementById('alege-localitatea').disabled = selected.localitate == 'LOCALITATE GENERIC';
             document.getElementById('id_nume').value = selected.nume;
             document.getElementById('id_cif').value = selected.cif;
             document.getElementById('id_nr_reg_com').value = selected.nr_reg_com;
-            document.getElementById('alege-localitatea').value = selected.localitate;
             document.getElementById('id_adresa').value = selected.adresa;
             document.getElementById('id_email').value = selected.email;
             document.getElementById('id_telefon').value = selected.telefon;
