@@ -10,3 +10,4 @@ dist
 *.spec
 dbsqlite/*
 Untitled.ipynb
+*.pdf
