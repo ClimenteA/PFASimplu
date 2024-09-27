@@ -12,6 +12,8 @@ from utils.views import (
 from utils.localitati import lista_localitati
 from .models import FacturaModel
 from .forms import FacturaForm
+from setari.models import SetariModel
+
 
 
 class FacturiSearchClientName(View):
@@ -42,6 +44,16 @@ class FacturiDescarcareView(View):
 class FacturiView(View):
 
     def get(self, request):
+        result = SetariModel.objects.first()
+        if not result:
+            messages.add_message(
+                request,
+                messages.ERROR,
+                "Introdu datele PFA-ului tau!",
+                extra_tags="🟥 Date necompletate!",
+            )
+            return redirect('/setari/')
+
         redirect_from_delete = handle_delete_id_query_param(request, FacturaModel)
         if redirect_from_delete:
             return redirect_from_delete

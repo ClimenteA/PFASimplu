@@ -10,9 +10,7 @@ from django.shortcuts import render, HttpResponseRedirect, get_object_or_404
 from .forms import InventarForm
 from django.utils import timezone
 from utils.views import handle_delete_id_query_param
-from django.core.files.base import ContentFile
 from django.template.loader import render_to_string
-from utils.pdf_from_html import create_pdf_from_html
 from core.settings import MEDIA_ROOT
 from zipfile import ZipFile
 
@@ -46,6 +44,7 @@ class InventarDescarcaFisierView(View):
             "blank_rows": list(range(30))
         }
 
+        # TODO
         factura_content = render_to_string("fisa_mijloc_fix_pdf.html", context)
         save_pdf_path = os.path.join(MEDIA_ROOT, "fisa_mijloc_fix.pdf")
         save_pdf_path = create_pdf_from_html(factura_content, save_pdf_path)
