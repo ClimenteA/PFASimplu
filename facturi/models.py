@@ -272,9 +272,12 @@ def creeaza_factura_pdf(data: dict, pdf_output_path: str):
         ]
         pdf.table_row(psrow, width_cols, option='responsive')
         
-    pdf.table_row([''])
-
     # Total si nota
+    if data["nota"]:
+        pdf.table_row([f'Note/Obs.: {data["nota"]}'])
+    else:
+        pdf.table_row([''])
+
     pdf.table_header([f"{data['header_total_de_plata']} {data['total_de_plata']} {data["valuta"]}"], align=Align.R)
 
     pdf.output(pdf_output_path)
