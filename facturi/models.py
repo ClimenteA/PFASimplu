@@ -231,8 +231,9 @@ def creeaza_factura_pdf(data: dict, pdf_output_path: str):
     pdf.table_header([data['header_factura']], align=Align.L)
     pdf.table_row([''])
 
-    pdf.table_header(data['header_date_factura'], align=Align.L)
-    pdf.table_row([data['serie'], data['numar'], data['data_emitere'], data['data_scadenta']])
+    width_cols = pdf.table_cols(2,2,4,4)
+    pdf.table_header(data['header_date_factura'], width_cols, align=Align.L)
+    pdf.table_row([data['serie'], data['numar'], data['data_emitere'], data['data_scadenta']], width_cols)
     pdf.table_row([''])
 
 
@@ -255,12 +256,21 @@ def creeaza_factura_pdf(data: dict, pdf_output_path: str):
     pdf.table_row([''])
 
     # Produse sau servicii
-    pdf.table_header(['*'], align=Align.C)
-    pdf.table_row(data['header_produse_servicii'], option='responsive')
+    width_cols = pdf.table_cols(1, 4, 1, 2, 2, 2)
+    pdf.set_font(pdf.font, "B", pdf.text_normal_size)
+    pdf.table_row(data['header_produse_servicii'], width_cols, option='responsive')
+    pdf.set_font(pdf.font, "", pdf.text_normal_size)
 
     for ps in data['produse_sau_servicii']:
-        psrow = list(ps.values())
-        pdf.table_row(psrow, option='responsive')
+        psrow = [
+            ps['id'], 
+            ps['nume_produs_sau_serviciu'],
+            ps['cod_unitate'],
+            ps['numar_unitati'], 
+            ps['pret_pe_unitate'], 
+            ps['subtotal'], 
+        ]
+        pdf.table_row(psrow, width_cols, option='responsive')
         
     pdf.table_row([''])
 
