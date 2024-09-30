@@ -10,9 +10,9 @@ from django.shortcuts import render, HttpResponseRedirect, get_object_or_404
 from .forms import InventarForm
 from django.utils import timezone
 from utils.views import handle_delete_id_query_param
-from django.template.loader import render_to_string
 from core.settings import MEDIA_ROOT
 from zipfile import ZipFile
+from fpdf_table import PDFTable, Align
 
 
 
@@ -26,28 +26,58 @@ class InventarDescarcaFisierView(View):
 
         fel_document = f"{inv.nume_cheltuiala} {inv.data_inserarii.isoformat()}"
 
-        context = {
-            "numar_inventar": nr_inventar,
-            "fel_document": fel_document,
-            "valoare_inventar": inv.suma_in_ron,
-            "amortizare_lunara": inv.amortizare_lunara,
-            "denumire_si_caracteristici_tehnice": "Detaliate in factura/bon.",
-            "accesorii": "Detaliate in factura/bon.",
-            "grupa": inv.grupa,
-            "cod_de_clasificare": inv.cod_de_clasificare,
-            "anul_darii_in_folosinta": inv.anul_darii_in_folosinta,
-            "luna_darii_in_folosinta": inv.luna_darii_in_folosinta,
-            "anul_amortizarii_complete": inv.anul_amortizarii_complete,
-            "luna_amortizarii_complete": inv.luna_amortizarii_complete,
-            "durata_normala_de_functionare": inv.durata_normala_de_functionare,
-            "cota_de_amortizare": inv.cota_de_amortizare,
-            "blank_rows": list(range(30))
-        }
+        pdf = PDFTable()
 
-        # TODO
-        factura_content = render_to_string("fisa_mijloc_fix_pdf.html", context)
+        pdf.add_fonts_custom(
+            font_name="arial", 
+            font_extension="ttf", 
+            font_dir=os.path.join("static", "arial-font"), 
+            set_default=True
+        )
+
+        # Date identificare factura
+        pdf.table_header(["FIŞA MIJLOCULUI FIX"], align=Align.L)
+        pdf.table_row([''])
+        pdf.table_row(['Nr. Inventar: ', str(nr_inventar)])
+        pdf.table_row(['Fel, serie, nr. data document provenienţă: ', fel_document])
+        pdf.table_row(['Valoare de inventar: ', str(inv.suma_in_ron)])
+        pdf.table_row(['Amortizare lunară: ', str(inv.amortizare_lunara)])
+        pdf.table_row(['Denumirea mijlocului fix şi caracteristici tehnice: ', "Detaliate in factura/bon."])
+        pdf.table_row(['Accesorii: ', "Detaliate in factura/bon."])
+        pdf.table_row(['Grupa: ', inv.grupa], option='responsive')
+        pdf.table_row(['Codul de clasificare: ', inv.cod_de_clasificare])
+        pdf.table_row(['Anul dării în folosinţă: ', str(inv.anul_darii_in_folosinta)])
+        pdf.table_row(['Luna dării în folosinţă: ', str(inv.luna_darii_in_folosinta)])
+        pdf.table_row(['Anul amortizării complete: ', str(inv.anul_amortizarii_complete)])
+        pdf.table_row(['Luna amortizării complete: ', str(inv.luna_amortizarii_complete)])
+        pdf.table_row(['Durata normală de funcţionare: ', inv.durata_normala_de_functionare])
+        pdf.table_row(['Cota de amortizare: ', str(inv.cota_de_amortizare)])
+
+        pdf.table_row([''])
+        
+        width_cols = pdf.table_cols(1, 3, 3.5, 0.5, 1, 1, 1, 1)
+        pdf.set_font(pdf.font, "B", pdf.text_normal_size)
+
+        mutari_header = [
+            "Nr.inventar (de la număr la număr)",
+            "Documentul (data, felul, numărul)",
+            "Operaţiunile care privesc mişcarea, creşterea sau diminuarea valorii mijlocului fix",
+            "Buc.",
+            "Debit",
+            "Credit",
+            "Sold",
+            'Soldul contului 105 "Rezerve din reevaluare"'
+        ]
+
+        pdf.table_row(mutari_header, width_cols, option='responsive')
+        pdf.set_font(pdf.font, "", pdf.text_normal_size)
+        
+        empty_rows = [""]*len(mutari_header)
+        for _ in range(20): 
+            pdf.table_row(empty_rows, width_cols)
+
         save_pdf_path = os.path.join(MEDIA_ROOT, "fisa_mijloc_fix.pdf")
-        save_pdf_path = create_pdf_from_html(factura_content, save_pdf_path)
+        pdf.output(save_pdf_path)
 
         extracts_folder = os.path.join(MEDIA_ROOT, "extracts")
         os.makedirs(extracts_folder, exist_ok=True)
