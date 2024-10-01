@@ -75,6 +75,18 @@
                 }
             }
 
+            let valutaEl = document.getElementById('id_valuta');
+            valutaEl.disabled = ['e-factura', 'factura-romana'].includes(tipFacturaSelectEl.value);
+            const voptions = valutaEl.options;
+            for (let i = 0; i < voptions.length; i++) {
+                if (voptions[i].value === selected.valuta) {
+                    voptions[i].selected = true;
+                    valutaEl.value = selected.valuta;
+                } else {
+                    voptions[i].selected = false;
+                }
+            }
+
             document.getElementById('alege-localitatea').value = selected.localitate;
             document.getElementById('alege-localitatea').disabled = selected.localitate == 'LOCALITATE GENERIC';
             document.getElementById('id_nume').value = selected.nume;

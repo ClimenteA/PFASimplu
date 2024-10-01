@@ -1,14 +1,16 @@
+import shutil
 from django.shortcuts import render, HttpResponseRedirect
 from django.contrib import messages
 from django.views import View
-from .forms import SetariForm
-from .models import SetariModel
 from cheltuieli.models import CheltuialaModel
 from incasari.models import IncasariModel
 from documente.models import DocumenteModel
 from facturi.models import FacturaModel
 from utils.localitati import lista_localitati
 from utils.data_import_v1 import DataImportV1
+from .forms import SetariForm
+from .models import SetariModel
+from core.settings import MEDIA_ROOT, make_media_dir
 
 
 class ImportV1View(View):
@@ -73,5 +75,8 @@ class SetariViewDropData(View):
         IncasariModel.objects.all().delete()
         DocumenteModel.objects.all().delete()
         FacturaModel.objects.all().delete()
+
+        shutil.rmtree(MEDIA_ROOT, ignore_errors=True)
+        make_media_dir()
 
         return HttpResponseRedirect("/setari/")
