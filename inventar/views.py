@@ -119,7 +119,7 @@ class InventarView(View):
 
         results = CheltuialaModel.objects.filter(
             Q(obiect_de_inventar=True) | Q(mijloc_fix=True)
-        ).order_by("-actualizat_la")
+        ).order_by("-data_inserarii")
 
         paginator = Paginator(results, 100)
         page_items = paginator.get_page(page_number)
