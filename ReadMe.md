@@ -64,7 +64,9 @@ Din sectiunea `Releases` din aceasta pagina descarca zip-ul pentru sistemul tau 
 Odata descarcat click dreapta unzip si rulezi executabilul `pfasimplu.exe`.
 Daca ai MacOS va trebui sa urmezi sectiunea *Instalare pt. developeri*. 
 
-Executabilul nu are un certificat digital, asa ca sistemul de operare (windows/macos) iti va spune ca executabilul este un posibil virus sau ca este de la "un unknown publisher". Poti urma sectiunea *Instalare pt. developeri* daca vrei sa eviti asta. Sa fii safe: nu descarca acest executabil din alta locatie decat cea din acest GitHub repo!  
+Daca executabilul nu functioneaza va trebui sa instalezi [latest-microsoft-visual-c-redistributable-version x64](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#latest-microsoft-visual-c-redistributable-version).
+
+Executabilul nu are un certificat digital, asa ca sistemul de operare (windows/macos) iti va spune ca executabilul este un posibil virus sau ca este de la "un unknown publisher". Poti urma sectiunea *Instalare pt. developeri* daca vrei sa eviti asta. Sa fii safe: nu descarca acest executabil din alta locatie decat cea din acest GitHub repo!
 
 
 ## Instalare pt. developeri
