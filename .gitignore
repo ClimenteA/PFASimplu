@@ -11,3 +11,4 @@ dist
 dbsqlite/*
 Untitled.ipynb
 *.pdf
+staticfiles

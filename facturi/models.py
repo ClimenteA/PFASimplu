@@ -11,7 +11,7 @@ from utils.localitati import Localitati
 from utils.files import get_save_path
 from utils.valuta import Valuta
 from setari.models import SetariModel
-from core.settings import MEDIA_ROOT
+from core.settings import MEDIA_ROOT, get_font_path
 from fpdf_table import PDFTable, Align
 
 
@@ -218,12 +218,12 @@ def creeaza_factura_pdf(data: dict, pdf_output_path: str):
 
     data = pdf_template_mapper[data["tip_factura"]](data)
 
-    pdf = PDFTable()
+    pdf = PDFTable()    
 
     pdf.add_fonts_custom(
         font_name="arial", 
         font_extension="ttf", 
-        font_dir=os.path.join("static", "arial-font"), 
+        font_dir=get_font_path(), 
         set_default=True
     )
 
@@ -241,13 +241,13 @@ def creeaza_factura_pdf(data: dict, pdf_output_path: str):
     pdf.table_header(data['header_date_client_furnizor'], align=Align.L)
 
     contact_info = [
-        [data['nume_lang'], data['nume_furnizor'], data['nume_client']],
-        [data['nr_reg_com_lang'], data['nr_reg_com_furnizor'], data['nr_reg_com_client']],
-        [data['cif_lang'], data['cif_furnizor'], data['cif_client']],
-        [data['adresa_lang'], data['adresa_furnizor'], data['adresa_client']],
-        [data['email_lang'], data['email_furnizor'], data['email_client']],
-        [data['telefon_lang'], data['telefon_furnizor'], data['telefon_client']],
-        [data['iban_lang'], data['iban_furnizor'], data['iban_client']]
+        [data['nume_lang'] or "", data['nume_furnizor'] or "", data['nume_client']] or "",
+        [data['nr_reg_com_lang'] or "", data['nr_reg_com_furnizor'] or "", data['nr_reg_com_client'] or ""],
+        [data['cif_lang'] or "", data['cif_furnizor'] or "", data['cif_client'] or ""],
+        [data['adresa_lang'] or "", data['adresa_furnizor'] or "", data['adresa_client'] or ""],
+        [data['email_lang'] or "", data['email_furnizor'] or "", data['email_client'] or ""],
+        [data['telefon_lang'] or "", data['telefon_furnizor'] or "", data['telefon_client'] or ""],
+        [data['iban_lang'] or "", data['iban_furnizor'] or "", data['iban_client'] or ""]
     ]
 
     for ci in contact_info:

@@ -62,7 +62,7 @@ MIDDLEWARE = [
 
 
 INTERNAL_IPS = [
-    "127.0.0.1",
+    "127.0.0.1", "localhost"
 ]
 
 ROOT_URLCONF = "core.urls"
@@ -141,10 +141,21 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
+static_files_path = os.path.join(BASE_DIR, "static")
+
 STATIC_URL = "static/"
-STATIC_ROOT = BASE_DIR / "public"
-STATICFILES_DIRS = [BASE_DIR / "static"]
+STATICFILES_DIRS = [static_files_path]
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+
+def get_font_path():
+
+    development_path = os.path.join(static_files_path, "arial-font")
+    if os.path.exists(development_path):
+        return development_path
+    
+    pyinstaller_path = os.path.join(BASE_DIR, "_internal", "static", "arial-font")
+    return pyinstaller_path
+
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")

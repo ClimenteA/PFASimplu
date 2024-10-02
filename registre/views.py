@@ -2,7 +2,6 @@ import os
 import itertools
 from copy import copy
 import pandas as pd
-import matplotlib.pyplot as plt
 from django.shortcuts import render
 from django.views import View
 from django.shortcuts import render
@@ -15,6 +14,11 @@ from utils.calcule import calculeaza_taxe_si_impozite
 from utils.valuta import ron_to_eur
 from utils.views import download_csv_or_xlsx
 from core.settings import MEDIA_ROOT
+
+import matplotlib
+matplotlib.use('SVG')
+
+import matplotlib.pyplot as plt
 
 
 class RegistruJurnalDescarcaView(View):
