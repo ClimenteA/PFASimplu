@@ -35,6 +35,9 @@ class RegistruJurnalDescarcaView(View):
         anul = get_year_from_request(request)
         incasari, cheltuieli = incasari_cheltuieli_dupa_anul_inserarii(anul)
         data = get_registru_jurnal_incasari_si_plati(request, incasari, cheltuieli)
+
+        if not data:
+            return redirect("/registre/")
         
         file_ids = list(set([d["documentId"] for d in data if d["documentId"] is not None]))
 
