@@ -26,13 +26,12 @@ class RegistruJurnalDescarcaView(View):
     def get(self, request):
         data = get_registru_jurnal_incasari_si_plati(request)
         df = pd.DataFrame(data)
-        df = df.drop(columns=["end_of_month"])
+        df = df.drop(columns=["end_of_month", "documentId"])
         df = df.rename(
             columns={
                 "nr_crt": "Nr.Crt.",
                 "data": "Data",
                 "documentul": "Documentul (fel, numar)",
-                "documentId": "Doc.Id",
                 "felul_operatiunii": "Felul operatiunii (explicatii)",
                 "incasari_numerar": "Incasari Numerar",
                 "incasari_banca": "Incasari Banca",
