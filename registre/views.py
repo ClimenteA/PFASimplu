@@ -1,9 +1,11 @@
 import os
+import shutil
 import itertools
 from copy import copy
 import pandas as pd
 from django.shortcuts import render
 from django.views import View
+from django.http import HttpResponse
 from django.shortcuts import render
 from django.utils import timezone
 from django.db.models import Sum, Q
@@ -13,10 +15,14 @@ from documente.models import DocumenteModel
 from utils.calcule import calculeaza_taxe_si_impozite
 from utils.valuta import ron_to_eur
 from utils.views import download_csv_or_xlsx
-from core.settings import MEDIA_ROOT
+from core.settings import MEDIA_ROOT, get_extracts_path
+from zipfile import ZipFile
+from utils.pretty_excel import make_excel_pretty
+
 
 import matplotlib
-matplotlib.use('SVG')
+# prevent thread issue with flaskwebgui
+matplotlib.use("SVG") 
 
 import matplotlib.pyplot as plt
 
@@ -24,7 +30,30 @@ import matplotlib.pyplot as plt
 class RegistruJurnalDescarcaView(View):
 
     def get(self, request):
-        data = get_registru_jurnal_incasari_si_plati(request)
+        anul = get_year_from_request(request)
+        incasari, cheltuieli = incasari_cheltuieli_dupa_anul_inserarii(anul)
+        data = get_registru_jurnal_incasari_si_plati(request, incasari, cheltuieli)
+        
+        file_ids = list(set([d["documentId"] for d in data if d["documentId"] is not None]))
+
+        query = Q()
+        for file_id in file_ids:
+            query |= Q(fisier__startswith=file_id)
+
+        incasari_fisiere = incasari.filter(query)
+        cheltuieli_fisiere = cheltuieli.filter(query)
+
+        rjip_files_path = get_extracts_path("rjip")
+        
+        rjip_files = []
+        for item in incasari_fisiere:
+            fp = shutil.copy2(item.fisier.path, os.path.join(rjip_files_path, os.path.basename(item.fisier.path))) 
+            rjip_files.append(fp)
+
+        for item in cheltuieli_fisiere:
+            fp = shutil.copy2(item.fisier.path, os.path.join(rjip_files_path, os.path.basename(item.fisier.path))) 
+            rjip_files.append(fp)
+
         df = pd.DataFrame(data)
         df = df.drop(columns=["end_of_month", "documentId"])
         df = df.rename(
@@ -39,7 +68,26 @@ class RegistruJurnalDescarcaView(View):
                 "plati_banca": "Plati Banca",
             }
         )
-        return download_csv_or_xlsx(request, df, "registru_jurnal_incasari_si_plati")
+        
+        extracts_path = get_extracts_path()
+        rjip_excel_path = os.path.join(extracts_path, "registru_jurnal_incasari_si_plati.xlsx")
+        df.to_excel(rjip_excel_path, index=False)
+        make_excel_pretty(rjip_excel_path)
+
+        files = [*rjip_files, rjip_excel_path]
+
+        zip_filename = os.path.join(extracts_path, f"registru_jurnal_{anul}.zip")
+        with ZipFile(zip_filename, "w") as zipf:
+            for file in files:
+                zipf.write(file, os.path.basename(file))
+
+        response = HttpResponse(
+            open(zip_filename, "rb"), content_type="application/zip"
+        )
+        response["Content-Disposition"] = (
+            f"attachment; filename={os.path.basename(zip_filename)}"
+        )
+        return response
 
 
 class RegistruFiscalDescarcaView(View):
@@ -499,12 +547,22 @@ LUNI_RO = {
 }
 
 
-def get_registru_jurnal_incasari_si_plati(request):
+def get_year_from_request(request):
     anul = request.GET.get("anul")
     anul = int(anul) if anul else timezone.now().year
+    return anul
 
+def incasari_cheltuieli_dupa_anul_inserarii(anul: int):
     incasari = IncasariModel.objects.filter(data_inserarii__year=anul)
     cheltuieli = CheltuialaModel.objects.filter(data_inserarii__year=anul)
+    return incasari, cheltuieli
+
+
+def get_registru_jurnal_incasari_si_plati(request, incasari = None, cheltuieli = None):
+    anul = get_year_from_request(request)
+
+    if incasari == None and cheltuieli == None:
+        incasari, cheltuieli = incasari_cheltuieli_dupa_anul_inserarii(anul)
 
     combined_data = sorted(
         itertools.chain(incasari, cheltuieli), key=lambda x: x.data_inserarii
@@ -586,6 +644,7 @@ def get_registru_jurnal_incasari_si_plati(request):
                     "nr_crt": "-",
                     "data": "-",
                     "documentul": "-",
+                    "documentId": None,
                     "felul_operatiunii": f"Calcul total luna {LUNI_RO[current_month]}",
                     "incasari_numerar": round(total_incasari_numerar, 2),
                     "incasari_banca": round(total_incasari_bancar, 2),

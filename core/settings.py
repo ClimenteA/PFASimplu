@@ -1,5 +1,5 @@
 import os
-import json
+import shutil
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -165,6 +165,15 @@ def make_media_dir():
         os.makedirs(MEDIA_ROOT)
 
 make_media_dir()
+
+def get_extracts_path(extra_dir: str | None = None):
+    extracts_path = os.path.join(MEDIA_ROOT, "extracts")
+    if extra_dir:
+        extracts_path = os.path.join(extracts_path, extra_dir) 
+        shutil.rmtree(extracts_path, ignore_errors=True)
+    os.makedirs(extracts_path, exist_ok=True)
+    return extracts_path
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

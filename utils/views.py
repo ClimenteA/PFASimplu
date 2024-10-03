@@ -3,7 +3,6 @@ import itertools
 import pandas as pd
 from datetime import datetime, timedelta
 from zipfile import ZipFile
-from django.conf import settings
 from django.http import HttpResponse
 from django.core.paginator import Paginator
 from django.shortcuts import HttpResponseRedirect, get_object_or_404
@@ -11,6 +10,7 @@ from django.utils import timezone
 from django.forms import ModelForm
 from django.db.models import Model
 from django.contrib import messages
+from core.settings import get_extracts_path
 
 
 def one_month_from_now():
@@ -94,8 +94,7 @@ def download_csv_or_xlsx(request, df: pd.DataFrame, filename: str):
     if filetype not in ["csv", "xlsx"]:
         return HttpResponseRedirect("/registre/")
 
-    extracts_folder = os.path.join(settings.MEDIA_ROOT, "extracts")
-    os.makedirs(extracts_folder, exist_ok=True)
+    extracts_folder = get_extracts_path()
 
     if filename == "registru_inventar":
         filename = f"{filename}.{filetype}"
@@ -133,8 +132,8 @@ def download_zip(request, theModel: Model, order_by: str = "-data_inserarii"):
         return HttpResponseRedirect("/registre/")
 
     page_number = 1
-    extracts_folder = os.path.join(settings.MEDIA_ROOT, "extracts")
-    os.makedirs(extracts_folder, exist_ok=True)
+    extracts_folder = get_extracts_path()
+
     files = []
 
     while True:
