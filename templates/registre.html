@@ -12,13 +12,13 @@
         <h1 style="display: flex; align-items: center; gap: 1rem;">
             <span>📊 Registre</span>
 
-            <select id="anul" class="mb-2" style="margin: 0; width: fit-content;" onclick="redirectToYear()">
+            <select id="anul" class="mb-2" style="margin: 0; width: fit-content;" onchange="redirectToYear()">
                 {% for an in ani_inregistrati %}
                 <option value="{{ an }}" {% if anul == an %} selected {% endif %}>{{ an }}</option>
                 {% endfor %}
             </select>
 
-            <select id="valuta" class="mb-2" style="margin: 0; width: fit-content;" onclick="redirectToYear()">
+            <select id="valuta" class="mb-2" style="margin: 0; width: fit-content;" onchange="redirectToYear()">
                 <option value="RON" {% if valuta == "RON" %} selected {% endif %}>In RON</option>
                 <option value="EUR" {% if valuta == "EUR" %} selected {% endif %}>In EUR</option>
             </select>
