@@ -19,7 +19,8 @@ def make_excel_pretty(excel_path: str):
         adjusted_width = (max_length + 2)
         ws.column_dimensions[column].width = adjusted_width
 
-    header_fill = PatternFill(start_color="CCFFCC", end_color="CCFFCC", fill_type="solid")
+    header_fill = PatternFill(start_color="00895a", end_color="00895a", fill_type="solid")
+    
     for cell in ws[1]:
         cell.fill = header_fill
 
