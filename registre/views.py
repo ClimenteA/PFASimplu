@@ -6,7 +6,7 @@ import pandas as pd
 from django.shortcuts import render
 from django.views import View
 from django.http import HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.utils import timezone
 from django.db.models import Sum, Q
 from cheltuieli.models import CheltuialaModel, Deductibilitate
@@ -30,6 +30,7 @@ import matplotlib.pyplot as plt
 class RegistruJurnalDescarcaView(View):
 
     def get(self, request):
+        filetype = request.GET.get("filetype").lower()
         anul = get_year_from_request(request)
         incasari, cheltuieli = incasari_cheltuieli_dupa_anul_inserarii(anul)
         data = get_registru_jurnal_incasari_si_plati(request, incasari, cheltuieli)
@@ -70,12 +71,19 @@ class RegistruJurnalDescarcaView(View):
         )
         
         extracts_path = get_extracts_path()
-        rjip_excel_path = os.path.join(extracts_path, "registru_jurnal_incasari_si_plati.xlsx")
-        df.to_excel(rjip_excel_path, index=False)
-        make_excel_pretty(rjip_excel_path)
 
-        files = [*rjip_files, rjip_excel_path]
-
+        if filetype == "xlsx":
+            rjip_fp = os.path.join(extracts_path, "registru_jurnal_incasari_si_plati.xlsx")
+            df.to_excel(rjip_fp, index=False)
+            make_excel_pretty(rjip_fp)
+        elif filetype == "csv":
+            rjip_fp = os.path.join(extracts_path, "registru_jurnal_incasari_si_plati.csv")
+            df.to_csv(rjip_fp, index=False)
+        else:
+            return redirect("/registre/")
+        
+        files = [*rjip_files, rjip_fp]
+        
         zip_filename = os.path.join(extracts_path, f"registru_jurnal_{anul}.zip")
         with ZipFile(zip_filename, "w") as zipf:
             for file in files:

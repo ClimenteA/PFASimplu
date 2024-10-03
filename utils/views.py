@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from zipfile import ZipFile
 from django.http import HttpResponse
 from django.core.paginator import Paginator
-from django.shortcuts import HttpResponseRedirect, get_object_or_404
+from django.shortcuts import redirect, get_object_or_404
 from django.utils import timezone
 from django.forms import ModelForm
 from django.db.models import Model
@@ -36,7 +36,7 @@ def handle_delete_id_query_param(request, theModel: Model, redirect_to: str = No
             extra_tags="✅ Succes!",
         )
 
-        return HttpResponseRedirect(redirect_to if redirect_to else redirect_mapper[theModel.__qualname__])
+        return redirect(redirect_to if redirect_to else redirect_mapper[theModel.__qualname__])
 
 
 
@@ -92,7 +92,7 @@ def download_csv_or_xlsx(request, df: pd.DataFrame, filename: str):
     filetype = request.GET.get("filetype").lower()
 
     if filetype not in ["csv", "xlsx"]:
-        return HttpResponseRedirect("/registre/")
+        return redirect("/registre/")
 
     extracts_folder = get_extracts_path()
 
@@ -129,7 +129,7 @@ def download_zip(request, theModel: Model, order_by: str = "-data_inserarii"):
     filetype = request.GET.get("filetype").lower()
 
     if filetype not in ["csv", "xlsx"]:        
-        return HttpResponseRedirect("/registre/")
+        return redirect("/registre/")
 
     page_number = 1
     extracts_folder = get_extracts_path()
