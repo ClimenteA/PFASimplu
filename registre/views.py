@@ -883,8 +883,6 @@ def create_bar_plot(
     currency: str = "RON",
 ):
 
-    print("valori pentru chart:", incasari_pe_luni, cheltuieli_pe_luni)
-
     if currency == "EUR":
         incasari_pe_luni = [ron_to_eur(i, anul) for i in incasari_pe_luni]
         cheltuieli_pe_luni = [ron_to_eur(c, anul) for c in cheltuieli_pe_luni]
