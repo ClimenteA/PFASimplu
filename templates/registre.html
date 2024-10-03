@@ -144,11 +144,11 @@
     <div x-show="active == 'rjip'" class="overflow-auto mt-2 mb-6">
 
         <div style="display: flex; justify-content: end; overflow: hidden;">
-            <a href="{% url 'descarca-registru-jurnal' %}?filetype=CSV" class="px-1 secondary"
+            <a href="{% url 'descarca-registru-jurnal' %}?filetype=CSV&anul={{ anul }}" class="px-1 secondary"
                 data-tooltip="Descarca CSV">
                 <i class="bi bi-filetype-csv"></i>
             </a>
-            <a href="{% url 'descarca-registru-jurnal' %}?filetype=XLSX" class="px-1 secondary"
+            <a href="{% url 'descarca-registru-jurnal' %}?filetype=XLSX&anul={{ anul }}" class="px-1 secondary"
                 data-tooltip="Descarca XLSX">
                 <i class="bi bi-filetype-xlsx"></i>
             </a>
@@ -207,11 +207,11 @@
     <div x-show="active == 'ref'" class="overflow-auto mt-2 mb-6">
 
         <div style="display: flex; justify-content: end; overflow: hidden;">
-            <a href="{% url 'descarca-registru-fiscal' %}?filetype=CSV" class="px-1 secondary"
+            <a href="{% url 'descarca-registru-fiscal' %}?filetype=CSV&anul={{ anul }}" class="px-1 secondary"
                 data-tooltip="Descarca CSV">
                 <i class="bi bi-filetype-csv"></i>
             </a>
-            <a href="{% url 'descarca-registru-fiscal' %}?filetype=XLSX" class="px-1 secondary"
+            <a href="{% url 'descarca-registru-fiscal' %}?filetype=XLSX&anul={{ anul }}" class="px-1 secondary"
                 data-tooltip="Descarca XLSX">
                 <i class="bi bi-filetype-xlsx"></i>
             </a>

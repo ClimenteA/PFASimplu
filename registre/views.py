@@ -82,13 +82,13 @@ class RegistruJurnalDescarcaView(View):
         else:
             return redirect("/registre/")
         
-        files = [*rjip_files, rjip_fp]
         
         zip_filename = os.path.join(extracts_path, f"registru_jurnal_{anul}.zip")
         with ZipFile(zip_filename, "w") as zipf:
-            for file in files:
-                zipf.write(file, os.path.basename(file))
-
+            for file in rjip_files:
+                zipf.write(file, os.path.join("documente", os.path.basename(file)))
+            zipf.write(rjip_fp, os.path.basename(rjip_fp))
+            
         response = HttpResponse(
             open(zip_filename, "rb"), content_type="application/zip"
         )
