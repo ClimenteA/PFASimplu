@@ -18,6 +18,7 @@ from utils.views import download_csv_or_xlsx
 from core.settings import MEDIA_ROOT, get_extracts_path
 from zipfile import ZipFile
 from utils.pretty_excel import make_excel_pretty
+from utils.mijloc_fix_pdf import create_fisa_mijloc_fix_pdf
 
 
 import matplotlib
@@ -82,7 +83,7 @@ class RegistruJurnalDescarcaView(View):
         else:
             return redirect("/registre/")
         
-        
+
         zip_filename = os.path.join(extracts_path, f"registru_jurnal_{anul}.zip")
         with ZipFile(zip_filename, "w") as zipf:
             for file in rjip_files:
@@ -125,8 +126,27 @@ class RegistruFiscalDescarcaView(View):
 class RegistruInventarDescarcaView(View):
 
     def get(self, request):
-        data = get_registru_inventar(dbid=False)
+        filetype = request.GET.get("filetype").lower()
+        data = get_registru_inventar(dbid=True)
+        
+        src_filepaths = []
+        for item in data:
+            if item["mijloc_fix"]:
+                zip_filepath = create_fisa_mijloc_fix_pdf(item['db_id'], item['nr_crt'])
+                item["fisier"] = os.path.basename(zip_filepath)
+                src_filepaths.append(zip_filepath)
+            else:
+                src_filepaths.append(item["fisier"])
+                item["fisier"] = os.path.basename(item["fisier"])
+
+        ri_files_path = get_extracts_path("ri")
+        ri_files = []
+        for sfp in src_filepaths:
+            fp = shutil.copy2(sfp, os.path.join(ri_files_path, os.path.basename(sfp))) 
+            ri_files.append(fp)
+
         df = pd.DataFrame(data)
+        df = df.drop(columns=["mijloc_fix", "db_id"])
         df = df.rename(
             columns={
                 "nr_crt": "Nr.Crt.",
@@ -136,7 +156,33 @@ class RegistruInventarDescarcaView(View):
                 "fisier": "Document",
             }
         )
-        return download_csv_or_xlsx(request, df, "registru_inventar")
+
+        extracts_path = get_extracts_path()
+
+        if filetype == "xlsx":
+            ri_fp = os.path.join(extracts_path, "registru_inventar.xlsx")
+            df.to_excel(ri_fp, index=False)
+            make_excel_pretty(ri_fp)
+        elif filetype == "csv":
+            ri_fp = os.path.join(extracts_path, "registru_inventar.csv")
+            df.to_csv(ri_fp, index=False)
+        else:
+            return redirect("/registre/")
+        
+        zip_filename = os.path.join(extracts_path, "registru_inventar.zip")
+        with ZipFile(zip_filename, "w") as zipf:
+            for file in ri_files:
+                zipf.write(file, os.path.join("documente", os.path.basename(file)))
+            zipf.write(ri_fp, os.path.basename(ri_fp))
+            
+        response = HttpResponse(
+            open(zip_filename, "rb"), content_type="application/zip"
+        )
+        response["Content-Disposition"] = (
+            f"attachment; filename={os.path.basename(zip_filename)}"
+        )
+        return response
+
 
 
 class RegistreView(View):
@@ -166,22 +212,29 @@ class RegistreView(View):
         )
 
 
-def get_registru_inventar(dbid: bool = True):
-
+def get_obiecte_inventar():
     results = CheltuialaModel.objects.filter(
         (Q(obiect_de_inventar=True) | Q(mijloc_fix=True)) & Q(scos_din_uz=False)
     ).order_by("data_inserarii")
 
+    return results
+
+
+def get_registru_inventar(dbid: bool = True, obiecte_inventar = None):
+
+    if obiecte_inventar is None:
+        obiecte_inventar = get_obiecte_inventar()
+
     idx = 1
     rows = []
-    for item in results:
+    for item in obiecte_inventar:
 
         data = {
             "nr_crt": idx,
             "nume_cheltuiala": item.nume_cheltuiala,
             "deducere_in_ron": item.deducere_in_ron,
             "data_inserarii": item.data_inserarii.isoformat(),
-            "fisier": item.fisier,
+            "fisier": item.fisier.path,
             "mijloc_fix": item.mijloc_fix,
         }
 

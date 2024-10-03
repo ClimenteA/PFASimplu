@@ -11,6 +11,7 @@ from django.forms import ModelForm
 from django.db.models import Model
 from django.contrib import messages
 from core.settings import get_extracts_path
+from .pretty_excel import make_excel_pretty
 
 
 def one_month_from_now():
@@ -113,6 +114,7 @@ def download_csv_or_xlsx(request, df: pd.DataFrame, filename: str):
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
         df.to_excel(filepath, index=False)
+        make_excel_pretty(filepath)
 
     response = HttpResponse(open(filepath, "rb"), content_type=content_type)
     response["Content-Disposition"] = (
@@ -155,6 +157,7 @@ def download_zip(request, theModel: Model, order_by: str = "-data_inserarii"):
             df.to_csv(filename, index=False)
         if filetype == "xlsx":
             df.to_excel(filename, index=False)
+            make_excel_pretty(filename)
 
         files.append(filename)
 
