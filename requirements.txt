@@ -13,3 +13,4 @@ flaskwebgui==1.1.5
 waitress==3.0.0
 whitenoise==6.7.0
 fpdf-table==1.1.5
+requests-cache==1.2.1

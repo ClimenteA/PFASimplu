@@ -34,17 +34,3 @@ class SetariModel(models.Model):
 
     def __str__(self):
         return self.nume
-
-
-class VersiuneModel(models.Model):
-    versiune_aplicatie = models.CharField(
-        max_length=100, default="2.0.0", null=True, blank=True
-    )
-    cod_calcul_taxe_impozite = models.TextField(null=True, blank=True)
-    ultima_actualizare = models.DateTimeField(default=timezone.now)
-
-    class Meta:
-        verbose_name_plural = "Versiuni"
-
-    def __str__(self):
-        return f"Aplicatie v{self.versiune_aplicatie} {self.ultima_actualizare.isoformat()}"

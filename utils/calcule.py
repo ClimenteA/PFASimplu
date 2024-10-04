@@ -1,8 +1,3 @@
-import requests
-import textwrap
-from datetime import timedelta
-from django.utils import timezone
-from setari.models import VersiuneModel
 
 
 def get_venit_net(year: int):
@@ -23,10 +18,7 @@ def get_venit_brut(year: int):
     return total_incasari
 
 
-def calcul_taxe_impozite_local(venit_net: float, anul: int):
-    """
-    versiune = "2.0.0"
-    """
+def calculeaza_taxe_si_impozite(venit_net: float, anul: int):
 
     minim_brute_an_val = {
         2020: 2230,
@@ -106,49 +98,3 @@ def calcul_taxe_impozite_local(venit_net: float, anul: int):
         "impozit_pe_venit": round(impozitPeVenit, 2),
         "total_taxe_impozite": round(total, 2),
     }
-
-
-def ultimul_calcul_taxe_impozite():
-
-    one_day_ago = timezone.now() - timedelta(days=1)
-
-    items = VersiuneModel.objects.filter(
-        ultima_actualizare__gte=one_day_ago,
-        cod_calcul_taxe_impozite__isnull=False,
-    )
-
-    if len(items) > 0:
-        return items[0].cod_calcul_taxe_impozite
-
-    response = requests.get(
-        "https://gist.githubusercontent.com/ClimenteA/a11ce736af219c594adf0926b978e26f/raw"
-    )
-    formatted_code = textwrap.dedent(response.text)
-
-    instance = VersiuneModel.objects.first()
-    if instance:
-        instance.ultima_actualizare = timezone.now()
-        instance.cod_calcul_taxe_impozite = formatted_code
-        instance.save()
-    else:
-        VersiuneModel.objects.create(
-            ultima_actualizare=timezone.now(),
-            cod_calcul_taxe_impozite=formatted_code,
-        )
-
-    print("Ultima versiune de calcul taxe si impozite a fost preluata.")
-    return formatted_code
-
-
-def calculeaza_taxe_si_impozite(venit_net: float, anul: int):
-    # try:
-    #     formatted_code = ultimul_calcul_taxe_impozite()
-    #     exec(formatted_code, globals())
-    #     if "calcul_taxe_impozite" in globals():
-    #         return calcul_taxe_impozite(venit_net, anul)  # type: ignore
-    #     else:
-    #         raise NameError("Functia 'calcul_taxe_impozite' nu a putut fi gasita.")
-    # except Exception as err:
-    #     print(err)
-    #     print("calcul din local")
-    return calcul_taxe_impozite_local(venit_net, anul)

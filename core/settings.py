@@ -157,6 +157,19 @@ def get_font_path():
     return pyinstaller_path
 
 
+def get_current_version():
+
+    versiune_path = os.path.join(static_files_path, "versiune.txt")
+    if not os.path.exists(versiune_path):
+        versiune_path = os.path.join(BASE_DIR, "_internal", "static", "versiune.txt")
+
+    with open(versiune_path, "r") as f:
+        ver = f.read()
+
+    return ver
+
+
+
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
