@@ -198,6 +198,17 @@ In cazul Registrului jurnal si Registrului Inventar un fisier zip va fi descarca
 ![registre](readmepics/registre.jpeg)
 
 
+## Actualizare aplicatie
+
+Daca a aparut o noua versiune a aplicatiei in pagina Registre va aparea linkul din imagine in descrierea paginii.
+
+![actualizare-aplicatie](readmepics/actualizare.png)
+
+Un click pe cel link te va duce catre pagina de Github Releases (pagina de unde ai descarcat prima data aplicatia).
+Din Assets descarca ultima versiune pentru sistemul tau de operare. 
+
+**TODO**
+
 
 ## Observatii
 
