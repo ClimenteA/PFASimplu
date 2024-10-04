@@ -21,6 +21,7 @@ Aplicatie pentru simplificarea gestiunii contabilitatii facuta in partida simpla
 - [Documente](#documente)
 - [Inventar](#inventar)
 - [Registre](#registre)
+- [Actualizare aplicatie](#actualizare-aplicatie)
 - [Observatii](#observatii)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
