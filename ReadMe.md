@@ -1,6 +1,8 @@
-# PFASimplu V2 in progress
+# PFASimplu (in progress)
 
+![GitHub all releases](https://img.shields.io/github/downloads/ClimenteA/PFASimplu/total?label=descarcari&style=for-the-badge)
 
+Aplicatie pentru simplificarea gestiunii contabilitatii facuta in partida simpla (versiunea 2).  
 
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
@@ -42,9 +44,11 @@ Aplicatia te ajuta sa:
 
 ## Poate aplicatia sa faca X,Y,Z?
 
-Aplicatia am facut-o potrivita pentru nevoile mele. Daca pe parcurs voi avea nevoie de X,Y,Z atunci poate voi actualiza aplicatia sa contina si X,Y,Z (cum am facut cu e-factura). 
+Aplicatia am facut-o potrivita pentru nevoile mele. Daca pe parcurs voi avea nevoie de X,Y,Z atunci poate voi actualiza aplicatia sa contina si X,Y,Z (cum am facut cu e-factura).
 
-Nu am cunostinte solide de contabilitate, dar daca deschizi un `New issue` din tabul `Issues` din aceasta pagina si spui pas cu pas care sunt cerintele voi lua in considerare sa adaug in aplicatie o noua functionalitate (in functie de timp si cunostinte).
+As fi vrut sa adaug mai multe functionalitati, dar nu am cunostinte solide de contabilitate. 
+Daca deschizi un `New issue` din tabul `Issues` din aceasta pagina si spui pas cu pas care sunt cerintele voi lua in considerare sa adaug in aplicatie o noua functionalitate (in functie de timp si cunostinte).
+
 
 
 ## Ce fac cu versiunea veche a aplicatiei (v1)?
@@ -55,7 +59,7 @@ Daca mai apar modificari de calcul al taxelor/impozitelor dupa 2024 atunci aplic
 **Recomand**: Versiunea 2 are si o optiune de preluare a datelor din versiunea 1. 
 Tot ce trebuie sa faci este sa copii fisierul `stocare` langa executabilul `pfasimplu.exe` si din pagina `Setari` sa apesi butonul `Adauga datele din PFASimplu V1` apoi astepti cateva secunde. Doar un cont trebuie sa fie prezent in folderul stocare.
 
-O alta optiune: Faci un zip cu aplicatia pfasimplu v1 (care contine registrele excel in folderul stocare) si il pui pe un usb stick pentru pastrare. Poti folosi pfasimplu v2 incepand cu noul an.  
+O alta optiune: Faci un zip cu aplicatia pfasimplu v1 (care contine registrele excel in folderul stocare) si il pui pe un usb stick pentru pastrare. Apoi, poti folosi v2.
 
 
 ## Instalare pt. utilizatori
@@ -64,7 +68,9 @@ Din sectiunea `Releases` din aceasta pagina descarca zip-ul pentru sistemul tau 
 Odata descarcat click dreapta unzip si rulezi executabilul `pfasimplu.exe`.
 Daca ai MacOS va trebui sa urmezi sectiunea *Instalare pt. developeri*. 
 
-Daca executabilul nu functioneaza va trebui sa instalezi [latest-microsoft-visual-c-redistributable-version x64](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#latest-microsoft-visual-c-redistributable-version).
+- [Click aici](https://github.com/ClimenteA/PFASimplu/releases) si descarca zip-ul din `Assets` pentru sistemul tau de operare (Windows, Ubuntu);
+
+Daca executabilul nu functioneaza pe Windows va trebui sa instalezi [latest-microsoft-visual-c-redistributable-version x64](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#latest-microsoft-visual-c-redistributable-version).
 
 Executabilul nu are un certificat digital, asa ca sistemul de operare (windows/macos) iti va spune ca executabilul este un posibil virus sau ca este de la "un unknown publisher". Poti urma sectiunea *Instalare pt. developeri* daca vrei sa eviti asta. Sa fii safe: nu descarca acest executabil din alta locatie decat cea din acest GitHub repo!
 
@@ -169,7 +175,10 @@ In cazul dovezii platii de impozite (pdf-ul primit de la ghiseul.ro) si al decla
 
 Aici gasesti tabelul cu toate obiectele de inventar si mijloacele/activele fixe achizitionate pana acum. Tot aici poti scoate din inventar un obiect de inventar sau mijloc fix. Daca ai vandut obiectul de inventar/mijlocul fix va trebui sa-l introduci si la incasari la Sursa venit: 'Venit din alte surse'. 
 
-Pentru a scoate un obiect de inventar din uz trebuie sa dai click in coloana Mod. pe iconita de modificare.
+Pentru a scoate un obiect de inventar din uz trebuie sa dai click in coloana Mod. pe iconita de modificare. 
+Formularul va fi completat cu datele salvate anterior pe care acum le poti modifica si salva.
+
+Deasupra tabelului in dreapta vei gasi 2 iconite pentru a descarca tot tabelul incasari. 
 
 
 ![inventar](readmepics/inventar.jpeg)
@@ -181,7 +190,9 @@ Pentru a scoate un obiect de inventar din uz trebuie sa dai click in coloana Mod
 Aici ai o vedere de ansamblu asupra incasarilor, cheltuielilor precum si taxele/impozitele de platit pentru anul curent, venituri vs cheltuieli pe ani, notificari facturi neincasate, declaratii de urcat in SPV etc. Totodata ai disponibile si registrele contabile obligatorii pe care trebuie sa le ai in relatia cu ANAF. Nu trebuie sa plateasca CASS: cei care cu profesii liberale (avocat, notar etc.) care au venituri nete sub 6 salarii minime. 
 
 Poti alege sa vezi sumele din grafic si total carduri in EUR sau RON. 
-Si da nu e gresit chiar daca ai 0 incasari (sau sub 6 salarii minime) trebuie sa platesti CASS ~2000 RON. 
+Si da, nu e gresit chiar daca ai 0 incasari (sau sub 6 salarii minime) trebuie sa platesti CASS ~2000 RON. 
+Poti descarca registrele dand click fie pe iconita de csv sau xlsx. 
+In cazul Registrului jurnal si Registrului Inventar un fisier zip va fi descarcat in folderul Downloads care va contine datele registrului intr-un fisier xlsx sau csv (depinde ce icon ai ales) si un folder Documente in care vor fi toate documentele justificative. Toate fisierele salvate in aplicatie for avea un prefix id de 8 caractere dupa care le puteti gasi (ex: `0x4rf2KW_Factura_etc.pdf`).  
 
 
 ![registre](readmepics/registre.jpeg)
@@ -190,7 +201,7 @@ Si da nu e gresit chiar daca ai 0 incasari (sau sub 6 salarii minime) trebuie sa
 
 ## Observatii
 
-Aplicatia este oferita ca atare, nu are nici o garantie asociata. Nu imi asumam raspunderea pentru eventuale erori in procesare date contabilitate, daune provocate dispozitivelor etc. Testeaza aplicatia inainte si vezi daca raspunde nevoilor tale inainte de o adauga in rutina de lucru.
+**Aplicatia este oferita ca atare, nu are nici o garantie asociata**. Nu imi asumam raspunderea pentru eventuale erori in procesare date contabilitate, daune provocate dispozitivelor etc. Testeaza aplicatia inainte si vezi daca raspunde nevoilor tale inainte de o adauga in rutina de lucru.
 
 Daca gasesti erori in aplicatie poti deschide un [`New issue`](https://github.com/ClimenteA/PFASimplu/issues/new) in tabul `Issues` din acesta pagina sau poti [posta pe reddit](https://www.reddit.com/r/PFASimplu/submit/?type=TEXT) in subredditul [PFASimplu](https://www.reddit.com/r/PFASimplu/).
 
@@ -198,5 +209,9 @@ Daca gasesti erori in aplicatie poti deschide un [`New issue`](https://github.co
 😁 Daca ai de unde, nu ma supar sa primesc donatii:
 
 <a href="https://www.buymeacoffee.com/climentea" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
+
+
+Daca vrei sa inveti sa faci aplicatii web de la 0 am facut un curs de 15 ore (Python, Javascript, HTML/CSS, Docker, Mongo etc) - [click aici](https://curs.softgata.com/) pentru mai multe detalii.
+
 
 Daca ai nevoie de o aplicatie web sau o automatizare a unui process de business ma poti contacta pe [ro.softgata.com](https://ro.softgata.com/). Imi poti trimite si un mesaj pe [linkedin](https://www.linkedin.com/in/climente-alin/) in caz de a picat hosting-ul pentru softgata.com 😅 (mai postez si acolo din cand in cand).
