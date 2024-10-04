@@ -1,6 +1,8 @@
 import os
+import json
 import shutil
 from pathlib import Path
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -167,6 +169,20 @@ def get_current_version():
         ver = f.read()
 
     return ver
+
+
+def get_salarii_minim_brut_local():
+
+    filepath = os.path.join(static_files_path, "minim_brut_an_val.json")
+    if not os.path.exists(filepath):
+        filepath = os.path.join(BASE_DIR, "_internal", "static", "minim_brut_an_val.json")
+
+    with open(filepath, "r") as f:
+        data = json.load(f)
+
+    data = {int(k): v for k, v in data.items()}
+
+    return data
 
 
 

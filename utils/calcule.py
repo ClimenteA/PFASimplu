@@ -1,4 +1,4 @@
-
+from .github_data import get_salarii_minim_brut
 
 def get_venit_net(year: int):
     """venit net aka baza de calcul"""
@@ -20,14 +20,7 @@ def get_venit_brut(year: int):
 
 def calculeaza_taxe_si_impozite(venit_net: float, anul: int):
 
-    minim_brute_an_val = {
-        2020: 2230,
-        2021: 2300,
-        2022: 2550,
-        2023: 3000,
-        2024: 3300,
-        2025: 3700,
-    }
+    minim_brute_an_val = get_salarii_minim_brut()
 
     if anul in minim_brute_an_val:
         salariuMinimBrut = minim_brute_an_val[anul]
