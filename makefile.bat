@@ -43,7 +43,7 @@ IF "%1"=="run" (
     call %0 purge-db
     call %0 migrate-all
     call %0 purge-migration-dirs
-    pyinstaller --noconfirm --name pfasimplu --icon icon.png --add-data "dbsqlite;dbsqlite" --add-data "templates;templates" --add-data "static;static" --collect-all django_cleanup --collect-all whitenoise --collect-all matplotlib --collect-all django_browser_reload gui.py
+    pyinstaller --noconfirm --name pfasimplu --icon icon.png --add-data "dbsqlite;dbsqlite" --add-data "templates;templates" --add-data "static;static" --collect-all django_cleanup --collect-all whitenoise --collect-all matplotlib --collect-all django_browser_reload --collect-all cattr gui.py
     mkdir dist\pfasimplu\_internal\media
 
 ) ELSE (
