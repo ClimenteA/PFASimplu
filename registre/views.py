@@ -771,6 +771,18 @@ def get_cards_and_charts_data(request):
                 i_oldest_date.data_inserarii.year,
                 current_year,
             ]
+        elif cheltuieli:
+            years_list = [
+                c_newest_date.data_inserarii.year,
+                c_oldest_date.data_inserarii.year,
+                current_year,
+            ]
+        elif incasari:
+            years_list = [
+                i_newest_date.data_inserarii.year,
+                i_oldest_date.data_inserarii.year,
+                current_year,
+            ]
         else:
             years_list = [current_year]
 

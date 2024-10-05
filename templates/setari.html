@@ -155,9 +155,21 @@
 
 <div class="grid container" style="margin-top: 6rem;">
 
+    <form x-data="{downloading: false}" action="{% url 'download-data' %}" method="post">
+        {% csrf_token %}
+        <button @click="downloading = true;" x-text="downloading ? 'Exportul se realizeaza...': 'Exporta datele din applicatie';" class="secondary" type="submit">
+        </button>
+    </form>
+
+    <form x-data="{importingv2: false}" action="{% url 'setari-import-v2' %}" method="post">
+        {% csrf_token %}
+        <button @click="importingv2 = true;" x-text="importingv2 ? 'Datele se adauga...': 'Importa date din v2';" class="secondary" type="submit">
+        </button>
+    </form>
+
     <form x-data="{importing: false}" action="{% url 'setari-import-v1' %}" method="post">
         {% csrf_token %}
-        <button @click="importing = true;" x-text="importing ? 'Datele se adauga...': 'Adauga datele din PFASimplu V1';" class="secondary" type="submit">
+        <button @click="importing = true;" x-text="importing ? 'Datele se adauga...': 'Importa date din v1';" class="secondary" type="submit">
         </button>
     </form>
 
