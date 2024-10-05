@@ -35,144 +35,7 @@
     </hgroup>
 
 
-    <article class="article-form mt-4 container" x-data="{
-        numeClient: '',
-        suggestedNames: [], 
-        suggestName: async function(){
-            let name = this.numeClient.trim();
-            if (name.length < 3) return
-
-            let baseUrl = document.location.href.replace(document.location.pathname, '');
-            let searchUrl = `${baseUrl}/facturi/search/${name}`;
-
-            let response = await fetch(searchUrl);
-            this.suggestedNames = await response.json();
-            console.log('raspuns cautare:', this.suggestedNames);
-
-        },
-        setSuggested: function(selectedId) {
-            let selected = this.suggestedNames.filter(i => i.id == selectedId)[0];
-
-            let tipFacturaSelectEl = document.getElementById('id_tip_factura');
-            const tfoptions = tipFacturaSelectEl.options;
-            for (let i = 0; i < tfoptions.length; i++) {
-                if (tfoptions[i].value === selected.tip_factura) {
-                    tfoptions[i].selected = true;
-                    tipFacturaSelectEl.value = selected.tip_factura;
-                } else {
-                    tfoptions[i].selected = false;
-                }
-            }
-
-            let tipTranzSelectEl = document.getElementById('id_tip_tranzactie');
-            const options = tipTranzSelectEl.options;
-            for (let i = 0; i < options.length; i++) {
-                if (options[i].value === selected.tip_tranzactie) {
-                    options[i].selected = true;
-                    tipTranzSelectEl.value = selected.tip_tranzactie;
-                } else {
-                    options[i].selected = false;
-                }
-            }
-
-            let valutaEl = document.getElementById('id_valuta');
-            valutaEl.disabled = ['e-factura', 'factura-romana'].includes(tipFacturaSelectEl.value);
-            const voptions = valutaEl.options;
-            for (let i = 0; i < voptions.length; i++) {
-                if (voptions[i].value === selected.valuta) {
-                    voptions[i].selected = true;
-                    valutaEl.value = selected.valuta;
-                } else {
-                    voptions[i].selected = false;
-                }
-            }
-
-            document.getElementById('alege-localitatea').value = selected.localitate;
-            document.getElementById('alege-localitatea').disabled = selected.localitate == 'LOCALITATE GENERIC';
-            document.getElementById('id_nume').value = selected.nume;
-            document.getElementById('id_cif').value = selected.cif;
-            document.getElementById('id_nr_reg_com').value = selected.nr_reg_com;
-            document.getElementById('id_adresa').value = selected.adresa;
-            document.getElementById('id_email').value = selected.email;
-            document.getElementById('id_telefon').value = selected.telefon;
-            this.suggestedNames = [];
-        },
-        moreFields: false,    
-        collection: [{
-            id: 1,
-            nume_produs_sau_serviciu: '', 
-            cod_unitate: 'HUR',
-            numar_unitati: null, 
-            pret_pe_unitate: null,
-            subtotal: null,
-            total_de_plata: null,
-        }],
-        addEmptyItem: function() {
-            let empty_item = {
-                id: this.collection.length + 1,
-                nume_produs_sau_serviciu: '', 
-                cod_unitate: 'HUR',
-                numar_unitati: null, 
-                pret_pe_unitate: null,
-                subtotal: null,
-                total_de_plata: null,
-            };
-            this.collection.push(empty_item);
-        },
-        updateTextarea: function() {
-            this.$refs.prod_servicii_el.value = JSON.stringify(this.collection, null, 2);
-            console.log(this.$refs.prod_servicii_el.value);
-        },
-        removeItem: function(id) {
-            if (this.collection.length > 1) {
-                this.collection = this.collection.filter(item => item.id != id);
-            } else {
-                this.collection = [];
-                this.addEmptyItem();
-            }
-            
-            this.updateTextarea();
-        },
-        addItem: function() {
-            let items = JSON.parse(JSON.stringify(this.collection));
-            
-            let total_de_plata = 0;
-            let newCollection = [];
-            for (let i of items) {
-                if (!(i.numar_unitati && i.pret_pe_unitate)) {
-                    continue
-                } 
-                let unitati = parseInt(i.numar_unitati);
-                let pret_unitate = parseFloat(i.pret_pe_unitate);
-                let subtotal = unitati * pret_unitate; 
-                total_de_plata += subtotal;
-                let item = {
-                    id: i.id,
-                    subtotal: subtotal.toFixed(2),
-                    nume_produs_sau_serviciu: i.nume_produs_sau_serviciu, 
-                    cod_unitate: i.cod_unitate,
-                    numar_unitati: unitati.toFixed(2), 
-                    pret_pe_unitate: pret_unitate.toFixed(2),
-                    total_de_plata: total_de_plata.toFixed(2),
-                } 
-                newCollection.push(item);
-            }
-            
-            this.collection = newCollection;
-            this.updateTextarea();
-            this.addEmptyItem();
-            console.log(newCollection);
-        },
-        handleSubmit: function(){
-            this.addItem();
-            //const data = new FormData(this.$refs.factura_form_el);
-            //const value = Object.fromEntries(data.entries());
-            //console.log('submit:', value);
-            this.moreFields = true;
-            document.getElementById('id_valuta').disabled = false;
-            this.$refs.factura_form_el.submit();
-        },
-    }" x-init="$watch('collection', (currentCol) => {
+    <article class="article-form mt-4 container" x-data="formHandler" x-init="$watch('collection', (currentCol) => {
         let currentColList = JSON.parse(JSON.stringify(currentCol));
         let total = 0
         for (let i of currentCol) {
@@ -359,9 +222,9 @@
 
                                 <label>
                                     Cod unitate:
-                                    <select>
+                                    <select x-model="item.cod_unitate">
                                         {% for code, name in unitati_de_masura.items %}
-                                        <option value="{{code}}" selected>{{name}}</option>
+                                        <option value="{{code}}" {% if code == 'HUR' %} selected {% endif %}>{{name}}</option>
                                         {% endfor %}
                                     </select>
                                 </label>
@@ -534,7 +397,151 @@
 </div>
 
 <script>
+
+    function formHandler(){
+        return {
+            numeClient: '',
+            suggestedNames: [], 
+            suggestName: async function(){
+                let name = this.numeClient.trim();
+                if (name.length < 3) return
+
+                let baseUrl = document.location.href.replace(document.location.pathname, '');
+                let searchUrl = `${baseUrl}/facturi/search/${name}`;
+
+                let response = await fetch(searchUrl);
+                this.suggestedNames = await response.json();
+                console.log('raspuns cautare:', this.suggestedNames);
+
+            },
+            setSuggested: function(selectedId) {
+                let selected = this.suggestedNames.filter(i => i.id == selectedId)[0];
+
+                let tipFacturaSelectEl = document.getElementById('id_tip_factura');
+                const tfoptions = tipFacturaSelectEl.options;
+                for (let i = 0; i < tfoptions.length; i++) {
+                    if (tfoptions[i].value === selected.tip_factura) {
+                        tfoptions[i].selected = true;
+                        tipFacturaSelectEl.value = selected.tip_factura;
+                    } else {
+                        tfoptions[i].selected = false;
+                    }
+                }
+
+                let tipTranzSelectEl = document.getElementById('id_tip_tranzactie');
+                const options = tipTranzSelectEl.options;
+                for (let i = 0; i < options.length; i++) {
+                    if (options[i].value === selected.tip_tranzactie) {
+                        options[i].selected = true;
+                        tipTranzSelectEl.value = selected.tip_tranzactie;
+                    } else {
+                        options[i].selected = false;
+                    }
+                }
+
+                let valutaEl = document.getElementById('id_valuta');
+                valutaEl.disabled = ['e-factura', 'factura-romana'].includes(tipFacturaSelectEl.value);
+                const voptions = valutaEl.options;
+                for (let i = 0; i < voptions.length; i++) {
+                    if (voptions[i].value === selected.valuta) {
+                        voptions[i].selected = true;
+                        valutaEl.value = selected.valuta;
+                    } else {
+                        voptions[i].selected = false;
+                    }
+                }
+
+                document.getElementById('alege-localitatea').value = selected.localitate;
+                document.getElementById('alege-localitatea').disabled = selected.localitate == 'LOCALITATE GENERIC';
+                document.getElementById('id_nume').value = selected.nume;
+                document.getElementById('id_cif').value = selected.cif;
+                document.getElementById('id_nr_reg_com').value = selected.nr_reg_com;
+                document.getElementById('id_adresa').value = selected.adresa;
+                document.getElementById('id_email').value = selected.email;
+                document.getElementById('id_telefon').value = selected.telefon;
+                this.suggestedNames = [];
+            },
+            moreFields: false,    
+            collection: [{
+                id: 1,
+                nume_produs_sau_serviciu: '', 
+                cod_unitate: 'HUR',
+                numar_unitati: null, 
+                pret_pe_unitate: null,
+                subtotal: null,
+                total_de_plata: null,
+            }],
+            addEmptyItem: function() {
+                let empty_item = {
+                    id: this.collection.length + 1,
+                    nume_produs_sau_serviciu: '', 
+                    cod_unitate: 'HUR',
+                    numar_unitati: null, 
+                    pret_pe_unitate: null,
+                    subtotal: null,
+                    total_de_plata: null,
+                };
+                this.collection.push(empty_item);
+            },
+            updateTextarea: function() {
+                this.$refs.prod_servicii_el.value = JSON.stringify(this.collection, null, 2);
+                console.log(this.$refs.prod_servicii_el.value);
+            },
+            removeItem: function(id) {
+                if (this.collection.length > 1) {
+                    this.collection = this.collection.filter(item => item.id != id);
+                } else {
+                    this.collection = [];
+                    this.addEmptyItem();
+                }
+                
+                this.updateTextarea();
+            },
+            addItem: function() {
+                let items = JSON.parse(JSON.stringify(this.collection));
+                
+                let total_de_plata = 0;
+                let newCollection = [];
+                for (let i of items) {
+                    if (!(i.numar_unitati && i.pret_pe_unitate)) {
+                        continue
+                    } 
+                    let unitati = parseInt(i.numar_unitati);
+                    let pret_unitate = parseFloat(i.pret_pe_unitate);
+                    let subtotal = unitati * pret_unitate; 
+                    total_de_plata += subtotal;
+                    let item = {
+                        id: i.id,
+                        subtotal: subtotal.toFixed(2),
+                        nume_produs_sau_serviciu: i.nume_produs_sau_serviciu, 
+                        cod_unitate: i.cod_unitate,
+                        numar_unitati: unitati.toFixed(2), 
+                        pret_pe_unitate: pret_unitate.toFixed(2),
+                        total_de_plata: total_de_plata.toFixed(2),
+                    } 
+                    newCollection.push(item);
+                }
+                
+                this.collection = newCollection;
+                this.updateTextarea();
+                this.addEmptyItem();
+                console.log(newCollection);
+            },
+            handleSubmit: function(){
+                this.addItem();
+                // const data = new FormData(this.$refs.factura_form_el);
+                // const value = Object.fromEntries(data.entries());
+                // console.log('submit:', value);
+                this.moreFields = true;
+                document.getElementById('id_valuta').disabled = false;
+                this.$refs.factura_form_el.submit();
+            },
+        }
+    }
+
+
     document.addEventListener("DOMContentLoaded", () => {
+
         document.getElementById("id_serie").style = "text-transform: uppercase;";
 
         let tipFactSelectEl = document.getElementById("id_tip_factura");
