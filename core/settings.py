@@ -195,6 +195,17 @@ def make_media_dir():
 
 make_media_dir()
 
+
+def get_media_path():
+
+    development_path = os.path.join(MEDIA_ROOT)
+    if os.path.exists(development_path):
+        return development_path
+    
+    pyinstaller_path = os.path.join(BASE_DIR, "_internal", "media")
+    return pyinstaller_path
+
+
 def get_extracts_path(extra_dir: str | None = None):
     extracts_path = os.path.join(MEDIA_ROOT, "extracts")
     if extra_dir:

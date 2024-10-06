@@ -90,6 +90,7 @@ class DocumenteModel(models.Model):
     mentiuni = models.TextField(max_length=50000, null=True, blank=True)
     fisier = models.FileField(max_length=100_000, upload_to=get_save_path)
     actualizat_la = models.DateTimeField(auto_now_add=True)
+    parse_tip_document = models.BooleanField(null=True, blank=True, default=True)
 
     @staticmethod
     def total_plati_la_stat():
@@ -108,19 +109,20 @@ class DocumenteModel(models.Model):
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
 
-        if self.fisier.path.endswith(".pdf") and self.tip_document in [
-            TipDocument.DECLARATIE_UNICA_212.value,
-            TipDocument.DECLARATIE_UNICA_212_DOVADA_INCARCARE.value,
-            TipDocument.DOVADA_PLATA_TAXE_SI_IMPOZITE.value,
-        ]:
-            data = pdf_parser(self.fisier.path)
-            if data:
-                self.tip_document = data["tip_document"]
-                self.document_pentru_anul = data["document_pentru_anul"]
-                if self.tip_document == TipDocument.DOVADA_PLATA_TAXE_SI_IMPOZITE.value:
-                    plata_spv_text = f'Plata spv {data["suma_plata_anaf"]} RON'
-                    if plata_spv_text not in self.mentiuni:
-                        self.mentiuni = plata_spv_text
+        if self.parse_tip_document:
+            if self.fisier.path.endswith(".pdf") and self.tip_document in [
+                TipDocument.DECLARATIE_UNICA_212.value,
+                TipDocument.DECLARATIE_UNICA_212_DOVADA_INCARCARE.value,
+                TipDocument.DOVADA_PLATA_TAXE_SI_IMPOZITE.value,
+            ]:
+                data = pdf_parser(self.fisier.path)
+                if data:
+                    self.tip_document = data["tip_document"]
+                    self.document_pentru_anul = data["document_pentru_anul"]
+                    if self.tip_document == TipDocument.DOVADA_PLATA_TAXE_SI_IMPOZITE.value:
+                        plata_spv_text = f'Plata spv {data["suma_plata_anaf"]} RON'
+                        if plata_spv_text not in self.mentiuni:
+                            self.mentiuni = plata_spv_text
 
                 super().save(
                     update_fields=["document_pentru_anul", "tip_document", "mentiuni"]
@@ -131,7 +133,7 @@ class DocumenteModel(models.Model):
         verbose_name_plural = "Documente"
 
     def __str__(self):
-        return f"{self.tip_document} {self.mentiuni} self.actualizat_la.isoformat()"
+        return f"{self.tip_document} {self.mentiuni} {self.actualizat_la.isoformat()}"
 
 
 def pdf_parser(pdf_path: str):

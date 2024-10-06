@@ -1,15 +1,14 @@
 import os
-import glob
-import json
+import shutil
 import pandas as pd
-from documente.models import DocumenteModel, TipDocument
+from documente.models import DocumenteModel
 from incasari.models import IncasariModel
 from cheltuieli.models import CheltuialaModel
 from setari.models import SetariModel
-from django.core.files import File
 from django.utils import timezone
 from datetime import datetime
-import numpy as np
+from core.settings import get_media_path
+
 
 
 class DataImportV2:
@@ -17,9 +16,10 @@ class DataImportV2:
     def insert_date_pfa(self):
 
         df = pd.read_csv(os.path.join("stocare", "Setari.csv"))
-        df.fillna("", inplace=True)
 
         data = df.to_records("dict")[0]
+        df = df.astype(object).where(df.notna(), None)
+        data = df.to_dict('records')[0]
 
         instance = SetariModel(
             nume = data["nume"],
@@ -41,38 +41,38 @@ class DataImportV2:
         instance.save()
 
     def insert_incasari(self):
-        # TODO
-        incasare = IncasariModel(
-            suma=r["Suma Incasata"],
-            tip_tranzactie=r["Tip Tranzactie"],
-            data_inserarii=data_inserarii,
-            fisier=File(f, name=os.path.basename(r["Cale Fisier"])),
-        )
 
-        incasare.save()
+        df = pd.read_csv(os.path.join("stocare", "Incasari.csv"))
+        df = df.astype(object).where(df.notna(), None)
+        records = df.to_dict('records')
 
-        records = self.get_incasari_records()
+        media_path = get_media_path()
 
-        for r in records:
-            with open(r["Cale Fisier"], "rb") as f:
+        for record in records:
+            filepath = os.path.join("stocare", record["fisier"])
+            shutil.copy2(filepath, os.path.join(media_path, record["fisier"]))
 
-                naive_datetime = datetime.strptime(r["Data"], "%Y-%m-%d")
-                data_inserarii = timezone.make_aware(naive_datetime)
-
-                incasare = IncasariModel(
-                    suma=r["Suma Incasata"],
-                    tip_tranzactie=r["Tip Tranzactie"],
-                    data_inserarii=data_inserarii,
-                    fisier=File(f, name=os.path.basename(r["Cale Fisier"])),
-                )
-                incasare.save()
+            incasare = IncasariModel(
+                sursa_venit=record['sursa_venit'],
+                suma_in_ron=record['suma_in_ron'],
+                suma=record['suma'],
+                valuta=record['valuta'],
+                tip_tranzactie=record['tip_tranzactie'],
+                data_inserarii=record['data_inserarii'],
+                fisier=record['fisier'],
+            )
+            incasare.save()
 
     def insert_cheltuieli(self):
 
         df = pd.read_csv(os.path.join("stocare", "Cheltuiala.csv"))
-        df = df.replace({np.nan: None})
+        df = df.astype(object).where(df.notna(), None)
+        records = df.to_dict('records')
+        media_path = get_media_path()
 
-        for record in df.to_dict('records'):
+        for record in records:
+            filepath = os.path.join("stocare", record["fisier"])
+            shutil.copy2(filepath, os.path.join(media_path, record["fisier"]))
 
             data_punerii_in_functiune = None
             if record['data_punerii_in_functiune']:
@@ -125,32 +125,21 @@ class DataImportV2:
 
 
     def insert_documente(self):
-        # TODO
-        
-        tipdocmap = {
-            "Declaratie unica (212)": TipDocument.DECLARATIE_UNICA_212,
-            "Dovada incarcare Declaratie 212": TipDocument.DECLARATIE_UNICA_212_DOVADA_INCARCARE,
-            "Dovada plata impozite": TipDocument.DOVADA_PLATA_TAXE_SI_IMPOZITE,
-        }
+    
+        df = pd.read_csv(os.path.join("stocare", "Documente.csv"))
+        df = df.astype(object).where(df.notna(), None)
+        records = df.to_dict('records')
+        media_path = get_media_path()
 
-        documente_path = os.path.join(self.account_path, "declaratii")
-        for filepath in glob.glob(f"{documente_path}/**/*", recursive=True):
-            if not os.path.isfile(filepath):
-                continue
-            if not filepath.endswith(".json"):
-                continue
+        for record in records:
+            filepath = os.path.join("stocare", record["fisier"])
+            shutil.copy2(filepath, os.path.join(media_path, record["fisier"]))
 
-            with open(filepath, "r") as f:
-                m = json.load(f)
-
-            with open(m["cale_document"], "rb") as f:
-                instance = DocumenteModel(
-                    tip_document=tipdocmap.get(
-                        m["tip_document"], TipDocument.DOCUMENT_UTIL
-                    ),
-                    mentiuni=m["tip_document"],
-                    document_pentru_anul=m["pentru_anul"],
-                    fisier=File(f, name=os.path.basename(m["cale_document"])),
-                )
-
-                instance.save()
+            instance = DocumenteModel(
+                tip_document=record["tip_document"],
+                document_pentru_anul=record["document_pentru_anul"],
+                mentiuni=record["mentiuni"],
+                fisier=record["fisier"],
+                parse_tip_document=False,
+            )
+            instance.save()

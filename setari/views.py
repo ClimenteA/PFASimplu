@@ -42,9 +42,9 @@ class ImportV2View(View):
         dim2 = DataImportV2()
 
         dim2.insert_date_pfa()
-        # dim2.insert_incasari()
+        dim2.insert_incasari()
         dim2.insert_cheltuieli()
-        # dim2.insert_documente()
+        dim2.insert_documente()
 
         messages.add_message(
             request,
