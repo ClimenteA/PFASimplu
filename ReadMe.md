@@ -1,4 +1,4 @@
-# PFASimplu (in progress)
+# PFASimplu
 
 ![GitHub all releases](https://img.shields.io/github/downloads/ClimenteA/PFASimplu/total?label=descarcari&style=for-the-badge)
 
@@ -11,7 +11,6 @@ Aplicatie pentru simplificarea gestiunii contabilitatii facuta in partida simpla
 
 - [Pentru cine este de folos aceasta aplicatie?](#pentru-cine-este-de-folos-aceasta-aplicatie)
 - [Poate aplicatia sa faca X,Y,Z?](#poate-aplicatia-sa-faca-xyz)
-- [Ce fac cu versiunea veche a aplicatiei (v1)?](#ce-fac-cu-versiunea-veche-a-aplicatiei-v1)
 - [Instalare pt. utilizatori](#instalare-pt-utilizatori)
 - [Instalare pt. developeri](#instalare-pt-developeri)
 - [Setari](#setari)
@@ -22,6 +21,7 @@ Aplicatie pentru simplificarea gestiunii contabilitatii facuta in partida simpla
 - [Inventar](#inventar)
 - [Registre](#registre)
 - [Actualizare aplicatie](#actualizare-aplicatie)
+- [Ce fac cu versiunea veche a aplicatiei (v1)?](#ce-fac-cu-versiunea-veche-a-aplicatiei-v1)
 - [Observatii](#observatii)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -51,18 +51,6 @@ As fi vrut sa adaug mai multe functionalitati, dar nu am cunostinte solide de co
 Daca deschizi un `New issue` din tabul `Issues` din aceasta pagina si spui pas cu pas care sunt cerintele voi lua in considerare sa adaug in aplicatie o noua functionalitate (in functie de timp si cunostinte).
 
 
-
-## Ce fac cu versiunea veche a aplicatiei (v1)?
-
-O poti folosi in continuare. Este actualizata cu datele pana in 2024 inclusiv.
-Daca mai apar modificari de calcul al taxelor/impozitelor dupa 2024 atunci aplicatia anterioara (V1) nu mai este valabila.
-
-**Recomand**: Versiunea 2 are si o optiune de preluare a datelor din versiunea 1. 
-Tot ce trebuie sa faci este sa copii fisierul `stocare` langa executabilul `pfasimplu.exe` si din pagina `Setari` sa apesi butonul `Adauga datele din PFASimplu V1` apoi astepti cateva secunde. Doar un cont trebuie sa fie prezent in folderul stocare.
-
-O alta optiune: Faci un zip cu aplicatia pfasimplu v1 (care contine registrele excel in folderul stocare) si il pui pe un usb stick pentru pastrare. Apoi, poti folosi v2.
-
-
 ## Instalare pt. utilizatori
 
 Din sectiunea `Releases` din aceasta pagina descarca zip-ul pentru sistemul tau de operare. 
@@ -71,7 +59,7 @@ Daca ai MacOS va trebui sa urmezi sectiunea *Instalare pt. developeri*.
 
 - [Click aici](https://github.com/ClimenteA/PFASimplu/releases) si descarca zip-ul din `Assets` pentru sistemul tau de operare (Windows, Ubuntu);
 
-Daca executabilul nu functioneaza pe Windows va trebui sa instalezi [latest-microsoft-visual-c-redistributable-version x64](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#latest-microsoft-visual-c-redistributable-version).
+Daca executabilul nu functioneaza pe Windows va trebui sa instalezi [latest-microsoft-visual-c-redistributable-version x64 (click)](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#latest-microsoft-visual-c-redistributable-version).
 
 Executabilul nu are un certificat digital, asa ca sistemul de operare (windows/macos) iti va spune ca executabilul este un posibil virus sau ca este de la "un unknown publisher". Poti urma sectiunea *Instalare pt. developeri* daca vrei sa eviti asta. Sa fii safe: nu descarca acest executabil din alta locatie decat cea din acest GitHub repo!
 
@@ -94,11 +82,13 @@ Pe windows comenzile make for avea prefixul `.\makefile.bat X` - unde X poate fi
 
 ## Setari 
 
-In pagina `Setari` trebuie sa adaugi datele pfa-ului tau. Poti importa datele din versiunea 1.
-Poti sterge toate datele. Aceasta pagina trebuie completata la prima deschidere a aplicatiei.
+In pagina `Setari` trebuie sa adaugi datele pfa-ului tau.
+Poti importa datele din versiunea 1 sau versiunea 2. 
+Poti sterge toate datele. 
+Aceasta pagina trebuie completata la prima deschidere a aplicatiei.
 Cam rar vei schimba datele din aceasta pagina.
 
-![setari](readmepics/setari.jpeg)
+![setari](readmepics/setari_v2.jpeg)
 
 
 
@@ -208,7 +198,26 @@ Daca a aparut o noua versiune a aplicatiei in pagina Registre va aparea linkul d
 Un click pe cel link te va duce catre pagina de Github Releases (pagina de unde ai descarcat prima data aplicatia).
 Din Assets descarca ultima versiune pentru sistemul tau de operare. 
 
-**TODO**
+Din pagina Setari a aplicatiei "veche" click pe buttonul `Exporta datele din aplicatie` (un zip va fi descarcat in folderul Downloads/Descarcari). 
+
+![setari-actualizare](readmepics/setari_actualizare.png)
+
+Acum trebuie unzip la aplicatia noua (cea cu versiunea mai mare ce ai descarcat-o anterior din Github releases).
+Langa executabilul `pfasimplu.exe` da unzip la zip-ul creat cand ai dat click pe butonul Exporta datele din aplicatie.
+
+Deschide aplicatia cu versiunea noua si in pagina Setari da click pe `Importa date din v2`. Aplicatia va lua datele din folderul stocare de langa executabil si va adauga in baza de date din _internal/dbsqlite datele din csv-uri si in folderul _internal/media documentele justificative.
+
+
+## Ce fac cu versiunea veche a aplicatiei (v1)?
+
+O poti folosi in continuare. Este actualizata cu datele pana in 2024 inclusiv.
+Daca mai apar modificari de calcul al taxelor/impozitelor dupa 2024 atunci aplicatia anterioara (V1) nu mai este valabila.
+
+**Recomand**: Versiunea 2 are si o optiune de preluare a datelor din versiunea 1. 
+Tot ce trebuie sa faci este sa copii fisierul `stocare` langa executabilul `pfasimplu.exe` si din pagina `Setari` sa apesi butonul `Importa date din V1` apoi astepti cateva secunde. Doar un cont trebuie sa fie prezent in folderul stocare.
+
+O alta optiune: Faci un zip cu aplicatia pfasimplu v1 (care contine registrele excel in folderul stocare) si il pui pe un usb stick pentru pastrare. Apoi, poti folosi v2.
+
 
 
 ## Observatii
