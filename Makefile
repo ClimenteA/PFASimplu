@@ -34,5 +34,5 @@ package:
 	make migrate-all
 	make purge-migration-dirs
 	pyinstaller --noconfirm --name pfasimplu --icon icon.png --add-data "dbsqlite:dbsqlite" --add-data "templates:templates" --add-data "static:static" --collect-all django_cleanup --collect-all whitenoise --collect-all matplotlib --collect-all django_browser_reload --collect-all cattr gui.py
-	mkdir /dist/pfasimplu/_internal/media
+	mkdir ./dist/pfasimplu/_internal/media
 	

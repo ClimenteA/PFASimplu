@@ -1,7 +1,6 @@
 import datetime
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from django.utils.safestring import mark_safe
 from cursvalutarbnr import ron_exchange_rate
 from functools import lru_cache
 
