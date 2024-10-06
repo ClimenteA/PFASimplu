@@ -145,15 +145,17 @@
 
 <div id="tabel-cheltuieli" class="mt-4">
 
-    <div style="display: flex; justify-content: end; overflow: hidden;">
-        <a href="{% url 'descarca-cheltuieli' %}?filetype=CSV" class="px-1 secondary" data-tooltip="Descarca CSV">
+    <div x-data="{ downloaded_csv: false, downloaded_xlsx: false }" style="display: flex; justify-content: end; overflow: hidden;">
+        <a href="{% url 'descarca-cheltuieli' %}?filetype=CSV&anul={{ anul }}" @click="downloaded_csv = true" :class="downloaded_csv ? 'px-1 pico-color-purple-500': 'px-1 secondary'"
+            data-tooltip="Descarca CSV">
             <i class="bi bi-filetype-csv"></i>
         </a>
-        <a href="{% url 'descarca-cheltuieli' %}?filetype=XLSX" class="px-1 secondary" data-tooltip="Descarca XLSX">
+        <a href="{% url 'descarca-cheltuieli' %}?filetype=XLSX&anul={{ anul }}" @click="downloaded_xlsx = true" :class="downloaded_xlsx ? 'px-1 pico-color-purple-500': 'px-1 secondary'"
+            data-tooltip="Descarca XLSX">
             <i class="bi bi-filetype-xlsx"></i>
         </a>
     </div>
-
+    
     <div class="overflow-auto mb-2">
         <table class="striped">
             <thead>
