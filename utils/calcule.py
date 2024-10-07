@@ -1,5 +1,6 @@
 from .github_data import get_salarii_minim_brut
 
+
 def get_venit_net(year: int):
     """venit net aka baza de calcul"""
     from incasari.models import IncasariModel
@@ -18,7 +19,13 @@ def get_venit_brut(year: int):
     return total_incasari
 
 
-def calculeaza_taxe_si_impozite(venit_net: float, anul: int):
+def calculeaza_taxe_si_impozite(
+    venit_net: float,
+    anul: int,
+    scutit_cas: bool = False,
+    scutit_cass: bool = False,
+    scutit_impozit: bool = False,
+):
 
     minim_brute_an_val = get_salarii_minim_brut()
 
@@ -81,6 +88,15 @@ def calculeaza_taxe_si_impozite(venit_net: float, anul: int):
         impozitPeVenit = ProcentImpozitVenit * (venit_net - CAS - CASS) / 100
 
     if venit_net <= plafon6:
+        impozitPeVenit = 0
+
+    if scutit_cas:
+        CAS = 0
+    
+    if scutit_cass:
+        CASS = 0
+    
+    if scutit_impozit:
         impozitPeVenit = 0
 
     total = CAS + CASS + impozitPeVenit

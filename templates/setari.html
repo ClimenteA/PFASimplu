@@ -11,11 +11,20 @@
     <p>
         Aici poti modifica variabilele care stau la baza calculelor pentru
         impozite, taxe, crearea de declaratii, facturi samd.
-        Trebuie sa introduci datele PFA-ului tau (nume, CIF etc.). 
+        In pagina asta trebuie sa introduci datele PFA-ului tau (nume, CIF etc.).
+        Sunt scutite de la plata taxe/impozite (pensionari, persoane cu handicap, alte persoane cu statut special) 
+        bifeaza casuta corespunzatoare pentru a calcula corect darile la stat.
         Ai si optiunea de a adauga CAEN-uri secondare.
-        Ai disponibile si 2 butoane sub formular care te pot ajuta sa importi datele din versiunea 1.
-        Inainte de a apasa butonul "Adauga datele din PFASimplu V1" 
-        trebuie sa ai folderul "stocare" langa executabilul "pfasimplu.exe".
+        Ai disponibile si 3 butoane sub formular care te pot ajuta sa importi datele din versiunea 1 sau versiunea 2.
+
+        Pentru import din versiunea 1 copie folderul stocare langa executabilul pfasimplu.exe si apasa din butonul Importa date din v1.
+        
+        Pentru import din versiunea 2 copie noua aplicatie din <a href="https://github.com/ClimenteA/PFASimplu/releases">Github Releases</a> 
+        tot timpul ultimul release din Assets pentru sistemul tau de operare (Windows 10, Windows 11 sau Ubuntu).
+        Odata facut ce ai facut unzip la noua aplicatie din versiunea veche a aplicatiei da click pe butonul Exporta datele din applicatie.
+        Un zip se va crea in folderul Descarcari (Downloads). Acum la fel ca pentru importul v1 avem nevoie de folderul stocare langa executabilul pfasimplu.exe. 
+        Fa unzip la zipul creat langa executabilul nou pfasimplu.exe si apasa din aplicatia noua butonul Importa date din v2.
+
         Butonul "Sterge toate datele" va sterge toate datele din aplicatie.
         <strong>Atentie!</strong> odata ce ai apasat pe butonul "Sterge toate datele"
         datele vor fi sterse imediat!
@@ -62,7 +71,9 @@
             });">
                 <label>
                     Alege localitatea:
-                    <input name="localitate" {% if setari_form.localitate.value %} value="{{setari_form.localitate.value}}" {% endif %} x-ref="searchInputEl" autocomplete="off" type="text" placeholder="Iasi...">
+                    <input name="localitate" {% if setari_form.localitate.value %}
+                        value="{{setari_form.localitate.value}}" {% endif %} x-ref="searchInputEl" autocomplete="off"
+                        type="text" placeholder="Iasi...">
                     {{ setari_form.localitate.errors }}
                 </label>
             </div>
@@ -102,6 +113,30 @@
                 {{ setari_form.caen_principal.errors }}
             </label>
         </div>
+
+        <div style="margin-bottom: 2rem;">
+            <div style="display: flex; gap: 1rem; justify-content: end;">
+
+                <label for="{{ setari_form.scutit_cas.id_for_label }}">
+                    {{ setari_form.scutit_cas.label }}:
+                    {{ setari_form.scutit_cas }}
+                    {{ setari_form.scutit_cas.errors }}
+                </label>
+
+                <label for="{{ setari_form.scutit_cass.id_for_label }}">
+                    {{ setari_form.scutit_cass.label }}:
+                    {{ setari_form.scutit_cass }}
+                    {{ setari_form.scutit_cass.errors }}
+                </label>
+
+                <label for="{{ setari_form.scutit_impozit.id_for_label }}">
+                    {{ setari_form.scutit_impozit.label }}:
+                    {{ setari_form.scutit_impozit }}
+                    {{ setari_form.scutit_impozit.errors }}
+                </label>
+            </div>
+        </div>
+
 
         <div x-data="{show: {% if setari_form.caen_secondar_1.value %} true {% else %} false {% endif %} }">
 
@@ -157,25 +192,30 @@
 
     <form x-data="{downloading: false}" action="{% url 'download-data' %}" method="post">
         {% csrf_token %}
-        <button @click="downloading = true;" x-text="downloading ? 'Exportul se realizeaza...': 'Exporta datele din applicatie';" class="secondary" type="submit">
+        <button @click="downloading = true;"
+            x-text="downloading ? 'Exportul se realizeaza...': 'Exporta datele din applicatie';" class="secondary"
+            type="submit">
         </button>
     </form>
 
     <form x-data="{importingv2: false}" action="{% url 'setari-import-v2' %}" method="post">
         {% csrf_token %}
-        <button @click="importingv2 = true;" x-text="importingv2 ? 'Datele se adauga...': 'Importa date din v2';" class="secondary" type="submit">
+        <button @click="importingv2 = true;" x-text="importingv2 ? 'Datele se adauga...': 'Importa date din v2';"
+            class="secondary" type="submit">
         </button>
     </form>
 
     <form x-data="{importing: false}" action="{% url 'setari-import-v1' %}" method="post">
         {% csrf_token %}
-        <button @click="importing = true;" x-text="importing ? 'Datele se adauga...': 'Importa date din v1';" class="secondary" type="submit">
+        <button @click="importing = true;" x-text="importing ? 'Datele se adauga...': 'Importa date din v1';"
+            class="secondary" type="submit">
         </button>
     </form>
 
     <form x-data="{deleting: false}" action="{% url 'setari-drop-data' %}" method="post">
         {% csrf_token %}
-        <button @click="deleting = true;" x-text="deleting ? 'Datele se sterg...': 'Sterge toate datele';" class="pico-background-red-550" type="submit">
+        <button @click="deleting = true;" x-text="deleting ? 'Datele se sterg...': 'Sterge toate datele';"
+            class="pico-background-red-550" type="submit">
         </button>
     </form>
 

@@ -88,7 +88,7 @@ Poti sterge toate datele.
 Aceasta pagina trebuie completata la prima deschidere a aplicatiei.
 Cam rar vei schimba datele din aceasta pagina.
 
-![setari](readmepics/setari_v2.jpeg)
+![setari](readmepics/setari-scutit.jpeg)
 
 
 
@@ -192,6 +192,7 @@ In cazul Registrului jurnal si Registrului Inventar un fisier zip va fi descarca
 ## Actualizare aplicatie
 
 Daca a aparut o noua versiune a aplicatiei in pagina Registre va aparea linkul din imagine in descrierea paginii.
+La prima deschidere a aplicatiei este posibil ca mesajul "Click aici pentru a descarca noua versiune a aplicatiei" sa apara - da click butonul din stanga sus PFASimplu pentru a da refresh la pagina.
 
 ![actualizare-aplicatie](readmepics/actualizare.png)
 

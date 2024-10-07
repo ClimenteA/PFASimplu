@@ -27,6 +27,9 @@ class SetariModel(models.Model):
     caen_secondar_3 = models.CharField(max_length=4, blank=True, null=True)
     caen_secondar_4 = models.CharField(max_length=4, blank=True, null=True)
     caen_secondar_5 = models.CharField(max_length=4, blank=True, null=True)
+    scutit_cas = models.BooleanField(blank=True, null=True, default=False)
+    scutit_cass = models.BooleanField(blank=True, null=True, default=False)
+    scutit_impozit = models.BooleanField(blank=True, null=True, default=False)
     actualizat_la = models.DateTimeField(default=timezone.now)
 
     class Meta:

@@ -9,6 +9,7 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.utils import timezone
 from django.db.models import Sum, Q
+from setari.models import SetariModel
 from cheltuieli.models import CheltuialaModel, Deductibilitate
 from incasari.models import IncasariModel, SursaVenit
 from documente.models import DocumenteModel
@@ -23,8 +24,9 @@ from utils.github_data import new_version_available
 
 
 import matplotlib
+
 # prevent thread issue with flaskwebgui
-matplotlib.use("SVG") 
+matplotlib.use("SVG")
 
 import matplotlib.pyplot as plt
 
@@ -39,8 +41,10 @@ class RegistruJurnalDescarcaView(View):
 
         if not data:
             return redirect("/registre/")
-        
-        file_ids = list(set([d["documentId"] for d in data if d["documentId"] is not None]))
+
+        file_ids = list(
+            set([d["documentId"] for d in data if d["documentId"] is not None])
+        )
 
         query = Q()
         for file_id in file_ids:
@@ -50,14 +54,20 @@ class RegistruJurnalDescarcaView(View):
         cheltuieli_fisiere = cheltuieli.filter(query)
 
         rjip_files_path = get_extracts_path("rjip")
-        
+
         rjip_files = []
         for item in incasari_fisiere:
-            fp = shutil.copy2(item.fisier.path, os.path.join(rjip_files_path, os.path.basename(item.fisier.path))) 
+            fp = shutil.copy2(
+                item.fisier.path,
+                os.path.join(rjip_files_path, os.path.basename(item.fisier.path)),
+            )
             rjip_files.append(fp)
 
         for item in cheltuieli_fisiere:
-            fp = shutil.copy2(item.fisier.path, os.path.join(rjip_files_path, os.path.basename(item.fisier.path))) 
+            fp = shutil.copy2(
+                item.fisier.path,
+                os.path.join(rjip_files_path, os.path.basename(item.fisier.path)),
+            )
             rjip_files.append(fp)
 
         df = pd.DataFrame(data)
@@ -74,26 +84,29 @@ class RegistruJurnalDescarcaView(View):
                 "plati_banca": "Plati Banca",
             }
         )
-        
+
         extracts_path = get_extracts_path()
 
         if filetype == "xlsx":
-            rjip_fp = os.path.join(extracts_path, "registru_jurnal_incasari_si_plati.xlsx")
+            rjip_fp = os.path.join(
+                extracts_path, "registru_jurnal_incasari_si_plati.xlsx"
+            )
             df.to_excel(rjip_fp, index=False)
             make_excel_pretty(rjip_fp)
         elif filetype == "csv":
-            rjip_fp = os.path.join(extracts_path, "registru_jurnal_incasari_si_plati.csv")
+            rjip_fp = os.path.join(
+                extracts_path, "registru_jurnal_incasari_si_plati.csv"
+            )
             df.to_csv(rjip_fp, index=False)
         else:
             return redirect("/registre/")
-        
 
         zip_filename = os.path.join(extracts_path, f"registru_jurnal_{anul}.zip")
         with ZipFile(zip_filename, "w") as zipf:
             for file in rjip_files:
                 zipf.write(file, os.path.join("documente", os.path.basename(file)))
             zipf.write(rjip_fp, os.path.basename(rjip_fp))
-            
+
         response = HttpResponse(
             open(zip_filename, "rb"), content_type="application/zip"
         )
@@ -132,11 +145,11 @@ class RegistruInventarDescarcaView(View):
     def get(self, request):
         filetype = request.GET.get("filetype").lower()
         data = get_registru_inventar(dbid=True)
-        
+
         src_filepaths = []
         for item in data:
             if item["mijloc_fix"]:
-                zip_filepath = create_fisa_mijloc_fix_pdf(item['db_id'], item['nr_crt'])
+                zip_filepath = create_fisa_mijloc_fix_pdf(item["db_id"], item["nr_crt"])
                 item["fisier"] = os.path.basename(zip_filepath)
                 src_filepaths.append(zip_filepath)
             else:
@@ -146,7 +159,7 @@ class RegistruInventarDescarcaView(View):
         ri_files_path = get_extracts_path("ri")
         ri_files = []
         for sfp in src_filepaths:
-            fp = shutil.copy2(sfp, os.path.join(ri_files_path, os.path.basename(sfp))) 
+            fp = shutil.copy2(sfp, os.path.join(ri_files_path, os.path.basename(sfp)))
             ri_files.append(fp)
 
         df = pd.DataFrame(data)
@@ -172,13 +185,13 @@ class RegistruInventarDescarcaView(View):
             df.to_csv(ri_fp, index=False)
         else:
             return redirect("/registre/")
-        
+
         zip_filename = os.path.join(extracts_path, "registru_inventar.zip")
         with ZipFile(zip_filename, "w") as zipf:
             for file in ri_files:
                 zipf.write(file, os.path.join("documente", os.path.basename(file)))
             zipf.write(ri_fp, os.path.basename(ri_fp))
-            
+
         response = HttpResponse(
             open(zip_filename, "rb"), content_type="application/zip"
         )
@@ -186,7 +199,6 @@ class RegistruInventarDescarcaView(View):
             f"attachment; filename={os.path.basename(zip_filename)}"
         )
         return response
-
 
 
 class RegistreView(View):
@@ -211,7 +223,7 @@ class RegistreView(View):
             "registre.html",
             context={
                 **overview_data,
-                "versiune_noua_disponibila": versiune_noua_disponibila, 
+                "versiune_noua_disponibila": versiune_noua_disponibila,
                 "rjip": registru_jurnal_incasari_si_plati,
                 "ref": registru_fiscal,
                 "ri": registru_inventar,
@@ -227,7 +239,7 @@ def get_obiecte_inventar():
     return results
 
 
-def get_registru_inventar(dbid: bool = True, obiecte_inventar = None):
+def get_registru_inventar(dbid: bool = True, obiecte_inventar=None):
 
     if obiecte_inventar is None:
         obiecte_inventar = get_obiecte_inventar()
@@ -620,13 +632,14 @@ def get_year_from_request(request):
     anul = int(anul) if anul else timezone.now().year
     return anul
 
+
 def incasari_cheltuieli_dupa_anul_inserarii(anul: int):
     incasari = IncasariModel.objects.filter(data_inserarii__year=anul)
     cheltuieli = CheltuialaModel.objects.filter(data_inserarii__year=anul)
     return incasari, cheltuieli
 
 
-def get_registru_jurnal_incasari_si_plati(request, incasari = None, cheltuieli = None):
+def get_registru_jurnal_incasari_si_plati(request, incasari=None, cheltuieli=None):
     anul = get_year_from_request(request)
 
     if incasari == None and cheltuieli == None:
@@ -738,6 +751,8 @@ def get_cards_and_charts_data(request):
     in_euro = valuta == "EUR"
     anul = int(anul) if anul else current_year
 
+    furnizor = SetariModel.objects.first()
+
     # CALCUL INCASARI, CHELTUIELI
     try:
         total_neincasate = IncasariModel.get_total_neincasate(anul)
@@ -807,7 +822,18 @@ def get_cards_and_charts_data(request):
         )
 
     # CALCUL TAXE IMPOZITE
-    la_stat = calculeaza_taxe_si_impozite(total_incasari_net, anul)
+
+    if furnizor:
+        la_stat = calculeaza_taxe_si_impozite(
+            total_incasari_net,
+            anul,
+            furnizor.scutit_cas,
+            furnizor.scutit_cass,
+            furnizor.scutit_impozit,
+        )
+    else:
+        la_stat = calculeaza_taxe_si_impozite(total_incasari_net, anul)
+
     total_platite_la_stat_pe_toti_anii = DocumenteModel.total_plati_la_stat()
 
     years = copy(ani_inregistrati)
@@ -821,7 +847,21 @@ def get_cards_and_charts_data(request):
         total_cheltuieli_pe_toti_anii += tc
         total_incasari_brut_pe_toti_anii += tib
         incasari_net = round((tib - tc), 2)
-        tiy = calculeaza_taxe_si_impozite(incasari_net, yr)["total_taxe_impozite"]
+        
+        if furnizor:
+            tiy = calculeaza_taxe_si_impozite(
+                incasari_net,
+                yr,
+                furnizor.scutit_cas,
+                furnizor.scutit_cass,
+                furnizor.scutit_impozit,
+            )["total_taxe_impozite"]
+        else:
+            tiy = calculeaza_taxe_si_impozite(
+                incasari_net,
+                yr,
+            )["total_taxe_impozite"]
+
         total_de_platit_la_stat_pe_toti_anii += tiy
 
     total_incasari_net_pe_toti_anii = (
