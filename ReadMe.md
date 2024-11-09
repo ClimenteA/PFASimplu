@@ -87,6 +87,7 @@ Poti importa datele din versiunea 1 sau versiunea 2.
 Poti sterge toate datele. 
 Aceasta pagina trebuie completata la prima deschidere a aplicatiei.
 Cam rar vei schimba datele din aceasta pagina.
+Daca ai mai multe conturi IBAN (USD, RON etc.) sa ai grija sa schimbi IBAN-ul din setari in functie de factura valuta in care emiti factura.
 
 ![setari](readmepics/setari-scutit.jpeg)
 
