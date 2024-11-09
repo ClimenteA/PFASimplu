@@ -1,6 +1,7 @@
 import os
 import shutil
 import itertools
+import datetime
 from copy import copy
 import pandas as pd
 from django.shortcuts import render
@@ -370,14 +371,14 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
 
     cheltuieli_d_integral = CheltuialaModel.objects.filter(
         deductibila=Deductibilitate.DEDUCTIBILA_INTEGRAL, data_inserarii__year=anul
-    ).aggregate(total=Sum("suma_in_ron"))
-    cheltuieli_d_integral = cheltuieli_d_integral["total"]
+    )
+    cheltuieli_d_integral = cheltuieli_d_integral.aggregate(total=Sum("suma_in_ron"))["total"]
 
     if cheltuieli_d_integral:
         cheltuieli_pe_deductibilitate.append(
             {
                 "nume": Deductibilitate.DEDUCTIBILA_INTEGRAL.value,
-                "valoare": cheltuieli_d_integral,
+                "valoare": round(cheltuieli_d_integral, 2),
             }
         )
 
@@ -391,7 +392,7 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
         cheltuieli_pe_deductibilitate.append(
             {
                 "nume": Deductibilitate.DEDUCTIBILA_INTEGRAL_INVENTAR.value,
-                "valoare": cheltuieli_d_integral_inventar,
+                "valoare": round(cheltuieli_d_integral_inventar, 2),
             }
         )
 
@@ -405,21 +406,34 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
         cheltuieli_pe_deductibilitate.append(
             {
                 "nume": Deductibilitate.DEDUCTIBILA_INTEGRAL_SALARII.value,
-                "valoare": cheltuieli_d_integral_salarii,
+                "valoare": round(cheltuieli_d_integral_salarii, 2),
             }
         )
 
-    cheltuieli_d_integral_amortizari = CheltuialaModel.objects.filter(
+    amortizari = CheltuialaModel.objects.filter(
         deductibila=Deductibilitate.DEDUCTIBILA_INTEGRAL_AMORTIZATA,
-        data_inserarii__year=anul,
-    ).aggregate(total=Sum("suma_in_ron"))
-    cheltuieli_d_integral_amortizari = cheltuieli_d_integral_amortizari["total"]
+        mijloc_fix=True,
+    )
+    cheltuieli_d_integral_amortizari = 0
+    if amortizari:
+        for amortizare in amortizari:
+            if anul > amortizare.anul_amortizarii_complete or anul < amortizare.data_inceperii_amortizarii.year:
+                continue
+            
+            months = 12
+            if amortizare.data_inceperii_amortizarii.year == anul:
+                months = 12 - amortizare.data_inceperii_amortizarii.month
+
+            if amortizare.data_amortizarii_complete.year == anul:
+                months = amortizare.data_amortizarii_complete.month
+
+            cheltuieli_d_integral_amortizari += months * amortizare.amortizare_lunara
 
     if cheltuieli_d_integral_amortizari:
         cheltuieli_pe_deductibilitate.append(
             {
                 "nume": Deductibilitate.DEDUCTIBILA_INTEGRAL_AMORTIZATA.value,
-                "valoare": cheltuieli_d_integral_amortizari,
+                "valoare": round(cheltuieli_d_integral_amortizari, 2),
             }
         )
 
@@ -435,7 +449,7 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
         cheltuieli_pe_deductibilitate.append(
             {
                 "nume": Deductibilitate.DEDUCTIBILA_PARTIAL_AUTO_CASA_UTILITATI.value,
-                "valoare": cheltuieli_d_partial_auto_casa_utilizati,
+                "valoare": round(cheltuieli_d_partial_auto_casa_utilizati, 2),
             }
         )
 
@@ -449,7 +463,7 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
         cheltuieli_pe_deductibilitate.append(
             {
                 "nume": Deductibilitate.DEDUCTIBILA_PARTIAL_SPORT_2024.value,
-                "valoare": cheltuieli_d_partial_sport_2024,
+                "valoare": round(cheltuieli_d_partial_sport_2024, 2),
             }
         )
 
@@ -463,7 +477,7 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
         cheltuieli_pe_deductibilitate.append(
             {
                 "nume": Deductibilitate.DEDUCTIBILA_PARTIAL_PENSIE_PILON_3.value,
-                "valoare": cheltuieli_d_partial_pensie_p3,
+                "valoare": round(cheltuieli_d_partial_pensie_p3, 2),
             }
         )
 
@@ -477,7 +491,7 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
         cheltuieli_pe_deductibilitate.append(
             {
                 "nume": Deductibilitate.DEDUCTIBILA_PARTIAL_ASIG_MEDICALE_PRIVAT.value,
-                "valoare": cheltuieli_d_partial_asig_medicale,
+                "valoare": round(cheltuieli_d_partial_asig_medicale, 2),
             }
         )
 
@@ -491,7 +505,7 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
         cheltuieli_pe_deductibilitate.append(
             {
                 "nume": Deductibilitate.DEDUCTIBILA_PARTIAL_PROTOCOL.value,
-                "valoare": cheltuieli_d_partial_protocol,
+                "valoare": round(cheltuieli_d_partial_protocol, 2),
             }
         )
 
@@ -505,7 +519,7 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
         cheltuieli_pe_deductibilitate.append(
             {
                 "nume": Deductibilitate.DEDUCTIBILA_PARTIAL_SOCIALE.value,
-                "valoare": cheltuieli_d_partial_sociale,
+                "valoare": round(cheltuieli_d_partial_sociale, 2),
             }
         )
 
@@ -521,7 +535,7 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
         cheltuieli_pe_deductibilitate.append(
             {
                 "nume": Deductibilitate.DEDUCTIBILA_PARTIAL_CONTRIBUTII_OBLIGATORII_ASOC_ORG.value,
-                "valoare": cheltuieli_d_partial_contrib_obligatorii,
+                "valoare": round(cheltuieli_d_partial_contrib_obligatorii, 2),
             }
         )
 
@@ -537,7 +551,7 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
         cheltuieli_pe_deductibilitate.append(
             {
                 "nume": Deductibilitate.DEDUCTIBILA_PARTIAL_COTIZATII_VOLUNTARE_ASOC_ORG.value,
-                "valoare": cheltuieli_d_partial_cotizatii_voluntare,
+                "valoare": round(cheltuieli_d_partial_cotizatii_voluntare, 2),
             }
         )
 
