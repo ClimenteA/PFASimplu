@@ -656,7 +656,7 @@ def incasari_cheltuieli_dupa_anul_inserarii(anul: int):
 def get_registru_jurnal_incasari_si_plati(request, incasari=None, cheltuieli=None):
     anul = get_year_from_request(request)
 
-    if incasari == None and cheltuieli == None:
+    if incasari is None and cheltuieli is None:
         incasari, cheltuieli = incasari_cheltuieli_dupa_anul_inserarii(anul)
 
     combined_data = sorted(
@@ -668,23 +668,35 @@ def get_registru_jurnal_incasari_si_plati(request, incasari=None, cheltuieli=Non
     total_incasari_bancar = 0
     total_cheltuieli_numerar = 0
     total_cheltuieli_bancar = 0
-    current_month = None
     prev_month = None
     for idx, entry in enumerate(combined_data, start=1):
-
-        if current_month is None:
-            prev_month = entry.data_inserarii.month
-
         current_month = entry.data_inserarii.month
 
-        if isinstance(entry, IncasariModel):
+        if prev_month is not None and current_month != prev_month:
+            result.append(
+                {
+                    "nr_crt": "-",
+                    "data": "-",
+                    "documentul": "-",
+                    "documentId": None,
+                    "felul_operatiunii": f"Calcul total luna {LUNI_RO[prev_month]}",
+                    "incasari_numerar": round(total_incasari_numerar, 2),
+                    "incasari_banca": round(total_incasari_bancar, 2),
+                    "plati_numerar": round(total_cheltuieli_numerar, 2),
+                    "plati_banca": round(total_cheltuieli_bancar, 2),
+                    "end_of_month": True,
+                }
+            )
+            total_incasari_numerar = 0
+            total_incasari_bancar = 0
+            total_cheltuieli_numerar = 0
+            total_cheltuieli_bancar = 0
 
-            incasari_numerar = (
-                entry.suma_in_ron if entry.tip_tranzactie == "NUMERAR" else 0
-            )
-            incasari_bancar = (
-                entry.suma_in_ron if entry.tip_tranzactie == "BANCAR" else 0
-            )
+        prev_month = current_month
+
+        if isinstance(entry, IncasariModel):
+            incasari_numerar = entry.suma_in_ron if entry.tip_tranzactie == "NUMERAR" else 0
+            incasari_bancar = entry.suma_in_ron if entry.tip_tranzactie == "BANCAR" else 0
 
             total_incasari_numerar += incasari_numerar
             total_incasari_bancar += incasari_bancar
@@ -705,13 +717,8 @@ def get_registru_jurnal_incasari_si_plati(request, incasari=None, cheltuieli=Non
             )
 
         else:
-
-            cheltuieli_numerar = (
-                entry.suma_in_ron if entry.tip_tranzactie == "NUMERAR" else 0
-            )
-            cheltuieli_bancar = (
-                entry.suma_in_ron if entry.tip_tranzactie == "BANCAR" else 0
-            )
+            cheltuieli_numerar = entry.suma_in_ron if entry.tip_tranzactie == "NUMERAR" else 0
+            cheltuieli_bancar = entry.suma_in_ron if entry.tip_tranzactie == "BANCAR" else 0
 
             total_cheltuieli_numerar += cheltuieli_numerar
             total_cheltuieli_bancar += cheltuieli_bancar
@@ -731,28 +738,21 @@ def get_registru_jurnal_incasari_si_plati(request, incasari=None, cheltuieli=Non
                 }
             )
 
-        if current_month > prev_month:
-            prev_month = current_month
-
-            result.append(
-                {
-                    "nr_crt": "-",
-                    "data": "-",
-                    "documentul": "-",
-                    "documentId": None,
-                    "felul_operatiunii": f"Calcul total luna {LUNI_RO[current_month]}",
-                    "incasari_numerar": round(total_incasari_numerar, 2),
-                    "incasari_banca": round(total_incasari_bancar, 2),
-                    "plati_numerar": round(total_cheltuieli_numerar, 2),
-                    "plati_banca": round(total_cheltuieli_bancar, 2),
-                    "end_of_month": True,
-                }
-            )
-
-            total_incasari_numerar = 0
-            total_incasari_bancar = 0
-            total_cheltuieli_numerar = 0
-            total_cheltuieli_bancar = 0
+    if prev_month is not None:
+        result.append(
+            {
+                "nr_crt": "-",
+                "data": "-",
+                "documentul": "-",
+                "documentId": None,
+                "felul_operatiunii": f"Calcul total luna {LUNI_RO[prev_month]}",
+                "incasari_numerar": round(total_incasari_numerar, 2),
+                "incasari_banca": round(total_incasari_bancar, 2),
+                "plati_numerar": round(total_cheltuieli_numerar, 2),
+                "plati_banca": round(total_cheltuieli_bancar, 2),
+                "end_of_month": True,
+            }
+        )
 
     return result
 
