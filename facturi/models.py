@@ -278,7 +278,7 @@ def creeaza_factura_pdf(data: dict, pdf_output_path: str):
     else:
         pdf.table_row([''])
 
-    pdf.table_header([f"{data['header_total_de_plata']} {data['total_de_plata']} {data["valuta"]}"], align=Align.R)
+    pdf.table_header([f"{data['header_total_de_plata']} {data['total_de_plata']} {data['valuta']}"], align=Align.R)
 
     pdf.output(pdf_output_path)
 
