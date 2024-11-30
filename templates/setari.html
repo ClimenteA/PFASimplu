@@ -70,10 +70,8 @@
                 source: { local: localitati }
             });">
                 <label>
-                    Alege localitatea:
-                    <input name="localitate" {% if setari_form.localitate.value %}
-                        value="{{setari_form.localitate.value}}" {% endif %} x-ref="searchInputEl" autocomplete="off"
-                        type="text" placeholder="Iasi...">
+                    <span>Alege localitatea:</span> 
+                    <input name="localitate" {% if setari_form.localitate.value %} value="{{ setari_form.localitate.value }}" {% endif %} x-ref="searchInputEl" autocomplete="off" type="text" placeholder="Iasi...">
                     {{ setari_form.localitate.errors }}
                 </label>
             </div>
