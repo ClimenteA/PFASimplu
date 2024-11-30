@@ -5,6 +5,7 @@ from documente.models import DocumenteModel
 from incasari.models import IncasariModel
 from cheltuieli.models import CheltuialaModel
 from setari.models import SetariModel
+from facturi.models import FacturaModel
 from django.utils import timezone
 from datetime import datetime
 from core.settings import get_media_path
@@ -143,3 +144,68 @@ class DataImportV2:
                 parse_tip_document=False,
             )
             instance.save()
+
+    def insert_facturi(self):
+
+        df = pd.read_csv(os.path.join("stocare", "Factura.csv"))
+        df = df.astype(object).where(df.notna(), None)
+        records = df.to_dict('records')
+        media_path = get_media_path()
+
+        for record in records:
+            filepath_fisier_factura_pdf = os.path.join("stocare", record["filepath_fisier_factura_pdf"])
+            # TODO
+            if filepath_fisier_efactura_xml:
+                filepath_fisier_efactura_xml = os.path.join("stocare", record["filepath_fisier_efactura_xml"])
+                shutil.copy2(filepath_fisier_efactura_xml, os.path.join(media_path, record["filepath_fisier_efactura_xml"]))
+
+            if filepath_fisier_efactura_xml:
+                shutil.copy2(filepath_fisier_efactura_xml, os.path.join(media_path, record["filepath_fisier_efactura_xml"]))
+
+
+            instance = FacturaModel(
+                # serie = models.CharField(max_length=20)
+                # numar = models.IntegerField()
+                # data_emitere = models.DateTimeField(default=timezone.now)
+                # data_scadenta = models.DateTimeField(default=one_month_from_now)
+                # tip_factura = models.CharField(
+                #     max_length=300,
+                #     choices=TipFactura,
+                #     default=TipFactura.E_FACTURA,
+                # )
+                # # Client
+                # nume = models.CharField(max_length=200)
+                # cif = models.CharField(max_length=50)
+                # nr_reg_com = models.CharField(max_length=50, null=True, blank=True)
+                # localitate = models.CharField(
+                #     max_length=250,
+                #     choices=Localitati,
+                #     null=True,
+                #     blank=True,
+                #     default=Localitati.LOCALITATE_GENERIC,
+                # )
+                # adresa = models.CharField(max_length=1000)
+                # email = models.EmailField(max_length=250, null=True, blank=True)
+                # telefon = models.CharField(max_length=250, null=True, blank=True)
+                # # Plata
+                # tip_tranzactie = models.CharField(
+                #     max_length=250, choices=ModalitatePlata, default=ModalitatePlata.BANCAR
+                # )
+                # total_de_plata = models.FloatField()
+                # valuta = models.CharField(max_length=3, choices=Valuta, default=Valuta.RON)
+                # # Produse sau servicii
+                # # id, numar_unitati, total_de_plata, nume_produs_sau_serviciu, cod_unitate, pret_pe_unitate, subtotal
+                # produse_sau_servicii = models.JSONField(default=list)
+                # nota = models.TextField(max_length=5000, null=True, blank=True)
+                # data_inserarii = models.DateTimeField(default=timezone.now, null=True, blank=True)
+
+                # # Fisiere
+                # fisier_efactura_xml = models.FileField(
+                #     max_length=100_000, upload_to=get_save_path, null=True, blank=True
+                # )
+                # fisier_factura_pdf = models.FileField(
+                #     max_length=100_000, upload_to=get_save_path, null=True, blank=True
+                # )
+            )
+            instance.save()
+
