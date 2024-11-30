@@ -11,6 +11,7 @@ from facturi.models import FacturaModel
 from utils.localitati import lista_localitati
 from utils.data_import_v1 import DataImportV1
 from utils.data_import_v2 import DataImportV2
+from utils.data_import_from_path_v2 import DataImportFromPathV2
 from .forms import SetariForm
 from .models import SetariModel
 from core.settings import MEDIA_ROOT, make_media_dir, get_extracts_path
@@ -55,6 +56,22 @@ class ImportV2View(View):
         return redirect("/setari/")
 
 
+class ImportFromPathV2View(View):
+
+    def post(self, request):
+        
+        dimp2 = DataImportFromPathV2()
+
+        dimp2
+
+        messages.add_message(
+            request,
+            messages.SUCCESS,
+            "Datele din folderul stocare au fost adaugate!",
+            extra_tags="✅ Succes!",
+        )
+        return redirect("/setari/")
+
 
 class SetariView(View):
 
@@ -71,7 +88,6 @@ class SetariView(View):
         form = SetariForm(request.POST)
 
         if not form.is_valid():
-            print("------", form.errors)
             return render(
                 request,
                 "setari.html",
