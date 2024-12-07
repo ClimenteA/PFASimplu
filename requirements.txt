@@ -1,4 +1,4 @@
-Django==5.1.1
+Django==5.1.4
 django-cleanup==8.1.0
 django-browser-reload==1.13.0
 cursvalutarbnr==1.0.0
