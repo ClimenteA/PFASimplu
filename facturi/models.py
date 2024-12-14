@@ -379,6 +379,8 @@ class FacturaModel(models.Model):
 
     @staticmethod
     def clean_entry(entry: str | None):
+        if isinstance(entry, int):
+            return entry
         if entry is None:
             return ""
         entry = re.sub(r"\s{2,}", " ", unidecode(entry))

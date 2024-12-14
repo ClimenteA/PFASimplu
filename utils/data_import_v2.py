@@ -1,4 +1,5 @@
 import os
+import ast
 import shutil
 import pandas as pd
 from documente.models import DocumenteModel
@@ -151,61 +152,44 @@ class DataImportV2:
         df = df.astype(object).where(df.notna(), None)
         records = df.to_dict('records')
         media_path = get_media_path()
-
+ 
         for record in records:
-            filepath_fisier_factura_pdf = os.path.join("stocare", record["filepath_fisier_factura_pdf"])
-            # TODO
-            if filepath_fisier_efactura_xml:
-                filepath_fisier_efactura_xml = os.path.join("stocare", record["filepath_fisier_efactura_xml"])
-                shutil.copy2(filepath_fisier_efactura_xml, os.path.join(media_path, record["filepath_fisier_efactura_xml"]))
 
-            if filepath_fisier_efactura_xml:
-                shutil.copy2(filepath_fisier_efactura_xml, os.path.join(media_path, record["filepath_fisier_efactura_xml"]))
+            if record["fisier_efactura_xml"]:
+                filepath_fisier_efactura_xml = os.path.join("stocare", record["fisier_efactura_xml"])
+                shutil.copy2(filepath_fisier_efactura_xml, os.path.join(media_path, record["fisier_efactura_xml"]))
 
+            if record["fisier_factura_pdf"]:
+                filepath_fisier_factura_pdf = os.path.join("stocare", record["fisier_factura_pdf"])
+                shutil.copy2(filepath_fisier_factura_pdf, os.path.join(media_path, record["fisier_factura_pdf"]))
 
             instance = FacturaModel(
-                # serie = models.CharField(max_length=20)
-                # numar = models.IntegerField()
-                # data_emitere = models.DateTimeField(default=timezone.now)
-                # data_scadenta = models.DateTimeField(default=one_month_from_now)
-                # tip_factura = models.CharField(
-                #     max_length=300,
-                #     choices=TipFactura,
-                #     default=TipFactura.E_FACTURA,
-                # )
-                # # Client
-                # nume = models.CharField(max_length=200)
-                # cif = models.CharField(max_length=50)
-                # nr_reg_com = models.CharField(max_length=50, null=True, blank=True)
-                # localitate = models.CharField(
-                #     max_length=250,
-                #     choices=Localitati,
-                #     null=True,
-                #     blank=True,
-                #     default=Localitati.LOCALITATE_GENERIC,
-                # )
-                # adresa = models.CharField(max_length=1000)
-                # email = models.EmailField(max_length=250, null=True, blank=True)
-                # telefon = models.CharField(max_length=250, null=True, blank=True)
-                # # Plata
-                # tip_tranzactie = models.CharField(
-                #     max_length=250, choices=ModalitatePlata, default=ModalitatePlata.BANCAR
-                # )
-                # total_de_plata = models.FloatField()
-                # valuta = models.CharField(max_length=3, choices=Valuta, default=Valuta.RON)
-                # # Produse sau servicii
-                # # id, numar_unitati, total_de_plata, nume_produs_sau_serviciu, cod_unitate, pret_pe_unitate, subtotal
-                # produse_sau_servicii = models.JSONField(default=list)
-                # nota = models.TextField(max_length=5000, null=True, blank=True)
-                # data_inserarii = models.DateTimeField(default=timezone.now, null=True, blank=True)
+                serie = record["serie"],
+                numar = record["numar"],
+                data_emitere = datetime.fromisoformat(record["data_emitere"]),
+                data_scadenta = datetime.fromisoformat(record["data_emitere"]),
+                tip_factura = record["tip_factura"],
+                # Client
+                nume = record["nume"],
+                cif = record["cif"],
+                nr_reg_com = record["nr_reg_com"],
+                localitate = record["localitate"],
+                adresa = record["adresa"],
+                email = record["email"],
+                telefon = record["telefon"],
+                # Plata
+                tip_tranzactie = record["tip_tranzactie"],
+                total_de_plata = record["total_de_plata"],
+                valuta = record["valuta"],
+                # Produse sau servicii
+                # id, numar_unitati, total_de_plata, nume_produs_sau_serviciu, cod_unitate, pret_pe_unitate, subtotal
+                produse_sau_servicii = ast.literal_eval(record["produse_sau_servicii"]),
+                nota = record["nota"],
+                data_inserarii = record["data_inserarii"],
 
-                # # Fisiere
-                # fisier_efactura_xml = models.FileField(
-                #     max_length=100_000, upload_to=get_save_path, null=True, blank=True
-                # )
-                # fisier_factura_pdf = models.FileField(
-                #     max_length=100_000, upload_to=get_save_path, null=True, blank=True
-                # )
+                # Fisiere
+                fisier_efactura_xml = record["fisier_factura_pdf"],
+                fisier_factura_pdf = record["fisier_factura_pdf"],
             )
             instance.save()
 
