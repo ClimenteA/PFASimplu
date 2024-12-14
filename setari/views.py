@@ -45,6 +45,7 @@ class ImportV2View(View):
         dim2.insert_incasari()
         dim2.insert_cheltuieli()
         dim2.insert_documente()
+        dim2.insert_facturi()
 
         messages.add_message(
             request,
@@ -53,7 +54,6 @@ class ImportV2View(View):
             extra_tags="✅ Succes!",
         )
         return redirect("/setari/")
-
 
 
 class SetariView(View):
@@ -71,7 +71,6 @@ class SetariView(View):
         form = SetariForm(request.POST)
 
         if not form.is_valid():
-            print("------", form.errors)
             return render(
                 request,
                 "setari.html",
@@ -99,17 +98,32 @@ class SetariViewDownloadData(View):
         storage_path = os.path.join(extracts_path, "stocare")
         os.makedirs(storage_path, exist_ok=True)
 
-        def save_model_to_csv(model, filename):
+        copyfile = lambda fp: shutil.copy2(fp, os.path.join(storage_path, os.path.basename(fp))) 
+
+        def save_model_to_csv(model, filename: str):
             data = model.objects.all()
+
+            if len(data) == 0:
+                return
+            
             for item in data:
-                shutil.copy2(item.fisier.path, os.path.join(storage_path, os.path.basename(item.fisier.path))) 
-                
+                if hasattr(item, "fisier"):
+                    if item.fisier:
+                        copyfile(item.fisier.path)
+                if hasattr(item, "fisier_efactura_xml"):
+                    if item.fisier_efactura_xml:
+                        copyfile(item.fisier_efactura_xml.path)
+                if hasattr(item, "fisier_factura_pdf"):
+                    if item.fisier_factura_pdf:
+                        copyfile(item.fisier_factura_pdf.path)
+                    
             df = pd.DataFrame(data.values())
             df.to_csv(os.path.join(storage_path, filename), index=False)
 
         save_model_to_csv(CheltuialaModel, "Cheltuiala.csv")
         save_model_to_csv(IncasariModel, "Incasari.csv")
         save_model_to_csv(DocumenteModel, "Documente.csv")
+        save_model_to_csv(FacturaModel, "Factura.csv")
 
         df = pd.DataFrame(SetariModel.objects.all().values())
         df.to_csv(os.path.join(storage_path, "Setari.csv"), index=False)

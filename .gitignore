@@ -1,7 +1,5 @@
 .venv
-stocare
-stocare_v1
-stocare_v2
+stocare*
 .vscode
 .ipynb_checkpoints
 .venv
