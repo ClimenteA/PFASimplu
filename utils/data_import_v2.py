@@ -181,7 +181,6 @@ class DataImportV2:
             instance.save()
 
     def insert_facturi(self):
-
         csv_path = os.path.join("stocare", "Factura.csv")
 
         if not os.path.exists(csv_path):
