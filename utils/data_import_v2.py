@@ -17,8 +17,16 @@ class DataImportV2:
 
     def insert_date_pfa(self):
 
-        df = pd.read_csv(os.path.join("stocare", "Setari.csv"))
+        csv_path = os.path.join("stocare", "Setari.csv")
 
+        if not os.path.exists(csv_path):
+            return csv_path
+
+        df = pd.read_csv(csv_path)
+
+        if len(df.columns) == 0:
+            return
+        
         data = df.to_records("dict")[0]
         df = df.astype(object).where(df.notna(), None)
         data = df.to_dict('records')[0]
@@ -43,9 +51,17 @@ class DataImportV2:
         instance.save()
 
     def insert_incasari(self):
+        csv_path = os.path.join("stocare", "Incasari.csv")
 
-        df = pd.read_csv(os.path.join("stocare", "Incasari.csv"))
+        if not os.path.exists(csv_path):
+            return
+
+        df = pd.read_csv(csv_path)
         df = df.astype(object).where(df.notna(), None)
+
+        if len(df.columns) == 0:
+            return
+        
         records = df.to_dict('records')
 
         media_path = get_media_path()
@@ -67,8 +83,17 @@ class DataImportV2:
 
     def insert_cheltuieli(self):
 
-        df = pd.read_csv(os.path.join("stocare", "Cheltuiala.csv"))
+        csv_path = os.path.join("stocare", "Cheltuiala.csv")
+
+        if not os.path.exists(csv_path):
+            return
+
+        df = pd.read_csv(csv_path)
         df = df.astype(object).where(df.notna(), None)
+
+        if len(df.columns) == 0:
+            return
+        
         records = df.to_dict('records')
         media_path = get_media_path()
 
@@ -127,9 +152,18 @@ class DataImportV2:
 
 
     def insert_documente(self):
+
+        csv_path = os.path.join("stocare", "Documente.csv")
+
+        if not os.path.exists(csv_path):
+            return
     
-        df = pd.read_csv(os.path.join("stocare", "Documente.csv"))
+        df = pd.read_csv(csv_path)
         df = df.astype(object).where(df.notna(), None)
+
+        if len(df.columns) == 0:
+            return
+        
         records = df.to_dict('records')
         media_path = get_media_path()
 
@@ -148,8 +182,17 @@ class DataImportV2:
 
     def insert_facturi(self):
 
-        df = pd.read_csv(os.path.join("stocare", "Factura.csv"))
+        csv_path = os.path.join("stocare", "Factura.csv")
+
+        if not os.path.exists(csv_path):
+            return
+
+        df = pd.read_csv(csv_path)
         df = df.astype(object).where(df.notna(), None)
+
+        if len(df.columns) == 0:
+            return
+        
         records = df.to_dict('records')
         media_path = get_media_path()
  
