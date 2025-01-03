@@ -1,4 +1,5 @@
 import os
+import traceback
 import requests_cache
 from datetime import timedelta
 from core.settings import get_current_version, get_extracts_path, get_salarii_minim_brut_local
@@ -15,9 +16,10 @@ def new_version_available():
     try:
         current_version = get_current_version()
         response = requests_session.get(get_url("versiune.txt"))
-        return response.text != current_version
+        return response.text.strip() != current_version
     except Exception as err:
-        print("Nu am putut verifica daca a aparut o noua versiune:", err)
+        print(traceback.format_exc())
+        print("Nu am putut verifica daca a aparut o noua versiune:", str(err))
         return False
 
 
@@ -28,5 +30,6 @@ def get_salarii_minim_brut():
         data = {int(k): v for k, v in data.items()}
         return data
     except Exception as err:
-        print("Nu am putut prelua ultimele salarii minime brute:", err)
+        print(traceback.format_exc())
+        print("Nu am putut prelua ultimele salarii minime brute:", str(err))
         return get_salarii_minim_brut_local()

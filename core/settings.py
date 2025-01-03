@@ -166,7 +166,7 @@ def get_current_version():
         versiune_path = os.path.join(BASE_DIR, "_internal", "static", "versiune.txt")
 
     with open(versiune_path, "r") as f:
-        ver = f.read()
+        ver = f.read().strip()
 
     return ver
 
@@ -207,7 +207,7 @@ def get_media_path():
 
 
 def get_extracts_path(extra_dir: str | None = None):
-    extracts_path = os.path.join(MEDIA_ROOT, "extracts")
+    extracts_path = os.path.join(get_media_path(), "extracts")
     if extra_dir:
         extracts_path = os.path.join(extracts_path, extra_dir) 
         shutil.rmtree(extracts_path, ignore_errors=True)
