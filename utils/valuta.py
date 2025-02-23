@@ -4,8 +4,11 @@ from django.utils.translation import gettext_lazy as _
 from cursvalutarbnr import ron_exchange_rate
 from functools import lru_cache
 
+
 @lru_cache(maxsize=None)
 def to_ron(amount: float, currency: str, dateValue: datetime.date):
+    if isinstance(dateValue, str):
+        dateValue = datetime.datetime.strptime(dateValue, "%Y-%m-%d").date()
     return ron_exchange_rate(
         amount, currency, None if dateValue == "" else dateValue.isoformat()
     )

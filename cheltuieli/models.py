@@ -168,19 +168,14 @@ class CheltuialaModel(CommonIncasariCheltuieliModel):
 
         return list(sume_cheltuieli_pe_luni.values())
 
-
     @staticmethod
     def get_total_cheltuieli(year: int):
-        
         total_cheltuieli_result = CheltuialaModel.objects.filter(
             mijloc_fix=False, data_inserarii__year=year
         ).aggregate(totalc=Sum("deducere_in_ron"))
 
-        if total_cheltuieli_result["totalc"] is None:
-            total_cheltuieli = 0
-        else:
-            total_cheltuieli = total_cheltuieli_result["totalc"]
-        
+        total_cheltuieli = total_cheltuieli_result["totalc"] or 0
+
         cheltuieli_mijloc_fix_results = CheltuialaModel.objects.filter(
             Q(data_punerii_in_functiune__year__lte=year) & Q(data_amortizarii_complete__year__gte=year),
             mijloc_fix=True,
@@ -190,13 +185,11 @@ class CheltuialaModel(CommonIncasariCheltuieliModel):
         total_amortizari = 0
         for row in cheltuieli_mijloc_fix_results:
             if year == today.year:
-                # pana la luna curenta
-                multiply_months = today.month
+                multiply_months = min(today.month, row.data_amortizarii_complete.month)
             elif row.data_inceperii_amortizarii.year == year:
-                # 13 pentru ca includem data amortizarii complete 
-                multiply_months = 13 - row.data_inceperii_amortizarii.month 
-            elif row.data_amortizarii_complete.year == today.year:
-                multiply_months = row.data_amortizarii_complete.month - today.month
+                multiply_months = 12 - (row.data_inceperii_amortizarii.month - 1)
+            elif row.data_amortizarii_complete.year == year:
+                multiply_months = row.data_amortizarii_complete.month
             else:
                 multiply_months = 12
             
