@@ -3,8 +3,8 @@ from .github_data import get_salarii_minim_brut
 
 def get_venit_net(year: int):
     """venit net aka baza de calcul"""
-    from incasari.models import IncasariModel
     from cheltuieli.models import CheltuialaModel
+    from incasari.models import IncasariModel
 
     total_incasari = IncasariModel.get_total_incasari(year)
     total_cheltuieli = CheltuialaModel.get_total_cheltuieli(year)
@@ -47,6 +47,7 @@ def calculeaza_taxe_si_impozite(
     plafon12 = salariuMinimBrut * 12
     plafon24 = salariuMinimBrut * 24
     plafon60 = salariuMinimBrut * 60
+    plafon72 = salariuMinimBrut * 72
 
     if anul <= 2022:
         if venit_net > plafon12:
@@ -54,7 +55,7 @@ def calculeaza_taxe_si_impozite(
             CASS = ProcentCASS * plafon12 / 100
         impozitPeVenit = ProcentImpozitVenit * (venit_net - CAS) / 100
 
-    if anul == 2023:
+    elif anul == 2023:
 
         if venit_net > plafon6:
             CASS = ProcentCASS * plafon6 / 100
@@ -69,7 +70,7 @@ def calculeaza_taxe_si_impozite(
 
         impozitPeVenit = ProcentImpozitVenit * (venit_net - CAS) / 100
 
-    if anul >= 2024:
+    elif anul >= 2024:
 
         if venit_net <= plafon6:
             CASS = ProcentCASS * plafon6 / 100
@@ -82,8 +83,12 @@ def calculeaza_taxe_si_impozite(
             CAS = ProcentCAS * plafon24 / 100
             CASS = ProcentCASS * plafon24 / 100
 
-        if venit_net > plafon60:
-            CASS = ProcentCASS * plafon60 / 100
+        if anul >= 2026:
+            if venit_net > plafon72:
+                CASS = ProcentCASS * plafon72 / 100
+        else:
+            if venit_net > plafon60:
+                CASS = ProcentCASS * plafon60 / 100
 
         impozitPeVenit = ProcentImpozitVenit * (venit_net - CAS - CASS) / 100
 

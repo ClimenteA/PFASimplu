@@ -1,30 +1,28 @@
+import itertools
 import os
 import shutil
-import itertools
-import datetime
 from copy import copy
-import pandas as pd
-from django.shortcuts import render
-from django.views import View
-from django.http import HttpResponse
-from django.shortcuts import render, redirect
-from django.utils import timezone
-from django.db.models import Sum, Q
-from setari.models import SetariModel
-from cheltuieli.models import CheltuialaModel, Deductibilitate
-from incasari.models import IncasariModel, SursaVenit
-from documente.models import DocumenteModel
-from utils.calcule import calculeaza_taxe_si_impozite
-from utils.valuta import ron_to_eur
-from utils.views import download_csv_or_xlsx
-from core.settings import MEDIA_ROOT, get_extracts_path
 from zipfile import ZipFile
-from utils.pretty_excel import make_excel_pretty
-from utils.mijloc_fix_pdf import create_fisa_mijloc_fix_pdf
-from utils.github_data import new_version_available
-
 
 import matplotlib
+import pandas as pd
+from django.db.models import Q, Sum
+from django.http import HttpResponse
+from django.shortcuts import redirect, render
+from django.utils import timezone
+from django.views import View
+
+from cheltuieli.models import CheltuialaModel, Deductibilitate
+from core.settings import MEDIA_ROOT, get_extracts_path
+from documente.models import DocumenteModel
+from incasari.models import IncasariModel, SursaVenit
+from setari.models import SetariModel
+from utils.calcule import calculeaza_taxe_si_impozite
+from utils.github_data import new_version_available
+from utils.mijloc_fix_pdf import create_fisa_mijloc_fix_pdf
+from utils.pretty_excel import make_excel_pretty
+from utils.valuta import ron_to_eur
+from utils.views import download_csv_or_xlsx
 
 # prevent thread issue with flaskwebgui
 matplotlib.use("SVG")
