@@ -1,14 +1,16 @@
 import re
 from datetime import datetime
+
 import xmltodict
-from pypdf import PdfReader  # https://pypdf.readthedocs.io/en/stable/index.html
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from pypdf import PdfReader  # https://pypdf.readthedocs.io/en/stable/index.html
+
 from utils.files import get_save_path
-from django.core.exceptions import ValidationError
 
 
-# Plafonul TVA de 300000 RON pe an (cca. 60.000 EUR, 5440 Euro/luna, 31 Eur/Ora) 6 saptamani concediu
+# Plafonul TVA de 395000 RON pe an
 # https://virginradio.ro/p-ce-declaratii-trebuie-sa-depuna-un-pfa-in-decursul-unui-an
 class TipDocument(models.TextChoices):
 
@@ -82,7 +84,7 @@ def validate_year(value):
 
 class DocumenteModel(models.Model):
     tip_document = models.CharField(
-        max_length=300, choices=TipDocument, default=TipDocument.DECLARATIE_UNICA_212
+        max_length=300, choices=TipDocument, default=TipDocument.DOCUMENT_UTIL
     )
     document_pentru_anul = models.IntegerField(
         null=True, blank=True, validators=[validate_year]
@@ -117,12 +119,12 @@ class DocumenteModel(models.Model):
             ]:
                 data = pdf_parser(self.fisier.path)
                 if data:
-                    self.tip_document = data["tip_document"]
-                    self.document_pentru_anul = data["document_pentru_anul"]
-                    if self.tip_document == TipDocument.DOVADA_PLATA_TAXE_SI_IMPOZITE.value:
-                        plata_spv_text = f'Plata spv {data["suma_plata_anaf"]} RON'
-                        if plata_spv_text not in self.mentiuni:
-                            self.mentiuni = plata_spv_text
+                    if not self.tip_document:
+                        self.tip_document = data["tip_document"]
+                    if not self.document_pentru_anul:
+                        self.document_pentru_anul = data["document_pentru_anul"]
+                    if self.tip_document == TipDocument.DOVADA_PLATA_TAXE_SI_IMPOZITE.value and not self.mentiuni:
+                        self.mentiuni = f'Plata spv {data["suma_plata_anaf"]} RON'
 
                 super().save(
                     update_fields=["document_pentru_anul", "tip_document", "mentiuni"]

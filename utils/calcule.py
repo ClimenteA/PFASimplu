@@ -71,9 +71,12 @@ def calculeaza_taxe_si_impozite(
         impozitPeVenit = ProcentImpozitVenit * (venit_net - CAS) / 100
 
     elif anul >= 2024:
-
-        if venit_net <= plafon6:
-            CASS = ProcentCASS * plafon6 / 100
+        
+        if anul >= 2025 and venit_net == 0:
+            CASS = 0
+        else:
+            if venit_net <= plafon6:
+                CASS = ProcentCASS * plafon6 / 100
 
         if venit_net > plafon12 and venit_net <= plafon24:
             CAS = ProcentCAS * plafon12 / 100
