@@ -1,9 +1,11 @@
 # PFASimplu
 
+> Am facut [chatcodfiscal.ro](https://chatcodfiscal.ro/) sectiunea `Registre PFA` - urci un zip cu (e)facturi, bonuri, extrase bancare si primesti un zip cu toate registrele completate si documentele organizate.
+
+
 ![GitHub all releases](https://img.shields.io/github/downloads/ClimenteA/PFASimplu/total?label=descarcari&style=for-the-badge)
 
 Aplicatie pentru simplificarea gestiunii contabilitatii facuta in partida simpla (versiunea 2).  
-
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
