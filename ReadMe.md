@@ -34,7 +34,7 @@ Aplicatie pentru simplificarea gestiunii contabilitatii facuta in partida simpla
 
 - Pentru cei care detin PFA, PFI, II, etc si pot tine contabilitatea in partida simpla;
 - Impozitare in sistem real (fara norma de venit);
-- Nu au depasit pragul TVA (venituri sub 5k euro pe luna);
+- Nu au depasit pragul TVA (venituri sub 395k RON pe an);
 - Sunt prestatori de servicii (freelanceri, instalatori, curieri glovo, tazz, soferi taxi, bold, uber etc.);
 
 Aplicatia te ajuta sa:
