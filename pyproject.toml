@@ -23,3 +23,8 @@ dependencies = [
     "requests-cache==1.2.1"
 ]
 
+[dependency-groups]
+dev = [
+    "pyinstaller>=6.19.0",
+]
+
