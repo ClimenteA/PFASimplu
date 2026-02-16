@@ -80,6 +80,10 @@ Aplicatia este facuta in Python, Django cu SQLiteDB.
 
 Pe windows comenzile make for avea prefixul `.\makefile.bat X` - unde X poate fi una din comenzile make linux de mai sus (ex: `.\makefile.bat run`).
 
+- activate venv windows - `& D:/PFASimplu/.venv/Scripts/Activate.ps1`
+- allow bash in powershell - `Set-ExecutionPolicy Unrestricted -Scope Process`
+
+
 ## Setari 
 
 In pagina `Setari` trebuie sa adaugi datele pfa-ului tau.
