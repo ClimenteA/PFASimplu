@@ -95,9 +95,6 @@ def calculeaza_taxe_si_impozite(
 
         impozitPeVenit = ProcentImpozitVenit * (venit_net - CAS - CASS) / 100
 
-    if venit_net <= plafon6:
-        impozitPeVenit = 0
-
     if scutit_cas:
         CAS = 0
     

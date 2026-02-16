@@ -1,19 +1,19 @@
-run:
-	python manage.py runserver
+dev:
+	uv run manage.py runserver
 
 migrate-all:
-	python manage.py makemigrations
-	python manage.py migrate
-	python manage.py makemigrations cheltuieli 
-	python manage.py makemigrations documente 
-	python manage.py makemigrations facturi
-	python manage.py makemigrations incasari
-	python manage.py makemigrations setari
-	python manage.py migrate cheltuieli 
-	python manage.py migrate documente 
-	python manage.py migrate facturi
-	python manage.py migrate incasari
-	python manage.py migrate setari
+	uv run manage.py makemigrations
+	uv run manage.py migrate
+	uv run manage.py makemigrations cheltuieli 
+	uv run manage.py makemigrations documente 
+	uv run manage.py makemigrations facturi
+	uv run manage.py makemigrations incasari
+	uv run manage.py makemigrations setari
+	uv run manage.py migrate cheltuieli 
+	uv run manage.py migrate documente 
+	uv run manage.py migrate facturi
+	uv run manage.py migrate incasari
+	uv run manage.py migrate setari
 
 purge-migration-dirs:
 	rm -rf cheltuieli/migrations

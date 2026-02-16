@@ -71,11 +71,9 @@ Executabilul nu are un certificat digital, asa ca sistemul de operare (windows/m
 Aplicatia este facuta in Python, Django cu SQLiteDB. 
 
 - clone repo;
-- `virtualenv .venv`;
-- `source .venv/bin/activate` (pt. windows `Set-ExecutionPolicy Unrestricted -Scope Process` si `.\.venv\Scripts\activate`);
-- `pip install -r requirements.txt`;
+- `uv sync`;
 - `make migrate-all` - pt. Ubuntu pentru a face toate migrarile;
-- `make run` - pt. a porni Django dev. server (aka `python manage.py runserver`);
+- `make dev` - pt. a porni Django dev. server (aka `python manage.py runserver`);
 - `make purge-db` - pt. a sterge `stocare.db` (sqlite db) si toate folderele `migrations`;
 - `make purge-migration-dirs` - pt. a sterge toate folderele `migrations`;
 - `make package` - creeaza aplicatia pfasimplu ca executabil pentru sistemul de operare pe care a fost rulat;
