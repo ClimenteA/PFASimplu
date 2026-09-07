@@ -547,10 +547,9 @@ function filtreazaCodClasificare(event) {
 }
 
 function hideShowExtraFieldsForMijlocFix() {
-  if (
-    select_deductibila_el.value ==
-    "Mijloc fix peste 2500 RON (ded. integral cu amortizare)"
-  ) {
+  // Optiunea de mijloc fix se recunoaste dupa "cu amortizare", ca sa nu depinda de
+  // pragul din eticheta (2500 RON pana in 2025, 5000 RON din 2026).
+  if (select_deductibila_el.value.includes("cu amortizare")) {
     amortizare_el.style.display = "grid";
     display_coduri_clasif_el.style.display = "block";
     cod_cheltuiala_el.addEventListener("input", filtreazaCodClasificare);

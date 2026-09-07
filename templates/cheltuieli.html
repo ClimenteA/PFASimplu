@@ -14,7 +14,7 @@
         Aici poti aduga documentele justificative (facturi, chitante) pentru
         cheltuielile pe care le-ai facut in scopul prestarii activitatii tale de PFA.
 
-        Unele cheltuieli sunt integral deductibile: consumabile, plati servicii, achizitii bunuri sub 2500 RON etc.
+        Unele cheltuieli sunt integral deductibile: consumabile, plati servicii, achizitii bunuri sub 5000 RON etc.
         Altele sunt partial deductibile:
         2% din baza de calcul pentru cheltuielile cu potentialii clienti (mancare, cadouri sub 100 RON, etc),
         50% cheltuieli cu autovehicul/chirii/utilitati daca sunt folosite si in scop personal.
@@ -211,7 +211,7 @@
                         </a>
                     </td>
                     <td>
-                        <a href="?delete_id={{item.id}}" class="pico-color-red-500 px-1">
+                        <a href="?delete_id={{item.id}}" class="pico-color-red-500 px-1" onclick="return confirm('Stergi definitiv aceasta inregistrare si fisierul atasat?')">
                             <i class="bi bi-trash"></i>
                         </a>
                     </td>

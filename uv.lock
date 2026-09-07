@@ -185,16 +185,16 @@ wheels = [
 
 [[package]]
 name = "cursvalutarbnr"
-version = "1.0.5"
+version = "1.0.6"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "diskcache" },
     { name = "requests" },
     { name = "xmltodict" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/7d/9e/12ba99fcd4905d71f36fd6a55a719797c899c8b758c0415f49829b658434/cursvalutarbnr-1.0.5.tar.gz", hash = "sha256:60520c7e03e2600ab04de2c2c7871c44b88cb8ba8f3d66f586ef038420926914", size = 4446, upload-time = "2025-12-06T13:25:46.472Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/13/28/4dbf6b0c62cc98642f9f6a3e51ea83529a219ae34d3aae9cc77ff6ce2312/cursvalutarbnr-1.0.6.tar.gz", hash = "sha256:7bbce976a84a5200b384a6cd8da239ea610c5305a0b0f0b664f54aa92b7bb772", size = 4502, upload-time = "2026-08-18T06:45:56.795Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a7/58/a7e45c64e608bcbe3d7fe1cd6c63b673d960b735310569db54ececac863f/cursvalutarbnr-1.0.5-py3-none-any.whl", hash = "sha256:61b68fe720aee8d3f034f15e5e731193e95ea6f833280c515119bf2c31af0433", size = 4650, upload-time = "2025-12-06T13:25:45.141Z" },
+    { url = "https://files.pythonhosted.org/packages/ce/b4/7a8ffa2f754b637b95b66e0397f6d527cb99639e8816a99993cfa40f3d44/cursvalutarbnr-1.0.6-py3-none-any.whl", hash = "sha256:68aa998f20fa45143bca4a37c9abdcabadfdf7246884406421ec06002bc9f772", size = 4664, upload-time = "2026-08-18T06:45:55.63Z" },
 ]
 
 [[package]]
@@ -619,7 +619,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "cachetools", specifier = "==5.5.0" },
-    { name = "cursvalutarbnr", specifier = "==1.0.5" },
+    { name = "cursvalutarbnr", specifier = "==1.0.6" },
     { name = "django", specifier = "==5.2.11" },
     { name = "django-browser-reload", specifier = "==1.13.0" },
     { name = "django-cleanup", specifier = "==8.1.0" },

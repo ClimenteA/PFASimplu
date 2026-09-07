@@ -94,6 +94,9 @@ class InventarView(View):
 
         # Save
         form.instance.nume_cheltuiala = item.nume_cheltuiala
+        # Scoaterea din uz: marcam bunul ca iesit din patrimoniu; amortizarea se opreste
+        # dupa luna iesirii (vezi CheltuialaModel.luni_amortizare_in_an).
+        form.instance.scos_din_uz = bool(form.cleaned_data.get("data_iesirii_din_uz"))
         form.save()
         messages.add_message(
             request,

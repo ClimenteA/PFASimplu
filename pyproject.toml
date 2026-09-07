@@ -8,7 +8,7 @@ dependencies = [
     "Django==5.2.11",
     "django-cleanup==8.1.0",
     "django-browser-reload==1.13.0",
-    "cursvalutarbnr==1.0.5",
+    "cursvalutarbnr==1.0.6",
     "pandas==2.2.2",
     "openpyxl==3.1.5",
     "matplotlib==3.9.2",

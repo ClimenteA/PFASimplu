@@ -209,7 +209,7 @@ class DataImportV2:
                 serie = record["serie"],
                 numar = record["numar"],
                 data_emitere = datetime.fromisoformat(record["data_emitere"]),
-                data_scadenta = datetime.fromisoformat(record["data_emitere"]),
+                data_scadenta = datetime.fromisoformat(record["data_scadenta"]),
                 tip_factura = record["tip_factura"],
                 # Client
                 nume = record["nume"],
@@ -230,7 +230,7 @@ class DataImportV2:
                 data_inserarii = record["data_inserarii"],
 
                 # Fisiere
-                fisier_efactura_xml = record["fisier_factura_pdf"],
+                fisier_efactura_xml = record["fisier_efactura_xml"],
                 fisier_factura_pdf = record["fisier_factura_pdf"],
             )
             instance.save()

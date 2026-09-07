@@ -6,6 +6,7 @@ from zipfile import ZipFile
 
 import matplotlib
 import pandas as pd
+from django.contrib import messages
 from django.db.models import Q, Sum
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
@@ -144,6 +145,9 @@ class RegistruInventarDescarcaView(View):
     def get(self, request):
         filetype = request.GET.get("filetype").lower()
         data = get_registru_inventar(dbid=True)
+        if not data:
+            messages.add_message(request, messages.ERROR, "Registrul-inventar este gol, nu exista nimic de exportat.", extra_tags="🟥 Eroare!")
+            return redirect("/registre/")
 
         src_filepaths = []
         for item in data:
@@ -364,13 +368,15 @@ def get_incasari_pe_surse(anul: int):
 
 
 def get_cheltuieli_pe_deductibilitate(anul: int):
+    # Registrul fiscal arata sumele DEDUSE (deducere_in_ron), nu sumele platite, ca liniile
+    # sa se adune la "Total cheltuieli" (care e calculat tot pe deducere_in_ron).
 
     cheltuieli_pe_deductibilitate = []
 
     cheltuieli_d_integral = CheltuialaModel.objects.filter(
         deductibila=Deductibilitate.DEDUCTIBILA_INTEGRAL, data_inserarii__year=anul
     )
-    cheltuieli_d_integral = cheltuieli_d_integral.aggregate(total=Sum("suma_in_ron"))["total"]
+    cheltuieli_d_integral = cheltuieli_d_integral.aggregate(total=Sum("deducere_in_ron"))["total"]
 
     if cheltuieli_d_integral:
         cheltuieli_pe_deductibilitate.append(
@@ -383,7 +389,7 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
     cheltuieli_d_integral_inventar = CheltuialaModel.objects.filter(
         deductibila=Deductibilitate.DEDUCTIBILA_INTEGRAL_INVENTAR,
         data_inserarii__year=anul,
-    ).aggregate(total=Sum("suma_in_ron"))
+    ).aggregate(total=Sum("deducere_in_ron"))
     cheltuieli_d_integral_inventar = cheltuieli_d_integral_inventar["total"]
 
     if cheltuieli_d_integral_inventar:
@@ -397,7 +403,7 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
     cheltuieli_d_integral_salarii = CheltuialaModel.objects.filter(
         deductibila=Deductibilitate.DEDUCTIBILA_INTEGRAL_SALARII,
         data_inserarii__year=anul,
-    ).aggregate(total=Sum("suma_in_ron"))
+    ).aggregate(total=Sum("deducere_in_ron"))
     cheltuieli_d_integral_salarii = cheltuieli_d_integral_salarii["total"]
 
     if cheltuieli_d_integral_salarii:
@@ -415,22 +421,13 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
     cheltuieli_d_integral_amortizari = 0
     if amortizari:
         for amortizare in amortizari:
-            if anul > amortizare.anul_amortizarii_complete or anul < amortizare.data_inceperii_amortizarii.year:
-                continue
-            
-            months = 12
-            if amortizare.data_inceperii_amortizarii.year == anul:
-                months = 12 - amortizare.data_inceperii_amortizarii.month
-
-            if amortizare.data_amortizarii_complete.year == anul:
-                months = amortizare.data_amortizarii_complete.month
-
+            months = amortizare.luni_amortizare_in_an(anul)
             cheltuieli_d_integral_amortizari += months * amortizare.amortizare_lunara
 
     if cheltuieli_d_integral_amortizari:
         cheltuieli_pe_deductibilitate.append(
             {
-                "nume": Deductibilitate.DEDUCTIBILA_INTEGRAL_AMORTIZATA.value,
+                "nume": Deductibilitate.DEDUCTIBILA_INTEGRAL_AMORTIZATA.label,
                 "valoare": round(cheltuieli_d_integral_amortizari, 2),
             }
         )
@@ -438,7 +435,7 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
     cheltuieli_d_partial_auto_casa_utilizati = CheltuialaModel.objects.filter(
         deductibila=Deductibilitate.DEDUCTIBILA_PARTIAL_AUTO_CASA_UTILITATI,
         data_inserarii__year=anul,
-    ).aggregate(total=Sum("suma_in_ron"))
+    ).aggregate(total=Sum("deducere_in_ron"))
     cheltuieli_d_partial_auto_casa_utilizati = cheltuieli_d_partial_auto_casa_utilizati[
         "total"
     ]
@@ -454,7 +451,7 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
     cheltuieli_d_partial_sport_2024 = CheltuialaModel.objects.filter(
         deductibila=Deductibilitate.DEDUCTIBILA_PARTIAL_SPORT_2024,
         data_inserarii__year=anul,
-    ).aggregate(total=Sum("suma_in_ron"))
+    ).aggregate(total=Sum("deducere_in_ron"))
     cheltuieli_d_partial_sport_2024 = cheltuieli_d_partial_sport_2024["total"]
 
     if cheltuieli_d_partial_sport_2024:
@@ -468,7 +465,7 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
     cheltuieli_d_partial_pensie_p3 = CheltuialaModel.objects.filter(
         deductibila=Deductibilitate.DEDUCTIBILA_PARTIAL_PENSIE_PILON_3,
         data_inserarii__year=anul,
-    ).aggregate(total=Sum("suma_in_ron"))
+    ).aggregate(total=Sum("deducere_in_ron"))
     cheltuieli_d_partial_pensie_p3 = cheltuieli_d_partial_pensie_p3["total"]
 
     if cheltuieli_d_partial_pensie_p3:
@@ -482,7 +479,7 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
     cheltuieli_d_partial_asig_medicale = CheltuialaModel.objects.filter(
         deductibila=Deductibilitate.DEDUCTIBILA_PARTIAL_ASIG_MEDICALE_PRIVAT,
         data_inserarii__year=anul,
-    ).aggregate(total=Sum("suma_in_ron"))
+    ).aggregate(total=Sum("deducere_in_ron"))
     cheltuieli_d_partial_asig_medicale = cheltuieli_d_partial_asig_medicale["total"]
 
     if cheltuieli_d_partial_asig_medicale:
@@ -496,7 +493,7 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
     cheltuieli_d_partial_protocol = CheltuialaModel.objects.filter(
         deductibila=Deductibilitate.DEDUCTIBILA_PARTIAL_PROTOCOL,
         data_inserarii__year=anul,
-    ).aggregate(total=Sum("suma_in_ron"))
+    ).aggregate(total=Sum("deducere_in_ron"))
     cheltuieli_d_partial_protocol = cheltuieli_d_partial_protocol["total"]
 
     if cheltuieli_d_partial_protocol:
@@ -510,7 +507,7 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
     cheltuieli_d_partial_sociale = CheltuialaModel.objects.filter(
         deductibila=Deductibilitate.DEDUCTIBILA_PARTIAL_SOCIALE,
         data_inserarii__year=anul,
-    ).aggregate(total=Sum("suma_in_ron"))
+    ).aggregate(total=Sum("deducere_in_ron"))
     cheltuieli_d_partial_sociale = cheltuieli_d_partial_sociale["total"]
 
     if cheltuieli_d_partial_sociale:
@@ -524,7 +521,7 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
     cheltuieli_d_partial_contrib_obligatorii = CheltuialaModel.objects.filter(
         deductibila=Deductibilitate.DEDUCTIBILA_PARTIAL_CONTRIBUTII_OBLIGATORII_ASOC_ORG,
         data_inserarii__year=anul,
-    ).aggregate(total=Sum("suma_in_ron"))
+    ).aggregate(total=Sum("deducere_in_ron"))
     cheltuieli_d_partial_contrib_obligatorii = cheltuieli_d_partial_contrib_obligatorii[
         "total"
     ]
@@ -540,7 +537,7 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
     cheltuieli_d_partial_cotizatii_voluntare = CheltuialaModel.objects.filter(
         deductibila=Deductibilitate.DEDUCTIBILA_PARTIAL_COTIZATII_VOLUNTARE_ASOC_ORG,
         data_inserarii__year=anul,
-    ).aggregate(total=Sum("suma_in_ron"))
+    ).aggregate(total=Sum("deducere_in_ron"))
     cheltuieli_d_partial_cotizatii_voluntare = cheltuieli_d_partial_cotizatii_voluntare[
         "total"
     ]
@@ -705,7 +702,7 @@ def get_registru_jurnal_incasari_si_plati(request, incasari=None, cheltuieli=Non
                     "data": entry.data_inserarii.isoformat(),
                     "documentul": entry.fisier,
                     "documentId": str(entry.fisier).split("_")[0],
-                    "felul_operatiunii": "Incasare",
+                    "felul_operatiunii": "Incasare" + (f" ({entry.suma} {entry.valuta})" if entry.valuta != "RON" else ""),
                     "incasari_numerar": incasari_numerar,
                     "incasari_banca": incasari_bancar,
                     "plati_numerar": 0,
@@ -727,7 +724,7 @@ def get_registru_jurnal_incasari_si_plati(request, incasari=None, cheltuieli=Non
                     "data": entry.data_inserarii.isoformat(),
                     "documentul": entry.fisier,
                     "documentId": str(entry.fisier).split("_")[0],
-                    "felul_operatiunii": f"Cheltuiala {entry.nume_cheltuiala}",
+                    "felul_operatiunii": f"Cheltuiala {entry.nume_cheltuiala}" + (f" ({entry.suma} {entry.valuta})" if entry.valuta != "RON" else ""),
                     "incasari_numerar": 0,
                     "incasari_banca": 0,
                     "plati_numerar": cheltuieli_numerar,
@@ -775,10 +772,9 @@ def get_cards_and_charts_data(request):
             print("0 total cheltuieli", err)
             total_cheltuieli = 0
 
+        # Venitul net poate fi negativ (pierdere fiscala); se afiseaza ca atare in registrul
+        # fiscal, iar taxele se calculeaza pe baza pozitiva.
         total_incasari_net = round((total_incasari_brut - total_cheltuieli), 2)
-
-        if total_incasari_net <= 0:
-            total_incasari_net = 0
 
         cheltuieli = CheltuialaModel.objects.all()
         if cheltuieli:
@@ -837,14 +833,14 @@ def get_cards_and_charts_data(request):
 
     if furnizor:
         la_stat = calculeaza_taxe_si_impozite(
-            total_incasari_net,
+            max(total_incasari_net, 0),
             anul,
             furnizor.scutit_cas,
             furnizor.scutit_cass,
             furnizor.scutit_impozit,
         )
     else:
-        la_stat = calculeaza_taxe_si_impozite(total_incasari_net, anul)
+        la_stat = calculeaza_taxe_si_impozite(max(total_incasari_net, 0), anul)
 
     total_platite_la_stat_pe_toti_anii = DocumenteModel.total_plati_la_stat()
 
@@ -862,7 +858,7 @@ def get_cards_and_charts_data(request):
         
         if furnizor:
             tiy = calculeaza_taxe_si_impozite(
-                incasari_net,
+                max(incasari_net, 0),
                 yr,
                 furnizor.scutit_cas,
                 furnizor.scutit_cass,
@@ -870,7 +866,7 @@ def get_cards_and_charts_data(request):
             )["total_taxe_impozite"]
         else:
             tiy = calculeaza_taxe_si_impozite(
-                incasari_net,
+                max(incasari_net, 0),
                 yr,
             )["total_taxe_impozite"]
 
@@ -887,8 +883,9 @@ def get_cards_and_charts_data(request):
 
     total_incasari_net_pe_toti_anii = round(total_incasari_net_pe_toti_anii, 2)
 
+    # Pozitiv = mai e de platit; negativ = platit in plus fata de estimare.
     rest_de_plata_catre_stat = round(
-        abs(total_platite_la_stat_pe_toti_anii - total_de_platit_la_stat_pe_toti_anii),
+        total_de_platit_la_stat_pe_toti_anii - total_platite_la_stat_pe_toti_anii,
         2,
     )
 

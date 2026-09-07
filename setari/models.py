@@ -11,7 +11,7 @@ def validate_iban_length(value):
 
 
 class SetariModel(models.Model):
-    nume = models.CharField(max_length=50)
+    nume = models.CharField(max_length=250)
     localitate = models.CharField(max_length=250, choices=Localitati)
     adresa = models.CharField(max_length=500)
     nr_reg_com = models.CharField(max_length=50)

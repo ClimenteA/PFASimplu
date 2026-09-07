@@ -102,9 +102,12 @@ class DocumenteModel(models.Model):
 
         platite = 0
         for r in results:
-            plata_match = re.search(r"Plata spv (\d+\.\d+) RON", r.mentiuni)
+            plata_match = re.search(r"Plata spv ([\d.,]+) RON", r.mentiuni or "")
             if plata_match:
-                platite += float(plata_match.group(1))
+                try:
+                    platite += float(plata_match.group(1).replace(",", "."))
+                except ValueError:
+                    pass
 
         return round(platite, 2)
 

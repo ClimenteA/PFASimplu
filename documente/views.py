@@ -70,7 +70,7 @@ class DocumenteView(View):
             messages.add_message(
                 request,
                 messages.ERROR,
-                " ".join(err),
+                " ".join(err) if hasattr(err, "__iter__") else str(err),
                 extra_tags="🟥 Eroare!",
             )
 

@@ -20,13 +20,16 @@ class Deductibilitate(models.TextChoices):
     DEDUCTIBILA_INTEGRAL_INVENTAR = "Obiect de inventar (deductibil integral)", _(
         "Obiect de inventar (deductibil integral)"
     )
+    # Valoarea salvata in baza de date ramane cea veche (cu "2500"), ca sa nu se strice
+    # inregistrarile existente. Doar eticheta afisata arata pragul actual de 5000 RON
+    # (OUG 8/2026, de la 1 ianuarie 2026).
     DEDUCTIBILA_INTEGRAL_AMORTIZATA = (
         "Mijloc fix peste 2500 RON (ded. integral cu amortizare)",
-        _("Mijloc fix peste 2500 RON (ded. integral cu amortizare)"),
+        _("Mijloc fix peste 5000 RON (ded. integral cu amortizare)"),
     )
     DEDUCTIBILA_PARTIAL_AUTO_CASA_UTILITATI = (
         "Auto, chirii, utilitati 50% din valoarea lor",
-        _("Auto, chirii, utilitati 50% din valoarea lor"),
+        _("Vehicule nefolosite exclusiv in activitate, 50% (art. 68 alin. 7 lit. k)"),
     )
     DEDUCTIBILA_PARTIAL_SPORT_2024 = (
         "Sport, sali de fitness etc. max. 100 EUR pe an",
@@ -168,6 +171,27 @@ class CheltuialaModel(CommonIncasariCheltuieliModel):
 
         return list(sume_cheltuieli_pe_luni.values())
 
+    def luni_amortizare_in_an(self, year: int) -> int:
+        """Cate luni de amortizare intra in anul dat: lunile dintre data inceperii
+        amortizarii si data amortizarii complete, iar pentru anul curent doar pana
+        in luna de azi inclusiv."""
+        if not self.data_inceperii_amortizarii or not self.data_amortizarii_complete:
+            return 0
+        today = timezone.now().date()
+        months = 0
+        for month in range(1, 13):
+            month_date = datetime.date(year, month, 1)
+            if month_date < self.data_inceperii_amortizarii.replace(day=1):
+                continue
+            if month_date > self.data_amortizarii_complete:
+                continue
+            if self.scos_din_uz and self.data_iesirii_din_uz and month_date > self.data_iesirii_din_uz:
+                continue
+            if year == today.year and month > today.month:
+                continue
+            months += 1
+        return months
+
     @staticmethod
     def get_total_cheltuieli(year: int):
         total_cheltuieli_result = CheltuialaModel.objects.filter(
@@ -181,19 +205,9 @@ class CheltuialaModel(CommonIncasariCheltuieliModel):
             mijloc_fix=True,
         )
 
-        today = timezone.now()
         total_amortizari = 0
         for row in cheltuieli_mijloc_fix_results:
-            if year == today.year:
-                multiply_months = min(today.month, row.data_amortizarii_complete.month)
-            elif row.data_inceperii_amortizarii.year == year:
-                multiply_months = 12 - (row.data_inceperii_amortizarii.month - 1)
-            elif row.data_amortizarii_complete.year == year:
-                multiply_months = row.data_amortizarii_complete.month
-            else:
-                multiply_months = 12
-            
-            total_amortizari += row.amortizare_lunara * multiply_months
+            total_amortizari += row.amortizare_lunara * row.luni_amortizare_in_an(year)
 
         return round(total_cheltuieli + total_amortizari, 2)
 
@@ -210,11 +224,19 @@ class CheltuialaModel(CommonIncasariCheltuieliModel):
             return self.suma_in_ron
 
         if self.deductibila == Deductibilitate.DEDUCTIBILA_INTEGRAL_AMORTIZATA.value:
-            clasificare = [
-                c
-                for c in CODURI_CLASIFICARE
-                if c["cod_clasificare"] == self.cod_de_clasificare
-            ][0]
+            if not self.data_punerii_in_functiune:
+                raise ValidationError(
+                    _("Pentru un mijloc fix trebuie completata data punerii in functiune.")
+                )
+            cod = (self.cod_de_clasificare or "").strip()
+            if cod and not cod.endswith("."):
+                cod += "."
+            potriviri = [c for c in CODURI_CLASIFICARE if c["cod_clasificare"] == cod]
+            if not potriviri:
+                raise ValidationError(
+                    _(f"Codul de clasificare '{self.cod_de_clasificare}' nu exista in catalogul mijloacelor fixe (exemplu: 2.2.9.).")
+                )
+            clasificare = potriviri[0]
 
             self.mijloc_fix = True
             self.cod_de_clasificare = clasificare["cod_clasificare"]
@@ -253,20 +275,18 @@ class CheltuialaModel(CommonIncasariCheltuieliModel):
             return round((self.suma_in_ron / 2), 2)  # 50%
 
         if self.deductibila == Deductibilitate.DEDUCTIBILA_PARTIAL_PROTOCOL.value:
-            baza_de_calcul_venit_net = get_venit_net(self.data_inserarii.year)
-            suma_admisa_protocol = round(
-                baza_de_calcul_venit_net * 0.02, 2
-            )  # 2% din baza de calcul
-
+            # Art. 68 alin. (6): baza de calcul = venit brut - cheltuieli deductibile, altele
+            # decat cheltuielile de protocol (si bursele private). Se calculeaza pe datele din
+            # anul cheltuielii introduse pana acum; limita e anuala.
             result = CheltuialaModel.objects.filter(
                 deductibila=Deductibilitate.DEDUCTIBILA_PARTIAL_PROTOCOL.value,
                 data_inserarii__year=self.data_inserarii.year,
-            ).aggregate(total_sum=Sum("deducere_in_ron"))
+            ).exclude(pk=self.pk).aggregate(total_sum=Sum("deducere_in_ron"))
+            protocol_deja_dedus = result["total_sum"] or 0
+            baza_de_calcul = get_venit_net(self.data_inserarii.year) + protocol_deja_dedus
+            suma_admisa_protocol = round(baza_de_calcul * 0.02, 2)  # 2% din baza de calcul
 
-            if result["total_sum"] is None:
-                suma_curenta_protocol = self.suma_in_ron
-            else:
-                suma_curenta_protocol = result["total_sum"] + self.suma_in_ron
+            suma_curenta_protocol = protocol_deja_dedus + self.suma_in_ron
 
             if suma_curenta_protocol > suma_admisa_protocol:
                 remaining = round(
@@ -293,7 +313,7 @@ class CheltuialaModel(CommonIncasariCheltuieliModel):
             if result_salarii["total_s"] is None:
                 total_salarii = 0
             else:
-                total_salarii = result["total_s"]
+                total_salarii = result_salarii["total_s"]
 
             suma_admisa_sociale = round(total_salarii * 0.05, 2)  # 5% din total salarii
 

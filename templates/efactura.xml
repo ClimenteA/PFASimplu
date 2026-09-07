@@ -6,7 +6,8 @@
     <cbc:DueDate>{{ data_scadenta }}</cbc:DueDate>
     <cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>
     <cbc:Note>{{ nota }}</cbc:Note>
-    <cbc:DocumentCurrencyCode>RON</cbc:DocumentCurrencyCode>
+    <cbc:DocumentCurrencyCode>{{ valuta }}</cbc:DocumentCurrencyCode>{% if valuta != 'RON' %}
+    <cbc:TaxCurrencyCode>RON</cbc:TaxCurrencyCode>{% endif %}
     <cac:AccountingSupplierParty>
         <cac:Party>
             <cac:PostalAddress>
@@ -57,11 +58,14 @@
         </cac:PayeeFinancialAccount>
         {% endif %}
     </cac:PaymentMeans>
-    <cac:TaxTotal>
+{% if valuta != 'RON' %}    <cac:TaxTotal>
         <cbc:TaxAmount currencyID="RON">0.00</cbc:TaxAmount>
+    </cac:TaxTotal>
+{% endif %}    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="{{ valuta }}">0.00</cbc:TaxAmount>
         <cac:TaxSubtotal>
-            <cbc:TaxableAmount currencyID="RON">{{ total_de_plata }}</cbc:TaxableAmount>
-            <cbc:TaxAmount currencyID="RON">0.00</cbc:TaxAmount>
+            <cbc:TaxableAmount currencyID="{{ valuta }}">{{ total_de_plata }}</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="{{ valuta }}">0.00</cbc:TaxAmount>
             <cac:TaxCategory>
                 <cbc:ID>O</cbc:ID>
                 <cbc:Percent>0.00</cbc:Percent>
@@ -73,18 +77,18 @@
         </cac:TaxSubtotal>
     </cac:TaxTotal>
     <cac:LegalMonetaryTotal>
-        <cbc:LineExtensionAmount currencyID="RON">{{ total_de_plata }}</cbc:LineExtensionAmount>
-        <cbc:TaxExclusiveAmount currencyID="RON">{{ total_de_plata }}</cbc:TaxExclusiveAmount>
-        <cbc:TaxInclusiveAmount currencyID="RON">{{ total_de_plata }}</cbc:TaxInclusiveAmount>
-        <cbc:PrepaidAmount currencyID="RON">{{ total_de_plata }}</cbc:PrepaidAmount>
-        <cbc:PayableRoundingAmount currencyID="RON">{{ total_de_plata }}</cbc:PayableRoundingAmount>
-        <cbc:PayableAmount currencyID="RON">{{ total_de_plata }}</cbc:PayableAmount>
+        <cbc:LineExtensionAmount currencyID="{{ valuta }}">{{ total_de_plata }}</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="{{ valuta }}">{{ total_de_plata }}</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="{{ valuta }}">{{ total_de_plata }}</cbc:TaxInclusiveAmount>
+        <cbc:PrepaidAmount currencyID="{{ valuta }}">0.00</cbc:PrepaidAmount>
+        <cbc:PayableRoundingAmount currencyID="{{ valuta }}">0.00</cbc:PayableRoundingAmount>
+        <cbc:PayableAmount currencyID="{{ valuta }}">{{ total_de_plata }}</cbc:PayableAmount>
     </cac:LegalMonetaryTotal>
     {% for item in produse_sau_servicii %}
     <cac:InvoiceLine>
         <cbc:ID>{{ item.id }}</cbc:ID>
         <cbc:InvoicedQuantity unitCode="{{ item.cod_unitate }}">{{ item.numar_unitati }}</cbc:InvoicedQuantity>
-        <cbc:LineExtensionAmount currencyID="RON">{{ item.subtotal }}</cbc:LineExtensionAmount>
+        <cbc:LineExtensionAmount currencyID="{{ valuta }}">{{ item.subtotal }}</cbc:LineExtensionAmount>
         <cac:Item>
             <cbc:Name>{{ item.nume_produs_sau_serviciu|title }}</cbc:Name>
             <cac:ClassifiedTaxCategory>
@@ -95,7 +99,7 @@
             </cac:ClassifiedTaxCategory>
         </cac:Item>
         <cac:Price>
-            <cbc:PriceAmount currencyID="RON">{{ item.pret_pe_unitate }}</cbc:PriceAmount>
+            <cbc:PriceAmount currencyID="{{ valuta }}">{{ item.pret_pe_unitate }}</cbc:PriceAmount>
         </cac:Price>
     </cac:InvoiceLine>
     {% endfor %}

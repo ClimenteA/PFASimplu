@@ -71,27 +71,23 @@ def calculeaza_taxe_si_impozite(
         impozitPeVenit = ProcentImpozitVenit * (venit_net - CAS) / 100
 
     elif anul >= 2024:
-        
-        if anul >= 2025 and venit_net == 0:
-            CASS = 0
-        else:
-            if venit_net <= plafon6:
-                CASS = ProcentCASS * plafon6 / 100
-
+        # CAS (art. 148): baza aleasa, minim 12 salarii intre 12 si 24 salarii,
+        # minim 24 salarii de la 24 salarii in sus; sub 12 salarii nu se datoreaza.
         if venit_net > plafon12 and venit_net <= plafon24:
             CAS = ProcentCAS * plafon12 / 100
-            CASS = ProcentCASS * plafon12 / 100
-
         if venit_net > plafon24:
             CAS = ProcentCAS * plafon24 / 100
-            CASS = ProcentCASS * plafon24 / 100
 
-        if anul >= 2026:
-            if venit_net > plafon72:
-                CASS = ProcentCASS * plafon72 / 100
+        # CASS (art. 170 alin. 1, art. 156): 10% din venitul net, cu baza minima de
+        # 6 salarii si baza maxima de 60 salarii (2024, 2025) sau 72 salarii (din 2026,
+        # Legea 239/2025). Treptele 6/12/24 se aplica doar altor categorii de venituri
+        # (art. 170 alin. 3), nu activitatilor independente.
+        plafon_maxim_cass = plafon72 if anul >= 2026 else plafon60
+        if anul >= 2025 and venit_net <= 0:
+            baza_cass = 0
         else:
-            if venit_net > plafon60:
-                CASS = ProcentCASS * plafon60 / 100
+            baza_cass = min(max(venit_net, plafon6), plafon_maxim_cass)
+        CASS = ProcentCASS * baza_cass / 100
 
         impozitPeVenit = ProcentImpozitVenit * (venit_net - CAS - CASS) / 100
 
