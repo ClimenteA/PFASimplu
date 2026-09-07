@@ -231,14 +231,3 @@ O alta optiune: Faci un zip cu aplicatia pfasimplu v1 (care contine registrele e
 **Aplicatia este oferita ca atare, nu are nici o garantie asociata**. Nu imi asumam raspunderea pentru eventuale erori in procesare date contabilitate, daune provocate dispozitivelor etc. Testeaza aplicatia inainte si vezi daca raspunde nevoilor tale inainte de o adauga in rutina de lucru.
 
 Daca gasesti erori in aplicatie poti deschide un [`New issue`](https://github.com/ClimenteA/PFASimplu/issues/new) in tabul `Issues` din acesta pagina sau poti [posta pe reddit](https://www.reddit.com/r/PFASimplu/submit/?type=TEXT) in subredditul [PFASimplu](https://www.reddit.com/r/PFASimplu/).
-
-
-😁 Daca ai de unde, nu ma supar sa primesc donatii:
-
-<a href="https://www.buymeacoffee.com/climentea" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
-
-
-Daca vrei sa inveti sa faci aplicatii web de la 0 am facut un curs de 15 ore (Python, Javascript, HTML/CSS, Docker, Mongo etc) - [click aici](https://curs.softgata.com/) pentru mai multe detalii.
-
-
-Daca ai nevoie de o aplicatie web sau o automatizare a unui process de business ma poti contacta pe [ro.softgata.com](https://ro.softgata.com/). Imi poti trimite si un mesaj pe [linkedin](https://www.linkedin.com/in/climente-alin/) in caz de a picat hosting-ul pentru softgata.com 😅 (mai postez si acolo din cand in cand).
