@@ -19,7 +19,6 @@ from documente.models import DocumenteModel
 from incasari.models import IncasariModel, SursaVenit
 from setari.models import SetariModel
 from utils.calcule import calculeaza_taxe_si_impozite
-from utils.github_data import new_version_available
 from utils.mijloc_fix_pdf import create_fisa_mijloc_fix_pdf
 from utils.pretty_excel import make_excel_pretty
 from utils.tva import calculeaza_jurnal_cumparari
@@ -280,14 +279,11 @@ class RegistreView(View):
         registru_inventar = get_registru_inventar()
         jurnal_cumparari = calculeaza_jurnal_cumparari(overview_data["anul"])
 
-        versiune_noua_disponibila = new_version_available()
-
         return render(
             request,
             "registre.html",
             context={
                 **overview_data,
-                "versiune_noua_disponibila": versiune_noua_disponibila,
                 "rjip": registru_jurnal_incasari_si_plati,
                 "ref": registru_fiscal,
                 "ri": registru_inventar,

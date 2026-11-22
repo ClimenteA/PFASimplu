@@ -255,12 +255,7 @@ Daca ai cheltuieli cu servicii din UE/non-UE (taxare inversa), apare si tab-ul *
 
 ## Actualizare aplicatie
 
-Daca a aparut o noua versiune a aplicatiei in pagina Registre va aparea linkul din imagine in descrierea paginii.
-La prima deschidere a aplicatiei este posibil ca mesajul "Click aici pentru a descarca noua versiune a aplicatiei" sa apara - da click butonul din stanga sus PFASimplu pentru a da refresh la pagina.
-
-![actualizare-aplicatie](readmepics/actualizare.png)
-
-Un click pe cel link te va duce catre pagina de Github Releases (pagina de unde ai descarcat prima data aplicatia).
+Poti verifica oricand daca a aparut o versiune noua a aplicatiei pe pagina de [Github Releases](https://github.com/ClimenteA/PFASimplu/releases) (pagina de unde ai descarcat prima data aplicatia).
 Din Assets descarca ultima versiune pentru sistemul tau de operare. 
 
 Din pagina Setari a aplicatiei "veche" click pe buttonul `Exporta datele din aplicatie` (un zip va fi descarcat in folderul Downloads/Descarcari). 
@@ -269,15 +264,6 @@ Din pagina Setari a aplicatiei "veche" click pe buttonul `Exporta datele din apl
 
 Acum trebuie unzip la aplicatia noua (cea cu versiunea mai mare ce ai descarcat-o anterior din Github releases).
 Langa executabilul `pfasimplu.exe` da unzip la zip-ul creat cand ai dat click pe butonul Exporta datele din aplicatie.
-
-
-## Ce fac cu versiunea veche a aplicatiei (v1)?
-
-O poti folosi in continuare. Este actualizata cu datele pana in 2024 inclusiv.
-Daca mai apar modificari de calcul al taxelor/impozitelor dupa 2024 atunci aplicatia anterioara (V1) nu mai este valabila.
-
-O optiune: Faci un zip cu aplicatia pfasimplu v1 (care contine registrele excel in folderul stocare) si il pui pe un usb stick pentru pastrare. Apoi, poti folosi v2.
-
 
 
 ## Observatii
