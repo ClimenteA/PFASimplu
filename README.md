@@ -218,7 +218,7 @@ Pentru PFA-urile cu **cod special de TVA intracomunitar (art. 317 Cod fiscal)** 
 
 Tabelul pe luni arata: numarul de facturi, CIF-ul folosit, TVA-ul de plata, termenul de depunere/plata (**25 inclusiv a lunii urmatoare**) si statusul fiecarei declaratii (`Calculata → Descarcata → Depusa → Platita`). Daca lipsesc date din Setari (cod TVA intracomunitar, IBAN trezorerie) apar avertizari inainte de generare.
 
-**Jurnalul de cumparari** este disponibil si in pagina [Registre](#registre) (tab `Jurnal cumpărări TVA`), cu descarcare PDF/CSV/XLSX pe luna sau pe tot anul. Totalul documentului include TVA autolichidata, chiar daca furnizorul a facturat 0% TVA.
+**Jurnalul de cumparari** este disponibil si in pagina [Registre](#registre) (tab `Jurnale`), cu descarcare PDF/CSV/XLSX pe luna sau pe tot anul. Totalul documentului include TVA autolichidata, chiar daca furnizorul a facturat 0% TVA.
 
 > **Atentie:** codul TVA intracomunitar (art. 317) nu confera calitatea de platitor normal de TVA (art. 316). Aceasta functionalitate acopera regimul art. 317 (D301/D390), nu decontul D300. Pentru situatii speciale confirma tratamentul cu contabilul.
 
@@ -247,7 +247,7 @@ Si da, nu e gresit chiar daca ai 0 incasari (sau sub 6 salarii minime) trebuie s
 Poti descarca registrele dand click fie pe iconita de csv sau xlsx. 
 In cazul Registrului jurnal si Registrului Inventar un fisier zip va fi descarcat in folderul Downloads care va contine datele registrului intr-un fisier xlsx sau csv (depinde ce icon ai ales) si un folder Documente in care vor fi toate documentele justificative. Toate fisierele salvate in aplicatie for avea un prefix id de 8 caractere dupa care le puteti gasi (ex: `0x4rf2KW_Factura_etc.pdf`).  
 
-Daca ai cheltuieli cu servicii din UE/non-UE (taxare inversa), apare si tab-ul **Jurnal cumpărări TVA**: jurnalul pentru cumparari cu referinta `15-16`, baza impozitabila, TVA autolichidata si totalurile, descarcabil in PDF, CSV sau XLSX (pe luna sau pe tot anul).
+In tab-ul **Jurnale** gasesti **Jurnalul de cumpărări**: daca ai cheltuieli cu servicii din UE/non-UE (taxare inversa), jurnalul pentru cumparari cu referinta `15-16`, baza impozitabila, TVA autolichidata si totalurile, descarcabil in PDF, CSV sau XLSX (pe luna sau pe tot anul).
 
 
 ![registre](readmepics/registre.jpeg)

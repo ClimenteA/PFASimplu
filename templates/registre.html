@@ -138,9 +138,7 @@
             <button @click="active = 'ref'" :class="active == 'ref' ? '': 'outline'">Registru fiscal</button>
             <button @click="active = 'rjip'" :class="active == 'rjip' ? '': 'outline'">Registru jurnal</button>
             <button @click="active = 'rinv'" :class="active == 'rinv' ? '': 'outline'">Registru inventar</button>
-            {% if rjc %}
-            <button @click="active = 'rjc'" :class="active == 'rjc' ? '': 'outline'">Jurnal cumpărări TVA</button>
-            {% endif %}
+            <button @click="active = 'jurnale'" :class="active == 'jurnale' ? '': 'outline'">Jurnale</button>
         </div>
     </div>
 
@@ -300,8 +298,14 @@
         </table>
     </div>
 
-    {% if rjc %}
-    <div x-show="active == 'rjc'" class="overflow-auto mt-2 mb-6">
+    <div x-show="active == 'jurnale'" class="mt-2 mb-6">
+
+        <hgroup class="container">
+            <h3>🛒 Jurnal de cumpărări (TVA)</h3>
+        </hgroup>
+
+        {% if rjc %}
+        <div class="overflow-auto">
 
         <div x-data="{ downloaded_csv: false, downloaded_xlsx: false, downloaded_pdf: false }" style="display: flex; justify-content: end; overflow: hidden;">
             <a href="{% url 'descarca-jurnal-cumparari' %}?filetype=PDF&anul={{ anul }}" @click="downloaded_pdf = true" :class="downloaded_pdf ? 'px-1 pico-color-purple-500': 'px-1 secondary'"
@@ -365,8 +369,15 @@
                 </tr>
             </tbody>
         </table>
+        </div>
+        {% else %}
+        <article class="container text-center">
+            <p>
+                Jurnalul de cumpărări este gol: nu există cheltuieli cu taxare inversă (servicii UE/non-UE) în {{ anul }}.
+            </p>
+        </article>
+        {% endif %}
     </div>
-    {% endif %}
 
 </div>
 
