@@ -18,8 +18,6 @@ from utils.trezorerie import (
     COD_BUGETAR_TVA,
     ANAF_CODURI_IBAN,
 )
-from utils.data_import_v1 import DataImportV1
-from utils.data_import_v2 import DataImportV2
 from .forms import SetariForm
 from .models import SetariModel
 from core.settings import MEDIA_ROOT, make_media_dir, get_extracts_path
@@ -55,45 +53,6 @@ class SetariIbanTrezorerieView(View):
             "pagina_anaf": ANAF_CODURI_IBAN,
             "cod_bugetar": COD_BUGETAR_TVA,
         })
-
-
-class ImportV1View(View):
-
-    def post(self, request):
-        dim1 = DataImportV1()
-
-        dim1.insert_date_pfa()
-        dim1.insert_incasari()
-        dim1.insert_cheltuieli()
-        dim1.insert_documente()
-
-        messages.add_message(
-            request,
-            messages.SUCCESS,
-            "Datele din folderul stocare au fost adaugate!",
-            extra_tags="✅ Succes!",
-        )
-        return redirect("/setari/")
-
-
-class ImportV2View(View):
-
-    def post(self, request):
-        dim2 = DataImportV2()
-
-        dim2.insert_date_pfa()
-        dim2.insert_incasari()
-        dim2.insert_cheltuieli()
-        dim2.insert_documente()
-        dim2.insert_facturi()
-
-        messages.add_message(
-            request,
-            messages.SUCCESS,
-            "Datele din folderul stocare au fost adaugate!",
-            extra_tags="✅ Succes!",
-        )
-        return redirect("/setari/")
 
 
 class SetariView(View):

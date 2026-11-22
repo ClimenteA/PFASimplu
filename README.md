@@ -270,18 +270,13 @@ Din pagina Setari a aplicatiei "veche" click pe buttonul `Exporta datele din apl
 Acum trebuie unzip la aplicatia noua (cea cu versiunea mai mare ce ai descarcat-o anterior din Github releases).
 Langa executabilul `pfasimplu.exe` da unzip la zip-ul creat cand ai dat click pe butonul Exporta datele din aplicatie.
 
-Deschide aplicatia cu versiunea noua si in pagina Setari da click pe `Importa date din v2`. Aplicatia va lua datele din folderul stocare de langa executabil si va adauga in baza de date din _internal/dbsqlite datele din csv-uri si in folderul _internal/media documentele justificative.
-
 
 ## Ce fac cu versiunea veche a aplicatiei (v1)?
 
 O poti folosi in continuare. Este actualizata cu datele pana in 2024 inclusiv.
 Daca mai apar modificari de calcul al taxelor/impozitelor dupa 2024 atunci aplicatia anterioara (V1) nu mai este valabila.
 
-**Recomand**: Versiunea 2 are si o optiune de preluare a datelor din versiunea 1. 
-Tot ce trebuie sa faci este sa copii fisierul `stocare` langa executabilul `pfasimplu.exe` si din pagina `Setari` sa apesi butonul `Importa date din V1` apoi astepti cateva secunde. Doar un cont trebuie sa fie prezent in folderul stocare.
-
-O alta optiune: Faci un zip cu aplicatia pfasimplu v1 (care contine registrele excel in folderul stocare) si il pui pe un usb stick pentru pastrare. Apoi, poti folosi v2.
+O optiune: Faci un zip cu aplicatia pfasimplu v1 (care contine registrele excel in folderul stocare) si il pui pe un usb stick pentru pastrare. Apoi, poti folosi v2.
 
 
 

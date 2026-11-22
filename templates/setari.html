@@ -15,15 +15,10 @@
         Sunt scutite de la plata taxe/impozite (pensionari, persoane cu handicap, alte persoane cu statut special) 
         bifeaza casuta corespunzatoare pentru a calcula corect darile la stat.
         Ai si optiunea de a adauga CAEN-uri secondare.
-        Ai disponibile si 3 butoane sub formular care te pot ajuta sa importi datele din versiunea 1 sau versiunea 2.
+        Ai disponibile si 2 butoane sub formular pentru exportul si stergerea datelor.
 
-        Pentru import din versiunea 1 copie folderul stocare langa executabilul pfasimplu.exe si apasa din butonul Importa date din v1.
-        
-        Pentru import din versiunea 2 copie noua aplicatie din <a href="https://github.com/ClimenteA/PFASimplu/releases">Github Releases</a> 
-        tot timpul ultimul release din Assets pentru sistemul tau de operare (Windows 10, Windows 11 sau Ubuntu).
-        Odata facut ce ai facut unzip la noua aplicatie din versiunea veche a aplicatiei da click pe butonul Exporta datele din applicatie.
-        Un zip se va crea in folderul Descarcari (Downloads). Acum la fel ca pentru importul v1 avem nevoie de folderul stocare langa executabilul pfasimplu.exe. 
-        Fa unzip la zipul creat langa executabilul nou pfasimplu.exe si apasa din aplicatia noua butonul Importa date din v2.
+        Butonul "Exporta datele din aplicatie" va crea un zip in folderul Descarcari (Downloads)
+        cu toate datele din aplicatie (csv-uri si documente justificative).
 
         Butonul "Sterge toate datele" va sterge toate datele din aplicatie.
         <strong>Atentie!</strong> odata ce ai apasat pe butonul "Sterge toate datele"
@@ -310,22 +305,8 @@
     <form x-data="{downloading: false}" action="{% url 'download-data' %}" method="post">
         {% csrf_token %}
         <button @click="downloading = true;"
-            x-text="downloading ? 'Vezi folderul descarcari': 'Exporta datele din applicatie';" class="secondary"
+            x-text="downloading ? 'Vezi folderul descarcari': 'Exporta datele din aplicatie';" class="secondary"
             type="submit">
-        </button>
-    </form>
-
-    <form x-data="{importingv2: false}" action="{% url 'setari-import-v2' %}" method="post">
-        {% csrf_token %}
-        <button @click="importingv2 = true;" x-text="importingv2 ? 'Datele se adauga...': 'Importa date din v2';"
-            class="secondary" type="submit">
-        </button>
-    </form>
-
-    <form x-data="{importing: false}" action="{% url 'setari-import-v1' %}" method="post">
-        {% csrf_token %}
-        <button @click="importing = true;" x-text="importing ? 'Datele se adauga...': 'Importa date din v1';"
-            class="secondary" type="submit">
         </button>
     </form>
 
