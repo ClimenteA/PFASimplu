@@ -2,6 +2,7 @@ import os
 import shutil
 import zipfile
 from django.shortcuts import render, redirect, HttpResponse
+from django.http import JsonResponse
 from django.contrib import messages
 from django.views import View
 from cheltuieli.models import CheltuialaModel
@@ -10,7 +11,13 @@ from documente.models import DocumenteModel
 from facturi.models import FacturaModel
 from utils.localitati import lista_localitati
 from utils.valuta import Valuta
-from utils.trezorerie import get_link_iban_trezorerie, COD_BUGETAR_TVA
+from utils.trezorerie import (
+    get_link_iban_trezorerie,
+    get_iban_trezorerie_pentru_localitate,
+    asigura_date_iban_trezorerie,
+    COD_BUGETAR_TVA,
+    ANAF_CODURI_IBAN,
+)
 from utils.data_import_v1 import DataImportV1
 from utils.data_import_v2 import DataImportV2
 from .forms import SetariForm
@@ -32,6 +39,22 @@ def get_setari_context(form):
         "link_iban_trezorerie": get_link_iban_trezorerie(localitate),
         "cod_bugetar_tva": COD_BUGETAR_TVA,
     }
+
+
+class SetariIbanTrezorerieView(View):
+    """Cand utilizatorul selecteaza localitatea, intoarce IBAN-ul trezoreriei
+    pentru plata TVA (extras din sursele oficiale ANAF) + linkul de verificare."""
+
+    def get(self, request):
+        localitate = request.GET.get("localitate", "")
+        potrivire = get_iban_trezorerie_pentru_localitate(localitate)
+        return JsonResponse({
+            "iban": potrivire["iban"] if potrivire else None,
+            "nume_trezorerie": potrivire["nume_trezorerie"] if potrivire else None,
+            "sursa": potrivire["sursa"] if potrivire else get_link_iban_trezorerie(localitate),
+            "pagina_anaf": ANAF_CODURI_IBAN,
+            "cod_bugetar": COD_BUGETAR_TVA,
+        })
 
 
 class ImportV1View(View):
@@ -94,9 +117,30 @@ class SetariView(View):
                 context=get_setari_context(form),
             )
 
+        setari = form.save(commit=False)
+
+        # Daca IBAN-ul trezoreriei nu a fost completat (utilizatorul a salvat
+        # fara sa selecteze din nou localitatea), il deducem automat din
+        # localitate, din tabelul extras din sursele oficiale ANAF.
+        if not setari.cont_iban_trezoreria:
+            # Daca tabelul iban_trezorerie.json lipseste, il descarcam acum
+            # de pe ANAF (o singura data; apoi ramane salvat local).
+            if not asigura_date_iban_trezorerie():
+                messages.add_message(
+                    request,
+                    messages.WARNING,
+                    "Nu am putut descarca lista IBAN-urilor trezoreriilor de pe ANAF "
+                    "(lipsa conexiune?). Completeaza IBAN-ul trezoreriei manual din "
+                    "lista ANAF, sau salveaza din nou cand ai conexiune la internet.",
+                    extra_tags="⚠️ Atentie!",
+                )
+            potrivire = get_iban_trezorerie_pentru_localitate(setari.localitate)
+            if potrivire:
+                setari.cont_iban_trezoreria = potrivire["iban"]
+
         SetariModel.objects.all().delete()
 
-        form.save()
+        setari.save()
         messages.add_message(
             request,
             messages.SUCCESS,

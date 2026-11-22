@@ -473,11 +473,12 @@ class SetariTVAFieldsTests(TestCase):
 
     def test_link_trezorerie_din_localitate(self):
         self.assertEqual(get_judet_din_localitate("RO-IS, jud. Iasi, Iasi"), "Iasi")
-        self.assertIn("Iasi.htm", get_link_iban_trezorerie("RO-IS, jud. Iasi, Iasi"))
-        self.assertIn("Satu_Mare.htm", get_link_iban_trezorerie("RO-SM, jud. Satu Mare, Satu Mare"))
-        self.assertIn("Caras_Severin.htm", get_link_iban_trezorerie("RO-CS, jud. Caras-Severin, Resita"))
-        # Fara pagina dedicata -> link generic ANAF
-        self.assertNotIn("iban2014/", get_link_iban_trezorerie("RO-B, jud. Bucuresti, Bucuresti"))
+        # Localitate cu trezorerie cunoscuta -> link direct la PDF-ul ANAF (sursa IBAN-ului)
+        self.assertIn("iban_TREZ405_TREZ406.pdf", get_link_iban_trezorerie("RO-IS, jud. Iasi, Iasi"))
+        # Localitate fara trezorerie operativa proprie -> pagina judetului
+        self.assertIn("Iasi.htm", get_link_iban_trezorerie("RO-IS, jud. Iasi, com. Todiresti, Boldesti"))
+        self.assertIn("Satu_Mare.htm", get_link_iban_trezorerie("RO-SM, jud. Satu Mare, com. X, Y"))
+        self.assertIn("Caras_Severin.htm", get_link_iban_trezorerie("RO-CS, jud. Caras-Severin, com. X, Y"))
 
     def test_tari_ue_non_ue(self):
         self.assertTrue(este_tara_ue("AT"))
@@ -485,6 +486,215 @@ class SetariTVAFieldsTests(TestCase):
         self.assertFalse(este_tara_ue("US"))
         self.assertFalse(este_tara_ue("GB"))  # Brexit
         self.assertFalse(este_tara_ue(""))
+
+
+class IbanTrezorerieAutoTests(TestCase):
+    """IBAN-ul trezoreriei se deduce automat din localitatea selectata in Setari
+    (date extrase din sursele oficiale ANAF - static/iban_trezorerie.json)."""
+
+    def test_iban_iasi(self):
+        from utils.trezorerie import get_iban_trezorerie_pentru_localitate
+
+        r = get_iban_trezorerie_pentru_localitate("RO-IS, jud. Iasi, Iasi")
+        self.assertIsNotNone(r)
+        self.assertEqual(r["iban"], "RO41TREZ40620A100101XTVA")
+        self.assertEqual(r["cod_trezorerie"], "TREZ406")
+        self.assertIn("iban_TREZ405_TREZ406.pdf", r["sursa"])
+
+    def test_iban_pascani(self):
+        from utils.trezorerie import get_iban_trezorerie_pentru_localitate
+
+        r = get_iban_trezorerie_pentru_localitate("RO-IS, jud. Iasi, Pascani")
+        self.assertEqual(r["iban"], "RO63TREZ40720A100101XTVA")
+
+    def test_iban_bucuresti_sectoare(self):
+        from utils.trezorerie import get_iban_trezorerie_pentru_localitate
+
+        r1 = get_iban_trezorerie_pentru_localitate("RO-B, jud. Bucuresti, Sector 1")
+        r6 = get_iban_trezorerie_pentru_localitate("RO-B, jud. Bucuresti, Sector 6")
+        self.assertIn("TREZ701", r1["iban"])
+        self.assertIn("TREZ706", r6["iban"])
+        self.assertNotEqual(r1["iban"], r6["iban"])
+
+    def test_iban_variante_nume(self):
+        from utils.trezorerie import get_iban_trezorerie_pentru_localitate
+
+        # Abrevieri ANAF: Sf. / Tg., articulare: Simleul/Simleu, Otelul/Otelu
+        cazuri = [
+            ("RO-CV, jud. Covasna, com. Sfantul Gheorghe, Sfantu Gheorghe", "TREZ256"),
+            ("RO-CV, jud. Covasna, com. Tirgu Secuiesc, Targu Secuiesc", "TREZ257"),
+            ("RO-SJ, jud. Salaj, Simleu Silvaniei", "TREZ563"),
+            ("RO-CS, jud. Caras-Severin, Otelu Rosu", "TREZ188"),
+            ("RO-NT, jud. Neamt, com. Piatra Neamt, Piatra-Neamt", "TREZ491"),
+            ("RO-GJ, jud. Gorj, com. Tirgu Carbunesti, Carbunesti", "TREZ337"),
+            ("RO-CT, jud. Constanta, com. Eforie, Eforie Nord", "TREZ236"),
+        ]
+        for localitate, cod_trez in cazuri:
+            r = get_iban_trezorerie_pentru_localitate(localitate)
+            self.assertIsNotNone(r, localitate)
+            self.assertIn(cod_trez, r["iban"], localitate)
+
+    def test_fara_potriviri_gresite(self):
+        from utils.trezorerie import get_iban_trezorerie_pentru_localitate
+
+        # Sate fara trezorerie proprie NU trebuie sa primeasca IBAN-ul
+        # unui oras doar pentru ca impart un cuvant din nume.
+        cazuri = [
+            "RO-MM, jud. Maramures, Boiu Mare",          # nu Baia Mare
+            "RO-HR, jud. Harghita, Cristuru Secuiesc",   # nu Odorheiu Secuiesc
+            "RO-AB, jud. Alba, com. Bucium, Valea Alba", # nu Alba Iulia
+            "RO-IS, jud. Iasi, com. Todiresti, Boldesti",
+        ]
+        for localitate in cazuri:
+            self.assertIsNone(get_iban_trezorerie_pentru_localitate(localitate), localitate)
+
+    def test_toate_ibanurile_valid_mod97(self):
+        import json
+        import os
+
+        path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "static", "iban_trezorerie.json")
+        with open(path, encoding="utf-8") as f:
+            date = json.load(f)
+        self.assertGreaterEqual(len(date["trezorerii"]), 200)
+        for t in date["trezorerii"]:
+            iban = t["iban"]
+            self.assertEqual(len(iban), 24, iban)
+            self.assertIn("20A100101", iban)
+            rearr = iban[4:] + iban[:4]
+            numeric = "".join(str(int(c, 36)) for c in rearr)
+            self.assertEqual(int(numeric) % 97, 1, iban)
+
+    def test_endpoint_iban_trezorerie(self):
+        from django.urls import reverse
+
+        r = self.client.get(
+            reverse("setari-iban-trezorerie"),
+            {"localitate": "RO-IS, jud. Iasi, Iasi"},
+        )
+        self.assertEqual(r.status_code, 200)
+        data = r.json()
+        self.assertEqual(data["iban"], "RO41TREZ40620A100101XTVA")
+        self.assertIn("pdf", data["sursa"])
+        self.assertEqual(data["cod_bugetar"], "20A100101")
+
+        # Localitate fara trezorerie -> iban null, dar link de verificare
+        r = self.client.get(
+            reverse("setari-iban-trezorerie"),
+            {"localitate": "RO-IS, jud. Iasi, com. Todiresti, Boldesti"},
+        )
+        data = r.json()
+        self.assertIsNone(data["iban"])
+        self.assertIn("Iasi.htm", data["sursa"])
+
+    def test_salvare_completeaza_iban_automat(self):
+        """Bug fix: la 'Salveaza datele PFA' cu IBAN trezorerie gol,
+        acesta se completeaza automat din localitate (server-side)."""
+        from django.urls import reverse
+
+        self.client.post(reverse("setari"), {
+            "nume": "TEST PFA", "localitate": "RO-IS, jud. Iasi, Iasi",
+            "adresa": "str. Test", "nr_reg_com": "F1", "cif": "123",
+            "email": "t@t.ro", "caen_principal": "6201",
+            "conturi_iban": "[]",
+            "cod_tva_intracomunitar": "",
+            "cont_iban_trezoreria": "",
+        })
+        s = SetariModel.objects.first()
+        self.assertEqual(s.cont_iban_trezoreria, "RO41TREZ40620A100101XTVA")
+
+    def test_salvare_pastreaza_iban_manual(self):
+        """IBAN-ul introdus manual nu se suprascrie la salvare."""
+        from django.urls import reverse
+
+        self.client.post(reverse("setari"), {
+            "nume": "TEST PFA", "localitate": "RO-IS, jud. Iasi, Iasi",
+            "adresa": "str. Test", "nr_reg_com": "F1", "cif": "123",
+            "email": "t@t.ro", "caen_principal": "6201",
+            "conturi_iban": "[]",
+            "cod_tva_intracomunitar": "",
+            "cont_iban_trezoreria": "RO63TREZ40720A100101XTVA",  # Pascani, manual
+        })
+        s = SetariModel.objects.first()
+        self.assertEqual(s.cont_iban_trezoreria, "RO63TREZ40720A100101XTVA")
+
+    @patch("utils.trezorerie._get_trezorerii")
+    @patch("utils.scrape_iban_trezorerie.scrape")
+    @patch("utils.scrape_iban_trezorerie.salveaza_json")
+    def test_salvare_ruleaza_scraper_daca_json_lipseste(self, mock_salveaza, mock_scrape, mock_cache):
+        """Daca iban_trezorerie.json lipseste, la salvarea Setarilor se ruleaza
+        automat scraper-ul ANAF si IBAN-ul se completeaza din datele proaspete."""
+        from django.urls import reverse
+
+        randuri_proaspete = [{
+            "judet": "Iasi",
+            "cod_trezorerie": "TREZ406",
+            "nume_trezorerie": "Trezorerie operativa Municipiul Iasi",
+            "localitate": "iasi",
+            "iban": "RO41TREZ40620A100101XTVA",
+            "cod_bugetar": "20A100101",
+            "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ405_TREZ406.pdf",
+        }]
+        mock_scrape.return_value = randuri_proaspete
+        # Prima verificare: tabel gol -> scrape; dupa salvare: date disponibile.
+        # itertools.chain: dupa primele 2 apeluri, tot datele proaspete.
+        import itertools
+        mock_cache.side_effect = itertools.chain(
+            [[], randuri_proaspete], itertools.repeat(randuri_proaspete)
+        )
+
+        response = self.client.post(reverse("setari"), {
+            "nume": "TEST PFA", "localitate": "RO-IS, jud. Iasi, Iasi",
+            "adresa": "str. Test", "nr_reg_com": "F1", "cif": "123",
+            "email": "t@t.ro", "caen_principal": "6201",
+            "conturi_iban": "[]",
+            "cod_tva_intracomunitar": "",
+            "cont_iban_trezoreria": "",
+        })
+        self.assertEqual(response.status_code, 302)
+        mock_scrape.assert_called_once()
+        mock_salveaza.assert_called_once_with(randuri_proaspete)
+
+        s = SetariModel.objects.first()
+        self.assertEqual(s.cont_iban_trezoreria, "RO41TREZ40620A100101XTVA")
+
+    @patch("utils.trezorerie._get_trezorerii", return_value=[])
+    @patch("utils.scrape_iban_trezorerie.scrape", side_effect=Exception("lipsa retea"))
+    def test_salvare_esueaza_scraping_continua(self, mock_scrape, _mock_cache):
+        """Daca scraper-ul esueaza (lipsa retea), salvarea Setarilor continua
+        cu avertisment, fara IBAN automat."""
+        from django.urls import reverse
+
+        response = self.client.post(reverse("setari"), {
+            "nume": "TEST PFA", "localitate": "RO-IS, jud. Iasi, Iasi",
+            "adresa": "str. Test", "nr_reg_com": "F1", "cif": "123",
+            "email": "t@t.ro", "caen_principal": "6201",
+            "conturi_iban": "[]",
+            "cod_tva_intracomunitar": "",
+            "cont_iban_trezoreria": "",
+        }, follow=True)
+        self.assertEqual(response.status_code, 200)
+        s = SetariModel.objects.first()
+        self.assertIsNotNone(s)  # setarile s-au salvat
+        self.assertIsNone(s.cont_iban_trezoreria)
+        mesajele = [str(m) for m in response.context["messages"]]
+        self.assertTrue(any("Nu am putut descarca" in m for m in mesajele))
+
+    @patch("utils.scrape_iban_trezorerie.scrape")
+    def test_scraper_nu_ruleaza_daca_json_exista(self, mock_scrape):
+        """Cu tabelul deja disponibil, scraper-ul NU se ruleaza la salvare."""
+        from django.urls import reverse
+
+        self.client.post(reverse("setari"), {
+            "nume": "TEST PFA", "localitate": "RO-IS, jud. Iasi, Iasi",
+            "adresa": "str. Test", "nr_reg_com": "F1", "cif": "123",
+            "email": "t@t.ro", "caen_principal": "6201",
+            "conturi_iban": "[]",
+            "cod_tva_intracomunitar": "",
+            "cont_iban_trezoreria": "",
+        })
+        mock_scrape.assert_not_called()
+        s = SetariModel.objects.first()
+        self.assertEqual(s.cont_iban_trezoreria, "RO41TREZ40620A100101XTVA")
 
 
 @override_settings(MEDIA_ROOT=tempfile.mkdtemp(prefix="pfasimplu_test_media_"))

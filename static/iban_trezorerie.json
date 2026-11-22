@@ -1,0 +1,1825 @@
+{
+  "sursa": "https://www.anaf.ro/anaf/internet/ANAF/asistenta_contribuabili/plata_oblig_fiscale/coduri_iban",
+  "cod_bugetar": "20A100101",
+  "generat_la": "2026-11-22",
+  "trezorerii": [
+    {
+      "judet": "Alba",
+      "cod_trezorerie": "TREZ006",
+      "nume_trezorerie": "Trezorerie operativa Campeni",
+      "localitate": "campeni",
+      "iban": "RO68TREZ00620A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ001_TREZ006.pdf"
+    },
+    {
+      "judet": "Alba",
+      "cod_trezorerie": "TREZ009",
+      "nume_trezorerie": "Trezorerie operativa Cugir",
+      "localitate": "cugir",
+      "iban": "RO37TREZ00920A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ001_TREZ009.pdf"
+    },
+    {
+      "judet": "Alba",
+      "cod_trezorerie": "TREZ004",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Aiud",
+      "localitate": "aiud",
+      "iban": "RO24TREZ00420A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ001_TREZ004.pdf"
+    },
+    {
+      "judet": "Alba",
+      "cod_trezorerie": "TREZ002",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Alba Iulia",
+      "localitate": "alba iulia",
+      "iban": "RO77TREZ00220A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ001_TREZ002.pdf"
+    },
+    {
+      "judet": "Alba",
+      "cod_trezorerie": "TREZ003",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Blaj",
+      "localitate": "blaj",
+      "iban": "RO02TREZ00320A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ001_TREZ003.pdf"
+    },
+    {
+      "judet": "Alba",
+      "cod_trezorerie": "TREZ005",
+      "nume_trezorerie": "Trezorerie operativa Sebes",
+      "localitate": "sebes",
+      "iban": "RO46TREZ00520A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ001_TREZ005.pdf"
+    },
+    {
+      "judet": "Arad",
+      "cod_trezorerie": "TREZ022",
+      "nume_trezorerie": "Trezorerie operativa Chisinau Cris",
+      "localitate": "chisineu cris",
+      "iban": "RO32TREZ02220A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ020_TREZ022.pdf"
+    },
+    {
+      "judet": "Arad",
+      "cod_trezorerie": "TREZ024",
+      "nume_trezorerie": "Trezorerie operativa Ineu",
+      "localitate": "ineu",
+      "iban": "RO76TREZ02420A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ020_TREZ024.pdf"
+    },
+    {
+      "judet": "Arad",
+      "cod_trezorerie": "TREZ025",
+      "nume_trezorerie": "Trezorerie operativa Lipova",
+      "localitate": "lipova",
+      "iban": "RO98TREZ02520A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ020_TREZ025.pdf"
+    },
+    {
+      "judet": "Arad",
+      "cod_trezorerie": "TREZ021",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Arad",
+      "localitate": "arad",
+      "iban": "RO10TREZ02120A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ020_TREZ021.pdf"
+    },
+    {
+      "judet": "Arad",
+      "cod_trezorerie": "TREZ032",
+      "nume_trezorerie": "Trezorerie operativa Savarsin",
+      "localitate": "savarsin",
+      "iban": "RO58TREZ03220A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ020_TREZ032.pdf"
+    },
+    {
+      "judet": "Arad",
+      "cod_trezorerie": "TREZ028",
+      "nume_trezorerie": "Trezorerie operativa Sebis",
+      "localitate": "sebis",
+      "iban": "RO67TREZ02820A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ020_TREZ028.pdf"
+    },
+    {
+      "judet": "Arges",
+      "cod_trezorerie": "TREZ050",
+      "nume_trezorerie": "Trezorerie operativa Costesti",
+      "localitate": "costesti",
+      "iban": "RO66TREZ05020A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ045_TREZ050.pdf"
+    },
+    {
+      "judet": "Arges",
+      "cod_trezorerie": "TREZ049",
+      "nume_trezorerie": "Trezorerie operativa Mioveni",
+      "localitate": "mioveni",
+      "iban": "RO44TREZ04920A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ045_TREZ049.pdf"
+    },
+    {
+      "judet": "Arges",
+      "cod_trezorerie": "TREZ047",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Campulung",
+      "localitate": "campulung",
+      "iban": "RO97TREZ04720A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ045_TREZ047.pdf"
+    },
+    {
+      "judet": "Arges",
+      "cod_trezorerie": "TREZ048",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Curtea de Arges",
+      "localitate": "curtea de arges",
+      "iban": "RO22TREZ04820A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ045_TREZ048.pdf"
+    },
+    {
+      "judet": "Arges",
+      "cod_trezorerie": "TREZ046",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Pitesti",
+      "localitate": "pitesti",
+      "iban": "RO75TREZ04620A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ045_TREZ046.pdf"
+    },
+    {
+      "judet": "Arges",
+      "cod_trezorerie": "TREZ051",
+      "nume_trezorerie": "Trezorerie operativa Topoloveni",
+      "localitate": "topoloveni",
+      "iban": "RO88TREZ05120A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ045_TREZ051.pdf"
+    },
+    {
+      "judet": "Bacau",
+      "cod_trezorerie": "TREZ066",
+      "nume_trezorerie": "Trezorerie operativa Buhusi",
+      "localitate": "buhusi",
+      "iban": "RO30TREZ06620A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ060_TREZ066.pdf"
+    },
+    {
+      "judet": "Bacau",
+      "cod_trezorerie": "TREZ071",
+      "nume_trezorerie": "Trezorerie operativa Comunala Podu Turcului",
+      "localitate": "podu turcului",
+      "iban": "RO43TREZ07120A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ060_TREZ071.pdf"
+    },
+    {
+      "judet": "Bacau",
+      "cod_trezorerie": "TREZ063",
+      "nume_trezorerie": "Trezorerie operativa Moinesti",
+      "localitate": "moinesti",
+      "iban": "RO61TREZ06320A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ060_TREZ063.pdf"
+    },
+    {
+      "judet": "Bacau",
+      "cod_trezorerie": "TREZ061",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Bacau",
+      "localitate": "bacau",
+      "iban": "RO17TREZ06120A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ060_TREZ061.pdf"
+    },
+    {
+      "judet": "Bacau",
+      "cod_trezorerie": "TREZ062",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Onesti",
+      "localitate": "onesti",
+      "iban": "RO39TREZ06220A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ060_TREZ062.pdf"
+    },
+    {
+      "judet": "Bihor",
+      "cod_trezorerie": "TREZ081",
+      "nume_trezorerie": "Trezorerie operativa Alesd",
+      "localitate": "alesd",
+      "iban": "RO69TREZ08120A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ075_TREZ081.pdf"
+    },
+    {
+      "judet": "Bihor",
+      "cod_trezorerie": "TREZ078",
+      "nume_trezorerie": "Trezorerie operativa Beius",
+      "localitate": "beius",
+      "iban": "RO03TREZ07820A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ075_TREZ078.pdf"
+    },
+    {
+      "judet": "Bihor",
+      "cod_trezorerie": "TREZ082",
+      "nume_trezorerie": "Trezorerie operativa Marghita",
+      "localitate": "marghita",
+      "iban": "RO91TREZ08220A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ075_TREZ082.pdf"
+    },
+    {
+      "judet": "Bihor",
+      "cod_trezorerie": "TREZ076",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Oradea",
+      "localitate": "oradea",
+      "iban": "RO56TREZ07620A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ075_TREZ076.pdf"
+    },
+    {
+      "judet": "Bihor",
+      "cod_trezorerie": "TREZ083",
+      "nume_trezorerie": "Trezorerie operativa Salonta",
+      "localitate": "salonta",
+      "iban": "RO16TREZ08320A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ075_TREZ083.pdf"
+    },
+    {
+      "judet": "Bistrita nasaud",
+      "cod_trezorerie": "TREZ102",
+      "nume_trezorerie": "Trezorerie operativa Beclean",
+      "localitate": "beclean",
+      "iban": "RO46TREZ10220A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ100_TREZ102.pdf"
+    },
+    {
+      "judet": "Bistrita nasaud",
+      "cod_trezorerie": "TREZ101",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Bistrita",
+      "localitate": "bistrita",
+      "iban": "RO24TREZ10120A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ100_TREZ101.pdf"
+    },
+    {
+      "judet": "Bistrita nasaud",
+      "cod_trezorerie": "TREZ103",
+      "nume_trezorerie": "Trezorerie operativa Nasaud",
+      "localitate": "nasaud",
+      "iban": "RO68TREZ10320A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ100_TREZ103.pdf"
+    },
+    {
+      "judet": "Bistrita nasaud",
+      "cod_trezorerie": "TREZ104",
+      "nume_trezorerie": "Trezorerie operativa Sangeorz Bai",
+      "localitate": "sangeorz bai",
+      "iban": "RO90TREZ10420A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ100_TREZ104.pdf"
+    },
+    {
+      "judet": "Botosani",
+      "cod_trezorerie": "TREZ118",
+      "nume_trezorerie": "Trezorerie operativa Darabani",
+      "localitate": "darabani",
+      "iban": "RO10TREZ11820A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ115_TREZ118.pdf"
+    },
+    {
+      "judet": "Botosani",
+      "cod_trezorerie": "TREZ116",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Botosani",
+      "localitate": "botosani",
+      "iban": "RO63TREZ11620A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ115_TREZ116.pdf"
+    },
+    {
+      "judet": "Botosani",
+      "cod_trezorerie": "TREZ117",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Dorohoi",
+      "localitate": "dorohoi",
+      "iban": "RO85TREZ11720A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ115_TREZ117.pdf"
+    },
+    {
+      "judet": "Botosani",
+      "cod_trezorerie": "TREZ119",
+      "nume_trezorerie": "Trezorerie operativa Saveni",
+      "localitate": "saveni",
+      "iban": "RO32TREZ11920A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ115_TREZ119.pdf"
+    },
+    {
+      "judet": "Braila",
+      "cod_trezorerie": "TREZ153",
+      "nume_trezorerie": "Trezorerie operativa Faurei",
+      "localitate": "faurei",
+      "iban": "RO04TREZ15320A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ150_TREZ153.pdf"
+    },
+    {
+      "judet": "Braila",
+      "cod_trezorerie": "TREZ154",
+      "nume_trezorerie": "Trezorerie operativa Ianca",
+      "localitate": "ianca",
+      "iban": "RO26TREZ15420A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ150_TREZ154.pdf"
+    },
+    {
+      "judet": "Braila",
+      "cod_trezorerie": "TREZ152",
+      "nume_trezorerie": "Trezorerie operativa Insuratei",
+      "localitate": "insuratei",
+      "iban": "RO79TREZ15220A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ150_TREZ152.pdf"
+    },
+    {
+      "judet": "Braila",
+      "cod_trezorerie": "TREZ151",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Braila",
+      "localitate": "braila",
+      "iban": "RO57TREZ15120A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ150_TREZ151.pdf"
+    },
+    {
+      "judet": "Brasov",
+      "cod_trezorerie": "TREZ137",
+      "nume_trezorerie": "Trezorerie operativa Codlea",
+      "localitate": "codlea",
+      "iban": "RO40TREZ13720A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ130_TREZ137.pdf"
+    },
+    {
+      "judet": "Brasov",
+      "cod_trezorerie": "TREZ131",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Brasov",
+      "localitate": "brasov",
+      "iban": "RO05TREZ13120A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ130_TREZ131.pdf"
+    },
+    {
+      "judet": "Brasov",
+      "cod_trezorerie": "TREZ132",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Fagaras",
+      "localitate": "fagaras",
+      "iban": "RO27TREZ13220A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ130_TREZ132.pdf"
+    },
+    {
+      "judet": "Brasov",
+      "cod_trezorerie": "TREZ138",
+      "nume_trezorerie": "Trezorerie operativa Rasnov",
+      "localitate": "rasnov",
+      "iban": "RO62TREZ13820A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ130_TREZ138.pdf"
+    },
+    {
+      "judet": "Brasov",
+      "cod_trezorerie": "TREZ133",
+      "nume_trezorerie": "Trezorerie operativa Rupea",
+      "localitate": "rupea",
+      "iban": "RO49TREZ13320A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ130_TREZ133.pdf"
+    },
+    {
+      "judet": "Brasov",
+      "cod_trezorerie": "TREZ136",
+      "nume_trezorerie": "Trezorerie operativa Sacele",
+      "localitate": "sacele",
+      "iban": "RO18TREZ13620A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ130_TREZ136.pdf"
+    },
+    {
+      "judet": "Bucuresti",
+      "cod_trezorerie": "TREZ700",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Bucuresti",
+      "localitate": "bucuresti",
+      "iban": "RO10TREZ70020A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ000_TREZ700.pdf"
+    },
+    {
+      "judet": "Bucuresti",
+      "cod_trezorerie": "TREZ701",
+      "nume_trezorerie": "Trezorerie operativa Sector 1",
+      "localitate": "sector 1",
+      "iban": "RO32TREZ70120A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ000_TREZ701.pdf"
+    },
+    {
+      "judet": "Bucuresti",
+      "cod_trezorerie": "TREZ702",
+      "nume_trezorerie": "Trezorerie operativa Sector 2",
+      "localitate": "sector 2",
+      "iban": "RO54TREZ70220A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ000_TREZ702.pdf"
+    },
+    {
+      "judet": "Bucuresti",
+      "cod_trezorerie": "TREZ703",
+      "nume_trezorerie": "Trezorerie operativa Sector 3",
+      "localitate": "sector 3",
+      "iban": "RO76TREZ70320A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ000_TREZ703.pdf"
+    },
+    {
+      "judet": "Bucuresti",
+      "cod_trezorerie": "TREZ704",
+      "nume_trezorerie": "Trezorerie operativa Sector 4",
+      "localitate": "sector 4",
+      "iban": "RO98TREZ70420A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ000_TREZ704.pdf"
+    },
+    {
+      "judet": "Bucuresti",
+      "cod_trezorerie": "TREZ705",
+      "nume_trezorerie": "Trezorerie operativa Sector 5",
+      "localitate": "sector 5",
+      "iban": "RO23TREZ70520A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ000_TREZ705.pdf"
+    },
+    {
+      "judet": "Bucuresti",
+      "cod_trezorerie": "TREZ706",
+      "nume_trezorerie": "Trezorerie operativa Sector 6",
+      "localitate": "sector 6",
+      "iban": "RO45TREZ70620A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ000_TREZ706.pdf"
+    },
+    {
+      "judet": "Buzau",
+      "cod_trezorerie": "TREZ166",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Buzau",
+      "localitate": "buzau",
+      "iban": "RO96TREZ16620A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ165_TREZ166.pdf"
+    },
+    {
+      "judet": "Buzau",
+      "cod_trezorerie": "TREZ167",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Ramnicu Sarat",
+      "localitate": "ramnicu sarat",
+      "iban": "RO21TREZ16720A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ165_TREZ167.pdf"
+    },
+    {
+      "judet": "Buzau",
+      "cod_trezorerie": "TREZ169",
+      "nume_trezorerie": "Trezorerie operativa Patarlagele",
+      "localitate": "patarlagele",
+      "iban": "RO65TREZ16920A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ165_TREZ169.pdf"
+    },
+    {
+      "judet": "Buzau",
+      "cod_trezorerie": "TREZ170",
+      "nume_trezorerie": "Trezorerie operativa Pogoanele",
+      "localitate": "pogoanele",
+      "iban": "RO87TREZ17020A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ165_TREZ170.pdf"
+    },
+    {
+      "judet": "Calarasi",
+      "cod_trezorerie": "TREZ204",
+      "nume_trezorerie": "Trezorerie operativa Budesti",
+      "localitate": "budesti",
+      "iban": "RO59TREZ20420A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ200_TREZ204.pdf"
+    },
+    {
+      "judet": "Calarasi",
+      "cod_trezorerie": "TREZ203",
+      "nume_trezorerie": "Trezorerie operativa Lehliu Gara",
+      "localitate": "lehliu gara",
+      "iban": "RO37TREZ20320A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ200_TREZ203.pdf"
+    },
+    {
+      "judet": "Calarasi",
+      "cod_trezorerie": "TREZ201",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Calarasi",
+      "localitate": "calarasi",
+      "iban": "RO90TREZ20120A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ200_TREZ201.pdf"
+    },
+    {
+      "judet": "Calarasi",
+      "cod_trezorerie": "TREZ202",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Oltenita",
+      "localitate": "oltenita",
+      "iban": "RO15TREZ20220A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ200_TREZ202.pdf"
+    },
+    {
+      "judet": "Caras Severin",
+      "cod_trezorerie": "TREZ190",
+      "nume_trezorerie": "Trezorerie operativa Bozovici",
+      "localitate": "bozovici",
+      "iban": "RO42TREZ19020A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ180_TREZ190.pdf"
+    },
+    {
+      "judet": "Caras Severin",
+      "cod_trezorerie": "TREZ185",
+      "nume_trezorerie": "Trezorerie operativa Moldova Noua",
+      "localitate": "moldova noua",
+      "iban": "RO29TREZ18520A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ180_TREZ185.pdf"
+    },
+    {
+      "judet": "Caras Severin",
+      "cod_trezorerie": "TREZ182",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Caransebes",
+      "localitate": "caransebes",
+      "iban": "RO60TREZ18220A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ180_TREZ182.pdf"
+    },
+    {
+      "judet": "Caras Severin",
+      "cod_trezorerie": "TREZ181",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Resita",
+      "localitate": "resita",
+      "iban": "RO38TREZ18120A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ180_TREZ181.pdf"
+    },
+    {
+      "judet": "Caras Severin",
+      "cod_trezorerie": "TREZ187",
+      "nume_trezorerie": "Trezorerie operativa Oravita",
+      "localitate": "oravita",
+      "iban": "RO73TREZ18720A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ180_TREZ187.pdf"
+    },
+    {
+      "judet": "Caras Severin",
+      "cod_trezorerie": "TREZ188",
+      "nume_trezorerie": "Trezorerie operativa Otelul Rosu",
+      "localitate": "otelul rosu",
+      "iban": "RO95TREZ18820A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ180_TREZ188.pdf"
+    },
+    {
+      "judet": "Cluj",
+      "cod_trezorerie": "TREZ221",
+      "nume_trezorerie": "Trezorerie operativa Huedin",
+      "localitate": "huedin",
+      "iban": "RO45TREZ22120A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ215_TREZ221.pdf"
+    },
+    {
+      "judet": "Cluj",
+      "cod_trezorerie": "TREZ216",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Cluj Napoca",
+      "localitate": "cluj napoca",
+      "iban": "RO32TREZ21620A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ215_TREZ216.pdf"
+    },
+    {
+      "judet": "Cluj",
+      "cod_trezorerie": "TREZ217",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Dej",
+      "localitate": "dej",
+      "iban": "RO54TREZ21720A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ215_TREZ217.pdf"
+    },
+    {
+      "judet": "Cluj",
+      "cod_trezorerie": "TREZ218",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Gherla",
+      "localitate": "gherla",
+      "iban": "RO76TREZ21820A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ215_TREZ218.pdf"
+    },
+    {
+      "judet": "Cluj",
+      "cod_trezorerie": "TREZ219",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Turda",
+      "localitate": "turda",
+      "iban": "RO98TREZ21920A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ215_TREZ219.pdf"
+    },
+    {
+      "judet": "Constanta",
+      "cod_trezorerie": "TREZ236",
+      "nume_trezorerie": "Trezorerie operativa Eforie",
+      "localitate": "eforie",
+      "iban": "RO84TREZ23620A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ230_TREZ236.pdf"
+    },
+    {
+      "judet": "Constanta",
+      "cod_trezorerie": "TREZ238",
+      "nume_trezorerie": "Trezorerie operativa Harsova",
+      "localitate": "harsova",
+      "iban": "RO31TREZ23820A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ230_TREZ238.pdf"
+    },
+    {
+      "judet": "Constanta",
+      "cod_trezorerie": "TREZ231",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Constanta",
+      "localitate": "constanta",
+      "iban": "RO71TREZ23120A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ230_TREZ231.pdf"
+    },
+    {
+      "judet": "Constanta",
+      "cod_trezorerie": "TREZ233",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Mangalia",
+      "localitate": "mangalia",
+      "iban": "RO18TREZ23320A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ230_TREZ233.pdf"
+    },
+    {
+      "judet": "Constanta",
+      "cod_trezorerie": "TREZ232",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Medgidia",
+      "localitate": "medgidia",
+      "iban": "RO93TREZ23220A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ230_TREZ232.pdf"
+    },
+    {
+      "judet": "Covasna",
+      "cod_trezorerie": "TREZ259",
+      "nume_trezorerie": "Trezorerie operativa Baraolt",
+      "localitate": "baraolt",
+      "iban": "RO08TREZ25920A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ255_TREZ259.pdf"
+    },
+    {
+      "judet": "Covasna",
+      "cod_trezorerie": "TREZ256",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Sf.Gheorghe",
+      "localitate": "sfantul gheorghe",
+      "iban": "RO39TREZ25620A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ255_TREZ256.pdf"
+    },
+    {
+      "judet": "Covasna",
+      "cod_trezorerie": "TREZ257",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Tg.Secuiesc",
+      "localitate": "targu secuiesc",
+      "iban": "RO61TREZ25720A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ255_TREZ257.pdf"
+    },
+    {
+      "judet": "Dambovita",
+      "cod_trezorerie": "TREZ273",
+      "nume_trezorerie": "Trezorerie operativa Gaesti",
+      "localitate": "gaesti",
+      "iban": "RO25TREZ27320A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ270_TREZ273.pdf"
+    },
+    {
+      "judet": "Dambovita",
+      "cod_trezorerie": "TREZ274",
+      "nume_trezorerie": "Trezorerie operativa Moreni",
+      "localitate": "moreni",
+      "iban": "RO47TREZ27420A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ270_TREZ274.pdf"
+    },
+    {
+      "judet": "Dambovita",
+      "cod_trezorerie": "TREZ271",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Targoviste",
+      "localitate": "targoviste",
+      "iban": "RO78TREZ27120A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ270_TREZ271.pdf"
+    },
+    {
+      "judet": "Dambovita",
+      "cod_trezorerie": "TREZ275",
+      "nume_trezorerie": "Trezorerie operativa Pucioasa",
+      "localitate": "pucioasa",
+      "iban": "RO69TREZ27520A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ270_TREZ275.pdf"
+    },
+    {
+      "judet": "Dambovita",
+      "cod_trezorerie": "TREZ276",
+      "nume_trezorerie": "Trezorerie operativa Titu",
+      "localitate": "titu",
+      "iban": "RO91TREZ27620A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ270_TREZ276.pdf"
+    },
+    {
+      "judet": "Dolj",
+      "cod_trezorerie": "TREZ297",
+      "nume_trezorerie": "Trezorerie operativa Bechet",
+      "localitate": "bechet",
+      "iban": "RO68TREZ29720A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ290_TREZ297.pdf"
+    },
+    {
+      "judet": "Dolj",
+      "cod_trezorerie": "TREZ294",
+      "nume_trezorerie": "Trezorerie operativa Filiasi",
+      "localitate": "filiasi",
+      "iban": "RO02TREZ29420A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ290_TREZ294.pdf"
+    },
+    {
+      "judet": "Dolj",
+      "cod_trezorerie": "TREZ292",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Bailesti",
+      "localitate": "bailesti",
+      "iban": "RO55TREZ29220A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ290_TREZ292.pdf"
+    },
+    {
+      "judet": "Dolj",
+      "cod_trezorerie": "TREZ293",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Calafat",
+      "localitate": "calafat",
+      "iban": "RO77TREZ29320A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ290_TREZ293.pdf"
+    },
+    {
+      "judet": "Dolj",
+      "cod_trezorerie": "TREZ291",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Craiova",
+      "localitate": "craiova",
+      "iban": "RO33TREZ29120A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ290_TREZ291.pdf"
+    },
+    {
+      "judet": "Dolj",
+      "cod_trezorerie": "TREZ295",
+      "nume_trezorerie": "Trezorerie operativa Segarcea",
+      "localitate": "segarcea",
+      "iban": "RO24TREZ29520A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ290_TREZ295.pdf"
+    },
+    {
+      "judet": "Galati",
+      "cod_trezorerie": "TREZ306",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Galati",
+      "localitate": "galati",
+      "iban": "RO72TREZ30620A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ305_TREZ306.pdf"
+    },
+    {
+      "judet": "Galati",
+      "cod_trezorerie": "TREZ307",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Tecuci",
+      "localitate": "tecuci",
+      "iban": "RO94TREZ30720A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ305_TREZ307.pdf"
+    },
+    {
+      "judet": "Galati",
+      "cod_trezorerie": "TREZ308",
+      "nume_trezorerie": "Trezorerie operativa Tg.Bujor",
+      "localitate": "targu bujor",
+      "iban": "RO19TREZ30820A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ305_TREZ308.pdf"
+    },
+    {
+      "judet": "Giurgiu",
+      "cod_trezorerie": "TREZ322",
+      "nume_trezorerie": "Trezorerie operativa Bolintin Vale",
+      "localitate": "bolintin vale",
+      "iban": "RO36TREZ32220A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ320_TREZ322.pdf"
+    },
+    {
+      "judet": "Giurgiu",
+      "cod_trezorerie": "TREZ323",
+      "nume_trezorerie": "Trezorerie operativa Mihailesti",
+      "localitate": "mihailesti",
+      "iban": "RO58TREZ32320A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ320_TREZ323.pdf"
+    },
+    {
+      "judet": "Giurgiu",
+      "cod_trezorerie": "TREZ321",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Giurgiu",
+      "localitate": "giurgiu",
+      "iban": "RO14TREZ32120A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ320_TREZ321.pdf"
+    },
+    {
+      "judet": "Gorj",
+      "cod_trezorerie": "TREZ338",
+      "nume_trezorerie": "Trezorerie operativa Motru",
+      "localitate": "motru",
+      "iban": "RO97TREZ33820A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ335_TREZ338.pdf"
+    },
+    {
+      "judet": "Gorj",
+      "cod_trezorerie": "TREZ336",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Tg.Jiu",
+      "localitate": "targu jiu",
+      "iban": "RO53TREZ33620A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ335_TREZ336.pdf"
+    },
+    {
+      "judet": "Gorj",
+      "cod_trezorerie": "TREZ339",
+      "nume_trezorerie": "Trezorerie operativa Novaci",
+      "localitate": "novaci",
+      "iban": "RO22TREZ33920A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ335_TREZ339.pdf"
+    },
+    {
+      "judet": "Gorj",
+      "cod_trezorerie": "TREZ340",
+      "nume_trezorerie": "Trezorerie operativa Rovinari",
+      "localitate": "rovinari",
+      "iban": "RO44TREZ34020A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ335_TREZ340.pdf"
+    },
+    {
+      "judet": "Gorj",
+      "cod_trezorerie": "TREZ337",
+      "nume_trezorerie": "Trezorerie operativa Tg.Carbunesti",
+      "localitate": "targu carbunesti",
+      "iban": "RO75TREZ33720A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ335_TREZ337.pdf"
+    },
+    {
+      "judet": "Harghita",
+      "cod_trezorerie": "TREZ353",
+      "nume_trezorerie": "Trezorerie operativa Gheorgheni",
+      "localitate": "gheorgheni",
+      "iban": "RO39TREZ35320A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ350_TREZ353.pdf"
+    },
+    {
+      "judet": "Harghita",
+      "cod_trezorerie": "TREZ351",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Miercurea Ciuc",
+      "localitate": "miercurea ciuc",
+      "iban": "RO92TREZ35120A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ350_TREZ351.pdf"
+    },
+    {
+      "judet": "Harghita",
+      "cod_trezorerie": "TREZ352",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Odorheiul Secuiesc",
+      "localitate": "odorheiu secuiesc",
+      "iban": "RO17TREZ35220A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ350_TREZ352.pdf"
+    },
+    {
+      "judet": "Harghita",
+      "cod_trezorerie": "TREZ354",
+      "nume_trezorerie": "Trezorerie operativa Toplita",
+      "localitate": "toplita",
+      "iban": "RO61TREZ35420A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ350_TREZ354.pdf"
+    },
+    {
+      "judet": "Hunedoara",
+      "cod_trezorerie": "TREZ371",
+      "nume_trezorerie": "Trezorerie operativa Hateg",
+      "localitate": "hateg",
+      "iban": "RO47TREZ37120A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ365_TREZ371.pdf"
+    },
+    {
+      "judet": "Hunedoara",
+      "cod_trezorerie": "TREZ369",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Brad",
+      "localitate": "brad",
+      "iban": "RO03TREZ36920A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ365_TREZ369.pdf"
+    },
+    {
+      "judet": "Hunedoara",
+      "cod_trezorerie": "TREZ366",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Deva",
+      "localitate": "deva",
+      "iban": "RO34TREZ36620A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ365_TREZ366.pdf"
+    },
+    {
+      "judet": "Hunedoara",
+      "cod_trezorerie": "TREZ367",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Hunedoara",
+      "localitate": "hunedoara",
+      "iban": "RO56TREZ36720A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ365_TREZ367.pdf"
+    },
+    {
+      "judet": "Hunedoara",
+      "cod_trezorerie": "TREZ370",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Orastie",
+      "localitate": "orastie",
+      "iban": "RO25TREZ37020A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ365_TREZ370.pdf"
+    },
+    {
+      "judet": "Hunedoara",
+      "cod_trezorerie": "TREZ368",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Petrosani",
+      "localitate": "petrosani",
+      "iban": "RO78TREZ36820A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ365_TREZ368.pdf"
+    },
+    {
+      "judet": "Ialomita",
+      "cod_trezorerie": "TREZ392",
+      "nume_trezorerie": "Trezorerie operativa Fetesti",
+      "localitate": "fetesti",
+      "iban": "RO24TREZ39220A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ390_TREZ392.pdf"
+    },
+    {
+      "judet": "Ialomita",
+      "cod_trezorerie": "TREZ391",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Slobozia",
+      "localitate": "slobozia",
+      "iban": "RO02TREZ39120A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ390_TREZ391.pdf"
+    },
+    {
+      "judet": "Ialomita",
+      "cod_trezorerie": "TREZ393",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Urziceni",
+      "localitate": "urziceni",
+      "iban": "RO46TREZ39320A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ390_TREZ393.pdf"
+    },
+    {
+      "judet": "Iasi",
+      "cod_trezorerie": "TREZ409",
+      "nume_trezorerie": "Trezorerie operativa Harlau",
+      "localitate": "harlau",
+      "iban": "RO10TREZ40920A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ405_TREZ409.pdf"
+    },
+    {
+      "judet": "Iasi",
+      "cod_trezorerie": "TREZ406",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Iasi",
+      "localitate": "iasi",
+      "iban": "RO41TREZ40620A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ405_TREZ406.pdf"
+    },
+    {
+      "judet": "Iasi",
+      "cod_trezorerie": "TREZ407",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Pascani",
+      "localitate": "pascani",
+      "iban": "RO63TREZ40720A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ405_TREZ407.pdf"
+    },
+    {
+      "judet": "Iasi",
+      "cod_trezorerie": "TREZ410",
+      "nume_trezorerie": "Trezorerie operativa Raducaneni",
+      "localitate": "raducaneni",
+      "iban": "RO32TREZ41020A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ405_TREZ410.pdf"
+    },
+    {
+      "judet": "Iasi",
+      "cod_trezorerie": "TREZ408",
+      "nume_trezorerie": "Trezorerie operativa Tg.Frumos",
+      "localitate": "targu frumos",
+      "iban": "RO85TREZ40820A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ405_TREZ408.pdf"
+    },
+    {
+      "judet": "Ilfov",
+      "cod_trezorerie": "TREZ422",
+      "nume_trezorerie": "Trezorerie operativa Buftea",
+      "localitate": "buftea",
+      "iban": "RO05TREZ42220A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ420_TREZ422.pdf"
+    },
+    {
+      "judet": "Ilfov",
+      "cod_trezorerie": "TREZ421",
+      "nume_trezorerie": "Trezorerie operativa Ilfov",
+      "localitate": "ilfov",
+      "iban": "RO80TREZ42120A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ420_TREZ421.pdf"
+    },
+    {
+      "judet": "Maramures",
+      "cod_trezorerie": "TREZ436",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Baia Mare",
+      "localitate": "baia mare",
+      "iban": "RO22TREZ43620A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ435_TREZ436.pdf"
+    },
+    {
+      "judet": "Maramures",
+      "cod_trezorerie": "TREZ437",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Sighetul-Marmatiei",
+      "localitate": "sighetu marmatiei",
+      "iban": "RO44TREZ43720A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ435_TREZ437.pdf"
+    },
+    {
+      "judet": "Maramures",
+      "cod_trezorerie": "TREZ440",
+      "nume_trezorerie": "Trezorerie operativa Targu Lapus",
+      "localitate": "targu lapus",
+      "iban": "RO13TREZ44020A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ435_TREZ440.pdf"
+    },
+    {
+      "judet": "Maramures",
+      "cod_trezorerie": "TREZ441",
+      "nume_trezorerie": "Trezorerie operativa Viseul de Sus",
+      "localitate": "viseul de sus",
+      "iban": "RO35TREZ44120A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ435_TREZ441.pdf"
+    },
+    {
+      "judet": "Mehedinti",
+      "cod_trezorerie": "TREZ462",
+      "nume_trezorerie": "Trezorerie operativa Baia de Arama",
+      "localitate": "baia de arama",
+      "iban": "RO12TREZ46220A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ460_TREZ462.pdf"
+    },
+    {
+      "judet": "Mehedinti",
+      "cod_trezorerie": "TREZ461",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Drobeta Tr.Severin",
+      "localitate": "drobeta turnu severin",
+      "iban": "RO87TREZ46120A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ460_TREZ461.pdf"
+    },
+    {
+      "judet": "Mehedinti",
+      "cod_trezorerie": "TREZ463",
+      "nume_trezorerie": "Trezorerie operativa Orsova",
+      "localitate": "orsova",
+      "iban": "RO34TREZ46320A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ460_TREZ463.pdf"
+    },
+    {
+      "judet": "Mehedinti",
+      "cod_trezorerie": "TREZ464",
+      "nume_trezorerie": "Trezorerie operativa Strehaia",
+      "localitate": "strehaia",
+      "iban": "RO56TREZ46420A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ460_TREZ464.pdf"
+    },
+    {
+      "judet": "Mehedinti",
+      "cod_trezorerie": "TREZ465",
+      "nume_trezorerie": "Trezorerie operativa Vanju Mare",
+      "localitate": "vanju mare",
+      "iban": "RO78TREZ46520A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ460_TREZ465.pdf"
+    },
+    {
+      "judet": "Mures",
+      "cod_trezorerie": "TREZ480",
+      "nume_trezorerie": "Trezorerie operativa Ludus",
+      "localitate": "ludus",
+      "iban": "RO20TREZ48020A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ475_TREZ480.pdf"
+    },
+    {
+      "judet": "Mures",
+      "cod_trezorerie": "TREZ477",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Reghin",
+      "localitate": "reghin",
+      "iban": "RO51TREZ47720A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ475_TREZ477.pdf"
+    },
+    {
+      "judet": "Mures",
+      "cod_trezorerie": "TREZ478",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Sighisoara",
+      "localitate": "sighisoara",
+      "iban": "RO73TREZ47820A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ475_TREZ478.pdf"
+    },
+    {
+      "judet": "Mures",
+      "cod_trezorerie": "TREZ479",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Tarnaveni",
+      "localitate": "tarnaveni",
+      "iban": "RO95TREZ47920A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ475_TREZ479.pdf"
+    },
+    {
+      "judet": "Mures",
+      "cod_trezorerie": "TREZ476",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Tg.Mures",
+      "localitate": "targu mures",
+      "iban": "RO29TREZ47620A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ475_TREZ476.pdf"
+    },
+    {
+      "judet": "Mures",
+      "cod_trezorerie": "TREZ482",
+      "nume_trezorerie": "Trezorerie operativa Sovata",
+      "localitate": "sovata",
+      "iban": "RO64TREZ48220A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ475_TREZ482.pdf"
+    },
+    {
+      "judet": "Neamt",
+      "cod_trezorerie": "TREZ491",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Piatra Neamt",
+      "localitate": "piatra neamt",
+      "iban": "RO68TREZ49120A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ490_TREZ491.pdf"
+    },
+    {
+      "judet": "Neamt",
+      "cod_trezorerie": "TREZ492",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Roman",
+      "localitate": "roman",
+      "iban": "RO90TREZ49220A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ490_TREZ492.pdf"
+    },
+    {
+      "judet": "Neamt",
+      "cod_trezorerie": "TREZ494",
+      "nume_trezorerie": "Trezorerie operativa Oras Bicaz",
+      "localitate": "bicaz",
+      "iban": "RO37TREZ49420A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ490_TREZ494.pdf"
+    },
+    {
+      "judet": "Neamt",
+      "cod_trezorerie": "TREZ493",
+      "nume_trezorerie": "Trezorerie operativa Oras Tg.Neamt",
+      "localitate": "targu neamt",
+      "iban": "RO15TREZ49320A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ490_TREZ493.pdf"
+    },
+    {
+      "judet": "Olt",
+      "cod_trezorerie": "TREZ506",
+      "nume_trezorerie": "Trezorerie operativa Municipiu Slatina",
+      "localitate": "slatina",
+      "iban": "RO10TREZ50620A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ505_TREZ506.pdf"
+    },
+    {
+      "judet": "Olt",
+      "cod_trezorerie": "TREZ507",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Caracal",
+      "localitate": "caracal",
+      "iban": "RO32TREZ50720A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ505_TREZ507.pdf"
+    },
+    {
+      "judet": "Olt",
+      "cod_trezorerie": "TREZ508",
+      "nume_trezorerie": "Trezorerie operativa Orasul Bals",
+      "localitate": "bals",
+      "iban": "RO54TREZ50820A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ505_TREZ508.pdf"
+    },
+    {
+      "judet": "Olt",
+      "cod_trezorerie": "TREZ509",
+      "nume_trezorerie": "Trezorerie operativa Orasul Corabia",
+      "localitate": "corabia",
+      "iban": "RO76TREZ50920A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ505_TREZ509.pdf"
+    },
+    {
+      "judet": "Prahova",
+      "cod_trezorerie": "TREZ539",
+      "nume_trezorerie": "Trezorerie operativa Boldesti Scaieni",
+      "localitate": "boldesti scaieni",
+      "iban": "RO57TREZ53920A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ520_TREZ539.pdf"
+    },
+    {
+      "judet": "Prahova",
+      "cod_trezorerie": "TREZ529",
+      "nume_trezorerie": "Trezorerie operativa Busteni",
+      "localitate": "busteni",
+      "iban": "RO31TREZ52920A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ520_TREZ529.pdf"
+    },
+    {
+      "judet": "Prahova",
+      "cod_trezorerie": "TREZ524",
+      "nume_trezorerie": "Trezorerie operativa Mizil",
+      "localitate": "mizil",
+      "iban": "RO18TREZ52420A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ520_TREZ524.pdf"
+    },
+    {
+      "judet": "Prahova",
+      "cod_trezorerie": "TREZ522",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Campina",
+      "localitate": "campina",
+      "iban": "RO71TREZ52220A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ520_TREZ522.pdf"
+    },
+    {
+      "judet": "Prahova",
+      "cod_trezorerie": "TREZ521",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Ploiesti",
+      "localitate": "ploiesti",
+      "iban": "RO49TREZ52120A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ520_TREZ521.pdf"
+    },
+    {
+      "judet": "Prahova",
+      "cod_trezorerie": "TREZ526",
+      "nume_trezorerie": "Trezorerie operativa Slanic",
+      "localitate": "slanic",
+      "iban": "RO62TREZ52620A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ520_TREZ526.pdf"
+    },
+    {
+      "judet": "Prahova",
+      "cod_trezorerie": "TREZ528",
+      "nume_trezorerie": "Trezorerie operativa Valenii de Munte",
+      "localitate": "valenii de munte",
+      "iban": "RO09TREZ52820A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ520_TREZ528.pdf"
+    },
+    {
+      "judet": "Salaj",
+      "cod_trezorerie": "TREZ562",
+      "nume_trezorerie": "Trezorerie operativa Cehu Silvaniei",
+      "localitate": "cehu silvaniei",
+      "iban": "RO78TREZ56220A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ560_TREZ562.pdf"
+    },
+    {
+      "judet": "Salaj",
+      "cod_trezorerie": "TREZ564",
+      "nume_trezorerie": "Trezorerie operativa Jibou",
+      "localitate": "jibou",
+      "iban": "RO25TREZ56420A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ560_TREZ564.pdf"
+    },
+    {
+      "judet": "Salaj",
+      "cod_trezorerie": "TREZ561",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Zalau",
+      "localitate": "zalau",
+      "iban": "RO56TREZ56120A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ560_TREZ561.pdf"
+    },
+    {
+      "judet": "Salaj",
+      "cod_trezorerie": "TREZ563",
+      "nume_trezorerie": "Trezorerie operativa Simleul Silvaniei",
+      "localitate": "simleul silvaniei",
+      "iban": "RO03TREZ56320A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ560_TREZ563.pdf"
+    },
+    {
+      "judet": "Satu Mare",
+      "cod_trezorerie": "TREZ547",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Carei",
+      "localitate": "carei",
+      "iban": "RO39TREZ54720A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ545_TREZ547.pdf"
+    },
+    {
+      "judet": "Satu Mare",
+      "cod_trezorerie": "TREZ546",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Satu Mare",
+      "localitate": "satu mare",
+      "iban": "RO17TREZ54620A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ545_TREZ546.pdf"
+    },
+    {
+      "judet": "Satu Mare",
+      "cod_trezorerie": "TREZ548",
+      "nume_trezorerie": "Trezorerie operativa Negresti Oas",
+      "localitate": "negresti oas",
+      "iban": "RO61TREZ54820A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ545_TREZ548.pdf"
+    },
+    {
+      "judet": "Satu Mare",
+      "cod_trezorerie": "TREZ549",
+      "nume_trezorerie": "Trezorerie operativa Tasnad",
+      "localitate": "tasnad",
+      "iban": "RO83TREZ54920A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ545_TREZ549.pdf"
+    },
+    {
+      "judet": "Sibiu",
+      "cod_trezorerie": "TREZ578",
+      "nume_trezorerie": "Trezorerie operativa Agnita",
+      "localitate": "agnita",
+      "iban": "RO42TREZ57820A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ575_TREZ578.pdf"
+    },
+    {
+      "judet": "Sibiu",
+      "cod_trezorerie": "TREZ581",
+      "nume_trezorerie": "Trezorerie operativa Avrig",
+      "localitate": "avrig",
+      "iban": "RO11TREZ58120A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ575_TREZ581.pdf"
+    },
+    {
+      "judet": "Sibiu",
+      "cod_trezorerie": "TREZ577",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Medias",
+      "localitate": "medias",
+      "iban": "RO20TREZ57720A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ575_TREZ577.pdf"
+    },
+    {
+      "judet": "Sibiu",
+      "cod_trezorerie": "TREZ576",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Sibiu",
+      "localitate": "sibiu",
+      "iban": "RO95TREZ57620A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ575_TREZ576.pdf"
+    },
+    {
+      "judet": "Sibiu",
+      "cod_trezorerie": "TREZ585",
+      "nume_trezorerie": "Trezorerie operativa Saliste",
+      "localitate": "saliste",
+      "iban": "RO02TREZ58520A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ575_TREZ585.pdf"
+    },
+    {
+      "judet": "Suceava",
+      "cod_trezorerie": "TREZ592",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Campulung M.",
+      "localitate": "campulung moldovenesc",
+      "iban": "RO59TREZ59220A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ590_TREZ592.pdf"
+    },
+    {
+      "judet": "Suceava",
+      "cod_trezorerie": "TREZ593",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Falticeni",
+      "localitate": "falticeni",
+      "iban": "RO81TREZ59320A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ590_TREZ593.pdf"
+    },
+    {
+      "judet": "Suceava",
+      "cod_trezorerie": "TREZ594",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Gura Humorului",
+      "localitate": "gura humorului",
+      "iban": "RO06TREZ59420A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ590_TREZ594.pdf"
+    },
+    {
+      "judet": "Suceava",
+      "cod_trezorerie": "TREZ595",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Radauti",
+      "localitate": "radauti",
+      "iban": "RO28TREZ59520A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ590_TREZ595.pdf"
+    },
+    {
+      "judet": "Suceava",
+      "cod_trezorerie": "TREZ596",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Siret",
+      "localitate": "siret",
+      "iban": "RO50TREZ59620A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ590_TREZ596.pdf"
+    },
+    {
+      "judet": "Suceava",
+      "cod_trezorerie": "TREZ591",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Suceava",
+      "localitate": "suceava",
+      "iban": "RO37TREZ59120A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ590_TREZ591.pdf"
+    },
+    {
+      "judet": "Suceava",
+      "cod_trezorerie": "TREZ597",
+      "nume_trezorerie": "Trezorerie operativa Vatra Dornei",
+      "localitate": "vatra dornei",
+      "iban": "RO72TREZ59720A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ590_TREZ597.pdf"
+    },
+    {
+      "judet": "Teleorman",
+      "cod_trezorerie": "TREZ606",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Alexandria",
+      "localitate": "alexandria",
+      "iban": "RO76TREZ60620A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ605_TREZ606.pdf"
+    },
+    {
+      "judet": "Teleorman",
+      "cod_trezorerie": "TREZ608",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Rosiori de Vede",
+      "localitate": "rosiori de vede",
+      "iban": "RO23TREZ60820A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ605_TREZ608.pdf"
+    },
+    {
+      "judet": "Teleorman",
+      "cod_trezorerie": "TREZ607",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Turnu Magurele",
+      "localitate": "turnu magurele",
+      "iban": "RO98TREZ60720A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ605_TREZ607.pdf"
+    },
+    {
+      "judet": "Teleorman",
+      "cod_trezorerie": "TREZ609",
+      "nume_trezorerie": "Trezorerie operativa Videle",
+      "localitate": "videle",
+      "iban": "RO45TREZ60920A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ605_TREZ609.pdf"
+    },
+    {
+      "judet": "Teleorman",
+      "cod_trezorerie": "TREZ610",
+      "nume_trezorerie": "Trezorerie operativa Zimnicea",
+      "localitate": "zimnicea",
+      "iban": "RO67TREZ61020A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ605_TREZ610.pdf"
+    },
+    {
+      "judet": "Timis",
+      "cod_trezorerie": "TREZ626",
+      "nume_trezorerie": "Trezorerie operativa Buzias",
+      "localitate": "buzias",
+      "iban": "RO31TREZ62620A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ620_TREZ626.pdf"
+    },
+    {
+      "judet": "Timis",
+      "cod_trezorerie": "TREZ624",
+      "nume_trezorerie": "Trezorerie operativa Deta",
+      "localitate": "deta",
+      "iban": "RO84TREZ62420A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ620_TREZ624.pdf"
+    },
+    {
+      "judet": "Timis",
+      "cod_trezorerie": "TREZ628",
+      "nume_trezorerie": "Trezorerie operativa Faget",
+      "localitate": "faget",
+      "iban": "RO75TREZ62820A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ620_TREZ628.pdf"
+    },
+    {
+      "judet": "Timis",
+      "cod_trezorerie": "TREZ625",
+      "nume_trezorerie": "Trezorerie operativa Jimbolia",
+      "localitate": "jimbolia",
+      "iban": "RO09TREZ62520A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ620_TREZ625.pdf"
+    },
+    {
+      "judet": "Timis",
+      "cod_trezorerie": "TREZ623",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Lugoj",
+      "localitate": "lugoj",
+      "iban": "RO62TREZ62320A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ620_TREZ623.pdf"
+    },
+    {
+      "judet": "Timis",
+      "cod_trezorerie": "TREZ621",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Timisoara",
+      "localitate": "timisoara",
+      "iban": "RO18TREZ62120A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ620_TREZ621.pdf"
+    },
+    {
+      "judet": "Timis",
+      "cod_trezorerie": "TREZ627",
+      "nume_trezorerie": "Trezorerie operativa Sannicolau Mare",
+      "localitate": "sannicolau mare",
+      "iban": "RO53TREZ62720A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ620_TREZ627.pdf"
+    },
+    {
+      "judet": "Tulcea",
+      "cod_trezorerie": "TREZ645",
+      "nume_trezorerie": "Trezorerie operativa Babadag",
+      "localitate": "babadag",
+      "iban": "RO61TREZ64520A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ640_TREZ645.pdf"
+    },
+    {
+      "judet": "Tulcea",
+      "cod_trezorerie": "TREZ646",
+      "nume_trezorerie": "Trezorerie operativa Baia",
+      "localitate": "baia",
+      "iban": "RO83TREZ64620A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ640_TREZ646.pdf"
+    },
+    {
+      "judet": "Tulcea",
+      "cod_trezorerie": "TREZ642",
+      "nume_trezorerie": "Trezorerie operativa Macin",
+      "localitate": "macin",
+      "iban": "RO92TREZ64220A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ640_TREZ642.pdf"
+    },
+    {
+      "judet": "Tulcea",
+      "cod_trezorerie": "TREZ641",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Tulcea",
+      "localitate": "tulcea",
+      "iban": "RO70TREZ64120A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ640_TREZ641.pdf"
+    },
+    {
+      "judet": "Tulcea",
+      "cod_trezorerie": "TREZ644",
+      "nume_trezorerie": "Trezorerie operativa Sulina",
+      "localitate": "sulina",
+      "iban": "RO39TREZ64420A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ640_TREZ644.pdf"
+    },
+    {
+      "judet": "Valcea",
+      "cod_trezorerie": "TREZ682",
+      "nume_trezorerie": "Trezorerie operativa Babeni",
+      "localitate": "babeni",
+      "iban": "RO02TREZ68220A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ670_TREZ682.pdf"
+    },
+    {
+      "judet": "Valcea",
+      "cod_trezorerie": "TREZ679",
+      "nume_trezorerie": "Trezorerie operativa Balcesti",
+      "localitate": "balcesti",
+      "iban": "RO33TREZ67920A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ670_TREZ679.pdf"
+    },
+    {
+      "judet": "Valcea",
+      "cod_trezorerie": "TREZ676",
+      "nume_trezorerie": "Trezorerie operativa Gura Lotrului",
+      "localitate": "gura lotrului",
+      "iban": "RO64TREZ67620A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ670_TREZ676.pdf"
+    },
+    {
+      "judet": "Valcea",
+      "cod_trezorerie": "TREZ674",
+      "nume_trezorerie": "Trezorerie operativa Horezu",
+      "localitate": "horezu",
+      "iban": "RO20TREZ67420A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ670_TREZ674.pdf"
+    },
+    {
+      "judet": "Valcea",
+      "cod_trezorerie": "TREZ672",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Dragasani",
+      "localitate": "dragasani",
+      "iban": "RO73TREZ67220A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ670_TREZ672.pdf"
+    },
+    {
+      "judet": "Valcea",
+      "cod_trezorerie": "TREZ671",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Ramnicu Valcea",
+      "localitate": "ramnicu valcea",
+      "iban": "RO51TREZ67120A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ670_TREZ671.pdf"
+    },
+    {
+      "judet": "Vaslui",
+      "cod_trezorerie": "TREZ657",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Barlad",
+      "localitate": "barlad",
+      "iban": "RO34TREZ65720A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ655_TREZ657.pdf"
+    },
+    {
+      "judet": "Vaslui",
+      "cod_trezorerie": "TREZ658",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Husi",
+      "localitate": "husi",
+      "iban": "RO56TREZ65820A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ655_TREZ658.pdf"
+    },
+    {
+      "judet": "Vaslui",
+      "cod_trezorerie": "TREZ656",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Vaslui",
+      "localitate": "vaslui",
+      "iban": "RO12TREZ65620A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ655_TREZ656.pdf"
+    },
+    {
+      "judet": "Vaslui",
+      "cod_trezorerie": "TREZ659",
+      "nume_trezorerie": "Trezorerie operativa Negresti",
+      "localitate": "negresti",
+      "iban": "RO78TREZ65920A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ655_TREZ659.pdf"
+    },
+    {
+      "judet": "Vrancea",
+      "cod_trezorerie": "TREZ692",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Adjud",
+      "localitate": "adjud",
+      "iban": "RO28TREZ69220A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ690_TREZ692.pdf"
+    },
+    {
+      "judet": "Vrancea",
+      "cod_trezorerie": "TREZ691",
+      "nume_trezorerie": "Trezorerie operativa Municipiul Focsani",
+      "localitate": "focsani",
+      "iban": "RO06TREZ69120A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ690_TREZ691.pdf"
+    },
+    {
+      "judet": "Vrancea",
+      "cod_trezorerie": "TREZ694",
+      "nume_trezorerie": "Trezorerie operativa Panciu",
+      "localitate": "panciu",
+      "iban": "RO72TREZ69420A100101XTVA",
+      "cod_bugetar": "20A100101",
+      "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ690_TREZ694.pdf"
+    }
+  ]
+}

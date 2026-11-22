@@ -65,14 +65,45 @@
 
             <div x-data="{
                 localitati: {{ lista_localitati }},
+                async actualizeazaIbanTrezorerie() {
+                    const localitate = $refs.searchInputEl.value;
+                    if (!localitate || !localitate.includes('jud.')) return;
+                    try {
+                        const r = await fetch(`{% url 'setari-iban-trezorerie' %}?localitate=${encodeURIComponent(localitate)}`);
+                        const data = await r.json();
+                        const ibanInput = document.getElementById('{{ setari_form.cont_iban_trezoreria.id_for_label }}');
+                        const infoEl = document.getElementById('info-iban-trezorerie');
+                        if (data.iban && ibanInput) {
+                            // Completam automat doar daca utilizatorul nu a introdus deja alt IBAN
+                            if (!ibanInput.value || ibanInput.dataset.auto === 'true') {
+                                ibanInput.value = data.iban;
+                                ibanInput.dataset.auto = 'true';
+                            }
+                        }
+                        if (infoEl) {
+                            if (data.iban) {
+                                infoEl.innerHTML = `✅ <strong>${data.nume_trezorerie}</strong> — IBAN completat automat din <a href='${data.sursa}' target='_blank'>lista oficiala ANAF</a> (randul ${data.cod_bugetar}). Verifica inainte de plata.`;
+                            } else {
+                                infoEl.innerHTML = `⚠️ Localitatea nu are trezorerie operativa proprie in lista ANAF. Cauta IBAN-ul in <a href='${data.sursa}' target='_blank'>lista ANAF pentru judetul tau</a> (randul ${data.cod_bugetar}) si completeaza-l manual.`;
+                            }
+                        }
+                    } catch (e) { /* retea indisponibila - nu blocam formularul */ }
+                }
             }" x-init="typeahead({
                 input: $refs.searchInputEl,
                 source: { local: localitati }
-            });">
+            });
+            $refs.searchInputEl.addEventListener('input', () => actualizeazaIbanTrezorerie());
+            $refs.searchInputEl.addEventListener('change', () => actualizeazaIbanTrezorerie());
+            // La incarcarea paginii: daca localitatea e deja salvata si IBAN-ul
+            // trezoreriei lipseste, il completam automat (fara sa trebuiasca
+            // utilizatorul sa reselecteze localitatea).
+            if ($refs.searchInputEl.value) actualizeazaIbanTrezorerie();">
                 <label>
                     <span>Alege localitatea:</span> 
                     <input name="localitate" {% if setari_form.localitate.value %} value="{{ setari_form.localitate.value }}" {% endif %} x-ref="searchInputEl" autocomplete="off" type="text" placeholder="Iasi...">
                     {{ setari_form.localitate.errors }}
+                    <small>La selectarea localitatii, IBAN-ul trezoreriei pentru plata TVA se completeaza automat (din sursele ANAF).</small>
                 </label>
             </div>
 
@@ -224,7 +255,10 @@
             </button>
         </div>
 
-        <div class="mt-2" x-data="{ showTva: {% if setari_form.cod_tva_intracomunitar.value or setari_form.cont_iban_trezoreria.value %}true{% else %}false{% endif %} }">
+        <div class="mt-2" x-data="{ showTva: {% if setari_form.cod_tva_intracomunitar.value or setari_form.cont_iban_trezoreria.value %}true{% else %}false{% endif %} }" x-init="
+            const ibanInput = document.getElementById('{{ setari_form.cont_iban_trezoreria.id_for_label }}');
+            if (ibanInput && ibanInput.value) ibanInput.dataset.auto = 'true';
+        ">
             <button @click="showTva = !showTva" type="button" class="outline secondary">
                 <i :class="showTva ? 'bi bi-dash-lg': 'bi bi-plus-lg'"></i> TVA intracomunitar (D301/D390)
             </button>
@@ -251,12 +285,12 @@
                         {{ setari_form.cont_iban_trezoreria.label }}:
                         {{ setari_form.cont_iban_trezoreria }}
                         {{ setari_form.cont_iban_trezoreria.errors }}
-                        <small>
-                            Il gasesti in
-                            <a href="{{ link_iban_trezorerie }}" target="_blank">lista ANAF cu IBAN-urile trezoreriilor</a>
-                            pentru judetul tau: deschide PDF-ul trezoreriei operative de localitatea ta
-                            si cauta randul <strong>{{ cod_bugetar_tva }} - TVA incasata pentru operatiuni interne</strong>.
-                            NU folosi contul unic.
+                        <small id="info-iban-trezorerie">
+                            Se completeaza automat la selectarea localitatii (din
+                            <a href="{{ link_iban_trezorerie }}" target="_blank">lista oficiala ANAF</a>,
+                            randul <strong>{{ cod_bugetar_tva }} - TVA incasata pentru operatiuni interne</strong>).
+                            Daca localitatea nu are trezorerie operativa proprie, cauta IBAN-ul in lista ANAF
+                            si completeaza-l manual. NU folosi contul unic.
                         </small>
                     </label>
                 </div>
