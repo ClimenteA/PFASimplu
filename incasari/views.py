@@ -31,6 +31,15 @@ class IncasariView(View):
         nume_fisier_factura = None
         if factura_id:
             factura = get_object_or_404(FacturaModel, id=factura_id)
+            if IncasariModel.objects.filter(factura=factura).exists():
+                messages.add_message(
+                    request,
+                    messages.WARNING,
+                    "Aceasta factura are deja o incasare inregistrata! "
+                    "Sterge incasarea existenta daca vrei sa o adaugi din nou.",
+                    extra_tags="⚠️ Atentie!",
+                )
+                return HttpResponseRedirect("/incasari/")
             tip_tranzactie = (
                 TipTranzactie.BANCAR.value
                 if factura.tip_tranzactie == ModalitatePlata.BANCAR.value
@@ -78,6 +87,15 @@ class IncasariView(View):
         factura = None
         if factura_id and not request.GET.get("id"):
             factura = get_object_or_404(FacturaModel, id=factura_id)
+            if IncasariModel.objects.filter(factura=factura).exists():
+                messages.add_message(
+                    request,
+                    messages.WARNING,
+                    "Aceasta factura are deja o incasare inregistrata! "
+                    "Sterge incasarea existenta daca vrei sa o adaugi din nou.",
+                    extra_tags="⚠️ Atentie!",
+                )
+                return HttpResponseRedirect("/incasari/")
             if not request.FILES.get("fisier") and factura.fisier_factura_pdf:
                 with factura.fisier_factura_pdf.open("rb") as pdf:
                     form.files["fisier"] = ContentFile(
@@ -114,7 +132,10 @@ class IncasariView(View):
                 )
 
         # Save
-        form.save()
+        incasare = form.save(commit=False)
+        if factura:
+            incasare.factura = factura
+        incasare.save()
         messages.add_message(
             request,
             messages.SUCCESS,

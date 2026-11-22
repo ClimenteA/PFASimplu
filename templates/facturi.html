@@ -361,10 +361,17 @@
                     <td>{{ item.telefon }}</td>
                     <td>{{ item.data_scadenta|date:"Y-m-d" }}</td>
                     <td>
+                        {% if item.incasare %}
+                        <a class="pico-color-slate-700 px-1" role="link" aria-disabled="true"
+                            data-tooltip="Factura are deja o incasare. Sterge incasarea pentru a o putea adauga din nou.">
+                            <i class="bi bi-cash-coin"></i>
+                        </a>
+                        {% else %}
                         <a href="{% url 'incasari' %}?factura_id={{ item.id }}#formular-incasari"
                             class="pico-color-green-500 px-1" data-tooltip="Adauga incasarea pentru aceasta factura">
                             <i class="bi bi-cash-coin"></i>
                         </a>
+                        {% endif %}
                     </td>
                     <td>
                         <a href="?delete_id={{item.id}}" class="pico-color-red-500 px-1" onclick="return confirm('Stergi definitiv aceasta inregistrare si fisierul atasat?')">

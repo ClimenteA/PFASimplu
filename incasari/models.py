@@ -35,6 +35,13 @@ class IncasariModel(CommonIncasariCheltuieliModel):
     sursa_venit = models.CharField(
         max_length=300, choices=SursaVenit, default=SursaVenit.ACTIVITATE_PRINCIPALA
     )
+    factura = models.OneToOneField(
+        "facturi.FacturaModel",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="incasare",
+    )
 
     @staticmethod
     def get_total_incasari_pe_luni(year: int):
