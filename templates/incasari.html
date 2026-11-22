@@ -23,7 +23,7 @@
 
 <article id="formular-incasari" class="article-form mt-4 container">
 
-    <form action={% if item_id %} "{% url 'incasari' %}?id={{ item_id }}" {% else %} "{% url 'incasari' %}" {% endif %}
+    <form id="form-incasare" action="{% url 'incasari' %}?{% if item_id %}id={{ item_id }}{% endif %}{% if factura_id %}factura_id={{ factura_id }}{% endif %}"
         method="POST" enctype="multipart/form-data">
 
         <p class="text-bold">Datele incasarii:</p>
@@ -68,7 +68,12 @@
 
         <label class="max-w-fit" for="{{ incasari_form.fisier.id_for_label }}">
             {{ incasari_form.fisier.label }}:
+            {% if fisier_factura %}
+            <input type="file" name="fisier" id="{{ incasari_form.fisier.id_for_label }}" hidden>
+            <input type="text" value="📄 {{ nume_fisier_factura }}" readonly aria-label="Fisier atasat">
+            {% else %}
             {{ incasari_form.fisier }}
+            {% endif %}
             {{ incasari_form.fisier.errors }}
         </label>
 
@@ -86,6 +91,31 @@
         </div>
 
     </form>
+    {% if fisier_factura %}
+    <script>
+        // Browserul nu afiseaza fisiere atasate programatic, asa ca atasam
+        // PDF-ul facturii la submit (daca utilizatorul nu a ales alt fisier).
+        (function () {
+            const form = document.getElementById('form-incasare');
+            const fileInput = document.getElementById('{{ incasari_form.fisier.id_for_label }}');
+            form.addEventListener('submit', async function (e) {
+                if (fileInput.files.length > 0) return;
+                e.preventDefault();
+                try {
+                    const response = await fetch('{{ fisier_factura.url }}');
+                    const blob = await response.blob();
+                    const file = new File([blob], '{{ nume_fisier_factura|escapejs }}', { type: 'application/pdf' });
+                    const dt = new DataTransfer();
+                    dt.items.add(file);
+                    fileInput.files = dt.files;
+                } catch (err) {
+                    console.error('Nu am putut atasa PDF-ul facturii:', err);
+                }
+                form.submit();
+            });
+        })();
+    </script>
+    {% endif %}
 </article>
 
 
