@@ -99,7 +99,9 @@ if not os.path.exists(DB_DIR):
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": os.path.join(DB_DIR, "stocare.db"),
+        # Testele end-to-end (folderul tests/) pot redirectiona baza de date
+        # printr-o variabila de mediu, ca sa nu atinga datele reale.
+        "NAME": os.environ.get("PFASIMPLU_DB_PATH") or os.path.join(DB_DIR, "stocare.db"),
     },
     "OPTIONS": {
         "timeout": 20,

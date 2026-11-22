@@ -25,6 +25,9 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "faker>=40.63.0",
     "pyinstaller>=6.19.0",
+    "pytest>=9.2.0",
+    "pytest-playwright>=0.10.0",
 ]
 

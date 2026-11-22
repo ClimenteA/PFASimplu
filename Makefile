@@ -1,6 +1,10 @@
 dev:
 	uv run manage.py runserver 8990
 
+test-e2e:
+	uv run playwright install chromium
+	uv run pytest tests/ -v
+
 migrate-all:
 	uv run manage.py makemigrations
 	uv run manage.py migrate
