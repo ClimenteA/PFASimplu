@@ -20,6 +20,84 @@
     </p>
 </hgroup>
 
+{% if declaratii_tva %}
+<article id="declaratii-tva" class="mt-4 container">
+    <p class="text-bold">
+        🇪🇺 Declarații TVA (D301 / D390) —
+        <select style="display: inline-block; width: fit-content; margin: 0; padding: 0.1rem 0.5rem;"
+            onchange="window.location.href = '/documente/?anul_tva=' + this.value + '#declaratii-tva'">
+            {% for an in ani_cu_tva %}
+            <option value="{{ an }}" {% if an == anul_tva %}selected{% endif %}>{{ an }}</option>
+            {% endfor %}
+        </select>
+    </p>
+    <p style="font-size: 14px;">
+        Pentru serviciile cumparate din UE/non-UE (taxare inversa), TVA-ul se calculeaza automat din cheltuieli.
+        <strong>1.</strong> Apasa „Generează” — primesti un zip cu D301, D390 (doar pentru UE), jurnalul de cumparari
+        si instructiunea de plata, toate completate.
+        <strong>2.</strong> Depune declaratiile online pe
+        <a href="https://declaratii.anaf.ro/" target="_blank">declaratii.anaf.ro</a> (poti importa XML-urile din zip).
+        <strong>3.</strong> Incarca recipisa mai jos (se detecteaza automat tipul si perioada).
+        <strong>4.</strong> Plateste TVA-ul in contul trezoreriei din Setari si marcheaza „Plătită”.
+        Termen: <strong>25 a lunii urmatoare</strong>.
+    </p>
+
+    <div class="overflow-auto">
+        <table class="striped">
+            <thead>
+                <tr>
+                    <th>Luna</th>
+                    <th>Facturi</th>
+                    <th>CIF folosit</th>
+                    <th>TVA de plată (lei)</th>
+                    <th>Termen</th>
+                    <th>D301</th>
+                    <th>D390</th>
+                    <th>Acțiuni</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for rand in declaratii_tva %}
+                <tr>
+                    <td>{{ rand.luna_nume }} {{ rand.anul }}</td>
+                    <td>{{ rand.nr_facturi }} {% if rand.are_ue %}🇪🇺{% else %}🌍{% endif %}</td>
+                    <td>{{ rand.cif_folosit }}</td>
+                    <td><strong>{{ rand.tva_de_plata }}</strong></td>
+                    <td>{{ rand.termen|date:"d.m.Y" }}</td>
+                    <td style="font-size: 13px;">{{ rand.d301_status }}</td>
+                    <td style="font-size: 13px;">{% if rand.d390_status %}{{ rand.d390_status }}{% else %}— (non-UE){% endif %}</td>
+                    <td>
+                        <div role="group" style="margin: 0;">
+                            <a href="{% url 'tva-genereaza' %}?anul={{ rand.anul }}&luna={{ rand.luna }}"
+                                role="button" class="outline" style="padding: 0.2rem 0.5rem; font-size: 13px;"
+                                data-tooltip="Descarca D301 + D390 + jurnal + instructiune plata">
+                                <i class="bi bi-file-earmark-zip"></i> Generează
+                            </a>
+                            {% if rand.d301_status == 'Depusa' or rand.d301_status == 'Descarcata' %}
+                            <form action="{% url 'tva-marcheaza-platita' %}" method="post" style="margin: 0;">
+                                {% csrf_token %}
+                                <input type="hidden" name="anul" value="{{ rand.anul }}">
+                                <input type="hidden" name="luna" value="{{ rand.luna }}">
+                                <button type="submit" class="outline secondary" style="padding: 0.2rem 0.5rem; font-size: 13px;"
+                                    data-tooltip="Marcheaza TVA-ul ca platit la trezorerie">
+                                    <i class="bi bi-check2-circle"></i> Plătită
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+                        {% for obs in rand.observatii %}
+                        <small class="pico-color-amber-250">⚠️ {{ obs }}</small>
+                        {% endfor %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <small>Recipisele D301/D390 se încarcă prin formularul de mai jos — tipul, perioada și CIF-ul se detectează automat din PDF.</small>
+</article>
+{% endif %}
+
 <article id="formular-documente" class="article-form mt-4 container">
 
     <form action={% if item_id %} "{% url 'documente' %}?id={{ item_id }}" {% else %} "{% url 'documente' %}" {% endif %} method="POST" enctype="multipart/form-data">

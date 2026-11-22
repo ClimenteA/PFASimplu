@@ -53,6 +53,8 @@ class DataImportV2:
             caen_secondar_3 = data["caen_secondar_3"],
             caen_secondar_4 = data["caen_secondar_4"],
             caen_secondar_5 = data["caen_secondar_5"],
+            cod_tva_intracomunitar = data.get("cod_tva_intracomunitar"),
+            cont_iban_trezoreria = data.get("cont_iban_trezoreria"),
         )
 
         instance.save()
@@ -153,6 +155,13 @@ class DataImportV2:
                 modalitate_iesire_din_uz=record['modalitate_iesire_din_uz'],
                 data_iesirii_din_uz=record['data_iesirii_din_uz'],
                 document_justificativ_iesire_din_uz=record['document_justificativ_iesire_din_uz'],
+                # Achizitii servicii UE/non-UE (taxare inversa) - campuri noi, optionale
+                tip_achizitie=record.get('tip_achizitie') or 'Romania',
+                furnizor_denumire=record.get('furnizor_denumire'),
+                furnizor_cod_fiscal=record.get('furnizor_cod_fiscal'),
+                furnizor_tara=record.get('furnizor_tara'),
+                numar_factura=record.get('numar_factura'),
+                data_facturii=record.get('data_facturii'),
             )
     
             incasare.save()

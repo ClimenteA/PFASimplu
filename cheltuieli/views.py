@@ -1,15 +1,43 @@
 from django.views import View
 from django.contrib import messages
+from django.http import JsonResponse
 from django.shortcuts import render, HttpResponseRedirect, get_object_or_404
 from utils.views import get_page_items, download_zip, handle_delete_id_query_param
 from .forms import CheltuieliForm
-from .models import CheltuialaModel
+from .models import CheltuialaModel, TipAchizitie
 
 
 class CheltuieliDescarcareView(View):
 
     def get(self, request):
         return download_zip(request, CheltuialaModel)
+
+
+class CheltuieliSearchFurnizor(View):
+    """Typeahead pentru furnizorii externi: la a doua factura de la acelasi
+    furnizor, codul fiscal si tara se precompleteaza din inregistrarile anterioare."""
+
+    def get(self, request, nume_furnizor: str):
+        results = (
+            CheltuialaModel.objects.filter(
+                furnizor_denumire__icontains=nume_furnizor,
+                tip_achizitie__in=[TipAchizitie.SERVICII_UE, TipAchizitie.SERVICII_NON_UE],
+            )
+            .order_by("-data_inserarii")
+            .values("furnizor_denumire", "furnizor_cod_fiscal", "furnizor_tara")
+        )
+
+        vazute = set()
+        unici = []
+        for r in results:
+            cheie = (r["furnizor_denumire"] or "").strip().upper()
+            if cheie and cheie not in vazute:
+                vazute.add(cheie)
+                unici.append(r)
+            if len(unici) >= 10:
+                break
+
+        return JsonResponse(unici, safe=False)
 
 
 class CheltuieliView(View):

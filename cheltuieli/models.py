@@ -7,11 +7,22 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.db.models.functions import TruncMonth
 from django.db.models import Q
-from utils.valuta import to_ron
+from utils.valuta import to_ron, curs_bnr_data_exigibilitatii
 from utils.files import get_save_path
+from utils.tari import TARI_CHOICES, este_tara_ue
 from utils.validators import validate_not_future_date
 from utils.models import CommonIncasariCheltuieliModel
 from utils.calcule import get_venit_net, get_venit_brut
+
+
+# Cota standard de TVA (art. 291 alin. (1) Cod fiscal), folosita la taxarea inversa.
+COTA_TVA_STANDARD = 0.21
+
+
+class TipAchizitie(models.TextChoices):
+    ROMANIA = "Romania", _("Romania (furnizor roman)")
+    SERVICII_UE = "Servicii UE", _("Servicii din UE (taxare inversa)")
+    SERVICII_NON_UE = "Servicii non-UE", _("Servicii din afara UE (taxare inversa)")
 
 
 
@@ -107,6 +118,96 @@ class CheltuialaModel(CommonIncasariCheltuieliModel):
     document_justificativ_iesire_din_uz = models.FileField(
         null=True, blank=True, upload_to=get_save_path
     )
+
+    # Achizitii de servicii din UE/non-UE cu taxare inversa (art. 307 alin. (2) Cod fiscal).
+    # Pentru ele se calculeaza TVA autolichidata si se genereaza D301/D390 + jurnalul de cumparari.
+    tip_achizitie = models.CharField(
+        max_length=50, choices=TipAchizitie, default=TipAchizitie.ROMANIA
+    )
+    furnizor_denumire = models.CharField(max_length=500, null=True, blank=True)
+    # Codul TVA complet al furnizorului UE (ex. ATU77164426) sau codul fiscal strain
+    # non-UE (ex. EIN 27-0805829). In jurnal se scrie complet.
+    furnizor_cod_fiscal = models.CharField(max_length=100, null=True, blank=True)
+    furnizor_tara = models.CharField(max_length=2, null=True, blank=True, choices=TARI_CHOICES)
+    numar_factura = models.CharField(max_length=200, null=True, blank=True)
+    data_facturii = models.DateField(
+        null=True, blank=True, validators=[validate_not_future_date]
+    )
+    # Calculate automat la salvare; cursul poate fi suprascris manual (ex. cursul de pe factura).
+    curs_bnr_aplicat = models.FloatField(null=True, blank=True)
+    baza_in_lei = models.FloatField(null=True, blank=True)
+    tva_autolichidata = models.FloatField(null=True, blank=True)
+
+    @property
+    def este_taxare_inversa(self) -> bool:
+        return self.tip_achizitie in (
+            TipAchizitie.SERVICII_UE.value,
+            TipAchizitie.SERVICII_NON_UE.value,
+        )
+
+    @property
+    def este_ue(self) -> bool:
+        return self.tip_achizitie == TipAchizitie.SERVICII_UE.value
+
+    def calculeaza_taxare_inversa(self):
+        """Completeaza cursul BNR, baza in lei si TVA autolichidata pentru
+        achizitiile de servicii UE/non-UE. Se apeleaza la salvare."""
+        if not self.este_taxare_inversa:
+            self.curs_bnr_aplicat = None
+            self.baza_in_lei = None
+            self.tva_autolichidata = None
+            return
+
+        if not self.furnizor_denumire:
+            raise ValidationError(
+                _("Pentru servicii din UE/non-UE trebuie completata denumirea furnizorului.")
+            )
+        if not self.furnizor_tara:
+            raise ValidationError(
+                _("Pentru servicii din UE/non-UE trebuie selectata tara furnizorului.")
+            )
+
+        # UE/non-UE se deduce din tara; corectam tipul daca utilizatorul a gresit selectia.
+        self.tip_achizitie = (
+            TipAchizitie.SERVICII_UE.value
+            if este_tara_ue(self.furnizor_tara)
+            else TipAchizitie.SERVICII_NON_UE.value
+        )
+
+        if self.este_ue and not self.furnizor_cod_fiscal:
+            raise ValidationError(
+                _("Pentru servicii din UE trebuie completat codul TVA al furnizorului (ex. ATU77164426).")
+            )
+        if self.este_ue:
+            cod = (self.furnizor_cod_fiscal or "").strip().upper()
+            if not cod.startswith(self.furnizor_tara.upper()):
+                raise ValidationError(
+                    _(
+                        f"Codul TVA '{cod}' nu incepe cu prefixul tarii furnizorului "
+                        f"({self.furnizor_tara}). Verifica factura."
+                    )
+                )
+
+        if not self.numar_factura:
+            raise ValidationError(
+                _("Pentru servicii din UE/non-UE trebuie completat numarul facturii.")
+            )
+
+        data_exigibilitatii = self.data_facturii or self.data_inserarii
+        if not data_exigibilitatii:
+            raise ValidationError(
+                _("Pentru servicii din UE/non-UE trebuie completata data facturii (exigibilitatea TVA).")
+            )
+
+        # Cursul BNR din data exigibilitatii (art. 290 alin. (2)).
+        # La actualizarea unei inregistrari existente pastram cursul salvat anterior
+        # (poate fi suprascris manual din formular); la o inregistrare noua se ia automat.
+        if not self.curs_bnr_aplicat or not self.pk:
+            self.curs_bnr_aplicat = curs_bnr_data_exigibilitatii(
+                self.valuta, data_exigibilitatii
+            )
+        self.baza_in_lei = round(self.suma * self.curs_bnr_aplicat, 2)
+        self.tva_autolichidata = round(self.baza_in_lei * COTA_TVA_STANDARD, 2)
 
     def eur_to_ron(self, suma):
         return round((to_ron(1, "EUR", self.data_inserarii) * suma), 2)
@@ -211,17 +312,28 @@ class CheltuialaModel(CommonIncasariCheltuieliModel):
 
         return round(total_cheltuieli + total_amortizari, 2)
 
+    def save(self, *args, **kwargs):
+        # Pentru taxare inversa calculam cursul/baza/TVA inainte de suma_in_ron,
+        # ca deducerea sa poata include TVA-ul autolichidat.
+        if hasattr(self, "calculeaza_taxare_inversa"):
+            self.calculeaza_taxare_inversa()
+        super().save(*args, **kwargs)
+
     def calculeaza_deducere_in_ron(self):
+
+        # TVA-ul autolichidat (platit la ANAF prin D301) este cheltuiala a PFA-ului
+        # cu cod special art. 317: se adauga la baza deductibila a facturii.
+        tva_de_adaugat = getattr(self, "tva_autolichidata", None) or 0
 
         if self.deductibila in [
             Deductibilitate.DEDUCTIBILA_INTEGRAL.value,
             Deductibilitate.DEDUCTIBILA_INTEGRAL_SALARII.value,
         ]:
-            return self.suma_in_ron
+            return round(self.suma_in_ron + tva_de_adaugat, 2)
 
         if self.deductibila == Deductibilitate.DEDUCTIBILA_INTEGRAL_INVENTAR.value:
             self.obiect_de_inventar = True
-            return self.suma_in_ron
+            return round(self.suma_in_ron + tva_de_adaugat, 2)
 
         if self.deductibila == Deductibilitate.DEDUCTIBILA_INTEGRAL_AMORTIZATA.value:
             if not self.data_punerii_in_functiune:
@@ -266,13 +378,13 @@ class CheltuialaModel(CommonIncasariCheltuieliModel):
             self.anul_amortizarii_complete = self.data_amortizarii_complete.year
             self.luna_amortizarii_complete = self.data_amortizarii_complete.month
 
-            return self.suma_in_ron
+            return round(self.suma_in_ron + tva_de_adaugat, 2)
 
         if (
             self.deductibila
             == Deductibilitate.DEDUCTIBILA_PARTIAL_AUTO_CASA_UTILITATI.value
         ):
-            return round((self.suma_in_ron / 2), 2)  # 50%
+            return round((self.suma_in_ron / 2) + tva_de_adaugat, 2)  # 50% + TVA autolichidat integral
 
         if self.deductibila == Deductibilitate.DEDUCTIBILA_PARTIAL_PROTOCOL.value:
             # Art. 68 alin. (6): baza de calcul = venit brut - cheltuieli deductibile, altele

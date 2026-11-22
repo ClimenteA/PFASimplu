@@ -224,6 +224,45 @@
             </button>
         </div>
 
+        <div class="mt-2" x-data="{ showTva: {% if setari_form.cod_tva_intracomunitar.value or setari_form.cont_iban_trezoreria.value %}true{% else %}false{% endif %} }">
+            <button @click="showTva = !showTva" type="button" class="outline secondary">
+                <i :class="showTva ? 'bi bi-dash-lg': 'bi bi-plus-lg'"></i> TVA intracomunitar (D301/D390)
+            </button>
+
+            <div x-show="showTva" class="mt-2">
+                <p style="font-size: 14px;">
+                    Completeaza doar daca ai <strong>cod special de TVA intracomunitar (art. 317 Cod fiscal)</strong>
+                    si cumperi servicii din UE/non-UE (ex. Google, Cloudflare, OpenAI).
+                    Cu aceste date aplicatia calculeaza automat TVA-ul datorat (taxare inversa 21%),
+                    genereaza declaratiile D301/D390 si jurnalul de cumparari in pagina Documente.
+                    Codul special este <strong>diferit</strong> de CIF-ul normal al PFA-ului:
+                    pentru facturi din UE se foloseste codul special, pentru non-UE codul normal.
+                </p>
+
+                <div class="grid">
+                    <label for="{{ setari_form.cod_tva_intracomunitar.id_for_label }}">
+                        {{ setari_form.cod_tva_intracomunitar.label }}:
+                        {{ setari_form.cod_tva_intracomunitar }}
+                        {{ setari_form.cod_tva_intracomunitar.errors }}
+                        <small>Codul din certificatul de inregistrare in scopuri de TVA (art. 317), fara prefixul RO.</small>
+                    </label>
+
+                    <label for="{{ setari_form.cont_iban_trezoreria.id_for_label }}">
+                        {{ setari_form.cont_iban_trezoreria.label }}:
+                        {{ setari_form.cont_iban_trezoreria }}
+                        {{ setari_form.cont_iban_trezoreria.errors }}
+                        <small>
+                            Il gasesti in
+                            <a href="{{ link_iban_trezorerie }}" target="_blank">lista ANAF cu IBAN-urile trezoreriilor</a>
+                            pentru judetul tau: deschide PDF-ul trezoreriei operative de localitatea ta
+                            si cauta randul <strong>{{ cod_bugetar_tva }} - TVA incasata pentru operatiuni interne</strong>.
+                            NU folosi contul unic.
+                        </small>
+                    </label>
+                </div>
+            </div>
+        </div>
+
         <div class="mt-2">
             <button type="submit">
                 <i class="bi bi-save"></i> Salveaza datele PFA

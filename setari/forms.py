@@ -2,7 +2,7 @@ import json
 from django import forms
 from django.forms import ModelForm
 from utils.valuta import Valuta
-from .models import SetariModel, validate_iban_length
+from .models import SetariModel, validate_iban_length, validate_iban_trezoreria
 
 
 class SetariForm(ModelForm):
@@ -22,12 +22,30 @@ class SetariForm(ModelForm):
             'scutit_cas': forms.CheckboxInput(),
             'scutit_cass': forms.CheckboxInput(),
             'scutit_impozit': forms.CheckboxInput(),
+            'cod_tva_intracomunitar': forms.TextInput(attrs={"placeholder": "ex. 52937756 (fara RO)"}),
+            'cont_iban_trezoreria': forms.TextInput(attrs={"placeholder": "ex. RO41TREZ40620A100101XTVA"}),
         }
         labels = {
             'scutit_cas': 'Scutit CAS',
             'scutit_cass': 'Scutit CASS',
             'scutit_impozit': 'Scutit Impozit',
+            'cod_tva_intracomunitar': 'Cod TVA intracomunitar (art. 317)',
+            'cont_iban_trezoreria': 'IBAN trezorerie pentru plata TVA',
         }
+
+    def clean_cod_tva_intracomunitar(self):
+        value = (self.cleaned_data.get("cod_tva_intracomunitar") or "").strip().upper()
+        value = value.removeprefix("RO").replace(" ", "")
+        if value and not value.isdigit():
+            raise forms.ValidationError("Codul TVA intracomunitar trebuie sa fie numeric (fara prefixul RO).")
+        return value or None
+
+    def clean_cont_iban_trezoreria(self):
+        value = (self.cleaned_data.get("cont_iban_trezoreria") or "").replace(" ", "").upper()
+        if not value:
+            return None
+        validate_iban_trezoreria(value)
+        return value
 
     def clean_conturi_iban(self):
         raw = self.cleaned_data.get("conturi_iban")

@@ -22,6 +22,8 @@ from utils.calcule import calculeaza_taxe_si_impozite
 from utils.github_data import new_version_available
 from utils.mijloc_fix_pdf import create_fisa_mijloc_fix_pdf
 from utils.pretty_excel import make_excel_pretty
+from utils.tva import calculeaza_jurnal_cumparari
+from utils.tva_documente import genereaza_jurnal_cumparari_pdf
 from utils.valuta import ron_to_eur
 from utils.views import download_csv_or_xlsx
 
@@ -204,6 +206,64 @@ class RegistruInventarDescarcaView(View):
         return response
 
 
+class RegistruJurnalCumparariDescarcaView(View):
+    """Jurnalul pentru cumparari (TVA taxare inversa): PDF, CSV sau XLSX,
+    pe luna (daca se da parametrul luna) sau pe tot anul."""
+
+    def get(self, request):
+        filetype = request.GET.get("filetype", "csv").lower()
+        anul = get_year_from_request(request)
+        luna = request.GET.get("luna")
+        luna = int(luna) if luna else None
+
+        jurnal = calculeaza_jurnal_cumparari(anul, luna)
+        if not jurnal:
+            messages.add_message(
+                request, messages.ERROR,
+                "Jurnalul de cumparari este gol: nu exista cheltuieli cu taxare inversa (UE/non-UE).",
+                extra_tags="🟥 Eroare!",
+            )
+            return redirect("/registre/")
+
+        setari = SetariModel.objects.first()
+        perioada = f"{anul}_{luna:02d}" if luna else str(anul)
+        extracts_path = get_extracts_path()
+
+        if filetype == "pdf":
+            fp = os.path.join(extracts_path, f"jurnal_cumparari_{perioada}.pdf")
+            genereaza_jurnal_cumparari_pdf(jurnal, setari, fp)
+            content_type = "application/pdf"
+        else:
+            df = pd.DataFrame(jurnal["randuri"]).rename(
+                columns={
+                    "nr_crt": "Nr.Crt.",
+                    "data_doc": "Document Data",
+                    "nr_doc": "Document Numar",
+                    "furnizor_denumire": "Furnizor Denumire",
+                    "furnizor_cod_fiscal": "Furnizor Cod Fiscal",
+                    "total_document": "Total document (inclusiv TVA)",
+                    "baza": "Baza impozitare",
+                    "tva": "Valoare T.V.A.",
+                    "cod_referinta": "Referinta cod",
+                }
+            )
+            if filetype == "xlsx":
+                fp = os.path.join(extracts_path, f"jurnal_cumparari_{perioada}.xlsx")
+                df.to_excel(fp, index=False)
+                make_excel_pretty(fp)
+                content_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            elif filetype == "csv":
+                fp = os.path.join(extracts_path, f"jurnal_cumparari_{perioada}.csv")
+                df.to_csv(fp, index=False)
+                content_type = "text/csv"
+            else:
+                return redirect("/registre/")
+
+        response = HttpResponse(open(fp, "rb"), content_type=content_type)
+        response["Content-Disposition"] = f"attachment; filename={os.path.basename(fp)}"
+        return response
+
+
 class RegistreView(View):
 
     def get(self, request):
@@ -218,6 +278,7 @@ class RegistreView(View):
             request
         )
         registru_inventar = get_registru_inventar()
+        jurnal_cumparari = calculeaza_jurnal_cumparari(overview_data["anul"])
 
         versiune_noua_disponibila = new_version_available()
 
@@ -230,6 +291,7 @@ class RegistreView(View):
                 "rjip": registru_jurnal_incasari_si_plati,
                 "ref": registru_fiscal,
                 "ri": registru_inventar,
+                "rjc": jurnal_cumparari,
             },
         )
 

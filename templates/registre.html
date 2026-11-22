@@ -142,6 +142,9 @@
             <button @click="active = 'ref'" :class="active == 'ref' ? '': 'outline'">Registru fiscal</button>
             <button @click="active = 'rjip'" :class="active == 'rjip' ? '': 'outline'">Registru jurnal</button>
             <button @click="active = 'rinv'" :class="active == 'rinv' ? '': 'outline'">Registru inventar</button>
+            {% if rjc %}
+            <button @click="active = 'rjc'" :class="active == 'rjc' ? '': 'outline'">Jurnal cumpărări TVA</button>
+            {% endif %}
         </div>
     </div>
 
@@ -300,6 +303,74 @@
             </tbody>
         </table>
     </div>
+
+    {% if rjc %}
+    <div x-show="active == 'rjc'" class="overflow-auto mt-2 mb-6">
+
+        <div x-data="{ downloaded_csv: false, downloaded_xlsx: false, downloaded_pdf: false }" style="display: flex; justify-content: end; overflow: hidden;">
+            <a href="{% url 'descarca-jurnal-cumparari' %}?filetype=PDF&anul={{ anul }}" @click="downloaded_pdf = true" :class="downloaded_pdf ? 'px-1 pico-color-purple-500': 'px-1 secondary'"
+                data-tooltip="Descarca PDF">
+                <i class="bi bi-filetype-pdf"></i>
+            </a>
+            <a href="{% url 'descarca-jurnal-cumparari' %}?filetype=CSV&anul={{ anul }}" @click="downloaded_csv = true" :class="downloaded_csv ? 'px-1 pico-color-purple-500': 'px-1 secondary'"
+                data-tooltip="Descarca CSV">
+                <i class="bi bi-filetype-csv"></i>
+            </a>
+            <a href="{% url 'descarca-jurnal-cumparari' %}?filetype=XLSX&anul={{ anul }}" @click="downloaded_xlsx = true" :class="downloaded_xlsx ? 'px-1 pico-color-purple-500': 'px-1 secondary'"
+                data-tooltip="Descarca XLSX">
+                <i class="bi bi-filetype-xlsx"></i>
+            </a>
+        </div>
+
+        <p style="font-size: 14px;">
+            Facturi de servicii UE/non-UE cu taxare inversa. Referința <strong>15-16</strong> =
+            „Cumpărări pentru care cumpărătorul este obligat la plata TVA art. 307”.
+            Total document include TVA autolichidată (21%), chiar dacă furnizorul a facturat 0% TVA.
+        </p>
+
+        <table class="striped">
+            <thead>
+                <tr>
+                    <th>Nr.Crt.</th>
+                    <th>Data</th>
+                    <th>Număr document</th>
+                    <th>Furnizor</th>
+                    <th>Cod fiscal</th>
+                    <th>Total document (cu TVA)</th>
+                    <th>Baza impozitare</th>
+                    <th>Valoare TVA</th>
+                    <th>Ref. cod</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in rjc.randuri %}
+                <tr>
+                    <td>{{ item.nr_crt }}</td>
+                    <td>{{ item.data_doc }}</td>
+                    <td>{{ item.nr_doc }}</td>
+                    <td>{{ item.furnizor_denumire }}</td>
+                    <td>{{ item.furnizor_cod_fiscal }}</td>
+                    <td>{{ item.total_document }}</td>
+                    <td>{{ item.baza }}</td>
+                    <td>{{ item.tva }}</td>
+                    <td>{{ item.cod_referinta }}</td>
+                </tr>
+                {% endfor %}
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td class="pico-background-grey"><strong>Total</strong></td>
+                    <td class="pico-background-grey"><strong>{{ rjc.total_document }}</strong></td>
+                    <td class="pico-background-grey"><strong>{{ rjc.total_baza }}</strong></td>
+                    <td class="pico-background-grey"><strong>{{ rjc.total_tva }}</strong></td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
 
 </div>
 

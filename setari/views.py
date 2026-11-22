@@ -10,6 +10,7 @@ from documente.models import DocumenteModel
 from facturi.models import FacturaModel
 from utils.localitati import lista_localitati
 from utils.valuta import Valuta
+from utils.trezorerie import get_link_iban_trezorerie, COD_BUGETAR_TVA
 from utils.data_import_v1 import DataImportV1
 from utils.data_import_v2 import DataImportV2
 from .forms import SetariForm
@@ -19,6 +20,18 @@ import pandas as pd
 
 
 lista_valute = [choice.value for choice in Valuta]
+
+
+def get_setari_context(form):
+    result = SetariModel.objects.first()
+    localitate = form.initial.get("localitate") or (result.localitate if result else "")
+    return {
+        "setari_form": form,
+        "lista_localitati": lista_localitati,
+        "lista_valute": lista_valute,
+        "link_iban_trezorerie": get_link_iban_trezorerie(localitate),
+        "cod_bugetar_tva": COD_BUGETAR_TVA,
+    }
 
 
 class ImportV1View(View):
@@ -68,11 +81,7 @@ class SetariView(View):
         return render(
             request,
             template_name="setari.html",
-            context={
-                "setari_form": form,
-                "lista_localitati": lista_localitati,
-                "lista_valute": lista_valute,
-            },
+            context=get_setari_context(form),
         )
 
     def post(self, request, *args, **kwargs):
@@ -82,11 +91,7 @@ class SetariView(View):
             return render(
                 request,
                 "setari.html",
-                {
-                    "setari_form": form,
-                    "lista_localitati": lista_localitati,
-                    "lista_valute": lista_valute,
-                },
+                context=get_setari_context(form),
             )
 
         SetariModel.objects.all().delete()

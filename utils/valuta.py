@@ -26,6 +26,26 @@ def curs_bnr_ziua_bancara_anterioara(currency: str, dateValue: datetime.date) ->
     return float(rates[ultima_zi.isoformat()][currency])
 
 
+def curs_bnr_data_exigibilitatii(currency: str, dateValue: datetime.date) -> float:
+    """Cursul BNR pentru taxarea inversa (D301/D390), conform art. 290 alin. (2) Cod fiscal:
+    ultimul curs comunicat de BNR valabil la data exigibilitatii taxei (de regula data
+    facturii). Daca in ziua respectiva nu s-a publicat curs (weekend/sarbatoare), se ia
+    ultimul curs publicat inainte de acea data."""
+    if currency == "RON":
+        return 1.0
+    if isinstance(dateValue, str):
+        dateValue = datetime.datetime.strptime(dateValue, "%Y-%m-%d").date()
+    rates = cursvalutarbnr.get_bnr_rates(dateValue)
+    zile_disponibile = [
+        datetime.date.fromisoformat(d) for d in rates.keys()
+        if datetime.date.fromisoformat(d) <= dateValue
+    ]
+    if not zile_disponibile:
+        raise ValueError(f"Nu exista curs BNR publicat pana la {dateValue.isoformat()}")
+    ultima_zi = max(zile_disponibile)
+    return float(rates[ultima_zi.isoformat()][currency])
+
+
 @lru_cache(maxsize=None)
 def to_ron(amount: float, currency: str, dateValue: datetime.date):
     if isinstance(dateValue, str):
