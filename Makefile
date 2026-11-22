@@ -1,5 +1,5 @@
 dev:
-	uv run manage.py runserver
+	uv run manage.py runserver 8990
 
 migrate-all:
 	uv run manage.py makemigrations

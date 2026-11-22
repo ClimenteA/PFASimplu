@@ -151,6 +151,9 @@ class DataImportV1:
             telefon=data["telefon"],
             email=data["email"],
             iban=data["iban"],
+            conturi_iban=(
+                [{"valuta": "RON", "iban": data["iban"]}] if data["iban"] else []
+            ),
             caen_principal="6201",
         )
 

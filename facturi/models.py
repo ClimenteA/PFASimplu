@@ -417,7 +417,7 @@ class FacturaModel(models.Model):
             "nume_furnizor": furnizor.nume,
             "email_furnizor": furnizor.email,
             "telefon_furnizor": furnizor.telefon,
-            "iban_furnizor": furnizor.iban,
+            "iban_furnizor": furnizor.get_iban_pentru_valuta(self.valuta),
             "iban_client": "",
             "adresa_client": self.adresa,
             "localitate_client": self.get_localitate(self.localitate),

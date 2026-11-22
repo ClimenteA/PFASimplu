@@ -9,12 +9,16 @@ from incasari.models import IncasariModel
 from documente.models import DocumenteModel
 from facturi.models import FacturaModel
 from utils.localitati import lista_localitati
+from utils.valuta import Valuta
 from utils.data_import_v1 import DataImportV1
 from utils.data_import_v2 import DataImportV2
 from .forms import SetariForm
 from .models import SetariModel
 from core.settings import MEDIA_ROOT, make_media_dir, get_extracts_path
 import pandas as pd
+
+
+lista_valute = [choice.value for choice in Valuta]
 
 
 class ImportV1View(View):
@@ -64,7 +68,11 @@ class SetariView(View):
         return render(
             request,
             template_name="setari.html",
-            context={"setari_form": form, "lista_localitati": lista_localitati},
+            context={
+                "setari_form": form,
+                "lista_localitati": lista_localitati,
+                "lista_valute": lista_valute,
+            },
         )
 
     def post(self, request, *args, **kwargs):
@@ -74,7 +82,11 @@ class SetariView(View):
             return render(
                 request,
                 "setari.html",
-                {"setari_form": form, "lista_localitati": lista_localitati},
+                {
+                    "setari_form": form,
+                    "lista_localitati": lista_localitati,
+                    "lista_valute": lista_valute,
+                },
             )
 
         SetariModel.objects.all().delete()

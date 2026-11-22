@@ -31,6 +31,12 @@ class DataImportV2:
         df = df.astype(object).where(df.notna(), None)
         data = df.to_dict('records')[0]
 
+        conturi_iban = []
+        if data.get("conturi_iban"):
+            conturi_iban = ast.literal_eval(data["conturi_iban"])
+        elif data.get("iban"):
+            conturi_iban = [{"valuta": "RON", "iban": data["iban"]}]
+
         instance = SetariModel(
             nume = data["nume"],
             localitate = data["localitate"],
@@ -40,6 +46,7 @@ class DataImportV2:
             email = data["email"],
             telefon = data["telefon"],
             iban = data["iban"],
+            conturi_iban = conturi_iban,
             caen_principal = data["caen_principal"],
             caen_secondar_1 = data["caen_secondar_1"],
             caen_secondar_2 = data["caen_secondar_2"],

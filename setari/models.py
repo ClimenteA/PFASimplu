@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from utils.localitati import Localitati
+from utils.valuta import Valuta
 
 
 def validate_iban_length(value):
@@ -32,8 +33,32 @@ class SetariModel(models.Model):
     scutit_impozit = models.BooleanField(blank=True, null=True, default=False)
     actualizat_la = models.DateTimeField(default=timezone.now)
 
+    conturi_iban = models.JSONField(default=list, blank=True)
+
     class Meta:
         verbose_name_plural = "Setari"
 
     def __str__(self):
         return self.nume
+
+    def get_iban_pentru_valuta(self, valuta: str | None = None):
+        """Returneaza IBAN-ul contului pentru moneda ceruta.
+        Daca nu exista un cont in moneda ceruta se foloseste contul de RON,
+        iar daca nici acesta nu exista, primul cont disponibil."""
+
+        conturi = self.conturi_iban or []
+
+        if valuta:
+            for cont in conturi:
+                if cont.get("valuta") == valuta and cont.get("iban"):
+                    return cont["iban"]
+
+        for cont in conturi:
+            if cont.get("valuta") == Valuta.RON.value and cont.get("iban"):
+                return cont["iban"]
+
+        for cont in conturi:
+            if cont.get("iban"):
+                return cont["iban"]
+
+        return self.iban

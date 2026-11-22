@@ -91,7 +91,7 @@ Poti importa datele din versiunea 1 sau versiunea 2.
 Poti sterge toate datele. 
 Aceasta pagina trebuie completata la prima deschidere a aplicatiei.
 Cam rar vei schimba datele din aceasta pagina.
-Daca ai mai multe conturi IBAN (USD, RON etc.) sa ai grija sa schimbi IBAN-ul din setari in functie de factura valuta in care emiti factura.
+Poti adauga mai multe conturi IBAN (RON, EUR, USD etc.), cate unul pentru fiecare moneda. La emiterea unei facturi se foloseste automat contul IBAN in moneda facturii, iar daca nu exista un cont in acea moneda, se foloseste contul de RON.
 
 ![setari](readmepics/setari-scutit.jpeg)
 

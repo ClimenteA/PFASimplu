@@ -97,21 +97,6 @@
             </label>
         </div>
 
-        <div class="grid">
-
-            <label for="{{ setari_form.iban.id_for_label }}">
-                IBAN:
-                {{ setari_form.iban }}
-                {{ setari_form.iban.errors }}
-            </label>
-
-            <label for="{{ setari_form.caen_principal.id_for_label }}">
-                Cod CAEN Principal:
-                {{ setari_form.caen_principal }}
-                {{ setari_form.caen_principal.errors }}
-            </label>
-        </div>
-
         <div style="margin-bottom: 2rem;">
             <div style="display: flex; gap: 1rem; justify-content: end;">
 
@@ -133,6 +118,14 @@
                     {{ setari_form.scutit_impozit.errors }}
                 </label>
             </div>
+        </div>
+
+        <div class="grid">
+            <label for="{{ setari_form.caen_principal.id_for_label }}">
+                Cod CAEN Principal:
+                {{ setari_form.caen_principal }}
+                {{ setari_form.caen_principal.errors }}
+            </label>
         </div>
 
 
@@ -175,6 +168,60 @@
                 </label>
             </div>
 
+        </div>
+
+        <div class="mt-2" x-data="{
+            conturi: (() => {
+                try {
+                    const lista = JSON.parse($el.dataset.conturi || '[]');
+                    if (lista.length) return lista;
+                } catch (e) {}
+                {% if setari_form.iban.value %}
+                return [{ valuta: 'RON', iban: '{{ setari_form.iban.value|escapejs }}' }];
+                {% else %}
+                return [{ valuta: 'RON', iban: '' }];
+                {% endif %}
+            })(),
+            valute: {{ lista_valute }},
+            adaugaCont() {
+                this.conturi.push({ valuta: 'EUR', iban: '' });
+            },
+            stergeCont(index) {
+                this.conturi.splice(index, 1);
+            }
+        }" data-conturi="{{ setari_form.conturi_iban.value|default:'[]' }}">
+            <label>
+                Conturi IBAN:
+                <small>
+                    Poti adauga cate un cont IBAN pentru fiecare moneda (RON, EUR, USD etc.).
+                    La emiterea facturii se foloseste contul in moneda facturii,
+                    iar daca nu exista, contul de RON.
+                </small>
+            </label>
+
+            {{ setari_form.conturi_iban.errors }}
+
+            <input type="hidden" name="conturi_iban" :value="JSON.stringify(conturi)">
+
+            <template x-for="(cont, index) in conturi" :key="index">
+                <div class="grid" style="grid-template-columns: 1fr 2fr auto; align-items: start;">
+                    <select x-model="cont.valuta" aria-label="Valuta cont">
+                        <template x-for="valuta in valute" :key="valuta">
+                            <option :value="valuta" x-text="valuta" :selected="cont.valuta === valuta"></option>
+                        </template>
+                    </select>
+
+                    <input type="text" x-model="cont.iban" placeholder="RO49AAAA1B31007593840000" aria-label="IBAN" minlength="24" maxlength="50">
+
+                    <button type="button" class="outline secondary" @click="stergeCont(index)" aria-label="Sterge contul" style="width: auto;">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            </template>
+
+            <button type="button" class="outline secondary" @click="adaugaCont()">
+                <i class="bi bi-plus-lg"></i> Adauga cont IBAN
+            </button>
         </div>
 
         <div class="mt-2">
