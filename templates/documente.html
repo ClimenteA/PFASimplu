@@ -200,7 +200,8 @@
                         </a>
                     </td>
                     <td>
-                        <a href="?delete_id={{item.id}}" class="pico-color-red-500 px-1" onclick="return confirm('Stergi definitiv aceasta inregistrare si fisierul atasat?')">
+                        <a href="?delete_id={{item.id}}" class="pico-color-red-500 px-1"
+                            @click.prevent="$dispatch('open-confirm', { message: 'Stergi definitiv aceasta inregistrare si fisierul atasat?', url: $el.href })">
                             <i class="bi bi-trash"></i>
                         </a>
                     </td>
