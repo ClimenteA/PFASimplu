@@ -8,6 +8,21 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+def _get_app_version() -> str:
+    """Versiunea aplicatiei, citita din pyproject.toml (sursa unica de adevar).
+    In build-ul PyInstaller fisierul e inclus prin pfasimplu.spec."""
+    import tomllib
+
+    try:
+        with open(BASE_DIR / "pyproject.toml", "rb") as f:
+            return tomllib.load(f)["project"]["version"]
+    except (OSError, KeyError, tomllib.TOMLDecodeError):
+        return ""
+
+
+APP_VERSION = _get_app_version()
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 

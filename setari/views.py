@@ -42,7 +42,13 @@ from utils.trezorerie import (
 )
 from .forms import SetariForm
 from .models import SetariModel
-from core.settings import MEDIA_ROOT, make_media_dir, get_extracts_path, get_media_path
+from core.settings import (
+    APP_VERSION,
+    MEDIA_ROOT,
+    make_media_dir,
+    get_extracts_path,
+    get_media_path,
+)
 
 
 lista_valute = [choice.value for choice in Valuta]
@@ -59,6 +65,7 @@ def get_setari_context(form):
         "cod_bugetar_tva": COD_BUGETAR_TVA,
         "ani_export": get_ani_export(),
         "anul_curent": timezone.now().year,
+        "app_version": APP_VERSION,
     }
 
 

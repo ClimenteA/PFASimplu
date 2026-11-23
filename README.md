@@ -2,31 +2,31 @@
 
 ![GitHub all releases](https://img.shields.io/github/downloads/ClimenteA/PFASimplu/total?label=descarcari&style=for-the-badge)
 
-Aplicatie pentru simplificarea gestiunii contabilitatii facuta in partida simpla (versiunea 2).  
+Aplicatie pentru simplificarea gestiunii contabilitatii facuta in partida simpla (versiunea 3).  
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
-- [Pentru cine este de folos aceasta aplicatie?](#pentru-cine-este-de-folos-aceasta-aplicatie)
-- [Poate aplicatia sa faca X,Y,Z?](#poate-aplicatia-sa-faca-xyz)
-- [Instalare pt. utilizatori](#instalare-pt-utilizatori)
-- [Instalare pt. developeri](#instalare-pt-developeri)
-- [Setari](#setari)
-- [Facturi](#facturi)
-- [Incasari](#incasari)
-- [Cheltuieli](#cheltuieli)
-  - [Servicii cumparate din UE / non-UE (taxare inversa)](#servicii-cumparate-din-ue--non-ue-taxare-inversa)
-- [Documente](#documente)
-- [TVA intracomunitar: D301, D390 si Jurnal de cumparari](#tva-intracomunitar-d301-d390-si-jurnal-de-cumparari)
-- [Inventar](#inventar)
-- [Registre](#registre)
-- [Actualizare aplicatie](#actualizare-aplicatie)
-- [Ce fac cu versiunea veche a aplicatiei (v1)?](#ce-fac-cu-versiunea-veche-a-aplicatiei-v1)
-- [Observatii](#observatii)
+- [PFASimplu](#pfasimplu)
+  - [Pentru cine este de folos aceasta aplicatie?](#pentru-cine-este-de-folos-aceasta-aplicatie)
+  - [Poate aplicatia sa faca X,Y,Z?](#poate-aplicatia-sa-faca-xyz)
+  - [Instalare pt. utilizatori](#instalare-pt-utilizatori)
+  - [Instalare pt. developeri](#instalare-pt-developeri)
+  - [Instalare pe VPS (Docker, mod multi-user)](#instalare-pe-vps-docker-mod-multi-user)
+  - [Setari](#setari)
+  - [Facturi](#facturi)
+  - [Incasari](#incasari)
+  - [Cheltuieli](#cheltuieli)
+    - [Servicii cumparate din UE / non-UE (taxare inversa)](#servicii-cumparate-din-ue--non-ue-taxare-inversa)
+  - [Documente](#documente)
+  - [TVA intracomunitar: D301, D390 si Jurnal de cumparari](#tva-intracomunitar-d301-d390-si-jurnal-de-cumparari)
+  - [Inventar](#inventar)
+  - [Registre](#registre)
+  - [Actualizare aplicatie](#actualizare-aplicatie)
+  - [Observatii](#observatii)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
 
 
 ## Pentru cine este de folos aceasta aplicatie?
@@ -315,15 +315,9 @@ In tab-ul **Jurnale** gasesti **Jurnalul de cumpărări**: daca ai cheltuieli cu
 
 ## Actualizare aplicatie
 
-Poti verifica oricand daca a aparut o versiune noua a aplicatiei pe pagina de [Github Releases](https://github.com/ClimenteA/PFASimplu/releases) (pagina de unde ai descarcat prima data aplicatia).
-Din Assets descarca ultima versiune pentru sistemul tau de operare. 
+Poti verifica oricand daca a aparut o versiune noua a aplicatiei pe pagina de [Github Releases](https://github.com/ClimenteA/PFASimplu/releases) (pagina de unde ai descarcat prima data aplicatia). Din Assets descarca ultima versiune pentru sistemul tau de operare.
 
-Din pagina Setari a aplicatiei "veche" click pe buttonul `Exporta datele din aplicatie` (un zip va fi descarcat in folderul Downloads/Descarcari). 
-
-![setari-actualizare](readmepics/setari_actualizare.png)
-
-Acum trebuie unzip la aplicatia noua (cea cu versiunea mai mare ce ai descarcat-o anterior din Github releases).
-Langa executabilul `pfasimplu.exe` da unzip la zip-ul creat cand ai dat click pe butonul Exporta datele din aplicatie.
+In pagina 
 
 
 ## Observatii
