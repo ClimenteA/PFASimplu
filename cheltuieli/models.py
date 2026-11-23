@@ -133,7 +133,7 @@ class CheltuialaModel(CommonIncasariCheltuieliModel):
     data_facturii = models.DateField(
         null=True, blank=True, validators=[validate_not_future_date]
     )
-    # Calculate automat la salvare; cursul poate fi suprascris manual (ex. cursul de pe factura).
+    # Calculate automat la salvare, din cursul BNR (cursvalutarbnr).
     curs_bnr_aplicat = models.FloatField(null=True, blank=True)
     baza_in_lei = models.FloatField(null=True, blank=True)
     tva_autolichidata = models.FloatField(null=True, blank=True)
@@ -199,13 +199,11 @@ class CheltuialaModel(CommonIncasariCheltuieliModel):
                 _("Pentru servicii din UE/non-UE trebuie completata data facturii (exigibilitatea TVA).")
             )
 
-        # Cursul BNR din data exigibilitatii (art. 290 alin. (2)).
-        # La actualizarea unei inregistrari existente pastram cursul salvat anterior
-        # (poate fi suprascris manual din formular); la o inregistrare noua se ia automat.
-        if not self.curs_bnr_aplicat or not self.pk:
-            self.curs_bnr_aplicat = curs_bnr_data_exigibilitatii(
-                self.valuta, data_exigibilitatii
-            )
+        # Cursul BNR din data exigibilitatii (art. 290 alin. (2)), luat automat
+        # din cursvalutarbnr la fiecare salvare.
+        self.curs_bnr_aplicat = curs_bnr_data_exigibilitatii(
+            self.valuta, data_exigibilitatii
+        )
         self.baza_in_lei = round(self.suma * self.curs_bnr_aplicat, 2)
         self.tva_autolichidata = round(self.baza_in_lei * COTA_TVA_STANDARD, 2)
 

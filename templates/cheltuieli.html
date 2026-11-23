@@ -7,6 +7,12 @@
 {% block body %}
 
 <script defer src="{% static 'coduri_classificare.js' %}"></script>
+<script>
+    // Lista tarilor pentru "Tara furnizor", filtrata dupa originea furnizorului.
+    // Tarile UE urmeaza lista oficiala: https://european-union.europa.eu/node/288/rss_ro
+    const TARI_UE = {{ tari_ue_json|safe }};
+    const TARI_NON_UE = {{ tari_non_ue_json|safe }};
+</script>
 
 <hgroup class="title-description container">
     <h1>🛒 Cheltuieli</h1>
@@ -28,8 +34,9 @@
         Achizitiile/Cheltuielile care nu isi pierd valoarea in timp cum ar fi terenuri, aur, case nu sunt deductibile.
 
         Pentru <strong>servicii cumparate din UE sau din afara UE</strong> (ex. Google, Cloudflare, OpenAI)
-        alege originea furnizorului mai jos: aplicatia calculeaza automat TVA-ul datorat prin taxare inversa (21%),
-        il adauga la cheltuiala deductibila si pregateste declaratiile D301/D390 in pagina Documente.
+        alege originea furnizorului mai jos: aplicatia calculeaza automat TVA-ul datorat prin taxare inversa (21%)
+        si il adauga la cheltuiala deductibila. Declaratiile D301/D390 se descarca din filtrul
+        „Cheltuieli externe (TVA)" de deasupra tabelului, pe luna selectata.
 
     </p>
 </hgroup>
@@ -37,17 +44,47 @@
 
 <article id="formular-cheltuieli" class="article-form mt-4 container">
 
-    <form action={% if item_id %} "{% url 'cheltuieli' %}?id={{ item_id }}" {% else %} "{% url 'cheltuieli' %}" {% endif %} method="POST" enctype="multipart/form-data">
+    <form action={% if item_id %} "{% url 'cheltuieli' %}?id={{ item_id }}" {% else %} "{% url 'cheltuieli' %}" {% endif %} method="POST" enctype="multipart/form-data"
+        x-data="{
+            tipAchizitie: '{{ cheltuieli_form.tip_achizitie.value|default:'Romania'|escapejs }}',
+            get extern() { return this.tipAchizitie !== 'Romania'; },
+            get tari() { return this.tipAchizitie === 'Servicii UE' ? TARI_UE : TARI_NON_UE; },
+            furnizori: [],
+            async cautaFurnizori(nume) {
+                if (!nume || nume.length < 2) { this.furnizori = []; return; }
+                const r = await fetch(`/cheltuieli/cauta-furnizor/${encodeURIComponent(nume)}/`);
+                this.furnizori = await r.json();
+            },
+            alegeFurnizor(f) {
+                $refs.furnizorDenumire.value = f.furnizor_denumire;
+                $refs.furnizorCod.value = f.furnizor_cod_fiscal || '';
+                $refs.furnizorTara.value = f.furnizor_tara || '';
+                this.furnizori = [];
+            }
+        }">
 
         <p class="text-bold">Datele cheltuielii:</p>
 
         {% csrf_token %}
-    
-        <label for="{{ cheltuieli_form.deductibila.id_for_label }}">
-            {{ cheltuieli_form.deductibila.label }}:
-            {{ cheltuieli_form.deductibila }}
-            {{ cheltuieli_form.deductibila.errors }}
-        </label>
+
+        <div class="grid">
+            <label for="{{ cheltuieli_form.deductibila.id_for_label }}">
+                {{ cheltuieli_form.deductibila.label }}:
+                {{ cheltuieli_form.deductibila }}
+                {{ cheltuieli_form.deductibila.errors }}
+            </label>
+
+            <label for="{{ cheltuieli_form.tip_achizitie.id_for_label }}">
+                {{ cheltuieli_form.tip_achizitie.label }}:
+                <select name="{{ cheltuieli_form.tip_achizitie.name }}" id="{{ cheltuieli_form.tip_achizitie.id_for_label }}" x-model="tipAchizitie"
+                    @change="if ($refs.furnizorTara && !tari.some(t => t[0] === $refs.furnizorTara.value)) $refs.furnizorTara.value = ''">
+                    {% for value, label in cheltuieli_form.tip_achizitie.field.choices %}
+                    <option value="{{ value }}" {% if cheltuieli_form.tip_achizitie.value == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+                {{ cheltuieli_form.tip_achizitie.errors }}
+            </label>
+        </div>
 
 
         <div class="grid">
@@ -124,115 +161,78 @@
 
         </div>
 
-        <div class="mt-2" x-data="{
-            tipAchizitie: '{{ cheltuieli_form.tip_achizitie.value|default:'Romania'|escapejs }}',
-            get extern() { return this.tipAchizitie !== 'Romania'; },
-            furnizori: [],
-            async cautaFurnizori(nume) {
-                if (!nume || nume.length < 2) { this.furnizori = []; return; }
-                const r = await fetch(`/cheltuieli/cauta-furnizor/${encodeURIComponent(nume)}/`);
-                this.furnizori = await r.json();
-            },
-            alegeFurnizor(f) {
-                $refs.furnizorDenumire.value = f.furnizor_denumire;
-                $refs.furnizorCod.value = f.furnizor_cod_fiscal || '';
-                $refs.furnizorTara.value = f.furnizor_tara || '';
-                this.furnizori = [];
-            }
-        }">
-            <label for="{{ cheltuieli_form.tip_achizitie.id_for_label }}">
-                {{ cheltuieli_form.tip_achizitie.label }}:
-                <select name="{{ cheltuieli_form.tip_achizitie.name }}" id="{{ cheltuieli_form.tip_achizitie.id_for_label }}" x-model="tipAchizitie">
-                    {% for value, label in cheltuieli_form.tip_achizitie.field.choices %}
-                    <option value="{{ value }}" {% if cheltuieli_form.tip_achizitie.value == value %}selected{% endif %}>{{ label }}</option>
-                    {% endfor %}
-                </select>
-                {{ cheltuieli_form.tip_achizitie.errors }}
-            </label>
+        <div x-show="extern" x-cloak class="mt-2">
+            <p style="font-size: 14px;">
+                Factura furnizorului are de obicei mentiunea <em>reverse charge / 0% VAT</em>.
+                Completeaza datele de pe factura — <strong>cursul BNR se ia automat din data facturii,
+                iar baza in lei si TVA-ul de plata (21%) se calculeaza automat</strong> la salvare.
+                Pentru furnizori din UE se depun D301 + D390 (pe codul TVA intracomunitar din Setari),
+                pentru non-UE doar D301 (pe CIF-ul din Setari).
+            </p>
 
-            <div x-show="extern" class="mt-1">
-                <p style="font-size: 14px;">
-                    Factura furnizorului are de obicei mentiunea <em>reverse charge / 0% VAT</em>.
-                    Completeaza datele de pe factura — <strong>cursul BNR, baza in lei si TVA-ul de plata (21%)
-                    se calculeaza automat</strong> la salvare. Pentru furnizori din UE se depun D301 + D390,
-                    pentru non-UE doar D301 (alegerea se face automat din tara).
-                </p>
+            <div class="grid">
+                <label>
+                    {{ cheltuieli_form.furnizor_denumire.label }}:
+                    <input type="text" name="{{ cheltuieli_form.furnizor_denumire.name }}"
+                        id="{{ cheltuieli_form.furnizor_denumire.id_for_label }}"
+                        x-ref="furnizorDenumire" autocomplete="off"
+                        value="{{ cheltuieli_form.furnizor_denumire.value|default:'' }}"
+                        placeholder="ex. CORTECS GMBH"
+                        @input.debounce.300ms="cautaFurnizori($event.target.value)">
+                    {{ cheltuieli_form.furnizor_denumire.errors }}
+                    <template x-if="furnizori.length">
+                        <div class="mt-1" style="border: 1px solid var(--pico-muted-border-color); border-radius: 4px;">
+                            <template x-for="f in furnizori" :key="f.furnizor_denumire">
+                                <a href="#" @click.prevent="alegeFurnizor(f)" style="display: block; padding: 0.3rem 0.6rem; font-size: 14px;">
+                                    <span x-text="f.furnizor_denumire"></span>
+                                    <small x-text="`(${f.furnizor_cod_fiscal || 'fara cod'}, ${f.furnizor_tara})`"></small>
+                                </a>
+                            </template>
+                        </div>
+                    </template>
+                </label>
 
-                <div class="grid">
-                    <label>
-                        {{ cheltuieli_form.furnizor_denumire.label }}:
-                        <input type="text" name="{{ cheltuieli_form.furnizor_denumire.name }}"
-                            id="{{ cheltuieli_form.furnizor_denumire.id_for_label }}"
-                            x-ref="furnizorDenumire" autocomplete="off"
-                            value="{{ cheltuieli_form.furnizor_denumire.value|default:'' }}"
-                            placeholder="ex. CORTECS GMBH"
-                            @input.debounce.300ms="cautaFurnizori($event.target.value)">
-                        {{ cheltuieli_form.furnizor_denumire.errors }}
-                        <template x-if="furnizori.length">
-                            <div class="mt-1" style="border: 1px solid var(--pico-muted-border-color); border-radius: 4px;">
-                                <template x-for="f in furnizori" :key="f.furnizor_denumire">
-                                    <a href="#" @click.prevent="alegeFurnizor(f)" style="display: block; padding: 0.3rem 0.6rem; font-size: 14px;">
-                                        <span x-text="f.furnizor_denumire"></span>
-                                        <small x-text="`(${f.furnizor_cod_fiscal || 'fara cod'}, ${f.furnizor_tara})`"></small>
-                                    </a>
-                                </template>
-                            </div>
+                <label for="{{ cheltuieli_form.furnizor_tara.id_for_label }}">
+                    {{ cheltuieli_form.furnizor_tara.label }}:
+                    <select name="{{ cheltuieli_form.furnizor_tara.name }}" id="{{ cheltuieli_form.furnizor_tara.id_for_label }}" x-ref="furnizorTara">
+                        <option value="">---------</option>
+                        <template x-for="t in tari" :key="t[0]">
+                            <option :value="t[0]" :selected="t[0] === '{{ cheltuieli_form.furnizor_tara.value|default:''|escapejs }}'" x-text="t[1]"></option>
                         </template>
-                    </label>
+                    </select>
+                    {{ cheltuieli_form.furnizor_tara.errors }}
+                </label>
+            </div>
 
-                    <label for="{{ cheltuieli_form.furnizor_tara.id_for_label }}">
-                        {{ cheltuieli_form.furnizor_tara.label }}:
-                        <select name="{{ cheltuieli_form.furnizor_tara.name }}" id="{{ cheltuieli_form.furnizor_tara.id_for_label }}" x-ref="furnizorTara">
-                            <option value="">---------</option>
-                            {% for value, label in cheltuieli_form.furnizor_tara.field.choices %}
-                            <option value="{{ value }}" {% if cheltuieli_form.furnizor_tara.value == value %}selected{% endif %}>{{ label }}</option>
-                            {% endfor %}
-                        </select>
-                        {{ cheltuieli_form.furnizor_tara.errors }}
-                    </label>
-                </div>
+            <div class="grid">
+                <label for="{{ cheltuieli_form.furnizor_cod_fiscal.id_for_label }}">
+                    {{ cheltuieli_form.furnizor_cod_fiscal.label }}:
+                    <input type="text" name="{{ cheltuieli_form.furnizor_cod_fiscal.name }}"
+                        id="{{ cheltuieli_form.furnizor_cod_fiscal.id_for_label }}"
+                        x-ref="furnizorCod" autocomplete="off"
+                        value="{{ cheltuieli_form.furnizor_cod_fiscal.value|default:'' }}"
+                        placeholder="UE: ATU77164426 / non-UE: 27-0805829">
+                    {{ cheltuieli_form.furnizor_cod_fiscal.errors }}
+                    <small>UE: codul TVA complet cu prefixul tarii. Non-UE: codul fiscal strain (ex. EIN), daca exista.</small>
+                </label>
 
-                <div class="grid">
-                    <label for="{{ cheltuieli_form.furnizor_cod_fiscal.id_for_label }}">
-                        {{ cheltuieli_form.furnizor_cod_fiscal.label }}:
-                        <input type="text" name="{{ cheltuieli_form.furnizor_cod_fiscal.name }}"
-                            id="{{ cheltuieli_form.furnizor_cod_fiscal.id_for_label }}"
-                            x-ref="furnizorCod" autocomplete="off"
-                            value="{{ cheltuieli_form.furnizor_cod_fiscal.value|default:'' }}"
-                            placeholder="UE: ATU77164426 / non-UE: 27-0805829">
-                        {{ cheltuieli_form.furnizor_cod_fiscal.errors }}
-                        <small>UE: codul TVA complet cu prefixul tarii. Non-UE: codul fiscal strain (ex. EIN), daca exista.</small>
-                    </label>
+                <label for="{{ cheltuieli_form.numar_factura.id_for_label }}">
+                    {{ cheltuieli_form.numar_factura.label }}:
+                    <input type="text" name="{{ cheltuieli_form.numar_factura.name }}"
+                        id="{{ cheltuieli_form.numar_factura.id_for_label }}" autocomplete="off"
+                        value="{{ cheltuieli_form.numar_factura.value|default:'' }}"
+                        placeholder="ex. PBW-2026-003576">
+                    {{ cheltuieli_form.numar_factura.errors }}
+                </label>
 
-                    <label for="{{ cheltuieli_form.numar_factura.id_for_label }}">
-                        {{ cheltuieli_form.numar_factura.label }}:
-                        <input type="text" name="{{ cheltuieli_form.numar_factura.name }}"
-                            id="{{ cheltuieli_form.numar_factura.id_for_label }}" autocomplete="off"
-                            value="{{ cheltuieli_form.numar_factura.value|default:'' }}"
-                            placeholder="ex. PBW-2026-003576">
-                        {{ cheltuieli_form.numar_factura.errors }}
-                    </label>
-
-                    <label for="{{ cheltuieli_form.data_facturii.id_for_label }}">
-                        {{ cheltuieli_form.data_facturii.label }}:
-                        <input type="date" name="{{ cheltuieli_form.data_facturii.name }}"
-                            id="{{ cheltuieli_form.data_facturii.id_for_label }}"
-                            value="{{ cheltuieli_form.data_facturii.value|date:'Y-m-d' }}">
-                        {{ cheltuieli_form.data_facturii.errors }}
-                        <small>Daca lipseste, se foloseste data cheltuielii. Cursul BNR se ia din aceasta data.</small>
-                    </label>
-                </div>
-
-                <div class="grid">
-                    <label for="{{ cheltuieli_form.curs_bnr_aplicat.id_for_label }}">
-                        {{ cheltuieli_form.curs_bnr_aplicat.label }}:
-                        {{ cheltuieli_form.curs_bnr_aplicat }}
-                        {{ cheltuieli_form.curs_bnr_aplicat.errors }}
-                        <small>Goleste ca sa se ia automat cursul BNR din data facturii. Completeaza doar daca factura impune un curs anume.</small>
-                    </label>
-                    <div></div>
-                    <div></div>
-                </div>
+                <label for="{{ cheltuieli_form.data_facturii.id_for_label }}">
+                    {{ cheltuieli_form.data_facturii.label }}:
+                    <input type="date" name="{{ cheltuieli_form.data_facturii.name }}"
+                        id="{{ cheltuieli_form.data_facturii.id_for_label }}"
+                        value="{{ cheltuieli_form.data_facturii.value|date:'Y-m-d' }}">
+                    {{ cheltuieli_form.data_facturii.errors }}
+                    <small>Daca lipseste, se foloseste data cheltuielii. Cursul BNR se ia automat din aceasta data.</small>
+                </label>
             </div>
         </div>
 
@@ -260,6 +260,51 @@
 
 
 <div id="tabel-cheltuieli" class="mt-4">
+
+    <article id="filtru-tva" class="container mb-2" style="padding: 2rem;">
+        <div class="grid">
+            <label style="margin: 0;">
+                <small>🇪🇺 Cheltuieli externe (TVA)</small>
+                <select id="filtru-extern" style="margin: 0;"
+                    onchange="window.location.href = this.value ? '/cheltuieli/?extern=1&anul_extern={{ anul_extern }}' + (this.value === 'toate' ? '' : '&luna_extern=' + this.value) + '#tabel-cheltuieli' : '/cheltuieli/#tabel-cheltuieli'">
+                    <option value="">Toate cheltuielile</option>
+                    <option value="toate" {% if extern and not luna_extern %}selected{% endif %}>UE + non-UE, tot anul</option>
+                    {% for luna in luni_extern %}
+                    <option value="{{ luna }}" {% if extern and luna_extern == luna %}selected{% endif %}>{{ luna|stringformat:"02d" }}/{{ anul_extern }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            {% if extern %}
+            <label style="margin: 0;">
+                <small>Anul</small>
+                <select id="filtru-extern-anul" style="margin: 0;"
+                    onchange="window.location.href = '/cheltuieli/?extern=1&anul_extern=' + this.value + '#tabel-cheltuieli'">
+                    {% for an in ani_externi %}
+                    <option value="{{ an }}" {% if an == anul_extern %}selected{% endif %}>{{ an }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            {% endif %}
+        </div>
+        <div class="mt-1">
+            <small class="pico-color-slate-500">
+                Facturile cu Origine furnizor UE/non-UE, grupate pe luna de raportare (data facturii).
+                Pentru fiecare luna se depun D301 + D390 (UE, pe codul TVA intracomunitar din Setari)
+                si doar D301 (non-UE, pe CIF-ul din Setari). „Descarca" genereaza un zip cu declaratiile
+                completate (Markdown) si jurnalul de cumparari in Excel.
+                Termen: 25 a lunii urmatoare.
+            </small>
+        </div>
+        {% if extern and luna_extern %}
+        <div class="mt-2">
+            <a href="{% url 'cheltuieli-tva-descarca' %}?anul={{ anul_extern }}&luna={{ luna_extern }}" role="button"
+                style="display: block; width: 100%; text-align: center;"
+                data-tooltip="Declaratiile D301 + D390 (doar UE) completate, in Markdown, + jurnalul de cumparari in Excel">
+                <i class="bi bi-file-earmark-zip"></i> Descarca
+            </a>
+        </div>
+        {% endif %}
+    </article>
 
     <div x-data="{ downloaded_csv: false, downloaded_xlsx: false }" style="display: flex; justify-content: end; overflow: hidden;">
         <a href="{% url 'descarca-cheltuieli' %}?filetype=CSV&anul={{ anul }}" @click="downloaded_csv = true" :class="downloaded_csv ? 'px-1 pico-color-purple-500': 'px-1 secondary'"

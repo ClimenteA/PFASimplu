@@ -1,8 +1,5 @@
 # PFASimplu
 
-> Am facut [chatcodfiscal.ro](https://chatcodfiscal.ro/) sectiunea `Registre PFA` - urci un zip cu (e)facturi, bonuri, extrase bancare si primesti un zip cu toate registrele completate si documentele organizate.
-
-
 ![GitHub all releases](https://img.shields.io/github/downloads/ClimenteA/PFASimplu/total?label=descarcari&style=for-the-badge)
 
 Aplicatie pentru simplificarea gestiunii contabilitatii facuta in partida simpla (versiunea 2).  
@@ -168,17 +165,17 @@ Odata introduse aceste date, aplicatia va calcula automat amortizarea acelui act
 Daca ai cod special de TVA intracomunitar (art. 317) si cumperi servicii de la furnizori din afara Romaniei (ex. Google, Cloudflare, OpenAI, Cortecs), la adaugarea cheltuielii alege la **Origine furnizor** `Servicii din UE` sau `Servicii din afara UE`. Apare o sectiune suplimentara cu datele de pe factura furnizorului (care are de obicei mentiunea *reverse charge / 0% VAT*):
 
 - **Denumire furnizor** - pe masura ce tastezi apar sugestii din facturile anterioare; cu un click codul TVA si tara se precompleteaza automat;
-- **Tara furnizor** - UE/non-UE se deduce automat din tara (Marea Britanie este non-UE dupa Brexit); daca ai ales gresit tipul, aplicatia il corecteaza;
+- **Tara furnizor** - lista este filtrata dupa originea aleasa: `Servicii din UE` arata doar cele 27 de state membre UE ([sursa oficiala](https://european-union.europa.eu/node/288/rss_ro)), `Servicii din afara UE` doar tarile non-UE (Marea Britanie este non-UE dupa Brexit); UE/non-UE se deduce automat din tara, iar daca ai ales gresit tipul, aplicatia il corecteaza;
 - **Cod TVA / cod fiscal furnizor** - pentru UE codul TVA complet cu prefixul tarii (ex. `ATU77164426`), pentru non-UE codul fiscal strain (ex. EIN `27-0805829`), daca exista;
 - **Numar factura** si **Data facturii** (exigibilitatea TVA) - daca data facturii lipseste se foloseste data cheltuielii.
 
 **Calculele se fac automat la salvare**, nu trebuie sa completezi nimic manual:
-- cursul BNR din data exigibilitatii (data facturii); daca factura impune un curs anume il poti trece in campul optional `Curs BNR`;
+- cursul BNR din data exigibilitatii (data facturii), luat automat din `cursvalutarbnr`;
 - baza in lei = valoarea in valuta x curs;
 - TVA autolichidata = baza x 21% (cota standard);
 - TVA-ul se adauga automat la cheltuiala deductibila (este o cheltuiala a PFA-ului, platita la ANAF prin D301) - vezi coloana `TVA D301` din tabel, cu badge 🇪🇺 (UE) sau 🌍 (non-UE).
 
-Din aceste cheltuieli aplicatia pregateste declaratiile D301/D390 si Jurnalul de cumparari - vezi sectiunea [TVA intracomunitar](#tva-intracomunitar-d301-d390-si-jurnal-de-cumparari).
+Odata salvata, cheltuiala apare automat in **Jurnalul de cumparari (TVA)** din pagina [Registre](#registre) (tab `Jurnale`) - este generat din calcul, nu trebuie inserat nimic. Declaratiile D301/D390 se descarca din filtrul „Cheltuieli externe (TVA)" de deasupra tabelului - vezi sectiunea [TVA intracomunitar](#tva-intracomunitar-d301-d390-si-jurnal-de-cumparari).
 
 
 ## Documente
@@ -187,7 +184,7 @@ Aici poti introduce documentele create in relatia cu ANAF. Declaratii, dovezi pl
 
 In cazul dovezii platii de impozite (pdf-ul primit de la ghiseul.ro) si al declaratiei unice datele relevante sunt automat extrase din PDF-ul incarcat.
 
-Daca ai cheltuieli cu servicii din UE/non-UE (taxare inversa), deasupra formularului apare sectiunea **Declarații TVA (D301 / D390)** - vezi mai jos.
+Recipisele D301/D390 primite de la ANAF se incarca tot aici - tipul declaratiei, perioada, CIF-ul si indexul de incarcare se detecteaza automat din PDF. Declaratiile in sine se genereaza din pagina [Cheltuieli](#tva-intracomunitar-d301-d390-si-jurnal-de-cumparari).
 
 ![documente](readmepics/documente.jpeg)
 
@@ -204,21 +201,22 @@ Pentru PFA-urile cu **cod special de TVA intracomunitar (art. 317 Cod fiscal)** 
 | Furnizor din UE (Austria, Irlanda, Germania etc.) | Da - secțiunea 4 + secțiunea 4.1 | Da - tip S | Codul special de TVA intracomunitar |
 | Furnizor din afara UE (SUA, UK, Canada etc.) | Da - doar secțiunea 4 | Nu | Codul normal al PFA-ului (CIF) |
 
-**Fluxul in aplicatie (pagina Documente, sectiunea „Declarații TVA"):**
+**Fluxul in aplicatie (pagina Cheltuieli, filtrul „Cheltuieli externe (TVA)"):**
 
 1. **Adaugi cheltuielile** cu origine UE/non-UE (vezi [Cheltuieli](#cheltuieli)) - cursul BNR, baza si TVA-ul se calculeaza automat;
-2. **Generezi** - un click pe butonul `Generează` din tabelul pe luni si primesti un zip cu:
-   - **D301** completat (PDF + XML in schema oficiala ANAF, pentru import in formularul online);
-   - **D390 VIES** completat (PDF + XML) - doar daca exista facturi din UE;
-   - **Jurnalul de cumparari** al lunii (PDF + CSV), cu referinta `15-16`;
-   - **Instructiunea de plata**: IBAN trezorerie, cod bugetar `20A100101`, suma, CIF platitor, termen;
-3. **Depui** declaratiile online pe [declaratii.anaf.ro](https://declaratii.anaf.ro/) (poti importa XML-urile din zip; suma de control si nr. de evidenta a platii se genereaza de aplicatia oficiala ANAF la validare);
-4. **Incarci recipisa** prin formularul de documente - tipul (D301/D390), perioada, CIF-ul si indexul de incarcare se detecteaza automat din PDF, iar declaratia lunii este marcata `Depusa`. Daca CIF-ul din recipisa difera de cel din declaratia generata, aplicatia te avertizeaza (prinde confuzia cod normal / cod special);
-5. **Platesti** TVA-ul in contul trezoreriei din Setari si apesi `Plătită`.
+2. **Filtrezi pe luna** - din selectorul „Cheltuieli externe (TVA)" de deasupra tabelului alegi luna de raportare (lunile cu facturi UE/non-UE, grupate dupa data facturii); tabelul arata doar facturile pentru care trebuie completate declaratiile;
+3. **Descarci** - un click pe butonul `Descarca` si primesti un zip cu declaratiile completate in **Markdown**, **grupate in cate un folder pentru fiecare cod fiscal** (CIF / cod TVA intracomunitar) pe care se depun declaratii:
+   - folderul **codului TVA intracomunitar** (art. 317): **D301** (sectiunile 4 + 4.1) + **D390 VIES** (tip S, cod operator fara prefixul tarii, baza rotunjita la intreg) + jurnalul de cumparari in **Excel** doar cu facturile UE;
+   - folderul **CIF-ului normal**: **D301** (doar sectiunea 4) + jurnalul de cumparari in **Excel** doar cu facturile non-UE;
+   - fiecare D301 contine antetul, sectiunile cu toate valorile, termenul si **instructiunea de plata** (IBAN trezorerie, cod bugetar `20A100101`, suma, CIF platitor);
+   - jurnalul de cumparari pe toata luna este disponibil si separat in [Registre](#registre) > `Jurnal Cumparaturi` (PDF/CSV/XLSX), cu referinta `15-16`;
+4. **Depui** declaratiile online pe [declaratii.anaf.ro](https://declaratii.anaf.ro/), completand formularul cu valorile din fisierele Markdown (suma de control si nr. de evidenta a platii se genereaza de aplicatia oficiala ANAF la validare); termen: **25 inclusiv a lunii urmatoare**;
+5. **Incarci recipisa** in pagina [Documente](#documente) - tipul (D301/D390), perioada, CIF-ul si indexul de incarcare se detecteaza automat din PDF;
+6. **Platesti** TVA-ul in contul trezoreriei din Setari (instructiunea de plata din fisierul D301 are toate datele).
 
-Tabelul pe luni arata: numarul de facturi, CIF-ul folosit, TVA-ul de plata, termenul de depunere/plata (**25 inclusiv a lunii urmatoare**) si statusul fiecarei declaratii (`Calculata → Descarcata → Depusa → Platita`). Daca lipsesc date din Setari (cod TVA intracomunitar, IBAN trezorerie) apar avertizari inainte de generare.
+Daca lipsesc date din Setari (cod TVA intracomunitar, IBAN trezorerie) apar avertizari la descarcare.
 
-**Jurnalul de cumparari** este disponibil si in pagina [Registre](#registre) (tab `Jurnale`), cu descarcare PDF/CSV/XLSX pe luna sau pe tot anul. Totalul documentului include TVA autolichidata, chiar daca furnizorul a facturat 0% TVA.
+**Jurnalul de cumparari** este disponibil si in pagina [Registre](#registre) (tab `Jurnal Cumparaturi`), cu descarcare PDF/CSV/XLSX pe luna sau pe tot anul. Totalul documentului include TVA autolichidata, chiar daca furnizorul a facturat 0% TVA.
 
 > **Atentie:** codul TVA intracomunitar (art. 317) nu confera calitatea de platitor normal de TVA (art. 316). Aceasta functionalitate acopera regimul art. 317 (D301/D390), nu decontul D300. Pentru situatii speciale confirma tratamentul cu contabilul.
 

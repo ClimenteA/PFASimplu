@@ -4,6 +4,10 @@ UE/non-UE se deduce automat din tara furnizorului:
 - UE: se depun D301 (sectiunile 4 si 4.1) + D390 VIES (tip S);
 - non-UE: se depune doar D301 (sectiunea 4), fara D390.
 
+Lista statelor membre UE urmeaza sursa oficiala (27 de state, fara Romania -
+furnizorii romani se inregistreaza cu originea "Romania"):
+https://european-union.europa.eu/node/288/rss_ro
+
 Regatul Unit este tara non-UE dupa Brexit.
 """
 
@@ -59,11 +63,19 @@ TARI = {
     "MX": ("Mexic", False),
 }
 
-# Lista pentru dropdown-uri: "AT - Austria (UE)" etc.
-TARI_CHOICES = [
-    (cod, f"{cod} - {denumire}" + (" (UE)" if ue else " (non-UE)"))
+# Liste pentru dropdown-uri, filtrate dupa originea furnizorului:
+# "Servicii din UE" arata doar tarile UE, "Servicii din afara UE" doar non-UE.
+TARI_UE_CHOICES = [
+    (cod, f"{cod} - {denumire}")
     for cod, (denumire, ue) in sorted(TARI.items(), key=lambda kv: kv[1][0])
+    if ue
 ]
+TARI_NON_UE_CHOICES = [
+    (cod, f"{cod} - {denumire}")
+    for cod, (denumire, ue) in sorted(TARI.items(), key=lambda kv: kv[1][0])
+    if not ue
+]
+TARI_CHOICES = TARI_UE_CHOICES + TARI_NON_UE_CHOICES
 
 
 def este_tara_ue(cod_tara: str) -> bool:

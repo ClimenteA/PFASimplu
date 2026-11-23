@@ -4,7 +4,6 @@ from datetime import datetime
 import xmltodict
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from pypdf import PdfReader  # https://pypdf.readthedocs.io/en/stable/index.html
 
@@ -270,45 +269,4 @@ def pdf_parser(pdf_path: str):
         }
 
 
-class TipDeclaratieTVA(models.TextChoices):
-    D301 = "D301", _("D301 - Decont special de TVA")
-    D390 = "D390", _("D390 VIES - Declaratie recapitulativa")
 
-
-class StatusDeclaratieTVA(models.TextChoices):
-    CALCULATA = "Calculata", _("Calculata")
-    DESCARCATA = "Descarcata", _("Descarcata")
-    DEPUSA = "Depusa", _("Depusa (recipisa)")
-    PLATITA = "Platita", _("Platita")
-
-
-class DeclaratieTVAModel(models.Model):
-    """O declaratie TVA (D301 sau D390) pentru o luna/an.
-    Randurile si totalurile sunt un snapshot al cheltuielilor cu taxare inversa
-    din luna respectiva, calculat la generare."""
-
-    tip = models.CharField(max_length=10, choices=TipDeclaratieTVA)
-    anul = models.IntegerField()
-    luna = models.IntegerField()
-    cif_folosit = models.CharField(max_length=20)
-    total_de_plata = models.FloatField(default=0)
-    randuri = models.JSONField(default=list, blank=True)
-    status = models.CharField(
-        max_length=20, choices=StatusDeclaratieTVA, default=StatusDeclaratieTVA.CALCULATA
-    )
-    recipisa = models.ForeignKey(
-        DocumenteModel,
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-        related_name="declaratie_tva",
-    )
-    actualizat_la = models.DateTimeField(default=timezone.now)
-
-    class Meta:
-        app_label = "documente"
-        verbose_name_plural = "DeclaratiiTVA"
-        unique_together = ("tip", "anul", "luna")
-
-    def __str__(self):
-        return f"{self.tip} {self.luna:02d}/{self.anul} ({self.status})"

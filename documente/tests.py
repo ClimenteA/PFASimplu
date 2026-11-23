@@ -4,6 +4,10 @@ Cazurile de referinta sunt exemplele reale din stocare/completare-declaratii-tva
 - Cortecs GmbH (Austria, UE): 21 EUR x 5.3447 = 112.24 lei baza, TVA 23.57 lei;
 - Google Cloud EMEA (Irlanda, UE): 50 USD x 4.5316 = 226.58 lei baza, TVA 47.58 lei;
 - Cloudflare/Kilo Code (SUA, non-UE): doar D301 sectiunea 4, CIF normal.
+
+Declaratiile se descarca din pagina Cheltuieli (filtru pe luna + Descarca):
+- UE: D301 + D390 pe codul special de TVA intracomunitar (art. 317);
+- non-UE: doar D301 pe CIF-ul normal din Setari.
 """
 
 import datetime
@@ -21,9 +25,6 @@ from cheltuieli.models import CheltuialaModel, Deductibilitate, TipAchizitie
 from documente.models import (
     DocumenteModel,
     TipDocument,
-    DeclaratieTVAModel,
-    TipDeclaratieTVA,
-    StatusDeclaratieTVA,
     recipisa_parser,
 )
 from setari.models import SetariModel
@@ -31,16 +32,14 @@ from utils.tari import este_tara_ue
 from utils.trezorerie import get_link_iban_trezorerie, get_judet_din_localitate
 from utils.tva import (
     calculeaza_d301,
+    calculeaza_d301_lista,
     calculeaza_d390,
     calculeaza_jurnal_cumparari,
     get_luni_cu_taxare_inversa,
+    round2,
     termen_depunere,
 )
-from utils.tva_documente import (
-    genereaza_d301_xml,
-    genereaza_d390_xml,
-    genereaza_pachet_tva,
-)
+from utils.tva_documente import genereaza_pachet_tva
 
 
 # Cursuri BNR fixe pentru teste (nu cerem reteaua).
@@ -171,12 +170,13 @@ class TaxareInversaCheltuialaTests(TestCase):
         with self.assertRaises(ValidationError):
             creeaza_cheltuiala_ue(numar_factura="")
 
-    def test_curs_manual_pastrat_la_editare(self, _mock):
+    def test_curs_bnr_automat_la_editare(self, _mock):
+        # Cursul nu mai poate fi suprascris manual: se ia automat din cursvalutarbnr.
         c = creeaza_cheltuiala_ue()
         c.curs_bnr_aplicat = 5.5
         c.save()
-        self.assertEqual(c.curs_bnr_aplicat, 5.5)
-        self.assertEqual(c.baza_in_lei, round(21.0 * 5.5, 2))
+        self.assertEqual(c.curs_bnr_aplicat, 5.3447)
+        self.assertEqual(c.baza_in_lei, 112.24)
 
     def test_data_facturii_fallback_pe_data_cheltuielii(self, _mock):
         c = creeaza_cheltuiala_ue(data_facturii=None)
@@ -211,9 +211,8 @@ class CalculDeclaratiiTests(TestCase):
         creeaza_cheltuiala_non_ue()
         d301 = calculeaza_d301(2026, 9, self.setari)
         self.assertIsNotNone(d301)
-        # Fara cod special completat, non-UE foloseste CIF-ul normal;
-        # aici avem cod special (art. 317) deci declaratia se depune pe el.
-        self.assertEqual(d301["cif"], "52937756")
+        # Non-UE se declara pe CIF-ul normal din Setari, nu pe codul special art. 317.
+        self.assertEqual(d301["cif"], "43000098")
         self.assertEqual(d301["baza4"], round(21.0 * 4.5839, 2))
         self.assertEqual(d301["baza5"], 0)
         self.assertEqual(d301["tva5"], 0)
@@ -253,7 +252,8 @@ class CalculDeclaratiiTests(TestCase):
         self.assertEqual(d390["bazaS"], 166)
 
     def test_luna_mixta_ue_si_non_ue(self, _mock):
-        # Septembrie: Google (UE, 50 USD) + Cloudflare + Kilo (non-UE)
+        # Septembrie: Google (UE, 50 USD) + Cloudflare + Kilo (non-UE).
+        # Cu coduri diferite (special art. 317 vs CIF) rezulta doua D301.
         creeaza_cheltuiala_ue(
             furnizor_denumire="GOOGLE CLOUD EMEA LIMITED",
             furnizor_cod_fiscal="IE3668997OH",
@@ -273,17 +273,42 @@ class CalculDeclaratiiTests(TestCase):
             data_facturii=datetime.date(2026, 9, 25),
         )
 
+        d301_lista = calculeaza_d301_lista(2026, 9, self.setari)
+        # Luna mixta cu coduri diferite: doua D301 separate, fiecare pe codul ei.
+        self.assertEqual(len(d301_lista), 2)
+        d301_ue, d301_non = d301_lista
+        self.assertEqual(d301_ue["cif"], "52937756")
+        self.assertEqual(d301_non["cif"], "43000098")
+        # Google (UE): sectiunea 4 + sectiunea 4.1
+        self.assertEqual(d301_ue["baza4"], 226.58)
+        self.assertEqual(d301_ue["baza5"], 226.58)
+        # Cloudflare + Kilo (non-UE): doar sectiunea 4
+        self.assertEqual(d301_non["baza4"], round2(96.26 + 231.97))
+        self.assertEqual(d301_non["baza5"], 0)
+
         d301 = calculeaza_d301(2026, 9, self.setari)
-        # 226.58 + 96.26 + 231.97 = 554.81 (rotunjire half-up la 2 zecimale per factura)
-        self.assertEqual(d301["baza4"], 554.81)
-        self.assertEqual(d301["baza5"], 226.58)
-        self.assertEqual(len([r for r in d301["randuri"] if r["tip_operatie"] == "4"]), 3)
+        self.assertEqual(d301["baza4"], 226.58)
+        self.assertEqual(len([r for r in d301["randuri"] if r["tip_operatie"] == "4"]), 1)
         self.assertEqual(len([r for r in d301["randuri"] if r["tip_operatie"] == "5"]), 1)
 
         d390 = calculeaza_d390(2026, 9, self.setari)
         self.assertEqual(d390["nr_operatori"], 1)
         self.assertEqual(d390["randuri"][0]["cod_operator"], "3668997OH")
         self.assertEqual(d390["bazaS"], 227)
+
+    def test_luna_mixta_fara_cod_special_o_singura_d301(self, _mock):
+        # Fara cod special art. 317, ambele tipuri se declara pe CIF: o singura D301.
+        setari_fara_cod = creeaza_setari(cod_tva_intracomunitar=None)
+        creeaza_cheltuiala_ue(
+            data_inserarii=datetime.date(2026, 9, 14),
+            data_facturii=datetime.date(2026, 9, 14),
+        )
+        creeaza_cheltuiala_non_ue()
+        d301_lista = calculeaza_d301_lista(2026, 9, setari_fara_cod)
+        self.assertEqual(len(d301_lista), 1)
+        self.assertEqual(d301_lista[0]["cif"], "43000098")
+        self.assertEqual(len([r for r in d301_lista[0]["randuri"] if r["tip_operatie"] == "4"]), 2)
+        self.assertEqual(len([r for r in d301_lista[0]["randuri"] if r["tip_operatie"] == "5"]), 1)
 
     def test_jurnal_cumparari(self, _mock):
         creeaza_cheltuiala_ue()
@@ -316,51 +341,10 @@ class CalculDeclaratiiTests(TestCase):
 @override_settings(MEDIA_ROOT=tempfile.mkdtemp(prefix="pfasimplu_test_media_"))
 @patch("utils.valuta.cursvalutarbnr.get_bnr_rates", side_effect=mock_get_bnr_rates)
 class GenerareDocumenteTests(TestCase):
-    """XML-urile ANAF si zip-ul generat."""
+    """Zip-ul generat: declaratii Markdown grupate in foldere pe CIF/cod TVA."""
 
     def setUp(self):
         self.setari = creeaza_setari()
-
-    def test_d301_xml_structura_oficiala(self, _mock):
-        import xml.etree.ElementTree as ET
-
-        creeaza_cheltuiala_ue()
-        d301 = calculeaza_d301(2026, 10, self.setari)
-        xml = genereaza_d301_xml(d301, self.setari)
-        root = ET.fromstring(xml)
-        self.assertTrue(root.tag.endswith("declaratie301"))
-        self.assertEqual(root.get("cif"), "52937756")
-        self.assertEqual(root.get("pers_inreg"), "2")
-        self.assertEqual(root.get("baza4"), "112.24")
-        self.assertEqual(root.get("tva4"), "23.57")
-        self.assertEqual(root.get("baza5"), "112.24")
-        self.assertEqual(root.get("tva5"), "23.57")
-        sectiuni = list(root)
-        self.assertEqual(len(sectiuni), 2)
-        self.assertEqual(sectiuni[0].get("tip_operatie"), "4")
-        self.assertEqual(sectiuni[1].get("tip_operatie"), "5")
-        self.assertEqual(sectiuni[0].get("nr_doc"), "PBW-2026-003576")
-        self.assertEqual(sectiuni[0].get("data_doc"), "02.10.2026")
-        self.assertEqual(sectiuni[0].get("curs_valutar"), "5.3447")
-
-    def test_d390_xml_structura_oficiala(self, _mock):
-        import xml.etree.ElementTree as ET
-
-        creeaza_cheltuiala_ue()
-        d390 = calculeaza_d390(2026, 10, self.setari)
-        xml = genereaza_d390_xml(d390, self.setari)
-        root = ET.fromstring(xml)
-        self.assertTrue(root.tag.endswith("declaratie390"))
-        self.assertEqual(root.get("cui"), "52937756")
-        self.assertEqual(root.get("luna"), "10")
-        rezumat = root.find("{mfp:anaf:dgti:d390:declaratie:v3}rezumat")
-        self.assertEqual(rezumat.get("bazaS"), "112")
-        self.assertEqual(rezumat.get("nrOPI"), "1")
-        operatie = root.find("{mfp:anaf:dgti:d390:declaratie:v3}operatie")
-        self.assertEqual(operatie.get("tip"), "S")
-        self.assertEqual(operatie.get("tara"), "AT")
-        self.assertEqual(operatie.get("codO"), "U77164426")
-        self.assertEqual(operatie.get("baza"), "112")
 
     def test_pachet_zip_complet(self, _mock):
         creeaza_cheltuiala_ue()
@@ -368,22 +352,109 @@ class GenerareDocumenteTests(TestCase):
         self.assertIsNotNone(pachet)
         with ZipFile(pachet["zip_path"]) as zf:
             names = zf.namelist()
-        self.assertIn("D301_2026_10.pdf", names)
-        self.assertIn("D301_2026_10.xml", names)
-        self.assertIn("D390_2026_10.pdf", names)
-        self.assertIn("D390_2026_10.xml", names)
-        self.assertIn("Jurnal_cumparari_2026_10.pdf", names)
-        self.assertIn("Jurnal_cumparari_2026_10.csv", names)
-        self.assertIn("Instructiune_plata_TVA_2026_10.pdf", names)
+        # Un folder pentru codul TVA intracomunitar, cu declaratiile + jurnalul.
+        self.assertIn("52937756/D301_2026_10.md", names)
+        self.assertIn("52937756/D390_2026_10.md", names)
+        self.assertIn("52937756/Jurnal_cumparari_2026_10.xlsx", names)
+        # Fara XML-uri si fara PDF-uri.
+        self.assertFalse(any(n.endswith(".xml") for n in names))
+        self.assertFalse(any(n.endswith(".pdf") for n in names))
+
+    def test_jurnal_xlsx_grupat_pe_cod(self, _mock):
+        import io
+        import pandas as pd
+
+        creeaza_cheltuiala_ue()
+        creeaza_cheltuiala_non_ue(
+            data_inserarii=datetime.date(2026, 10, 19),
+            data_facturii=datetime.date(2026, 10, 19),
+        )
+        pachet = genereaza_pachet_tva(2026, 10, self.setari)
+        with ZipFile(pachet["zip_path"]) as zf:
+            # Fiecare folder are jurnalul doar cu facturile declarate pe codul lui.
+            df_ue = pd.read_excel(io.BytesIO(zf.read("52937756/Jurnal_cumparari_2026_10.xlsx")))
+            df_non = pd.read_excel(io.BytesIO(zf.read("43000098/Jurnal_cumparari_2026_10.xlsx")))
+        self.assertEqual(df_ue["Document Numar"].tolist(), ["PBW-2026-003576"])
+        self.assertEqual(df_non["Document Numar"].tolist(), ["IN-79973856"])
+        self.assertTrue((df_ue["Referinta cod"] == "15-16").all())
+        self.assertTrue((df_non["Referinta cod"] == "15-16").all())
+
+    def test_d301_md_completat(self, _mock):
+        from utils.tva_documente import genereaza_d301_md
+
+        creeaza_cheltuiala_ue()
+        d301 = calculeaza_d301(2026, 10, self.setari)
+        md = genereaza_d301_md(d301, self.setari)
+        self.assertIn("D301 - Decont special de TVA - octombrie 2026", md)
+        self.assertIn("`RO52937756`", md)
+        self.assertIn("art. 317", md)
+        # Factura apare si in sectiunea 4 si in sectiunea 4.1
+        self.assertEqual(md.count("PBW-2026-003576"), 2)
+        self.assertIn("112,24", md)
+        self.assertIn("23,57", md)
+        self.assertIn("5,3447", md)
+        self.assertIn("25.11.2026", md)
+        # Instructiunea de plata la trezorerie
+        self.assertIn("RO41TREZ40620A100101XTVA", md)
+        self.assertIn("20A100101", md)
+
+    def test_d301_md_non_ue_pe_cif(self, _mock):
+        from utils.tva_documente import genereaza_d301_md
+
+        creeaza_cheltuiala_non_ue()
+        d301 = calculeaza_d301(2026, 9, self.setari)
+        md = genereaza_d301_md(d301, self.setari)
+        self.assertIn("`RO43000098`", md)
+        self.assertIn("codul normal de PFA (CIF)", md)
+        self.assertIn("IN-79973856", md)
+        # Sectiunea 4.1 ramane zero pentru non-UE
+        self.assertIn("**Zero**", md)
+        self.assertNotIn("U77164426", md)
+
+    def test_d390_md_completat(self, _mock):
+        from utils.tva_documente import genereaza_d390_md
+
+        creeaza_cheltuiala_ue()
+        d390 = calculeaza_d390(2026, 10, self.setari)
+        md = genereaza_d390_md(d390, self.setari)
+        self.assertIn("D390 VIES - Declarație recapitulativă - octombrie 2026", md)
+        self.assertIn("`RO52937756`", md)
+        self.assertIn("`Austria-AT`", md)
+        self.assertIn("`U77164426`", md)
+        self.assertIn("`CORTECS GMBH`", md)
+        self.assertIn("**`112`**", md)
+        self.assertIn("25.11.2026", md)
 
     def test_pachet_non_ue_fara_d390(self, _mock):
         creeaza_cheltuiala_non_ue()
         pachet = genereaza_pachet_tva(2026, 9, self.setari)
         with ZipFile(pachet["zip_path"]) as zf:
             names = zf.namelist()
-        self.assertIn("D301_2026_09.pdf", names)
-        self.assertNotIn("D390_2026_09.pdf", names)
-        self.assertNotIn("D390_2026_09.xml", names)
+        self.assertIn("43000098/D301_2026_09.md", names)
+        self.assertNotIn("43000098/D390_2026_09.md", names)
+        self.assertFalse(any("D390" in n for n in names))
+        # Non-UE se declara pe CIF-ul normal
+        self.assertEqual(pachet["d301"]["cif"], "43000098")
+
+    def test_pachet_luna_mixta_doua_d301(self, _mock):
+        # UE pe codul special art. 317 + non-UE pe CIF: cate un folder pe cod.
+        creeaza_cheltuiala_ue(
+            data_inserarii=datetime.date(2026, 9, 14),
+            data_facturii=datetime.date(2026, 9, 14),
+        )
+        creeaza_cheltuiala_non_ue()
+        pachet = genereaza_pachet_tva(2026, 9, self.setari)
+        with ZipFile(pachet["zip_path"]) as zf:
+            names = zf.namelist()
+        self.assertIn("52937756/D301_2026_09.md", names)
+        self.assertIn("52937756/D390_2026_09.md", names)
+        self.assertIn("52937756/Jurnal_cumparari_2026_09.xlsx", names)
+        self.assertIn("43000098/D301_2026_09.md", names)
+        self.assertIn("43000098/Jurnal_cumparari_2026_09.xlsx", names)
+        # D390 doar in folderul codului intracomunitar (UE).
+        self.assertNotIn("43000098/D390_2026_09.md", names)
+        coduri = [d["cif"] for d in pachet["d301_lista"]]
+        self.assertEqual(coduri, ["52937756", "43000098"])
 
     def test_pachet_luna_goala(self, _mock):
         self.assertIsNone(genereaza_pachet_tva(2026, 1, self.setari))
@@ -699,61 +770,66 @@ class IbanTrezorerieAutoTests(TestCase):
 
 @override_settings(MEDIA_ROOT=tempfile.mkdtemp(prefix="pfasimplu_test_media_"))
 @patch("utils.valuta.cursvalutarbnr.get_bnr_rates", side_effect=mock_get_bnr_rates)
-class FluxDocumenteViewTests(TestCase):
-    """Fluxul complet prin view-uri: generare zip, statusuri, marchare plata."""
+class FluxCheltuieliTVATests(TestCase):
+    """Fluxul prin pagina Cheltuieli: filtru pe luni + Descarca declaratiile TVA."""
 
     def setUp(self):
         self.setari = creeaza_setari()
 
-    def test_genereaza_creeaza_declaratii_si_descarca_zip(self, _mock):
+    def test_descarca_zip_pentru_luna(self, _mock):
         creeaza_cheltuiala_ue()
-        response = self.client.get(reverse("tva-genereaza"), {"anul": 2026, "luna": 10})
+        response = self.client.get(
+            reverse("cheltuieli-tva-descarca"), {"anul": 2026, "luna": 10}
+        )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response["Content-Type"], "application/zip")
+        self.assertIn("D301-D390_2026_10.zip", response["Content-Disposition"])
 
-        d301 = DeclaratieTVAModel.objects.get(tip=TipDeclaratieTVA.D301, anul=2026, luna=10)
-        self.assertEqual(d301.status, StatusDeclaratieTVA.DESCARCATA)
-        self.assertEqual(d301.cif_folosit, "52937756")
-        self.assertEqual(d301.total_de_plata, 23.57)
-        d390 = DeclaratieTVAModel.objects.get(tip=TipDeclaratieTVA.D390, anul=2026, luna=10)
-        self.assertEqual(d390.total_de_plata, 0)
-
-    def test_genereaza_luna_goala_redirect(self, _mock):
-        response = self.client.get(reverse("tva-genereaza"), {"anul": 2026, "luna": 1})
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(DeclaratieTVAModel.objects.count(), 0)
-
-    def test_marcheaza_platita(self, _mock):
-        creeaza_cheltuiala_ue()
-        self.client.get(reverse("tva-genereaza"), {"anul": 2026, "luna": 10})
-        response = self.client.post(
-            reverse("tva-marcheaza-platita"), {"anul": 2026, "luna": 10}
+    def test_descarca_luna_goala_redirect(self, _mock):
+        response = self.client.get(
+            reverse("cheltuieli-tva-descarca"), {"anul": 2026, "luna": 1}
         )
         self.assertEqual(response.status_code, 302)
-        d301 = DeclaratieTVAModel.objects.get(tip=TipDeclaratieTVA.D301, anul=2026, luna=10)
-        self.assertEqual(d301.status, StatusDeclaratieTVA.PLATITA)
+        self.assertEqual(response["Location"], "/cheltuieli/")
 
-    def test_regenerare_pastreaza_status_platita(self, _mock):
+    def test_descarca_fara_setari_redirect(self, _mock):
+        SetariModel.objects.all().delete()
         creeaza_cheltuiala_ue()
-        self.client.get(reverse("tva-genereaza"), {"anul": 2026, "luna": 10})
-        self.client.post(reverse("tva-marcheaza-platita"), {"anul": 2026, "luna": 10})
-        # Regeneram zip-ul: statusul Platita nu trebuie pierdut
-        self.client.get(reverse("tva-genereaza"), {"anul": 2026, "luna": 10})
-        d301 = DeclaratieTVAModel.objects.get(tip=TipDeclaratieTVA.D301, anul=2026, luna=10)
-        self.assertEqual(d301.status, StatusDeclaratieTVA.PLATITA)
+        response = self.client.get(
+            reverse("cheltuieli-tva-descarca"), {"anul": 2026, "luna": 10}
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response["Location"], "/setari/")
 
-    def test_pagina_documente_arata_tabel_tva(self, _mock):
+    def test_pagina_documente_fara_tabel_tva(self, _mock):
         creeaza_cheltuiala_ue()
-        response = self.client.get(reverse("documente"), {"anul_tva": 2026})
+        response = self.client.get(reverse("documente"))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Declarații TVA")
-        self.assertContains(response, "23.57")
-        self.assertContains(response, "52937756")
+        self.assertNotContains(response, "Declarații TVA")
+        self.assertNotContains(response, "tva/genereaza")
 
-    def test_recipisa_leaga_declaratia(self, _mock):
-        creeaza_cheltuiala_ue()
-        self.client.get(reverse("tva-genereaza"), {"anul": 2026, "luna": 10})
+    def test_filtru_extern_pe_luna(self, _mock):
+        creeaza_cheltuiala_ue()       # octombrie, UE
+        creeaza_cheltuiala_non_ue()   # septembrie, non-UE
+        CheltuialaModel.objects.create(
+            nume_cheltuiala="Consumabile",
+            suma=100.0,
+            valuta="RON",
+            data_inserarii=datetime.date(2026, 10, 2),
+            fisier=SimpleUploadedFile("bon.pdf", b"%PDF-1.4 test"),
+        )
+        response = self.client.get(
+            reverse("cheltuieli"), {"extern": 1, "anul_extern": 2026, "luna_extern": 10}
+        )
+        self.assertEqual(response.status_code, 200)
+        items = list(response.context["page_items"])
+        self.assertEqual(len(items), 1)
+        self.assertTrue(items[0].este_ue)
+        self.assertEqual(response.context["luni_extern"], [9, 10])
+        self.assertContains(response, "Descarca")
+        self.assertNotContains(response, "Consumabile")
 
+    def test_recipisa_detectata_la_incarcare(self, _mock):
         # PDF recipisa real din exemplele depuse
         recipisa_path = (
             "stocare/completare-declaratii-tva/DTVA-OCT-2026/"
@@ -774,9 +850,9 @@ class FluxDocumenteViewTests(TestCase):
             doc.tip_document,
             TipDocument.DECLARATIE_TVA_DECONT_SPECIAL_301_RECIPISA.value,
         )
-        d301 = DeclaratieTVAModel.objects.get(tip=TipDeclaratieTVA.D301, anul=2026, luna=10)
-        self.assertEqual(d301.status, StatusDeclaratieTVA.DEPUSA)
-        self.assertEqual(d301.recipisa_id, doc.id)
+        self.assertEqual(doc.document_pentru_anul, 2026)
+        self.assertIn("10/2026", doc.mentiuni)
+        self.assertIn("52937756", doc.mentiuni)
 
 
 @override_settings(MEDIA_ROOT=tempfile.mkdtemp(prefix="pfasimplu_test_media_"))

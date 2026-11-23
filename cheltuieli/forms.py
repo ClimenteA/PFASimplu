@@ -12,6 +12,7 @@ class CheltuieliForm(ModelForm):
             "deducere_in_ron",
             "baza_in_lei",
             "tva_autolichidata",
+            "curs_bnr_aplicat",  # completat automat din cursvalutarbnr
         ]
         widgets = {
             "cod_de_clasificare": TextInput(attrs={"placeholder": "2.2.9."}),
@@ -30,5 +31,4 @@ class CheltuieliForm(ModelForm):
             "furnizor_tara": "Tara furnizor",
             "numar_factura": "Numar factura",
             "data_facturii": "Data facturii (exigibilitate TVA)",
-            "curs_bnr_aplicat": "Curs BNR (optional)",
         }

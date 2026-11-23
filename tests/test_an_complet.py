@@ -18,6 +18,7 @@ tests/.runtime/test.db pentru inspectie ulterioara.
 """
 
 import datetime
+from pathlib import Path
 
 import pytest
 from playwright.sync_api import expect
@@ -504,3 +505,60 @@ def test_06_verificari_ui(page, db):
     # Pagina Registre se incarca pentru anul testat.
     page.goto("/registre/")
     expect(page.locator("h1").first).to_be_visible()
+
+
+def test_07_declaratii_tva_din_cheltuieli(page, db):
+    """Filtrul 'Cheltuieli externe (TVA)' pe luna + butonul Descarca:
+    zip cu D301/D390 (UE) si D301 (non-UE), jurnal si instructiuni de plata."""
+    luna = LAST_MONTH
+    page.goto(f"/cheltuieli/?extern=1&anul_extern={TEST_YEAR}&luna_extern={luna}")
+
+    filtru = page.locator("#filtru-extern")
+    expect(filtru).to_have_value(str(luna))
+
+    # In luna filtrata apar doar facturile UE/non-UE (2 in scenariu).
+    randuri = page.locator("#tabel-cheltuieli tbody tr")
+    assert randuri.count() == 2
+
+    with page.expect_download() as download_info:
+        page.locator("#filtru-tva").get_by_role("button", name="Descarca").click()
+    download = download_info.value
+    assert download.suggested_filename == f"D301-D390_{TEST_YEAR}_{luna:02d}.zip"
+
+    import io
+    import tempfile
+    from zipfile import ZipFile
+
+    import pandas as pd
+
+    zip_path = Path(tempfile.mkdtemp()) / download.suggested_filename
+    download.save_as(zip_path)
+    with ZipFile(zip_path) as zf:
+        names = zf.namelist()
+        # Cate un folder pe cod: UE pe codul special art. 317, non-UE pe CIF.
+        foldere = {n.split("/")[0] for n in names}
+        assert len(foldere) == 2
+        for cod in foldere:
+            assert f"{cod}/D301_{TEST_YEAR}_{luna:02d}.md" in names
+            assert f"{cod}/Jurnal_cumparari_{TEST_YEAR}_{luna:02d}.xlsx" in names
+            df = pd.read_excel(io.BytesIO(zf.read(f"{cod}/Jurnal_cumparari_{TEST_YEAR}_{luna:02d}.xlsx")))
+            # Jurnalul fiecarui folder contine doar factura declarata pe codul lui.
+            assert len(df) == 1
+            assert (df["Referinta cod"] == "15-16").all()
+        # D390 doar in folderul codului intracomunitar (UE).
+        d390_names = [n for n in names if "D390_" in n]
+        assert len(d390_names) == 1
+        assert d390_names[0].endswith(".md")
+        # Fara XML-uri in zip.
+        assert not any(n.endswith(".xml") for n in names)
+
+    # Jurnalul de cumparari din Registre contine facturile cu taxare inversa.
+    nr_taxare = db.execute(
+        "SELECT COUNT(*) FROM cheltuieli_cheltuialamodel WHERE tip_achizitie IN (?, ?)",
+        (TIP_ACHIZITIE_UE, TIP_ACHIZITIE_NON_UE),
+    ).fetchone()[0]
+    page.goto(f"/registre/?anul={TEST_YEAR}")
+    page.get_by_role("button", name="Jurnal Cumparaturi").click()
+    jurnal_randuri = page.locator("div[x-show=\"active == 'jurnale'\"] tbody tr")
+    expect(jurnal_randuri.first).to_be_visible()
+    assert jurnal_randuri.count() == nr_taxare  # fara rand de total

@@ -138,7 +138,7 @@
             <button @click="active = 'ref'" :class="active == 'ref' ? '': 'outline'">Registru fiscal</button>
             <button @click="active = 'rjip'" :class="active == 'rjip' ? '': 'outline'">Registru jurnal</button>
             <button @click="active = 'rinv'" :class="active == 'rinv' ? '': 'outline'">Registru inventar</button>
-            <button @click="active = 'jurnale'" :class="active == 'jurnale' ? '': 'outline'">Jurnale</button>
+            <button @click="active = 'jurnale'" :class="active == 'jurnale' ? '': 'outline'">Jurnal Cumparaturi</button>
         </div>
     </div>
 
@@ -300,10 +300,6 @@
 
     <div x-show="active == 'jurnale'" class="mt-2 mb-6">
 
-        <hgroup class="container">
-            <h3>🛒 Jurnal de cumpărări (TVA)</h3>
-        </hgroup>
-
         {% if rjc %}
         <div class="overflow-auto">
 
@@ -356,17 +352,6 @@
                     <td>{{ item.cod_referinta }}</td>
                 </tr>
                 {% endfor %}
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td class="pico-background-grey"><strong>Total</strong></td>
-                    <td class="pico-background-grey"><strong>{{ rjc.total_document }}</strong></td>
-                    <td class="pico-background-grey"><strong>{{ rjc.total_baza }}</strong></td>
-                    <td class="pico-background-grey"><strong>{{ rjc.total_tva }}</strong></td>
-                    <td></td>
-                </tr>
             </tbody>
         </table>
         </div>
