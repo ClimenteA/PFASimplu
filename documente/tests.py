@@ -398,6 +398,12 @@ class GenerareDocumenteTests(TestCase):
         # Instructiunea de plata la trezorerie
         self.assertIn("RO41TREZ40620A100101XTVA", md)
         self.assertIn("20A100101", md)
+        # Cum se depune: cont SPV pe codul intracomunitar, e-guvernare + certificat
+        self.assertIn("cont SPV", md)
+        self.assertIn("https://www.e-guvernare.ro/", md)
+        self.assertIn("DEPUNERE DECLARATII ANAF", md)
+        self.assertIn("https://decl.anaf.mfinante.gov.ro/my.policy", md)
+        self.assertIn("Authentificare cu certificat", md)
 
     def test_d301_md_non_ue_pe_cif(self, _mock):
         from utils.tva_documente import genereaza_d301_md
