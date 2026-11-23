@@ -1,9 +1,10 @@
-# Aplicatia PFASimplu (mod multi-user) pentru VPS.
-# Proxy-ul TLS (Caddy) ruleaza separat - vezi docker-compose.caddy.yml.
+# Aplicatia PFASimplu (mod multi-user) + proxy-ul TLS (Caddy) pentru VPS.
 #
-#   docker network create web          # o singura data pe VPS
 #   cp .env.prod.example .env.prod     # si completeaza valorile
 #   docker compose up -d --build
+#
+# Caddyfile-ul se monteaza din folderul curent; domeniul se seteaza
+# in .env.prod (PFASIMPLU_DOMAIN) sau direct in Caddyfile.
 
 services:
   pfasimplu-app:
@@ -18,9 +19,20 @@ services:
       - ./data/dbsqlite:/data/dbsqlite
       - ./data/media:/data/media
       - ./staticfiles:/app/staticfiles
-    networks:
-      - web
 
-networks:
-  web:
-    external: true
+  external-caddy-proxy:
+    container_name: external-caddy-proxy
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./staticfiles:/webapp/staticfiles:ro
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  caddy_data:
+  caddy_config:

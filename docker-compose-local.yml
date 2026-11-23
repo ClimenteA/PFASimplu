@@ -1,0 +1,28 @@
+# Varianta dockerizata pentru uz local, mereu pornita.
+#
+#   docker compose -f docker-compose-local.yml up -d --build
+#
+# Aplicatia e accesibila la http://localhost:8996 (port configurabil prin
+# variabila de mediu PFASIMPLU_PORT, ex: PFASIMPLU_PORT=9000 docker compose ...).
+#
+# "restart: unless-stopped" + serviciul Docker pornit la boot => aplicatia
+# revine singura dupa restartul calculatorului (mai putin daca a fost oprita
+# manual inainte).
+
+services:
+  pfasimplu-local:
+    container_name: pfasimplu-local
+    build: .
+    restart: unless-stopped
+    ports:
+      - "${PFASIMPLU_PORT:-8996}:8000"
+    environment:
+      PFASIMPLU_MULTI_USER: ${PFASIMPLU_MULTI_USER:-1}
+      PFASIMPLU_DEBUG: "0"
+      PFASIMPLU_SECRET_KEY: ${PFASIMPLU_SECRET_KEY:-local-dev-secret-key-not-for-production}
+      PFASIMPLU_ALLOWED_HOSTS: localhost,127.0.0.1
+      PFASIMPLU_CSRF_TRUSTED_ORIGINS: http://localhost:${PFASIMPLU_PORT:-8996},http://127.0.0.1:${PFASIMPLU_PORT:-8996}
+    volumes:
+      - ./data/dbsqlite:/data/dbsqlite
+      - ./data/media:/data/media
+      - ./staticfiles:/app/staticfiles

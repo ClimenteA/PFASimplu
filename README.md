@@ -101,19 +101,13 @@ Pe VPS (cu Docker si Docker Compose instalate):
 ```bash
 git clone https://github.com/ClimenteA/PFASimplu && cd PFASimplu
 
-# reteaua comuna pentru proxy + aplicatii (o singura data)
-docker network create web
-
 # configurarea aplicatiei
 cp .env.prod.example .env.prod
 # editeaza .env.prod: PFASIMPLU_SECRET_KEY (aleator, lung),
 # PFASIMPLU_ALLOWED_HOSTS si PFASIMPLU_CSRF_TRUSTED_ORIGINS cu domeniul tau
 
-# proxy-ul TLS (Caddy) - o singura data pe VPS; pune domeniul tau in Caddyfile
-docker compose -f docker-compose.caddy.yml up -d
-
-# aplicatia
-docker compose up -d --build
+# aplicatia + proxy-ul TLS (Caddy); pune domeniul tau in Caddyfile
+docker compose up -d --build   # sau: make start
 ```
 
 - Baza de date SQLite si fisierele urcate raman pe gazda in `./data/`
@@ -127,6 +121,17 @@ docker compose up -d --build
 - Pentru test local fara domeniu/TLS: in Caddyfile inlocuieste domeniul cu `:80`
   si in `.env.prod` pune `PFASIMPLU_ALLOWED_HOSTS=localhost` si
   `PFASIMPLU_CSRF_TRUSTED_ORIGINS=http://localhost`.
+
+Pentru a rula varianta dockerizata local, mereu pornita (fara Caddy/TLS):
+
+```bash
+docker compose -f docker-compose-local.yml up -d --build   # sau: make start-local
+```
+
+Aplicatia e accesibila la `http://localhost:8996`. Portul se schimba prin
+`PFASIMPLU_PORT` (ex. `PFASIMPLU_PORT=9000 docker compose -f docker-compose-local.yml up -d`).
+Cu `restart: unless-stopped` si serviciul Docker pornit la boot, aplicatia revine
+singura dupa restartul calculatorului (mai putin daca a fost oprita manual).
 
 Pentru a rula modul multi-user si fara Docker (ex. pentru teste):
 
