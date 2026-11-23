@@ -455,4 +455,4 @@ Dupa rulare, baza de date de test ramane in `tests/.runtime/` pentru inspectie m
 
 **Aplicatia este oferita ca atare, nu are nici o garantie asociata**. Nu imi asumam raspunderea pentru eventuale erori in procesare date contabilitate, daune provocate dispozitivelor etc. Testeaza aplicatia inainte si vezi daca raspunde nevoilor tale inainte de o adauga in rutina de lucru.
 
-Daca gasesti erori in aplicatie poti deschide un [`New issue`](https://github.com/ClimenteA/PFASimplu/issues/new) in tabul `Issues` din acesta pagina sau poti [posta pe reddit](https://www.reddit.com/r/PFASimplu/submit/?type=TEXT) in subredditul [PFASimplu](https://www.reddit.com/r/PFASimplu/).
+Daca gasesti erori in aplicatie poti deschide un [`New issue`](https://github.com/ClimenteA/PFASimplu/issues/new) in tabul `Issues` din acesta pagina.
