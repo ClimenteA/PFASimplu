@@ -34,6 +34,7 @@ from helpers import (
     TIP_ACHIZITIE_NON_UE,
     TIP_ACHIZITIE_UE,
     adauga_cheltuiala,
+    assert_saved,
     cell_float,
     completare_setari,
     emite_factura,
@@ -566,3 +567,106 @@ def test_07_declaratii_tva_din_cheltuieli(page, db):
     jurnal_randuri = page.locator("div[x-show=\"active == 'jurnale'\"] tbody tr")
     expect(jurnal_randuri.first).to_be_visible()
     assert jurnal_randuri.count() == nr_taxare  # fara rand de total
+
+
+def test_08_export_date_pe_an(page, db):
+    """Exportul din Setari pe anul selectat: zip cu documente/, cheltuieli/,
+    incasari/, registrele xlsx, fisele mijloacelor fixe si SUMAR.html."""
+    import io
+    import tempfile
+    from zipfile import ZipFile
+
+    import pandas as pd
+
+    # Un document urcat in pagina Documente pentru anul testat.
+    page.goto("/documente/")
+    page.select_option("#id_tip_document", "Document util")
+    page.fill("#id_document_pentru_anul", str(TEST_YEAR))
+    page.fill("#id_mentiuni", "Document pentru testul de export")
+    page.set_input_files("#id_fisier", pdf_justificativ("document_export"))
+    page.get_by_role("button", name="Adauga document").click()
+    assert_saved(page)
+
+    nr_incasari = db.execute(
+        "SELECT COUNT(*) FROM incasari_incasarimodel WHERE data_inserarii LIKE ?",
+        (f"{TEST_YEAR}%",),
+    ).fetchone()[0]
+    nr_cheltuieli = db.execute(
+        "SELECT COUNT(*) FROM cheltuieli_cheltuialamodel WHERE data_inserarii LIKE ?",
+        (f"{TEST_YEAR}%",),
+    ).fetchone()[0]
+    nr_mijloace_fixe = db.execute(
+        "SELECT COUNT(*) FROM cheltuieli_cheltuialamodel WHERE mijloc_fix = 1 AND scos_din_uz = 0"
+    ).fetchone()[0]
+
+    page.goto("/setari/")
+    expect(page.locator("#anul-export")).to_have_value(str(TEST_YEAR))
+
+    with page.expect_download() as download_info:
+        page.get_by_role("button", name="Exporta datele din aplicatie").click()
+    download = download_info.value
+    assert download.suggested_filename == f"export_date_{TEST_YEAR}.zip"
+
+    zip_path = Path(tempfile.mkdtemp()) / download.suggested_filename
+    download.save_as(zip_path)
+    with ZipFile(zip_path) as zf:
+        names = zf.namelist()
+
+        # Documentele justificative, grupate pe foldere.
+        assert sum(n.startswith("documente/") for n in names) >= 1
+        assert sum(n.startswith("cheltuieli/") for n in names) == nr_cheltuieli
+        assert sum(n.startswith("incasari/") for n in names) >= nr_incasari
+
+        # Registrele anului, in format xlsx, in root.
+        for registru in ("Registru_Jurnal", "Registru_Fiscal", "Registru_Inventar"):
+            assert f"{registru}_{TEST_YEAR}.xlsx" in names
+        assert f"Jurnal_Cumparaturi_{TEST_YEAR}.xlsx" in names
+
+        df_jurnal = pd.read_excel(io.BytesIO(zf.read(f"Registru_Jurnal_{TEST_YEAR}.xlsx")))
+        assert "Incasari Banca" in df_jurnal.columns
+        assert "Plati Banca" in df_jurnal.columns
+
+        df_cumparari = pd.read_excel(io.BytesIO(zf.read(f"Jurnal_Cumparaturi_{TEST_YEAR}.xlsx")))
+        nr_taxare = db.execute(
+            "SELECT COUNT(*) FROM cheltuieli_cheltuialamodel WHERE tip_achizitie IN (?, ?)",
+            (TIP_ACHIZITIE_UE, TIP_ACHIZITIE_NON_UE),
+        ).fetchone()[0]
+        assert len(df_cumparari) == nr_taxare
+
+        # Coloana cu numele fisierului justificativ, per rand; fisierele
+        # listate se regasesc in folderul cheltuieli/ din zip.
+        assert "Document justificativ (fisier)" in df_cumparari.columns
+        fisiere_justificative = df_cumparari["Document justificativ (fisier)"].tolist()
+        assert all(fisiere_justificative)
+        for nume_fisier in fisiere_justificative:
+            assert f"cheltuieli/{nume_fisier}" in names
+
+        # Fisele mijloacelor fixe (PDF), cate una per mijloc fix activ.
+        fise = [n for n in names if n.startswith("fise_mijloace_fixe/")]
+        assert len(fise) == nr_mijloace_fixe
+        assert all(n.endswith(".pdf") for n in fise)
+
+        # SUMAR.html cu metricile anului (pagina standalone, stil PicoCSS inline).
+        assert "SUMAR.html" in names
+        sumar = zf.read("SUMAR.html").decode("utf-8")
+        assert f"SUMAR {TEST_YEAR}" in sumar
+        assert "cdn.jsdelivr.net/npm/@picocss/pico@2" in sumar  # PicoCSS de pe CDN
+        assert "Total incasari (brut)" in sumar
+        assert "Total taxe si impozite estimate" in sumar
+        assert "Numar incasari inregistrate" in sumar and str(nr_incasari) in sumar
+        assert "Numar cheltuieli inregistrate" in sumar and str(nr_cheltuieli) in sumar
+        assert "Cea mai mare incasare" in sumar
+        assert "Cea mai mare cheltuiala" in sumar
+        assert "Venit net mediu pe luna (dupa taxe)" in sumar
+        assert "Taxe si impozite medii pe luna" in sumar
+
+        # Tabel de amortizare per mijloc fix (An, Luna, Suma), pana la
+        # amortizarea completa (mijloacele din scenariu se amortizeaza 3-10 ani).
+        assert "Amortizari mijloace fixe" in sumar
+        assert "Tabel Amortizare" in sumar
+        assert "Suma (RON)" in sumar
+        nr_mf_active = db.execute(
+            "SELECT COUNT(*) FROM cheltuieli_cheltuialamodel WHERE mijloc_fix = 1 AND scos_din_uz = 0"
+        ).fetchone()[0]
+        assert sumar.count("Tabel Amortizare") == nr_mf_active
+

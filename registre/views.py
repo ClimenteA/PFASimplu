@@ -32,6 +32,72 @@ matplotlib.use("SVG")
 import matplotlib.pyplot as plt
 
 
+def registru_jurnal_dataframe(data):
+    """DataFrame-ul Registrului Jurnal (incasari si plati), cu antetul afisat."""
+    df = pd.DataFrame(data)
+    df = df.drop(columns=["end_of_month", "documentId"])
+    return df.rename(
+        columns={
+            "nr_crt": "Nr.Crt.",
+            "data": "Data",
+            "documentul": "Documentul (fel, numar)",
+            "felul_operatiunii": "Felul operatiunii (explicatii)",
+            "incasari_numerar": "Incasari Numerar",
+            "incasari_banca": "Incasari Banca",
+            "plati_numerar": "Plati Numerar",
+            "plati_banca": "Plati Banca",
+        }
+    )
+
+
+def registru_fiscal_dataframe(data):
+    """DataFrame-ul Registrului de evidenta fiscala, cu antetul afisat."""
+    df = pd.DataFrame(data)
+    return df.rename(
+        columns={
+            "nr_crt": "Nr.Crt.",
+            "elemente_de_calcul": "Elemente de calcul pentru stabilirea venitului net annual/pierderii nete anuale",
+            "valoare": "Valoare",
+            "anul": "Anul",
+        }
+    )
+
+
+def registru_inventar_dataframe(data):
+    """DataFrame-ul Registrului-inventar, cu antetul afisat.
+    `data` vine din get_registru_inventar(dbid=True)."""
+    df = pd.DataFrame(data)
+    df = df.drop(columns=["mijloc_fix", "db_id"])
+    return df.rename(
+        columns={
+            "nr_crt": "Nr.Crt.",
+            "nume_cheltuiala": "Denumirea elementelor inventariate",
+            "deducere_in_ron": "Valoare inventar",
+            "data_inserarii": "Data",
+            "fisier": "Document",
+        }
+    )
+
+
+def jurnal_cumparari_dataframe(jurnal):
+    """DataFrame-ul Jurnalului pentru cumparari (taxare inversa), cu antetul afisat."""
+    df = pd.DataFrame(jurnal["randuri"])
+    return df.rename(
+        columns={
+            "nr_crt": "Nr.Crt.",
+            "data_doc": "Document Data",
+            "nr_doc": "Document Numar",
+            "furnizor_denumire": "Furnizor Denumire",
+            "furnizor_cod_fiscal": "Furnizor Cod Fiscal",
+            "total_document": "Total document (inclusiv TVA)",
+            "baza": "Baza impozitare",
+            "tva": "Valoare T.V.A.",
+            "cod_referinta": "Referinta cod",
+            "fisier": "Document justificativ (fisier)",
+        }
+    )
+
+
 class RegistruJurnalDescarcaView(View):
 
     def get(self, request):
@@ -71,20 +137,7 @@ class RegistruJurnalDescarcaView(View):
             )
             rjip_files.append(fp)
 
-        df = pd.DataFrame(data)
-        df = df.drop(columns=["end_of_month", "documentId"])
-        df = df.rename(
-            columns={
-                "nr_crt": "Nr.Crt.",
-                "data": "Data",
-                "documentul": "Documentul (fel, numar)",
-                "felul_operatiunii": "Felul operatiunii (explicatii)",
-                "incasari_numerar": "Incasari Numerar",
-                "incasari_banca": "Incasari Banca",
-                "plati_numerar": "Plati Numerar",
-                "plati_banca": "Plati Banca",
-            }
-        )
+        df = registru_jurnal_dataframe(data)
 
         extracts_path = get_extracts_path()
 
@@ -127,16 +180,7 @@ class RegistruFiscalDescarcaView(View):
             overview_data["total_incasari_net"],
             overview_data["total_cheltuieli"],
         )
-        df = pd.DataFrame(data)
-
-        df = df.rename(
-            columns={
-                "nr_crt": "Nr.Crt.",
-                "elemente_de_calcul": "Elemente de calcul pentru stabilirea venitului net annual/pierderii nete anuale",
-                "valoare": "Valoare",
-                "anul": "Anul",
-            }
-        )
+        df = registru_fiscal_dataframe(data)
 
         return download_csv_or_xlsx(request, df, "registrul_de_evidenta_fiscala")
 
@@ -166,17 +210,7 @@ class RegistruInventarDescarcaView(View):
             fp = shutil.copy2(sfp, os.path.join(ri_files_path, os.path.basename(sfp)))
             ri_files.append(fp)
 
-        df = pd.DataFrame(data)
-        df = df.drop(columns=["mijloc_fix", "db_id"])
-        df = df.rename(
-            columns={
-                "nr_crt": "Nr.Crt.",
-                "nume_cheltuiala": "Denumirea elementelor inventariate",
-                "deducere_in_ron": "Valoare inventar",
-                "data_inserarii": "Data",
-                "fisier": "Document",
-            }
-        )
+        df = registru_inventar_dataframe(data)
 
         extracts_path = get_extracts_path()
 
@@ -233,19 +267,7 @@ class RegistruJurnalCumparariDescarcaView(View):
             genereaza_jurnal_cumparari_pdf(jurnal, setari, fp)
             content_type = "application/pdf"
         else:
-            df = pd.DataFrame(jurnal["randuri"]).rename(
-                columns={
-                    "nr_crt": "Nr.Crt.",
-                    "data_doc": "Document Data",
-                    "nr_doc": "Document Numar",
-                    "furnizor_denumire": "Furnizor Denumire",
-                    "furnizor_cod_fiscal": "Furnizor Cod Fiscal",
-                    "total_document": "Total document (inclusiv TVA)",
-                    "baza": "Baza impozitare",
-                    "tva": "Valoare T.V.A.",
-                    "cod_referinta": "Referinta cod",
-                }
-            )
+            df = jurnal_cumparari_dataframe(jurnal)
             if filetype == "xlsx":
                 fp = os.path.join(extracts_path, f"jurnal_cumparari_{perioada}.xlsx")
                 df.to_excel(fp, index=False)
@@ -612,10 +634,13 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
 
 
 def get_registru_de_evidenta_fiscala(
-    request, total_incasari_brut, total_incasari_net, total_cheltuieli
+    request, total_incasari_brut, total_incasari_net, total_cheltuieli, anul=None
 ):
-    anul = request.GET.get("anul")
-    anul = int(anul) if anul else timezone.now().year
+    # `anul` poate fi dat explicit (ex. exportul pe an din Setari);
+    # altfel se ia din query params, cu fallback pe anul curent.
+    if anul is None:
+        anul = request.GET.get("anul")
+        anul = int(anul) if anul else timezone.now().year
 
     incasari_pe_surse_de_venit = get_incasari_pe_surse(anul)
     cheltuieli_pe_deductibilitate = get_cheltuieli_pe_deductibilitate(anul)
@@ -706,8 +731,10 @@ def incasari_cheltuieli_dupa_anul_inserarii(anul: int):
     return incasari, cheltuieli
 
 
-def get_registru_jurnal_incasari_si_plati(request, incasari=None, cheltuieli=None):
-    anul = get_year_from_request(request)
+def get_registru_jurnal_incasari_si_plati(request, incasari=None, cheltuieli=None, anul=None):
+    # `anul` poate fi dat explicit (ex. exportul pe an din Setari).
+    if anul is None:
+        anul = get_year_from_request(request)
 
     if incasari is None and cheltuieli is None:
         incasari, cheltuieli = incasari_cheltuieli_dupa_anul_inserarii(anul)

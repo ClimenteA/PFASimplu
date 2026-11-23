@@ -87,11 +87,17 @@ Pe windows comenzile make for avea prefixul `.\makefile.bat X` - unde X poate fi
 ## Setari 
 
 In pagina `Setari` trebuie sa adaugi datele pfa-ului tau.
-Poti importa datele din versiunea 1 sau versiunea 2. 
-Poti sterge toate datele. 
+Poti sterge toate datele.
 Aceasta pagina trebuie completata la prima deschidere a aplicatiei.
 Cam rar vei schimba datele din aceasta pagina.
 Poti adauga mai multe conturi IBAN (RON, EUR, USD etc.), cate unul pentru fiecare moneda. La emiterea unei facturi se foloseste automat contul IBAN in moneda facturii, iar daca nu exista un cont in acea moneda, se foloseste contul de RON.
+
+Cu butonul `Exporta datele din aplicatie` descarci un zip cu datele pentru **anul selectat** (ca sa nu se blocheze aplicatia procesand toti anii odata). Zip-ul contine:
+- `documente/`, `cheltuieli/`, `incasari/` - documentele justificative urcate in aplicatie pentru anul selectat;
+- registrele anului in format `.xlsx`: Registrul Jurnal, Registrul Inventar, Registrul Fiscal si Jurnalul de cumparari;
+- `fise_mijloace_fixe/` - fisele mijloacelor fixe (PDF);
+- `SUMAR.html` - metricile anului, in acelasi stil ca aplicatia (se deschide in orice browser): total incasari/cheltuieli, venit net, taxe si impozite de platit (CAS, CASS, impozit), medii lunare, cea mai mare incasare/cheltuiala, incasari pe surse, cheltuieli pe deductibilitate si tabelele de amortizare per mijloc fix pana la amortizarea completa.
+
 
 Daca ai **cod special de TVA intracomunitar (art. 317 Cod fiscal)** si cumperi servicii din UE/non-UE (ex. Google, Cloudflare, OpenAI), deschide sectiunea `TVA intracomunitar (D301/D390)` si completeaza:
 - **Cod TVA intracomunitar** - codul special din certificatul de inregistrare in scopuri de TVA, fara prefixul RO. Este diferit de CIF-ul normal al PFA-ului: pentru facturi din UE se foloseste codul special, pentru non-UE codul normal (aplicatia alege automat codul corect);

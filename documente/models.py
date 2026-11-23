@@ -136,7 +136,12 @@ class DocumenteModel(models.Model):
             if self.fisier.path.endswith(".pdf"):
                 # Recipisele D301/D390 se detecteaza automat din text
                 # (tip declaratie, perioada, CIF, index incarcare).
-                recipisa = recipisa_parser(self.fisier.path)
+                # Parsarea e best-effort: unele PDF-uri (scanate, generate
+                # minimal etc.) nu pot fi citite - documentul se salveaza oricum.
+                try:
+                    recipisa = recipisa_parser(self.fisier.path)
+                except Exception:
+                    recipisa = None
                 if recipisa:
                     self.tip_document = recipisa["tip_document"]
                     if not self.document_pentru_anul:
@@ -153,7 +158,10 @@ class DocumenteModel(models.Model):
                 TipDocument.DECLARATIE_UNICA_212_DOVADA_INCARCARE.value,
                 TipDocument.DOVADA_PLATA_TAXE_SI_IMPOZITE.value,
             ]:
-                data = pdf_parser(self.fisier.path)
+                try:
+                    data = pdf_parser(self.fisier.path)
+                except Exception:
+                    data = None
                 if data:
                     if not self.tip_document:
                         self.tip_document = data["tip_document"]

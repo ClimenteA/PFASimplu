@@ -270,14 +270,14 @@ class CheltuialaModel(CommonIncasariCheltuieliModel):
 
         return list(sume_cheltuieli_pe_luni.values())
 
-    def luni_amortizare_in_an(self, year: int) -> int:
-        """Cate luni de amortizare intra in anul dat: lunile dintre data inceperii
-        amortizarii si data amortizarii complete, iar pentru anul curent doar pana
-        in luna de azi inclusiv."""
+    def luni_amortizare_active_in_an(self, year: int) -> list[int]:
+        """Lunile (1-12) cu amortizare activa in anul dat: lunile dintre data
+        inceperii amortizarii si data amortizarii complete, iar pentru anul
+        curent doar pana in luna de azi inclusiv."""
         if not self.data_inceperii_amortizarii or not self.data_amortizarii_complete:
-            return 0
+            return []
         today = timezone.now().date()
-        months = 0
+        months = []
         for month in range(1, 13):
             month_date = datetime.date(year, month, 1)
             if month_date < self.data_inceperii_amortizarii.replace(day=1):
@@ -288,8 +288,12 @@ class CheltuialaModel(CommonIncasariCheltuieliModel):
                 continue
             if year == today.year and month > today.month:
                 continue
-            months += 1
+            months.append(month)
         return months
+
+    def luni_amortizare_in_an(self, year: int) -> int:
+        """Cate luni de amortizare intra in anul dat."""
+        return len(self.luni_amortizare_active_in_an(year))
 
     @staticmethod
     def get_total_cheltuieli(year: int):

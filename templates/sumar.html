@@ -1,0 +1,291 @@
+{% load static %}<!DOCTYPE html>
+<html lang="ro" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.jade.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.colors.min.css">
+    <style>
+        /* Fontul Poppins (Google Fonts, remote) + cateva utilitare din
+           styles.css al aplicatiei, ca pagina sa arate la fel. */
+        :root {
+            --pico-font-family-sans-serif: "Poppins", system-ui, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+        }
+        .title-description { text-align: left; margin-top: 2rem; }
+        .title-description > p { font-size: 14px; margin-top: 0.5rem; }
+        .mt-2 { margin-top: 2rem; }
+        .mt-4 { margin-top: 4rem; }
+        .mb-6 { margin-bottom: 6rem; }
+        .text-center { text-align: center; }
+    </style>
+    <title>SUMAR {{ anul }} - PFASimplu</title>
+</head>
+
+<body class="container-fluid">
+    <nav style="border-bottom: 1px solid #696868; padding-left: 1rem; padding-right: 1rem;">
+        <ul>
+            <li><strong>PFASimplu</strong></li>
+        </ul>
+        <ul>
+            <li>SUMAR {{ anul }}</li>
+        </ul>
+    </nav>
+
+    <main class="container-fluid">
+
+        <hgroup class="title-description container">
+            <h1>📊 SUMAR {{ anul }}</h1>
+            <p>
+                Export generat la {{ generat_la }} pentru anul {{ anul }}.
+                Toate sumele sunt in RON.
+            </p>
+        </hgroup>
+
+        <div class="container mt-2">
+            <div class="grid">
+                <article class="text-center pico-background-cyan-900">
+                    <strong class="pico-color-zinc-450">Total incasari brut</strong>
+                    <h3 class="pico-color-zinc-50">💰 {{ total_incasari_brut }}</h3>
+                </article>
+                <article class="text-center pico-background-cyan-900">
+                    <strong class="pico-color-zinc-450">Total cheltuieli</strong>
+                    <h3 class="pico-color-zinc-50">💸 {{ total_cheltuieli }}</h3>
+                </article>
+                <article class="text-center pico-background-cyan-900">
+                    <strong class="pico-color-zinc-450">Venit net (inainte de taxe)</strong>
+                    <h3 class="pico-color-zinc-50">💵 {{ total_incasari_net }}</h3>
+                </article>
+                <article class="text-center pico-background-cyan-900">
+                    <strong class="pico-color-zinc-450">Venit net dupa taxe</strong>
+                    <h3 class="pico-color-zinc-50">🫰 {{ venit_net_dupa_taxe }}</h3>
+                </article>
+            </div>
+
+            <div class="grid">
+                <article class="text-center pico-background-yellow-900">
+                    <strong class="pico-color-zinc-450">Total taxe/impozite</strong>
+                    <h3 class="pico-color-zinc-50">🏛️ {{ la_stat.total_taxe_impozite }}</h3>
+                </article>
+                <article class="text-center pico-background-yellow-900">
+                    <strong class="pico-color-zinc-450">Pensie (CAS)</strong>
+                    <h3 class="pico-color-zinc-50">🏡 {{ la_stat.cas_pensie }}</h3>
+                </article>
+                <article class="text-center pico-background-yellow-900">
+                    <strong class="pico-color-zinc-450">Sanatate (CASS)</strong>
+                    <h3 class="pico-color-zinc-50">🏥 {{ la_stat.cass_sanatate }}</h3>
+                </article>
+                <article class="text-center pico-background-yellow-900">
+                    <strong class="pico-color-zinc-450">Impozit pe venit</strong>
+                    <h3 class="pico-color-zinc-50">🏢 {{ la_stat.impozit_pe_venit }}</h3>
+                </article>
+            </div>
+        </div>
+
+        <div class="container mt-4">
+            <h2>Incasari si cheltuieli</h2>
+            <table class="striped">
+                <thead>
+                    <tr>
+                        <th>Indicator</th>
+                        <th>Valoare (RON)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rand in incasari_cheltuieli %}
+                    <tr>
+                        <td>{{ rand.0 }}</td>
+                        <td>{{ rand.1 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="container mt-4">
+            <h2>Medii lunare</h2>
+            <p>Calculate pe {{ luni }} luni{% if an_curent %} (anul curent, pana in luna de azi){% endif %}.</p>
+            <table class="striped">
+                <thead>
+                    <tr>
+                        <th>Indicator</th>
+                        <th>Valoare (RON)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rand in medii_lunare %}
+                    <tr>
+                        <td>{{ rand.0 }}</td>
+                        <td>{{ rand.1 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="container mt-4">
+            <h2>Taxe si impozite de platit</h2>
+            <table class="striped">
+                <thead>
+                    <tr>
+                        <th>Taxa</th>
+                        <th>Valoare (RON)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rand in taxe %}
+                    <tr>
+                        <td>{{ rand.0 }}</td>
+                        <td>{{ rand.1 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% if tva_autolichidata %}
+            <p><small>TVA-ul autolichidata se plateste separat, prin D301, la trezorerie.</small></p>
+            {% endif %}
+        </div>
+
+        <div class="container mt-4">
+            <h2>Cele mai mari tranzactii</h2>
+            <div class="grid">
+                <article>
+                    <strong>Cea mai mare incasare</strong>
+                    {% if cea_mai_mare_incasare %}
+                    <h3 class="pico-color-green-350">{{ cea_mai_mare_incasare.suma }} RON</h3>
+                    <p><small>{{ cea_mai_mare_incasare.data }} — {{ cea_mai_mare_incasare.detalii }}</small></p>
+                    {% else %}
+                    <p>-</p>
+                    {% endif %}
+                </article>
+                <article>
+                    <strong>Cea mai mare cheltuiala</strong>
+                    {% if cea_mai_mare_cheltuiala %}
+                    <h3 class="pico-color-amber-250">{{ cea_mai_mare_cheltuiala.suma }} RON</h3>
+                    <p><small>{{ cea_mai_mare_cheltuiala.data }} — {{ cea_mai_mare_cheltuiala.detalii }}</small></p>
+                    {% else %}
+                    <p>-</p>
+                    {% endif %}
+                </article>
+            </div>
+        </div>
+
+        {% if incasari_pe_surse %}
+        <div class="container mt-4">
+            <h2>Incasari pe surse de venit</h2>
+            <table class="striped">
+                <thead>
+                    <tr>
+                        <th>Sursa</th>
+                        <th>Valoare (RON)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in incasari_pe_surse %}
+                    <tr>
+                        <td>{{ item.nume }}</td>
+                        <td>{{ item.valoare }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        {% if cheltuieli_pe_deductibilitate %}
+        <div class="container mt-4">
+            <h2>Cheltuieli pe deductibilitate (sume deduse)</h2>
+            <table class="striped">
+                <thead>
+                    <tr>
+                        <th>Tip</th>
+                        <th>Valoare (RON)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in cheltuieli_pe_deductibilitate %}
+                    <tr>
+                        <td>{{ item.nume }}</td>
+                        <td>{{ item.valoare }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        <div class="container mt-4">
+            <h2>Pe luni</h2>
+            <table class="striped">
+                <thead>
+                    <tr>
+                        <th>Luna</th>
+                        <th>Incasari (RON)</th>
+                        <th>Cheltuieli deduse + amortizari (RON)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rand in pe_luni %}
+                    <tr>
+                        <td>{{ rand.luna }}</td>
+                        <td>{{ rand.incasari }}</td>
+                        <td>{{ rand.cheltuieli }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if amortizari %}
+        <div class="container mt-4 mb-6">
+            <h2>Amortizari mijloace fixe</h2>
+            <p>
+                Cat se poate deduce in fiecare luna, per mijloc fix, pana la amortizarea completa
+                (mijloacele scoase din uz nu sunt incluse). Lunile marcate cu * sunt viitoare (estimare).
+            </p>
+
+            {% for tabel in amortizari %}
+            <article class="mt-2">
+                <h3>Tabel Amortizare — {{ tabel.nume }}</h3>
+                <p>
+                    <small>
+                        Valoare: {{ tabel.valoare }} RON | Amortizare lunara: {{ tabel.amortizare_lunara }} RON |
+                        Perioada: {{ tabel.perioada }} ({{ tabel.ani }} ani)
+                    </small>
+                </p>
+                <figure>
+                    <table class="striped">
+                        <thead>
+                            <tr>
+                                <th>An</th>
+                                <th>Luna</th>
+                                <th>Suma (RON)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for rand in tabel.randuri %}
+                            <tr>
+                                <td>{{ rand.an }}</td>
+                                <td>{{ rand.luna }}</td>
+                                <td>{{ rand.suma }}{% if rand.estimat %} *{% endif %}</td>
+                            </tr>
+                            {% endfor %}
+                            <tr>
+                                <td colspan="2"><strong>TOTAL</strong></td>
+                                <td><strong>{{ tabel.total }}</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </figure>
+            </article>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+    </main>
+</body>
+
+</html>

@@ -346,6 +346,7 @@ def genereaza_jurnal_cumparari_xlsx(jurnal: dict, output_path: str):
             "baza": "Baza impozitare",
             "tva": "Valoare T.V.A.",
             "cod_referinta": "Referinta cod",
+            "fisier": "Document justificativ (fisier)",
         }
     )
     df.to_excel(output_path, index=False)

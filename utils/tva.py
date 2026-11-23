@@ -11,6 +11,7 @@ Reguli (conform ghidului din stocare/completare-declaratii-tva):
 """
 
 import datetime
+import os
 from decimal import Decimal, ROUND_HALF_UP
 
 from django.db.models import Q
@@ -239,6 +240,7 @@ def calculeaza_jurnal_cumparari(anul: int, luna: int | None = None) -> dict | No
                 "baza": round2(baza),
                 "tva": round2(tva),
                 "cod_referinta": COD_REFERINTA_JURNAL,
+                "fisier": os.path.basename(cheltuiala.fisier.path) if cheltuiala.fisier else "",
             }
         )
 

@@ -871,7 +871,7 @@ class JurnalCumparariRegistreTests(TestCase):
         self.setari = creeaza_setari()
 
     def test_descarca_jurnal_csv(self, _mock):
-        creeaza_cheltuiala_ue()
+        cheltuiala = creeaza_cheltuiala_ue()
         response = self.client.get(
             reverse("descarca-jurnal-cumparari"),
             {"filetype": "CSV", "anul": 2026, "luna": 10},
@@ -881,6 +881,9 @@ class JurnalCumparariRegistreTests(TestCase):
         self.assertIn("PBW-2026-003576", content)
         self.assertIn("15-16", content)
         self.assertIn("135.81", content)
+        # Coloana cu fisierul documentului justificativ, per rand.
+        self.assertIn("Document justificativ (fisier)", content)
+        self.assertIn(os.path.basename(cheltuiala.fisier.path), content)
 
     def test_descarca_jurnal_pdf(self, _mock):
         creeaza_cheltuiala_ue()

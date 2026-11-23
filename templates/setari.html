@@ -18,7 +18,10 @@
         Ai disponibile si 2 butoane sub formular pentru exportul si stergerea datelor.
 
         Butonul "Exporta datele din aplicatie" va crea un zip in folderul Descarcari (Downloads)
-        cu toate datele din aplicatie (csv-uri si documente justificative).
+        cu datele pentru anul selectat: documentele justificative (in folderele documente,
+        cheltuieli, incasari), registrele anului in format xlsx (Registrul Jurnal, Registrul
+        Inventar, Registrul Fiscal, Jurnalul de cumparari), fisele mijloacelor fixe si un
+        fisier SUMAR.html cu metricile anului (incasari, cheltuieli, taxe, medii lunare etc.).
 
         Butonul "Sterge toate datele" va sterge toate datele din aplicatie.
         <strong>Atentie!</strong> odata ce ai apasat pe butonul "Sterge toate datele"
@@ -300,17 +303,29 @@
     </form>
 </article>
 
-<div class="grid container" style="margin-top: 6rem;">
+<div class="container" style="margin-top: 6rem;">
 
     <form x-data="{downloading: false}" action="{% url 'download-data' %}" method="post">
         {% csrf_token %}
-        <button @click="downloading = true;"
-            x-text="downloading ? 'Vezi folderul descarcari': 'Exporta datele din aplicatie';" class="secondary"
-            type="submit">
-        </button>
+
+        <div class="grid">
+            <label for="anul-export">
+                Anul pentru export:
+                <select id="anul-export" name="anul" style="width: fit-content;">
+                    {% for an in ani_export %}
+                    <option value="{{ an }}" {% if an == anul_curent %} selected {% endif %}>{{ an }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <button @click="downloading = true;"
+                x-text="downloading ? 'Vezi folderul descarcari': 'Exporta datele din aplicatie';" class="secondary"
+                type="submit">
+            </button>
+        </div>
+        <small class="pico-color-slate-500">Zip-ul contine documentele, registrele (xlsx) si SUMAR.html pentru anul selectat.</small>
     </form>
 
-    <form x-data="{deleting: false}" action="{% url 'setari-drop-data' %}" method="post">
+    <form x-data="{deleting: false}" action="{% url 'setari-drop-data' %}" method="post" class="mt-4">
         {% csrf_token %}
         <button @click="deleting = true;" x-text="deleting ? 'Datele se sterg...': 'Sterge toate datele';"
             class="pico-background-red-550" type="submit">
