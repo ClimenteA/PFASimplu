@@ -28,6 +28,7 @@ from registre.views import (
     registru_jurnal_dataframe,
 )
 from utils.calcule import calculeaza_taxe_si_impozite
+from utils.github_data import get_latest_app_version
 from utils.localitati import lista_localitati
 from utils.mijloc_fix_pdf import create_fisa_mijloc_fix_pdf
 from utils.pretty_excel import make_excel_pretty
@@ -54,9 +55,21 @@ from core.settings import (
 lista_valute = [choice.value for choice in Valuta]
 
 
+def _este_versiune_mai_noua(remote: str, local: str) -> bool:
+    """Compara versiunile semver (ex. '2.0.7' vs '3.0.0') ca tuple de intregi,
+    ca '10.0.0' sa fie considerat mai nou decat '9.0.0'."""
+    if not remote or not local or remote == local:
+        return False
+    try:
+        return tuple(map(int, remote.split("."))) > tuple(map(int, local.split(".")))
+    except ValueError:
+        return False
+
+
 def get_setari_context(form):
     result = SetariModel.objects.first()
     localitate = form.initial.get("localitate") or (result.localitate if result else "")
+    latest_app_version = get_latest_app_version()
     return {
         "setari_form": form,
         "lista_localitati": lista_localitati,
@@ -66,6 +79,8 @@ def get_setari_context(form):
         "ani_export": get_ani_export(),
         "anul_curent": timezone.now().year,
         "app_version": APP_VERSION,
+        "latest_app_version": latest_app_version,
+        "update_available": _este_versiune_mai_noua(latest_app_version, APP_VERSION),
     }
 
 
@@ -172,7 +187,8 @@ class SetariViewDownloadData(View):
     - incasari/   -> documentele justificative ale incasarilor din anul selectat;
     - in root: registrele anului in format .xlsx (Registrul Jurnal, Registrul
       Inventar, Registrul Fiscal, Jurnalul de cumparari), fisele mijloacelor fixe
-      in folderul fise_mijloace_fixe/ si SUMAR.html cu metricile anului.
+      in folderul fise_mijloace_fixe/ si SUMAR.html cu metricile anului, inclusiv
+      ultima serie si numar de factura emisa.
 
     Exportul se face pe un singur an ca sa nu blocam aplicatia procesand
     toate datele dintr-o data.
@@ -340,6 +356,29 @@ class SetariViewDownloadData(View):
 
         total_neincasate = IncasariModel.get_total_neincasate(anul)
 
+        # Ultima factura emisa (serie + numar), atat in anul exportat cat si
+        # in aplicatie - informatia e utila in arhiva de sfarsit de an pentru
+        # a stii de unde se continua numerotarea.
+        def date_ultima_factura(factura):
+            if not factura:
+                return None
+            return {
+                "serie": factura.serie,
+                "numar": factura.numar,
+                "serie_numar": f"{factura.serie}-{factura.numar}",
+                "data_emitere": timezone.localdate(factura.data_emitere).isoformat(),
+                "total_de_plata": fmt(factura.total_de_plata),
+            }
+
+        ultima_factura_an = date_ultima_factura(
+            FacturaModel.objects.filter(
+                Q(data_emitere__year=anul) | Q(data_inserarii__year=anul)
+            ).order_by("-data_emitere", "-id").first()
+        )
+        ultima_factura = date_ultima_factura(
+            FacturaModel.objects.order_by("-data_emitere", "-id").first()
+        )
+
         # Pentru anul curent media se calculeaza pe lunile trecute, nu pe 12.
         today = timezone.now().date()
         luni = today.month if anul == today.year else 12
@@ -387,6 +426,8 @@ class SetariViewDownloadData(View):
             "total_incasari_net": fmt(total_incasari_net),
             "venit_net_dupa_taxe": fmt(venit_net_dupa_taxe),
             "la_stat": {k: fmt(v) for k, v in la_stat.items()},
+            "ultima_factura": ultima_factura,
+            "ultima_factura_an": ultima_factura_an,
             "incasari_cheltuieli": [
                 ("Total incasari (brut)", fmt(total_incasari_brut)),
                 ("Total cheltuieli deductibile (inclusiv amortizari)", fmt(total_cheltuieli)),

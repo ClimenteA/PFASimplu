@@ -352,12 +352,12 @@ class GenerareDocumenteTests(TestCase):
         self.assertIsNotNone(pachet)
         with ZipFile(pachet["zip_path"]) as zf:
             names = zf.namelist()
-        # Folder cu prefix VIES pentru codul TVA intracomunitar.
-        self.assertIn("VIES-52937756/D301_2026_10.md", names)
-        self.assertIn("VIES-52937756/D390_2026_10.md", names)
-        self.assertIn("VIES-52937756/Jurnal_cumparari_2026_10.xlsx", names)
+        # Folder cu prefix TVA pentru codul TVA intracomunitar.
+        self.assertIn("TVA-52937756/D301_2026_10.md", names)
+        self.assertIn("TVA-52937756/D390_2026_10.md", names)
+        self.assertIn("TVA-52937756/Jurnal_cumparari_2026_10.xlsx", names)
         # Factura furnizorului atasata cheltuielii, inclusa in folder.
-        self.assertIn("VIES-52937756/facturi/factura.pdf", names)
+        self.assertIn("TVA-52937756/facturi/factura.pdf", names)
         # Fara XML-uri si fara PDF-uri generate (doar factura atasata).
         self.assertFalse(any(n.endswith(".xml") for n in names))
 
@@ -373,7 +373,7 @@ class GenerareDocumenteTests(TestCase):
         pachet = genereaza_pachet_tva(2026, 10, self.setari)
         with ZipFile(pachet["zip_path"]) as zf:
             # Fiecare folder are jurnalul doar cu facturile declarate pe codul lui.
-            df_ue = pd.read_excel(io.BytesIO(zf.read("VIES-52937756/Jurnal_cumparari_2026_10.xlsx")))
+            df_ue = pd.read_excel(io.BytesIO(zf.read("TVA-52937756/Jurnal_cumparari_2026_10.xlsx")))
             df_non = pd.read_excel(io.BytesIO(zf.read("CIF-43000098/Jurnal_cumparari_2026_10.xlsx")))
         self.assertEqual(df_ue["Document Numar"].tolist(), ["PBW-2026-003576"])
         self.assertEqual(df_non["Document Numar"].tolist(), ["IN-79973856"])
@@ -454,9 +454,9 @@ class GenerareDocumenteTests(TestCase):
         pachet = genereaza_pachet_tva(2026, 9, self.setari)
         with ZipFile(pachet["zip_path"]) as zf:
             names = zf.namelist()
-        self.assertIn("VIES-52937756/D301_2026_09.md", names)
-        self.assertIn("VIES-52937756/D390_2026_09.md", names)
-        self.assertIn("VIES-52937756/Jurnal_cumparari_2026_09.xlsx", names)
+        self.assertIn("TVA-52937756/D301_2026_09.md", names)
+        self.assertIn("TVA-52937756/D390_2026_09.md", names)
+        self.assertIn("TVA-52937756/Jurnal_cumparari_2026_09.xlsx", names)
         self.assertIn("CIF-43000098/D301_2026_09.md", names)
         self.assertIn("CIF-43000098/Jurnal_cumparari_2026_09.xlsx", names)
         # D390 doar in folderul codului intracomunitar (UE).

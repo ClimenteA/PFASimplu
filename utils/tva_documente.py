@@ -297,7 +297,7 @@ def genereaza_pachet_tva(anul: int, luna: int, setari: SetariModel | None = None
     """Genereaza intr-un singur zip documentele lunii, grupate pe codul fiscal:
     cate un folder pentru fiecare cod pe care se depun declaratii, cu prefix
     dupa tipul codului:
-    - VIES-<cod> pentru codul special de TVA intracomunitar (facturile UE);
+    - TVA-<cod> pentru codul special de TVA intracomunitar (facturile UE);
     - CIF-<cod> pentru codul normal al PFA-ului (facturile non-UE).
     Fiecare folder contine:
     - D301 completat in Markdown (si D390 VIES, pentru codul cu facturi UE);
@@ -321,9 +321,9 @@ def genereaza_pachet_tva(anul: int, luna: int, setari: SetariModel | None = None
 
     for d301 in d301_lista:
         # Folder dedicat codului pe care se depune declaratia, cu prefix dupa tip:
-        # VIES = cod TVA intracomunitar (art. 317), CIF = codul normal al PFA-ului.
+        # TVA = cod TVA intracomunitar (art. 317), CIF = codul normal al PFA-ului.
         cod = d301["cif"]
-        nume_folder = f"{'VIES' if _este_cod_special(setari, cod) else 'CIF'}-{cod}"
+        nume_folder = f"{'TVA' if _este_cod_special(setari, cod) else 'CIF'}-{cod}"
         subfolder = os.path.join(folder, nume_folder)
         os.makedirs(subfolder, exist_ok=True)
 

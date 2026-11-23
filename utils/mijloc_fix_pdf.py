@@ -19,7 +19,9 @@ def create_fisa_mijloc_fix_pdf(db_id: int, nr_inventar: int, doar_pdf: bool = Fa
     fel_document = f"{fileid} {inv.nume_cheltuiala}"
 
     # Nume de fisier sigur pentru sistemul de fisiere (fara spatii/caractere
-    # speciale din numele cheltuielii), unic per mijloc fix.
+    # speciale din numele cheltuielii), unic per mijloc fix. Folosit si pentru
+    # zip: numele cheltuielii poate contine "/" (ex. "Laptop / birou"), care
+    # altfel ar fi interpretat ca separator de directoare la scrierea zip-ului.
     nume_sigur = re.sub(r"[^\w\-.]+", "_", inv.nume_cheltuiala).strip("_")[:80]
     nume_fisa = f"fisa_mijloc_fix_{fileid}_{nume_sigur}.pdf"
 
@@ -81,11 +83,14 @@ def create_fisa_mijloc_fix_pdf(db_id: int, nr_inventar: int, doar_pdf: bool = Fa
 
     extracts_folder = get_extracts_path()
 
+    # Documentul justificativ poate lipsi de pe disc (sters/mutat manual):
+    # in acel caz zip-ul contine doar fisa generata, in loc sa crape exportul.
     files = [save_pdf_path, inv.fisier.path]
-    zip_filepath = os.path.join(extracts_folder, f"{fel_document}.zip")
+    zip_filepath = os.path.join(extracts_folder, f"{fileid}_{nume_sigur}.zip")
     with ZipFile(zip_filepath, "w") as zipf:
         for file in files:
-            zipf.write(file, os.path.basename(file))
+            if os.path.exists(file):
+                zipf.write(file, os.path.basename(file))
 
     return zip_filepath
 

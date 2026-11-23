@@ -4,6 +4,9 @@
 dev:
 	uv run manage.py runserver 8990
 
+devdb:
+	PFASIMPLU_DB_PATH=tests/.runtime/test.db PFASIMPLU_MEDIA_ROOT=tests/.runtime/files uv run manage.py runserver 8990
+
 test-e2e:
 	uv run playwright install chromium
 	uv run pytest tests/ -v

@@ -1,8 +1,8 @@
+import json
 import os
 import itertools
 import pandas as pd
 from datetime import datetime, timedelta
-from zipfile import ZipFile
 from django.http import HttpResponse
 from django.core.paginator import Paginator
 from django.shortcuts import redirect, get_object_or_404
@@ -87,29 +87,21 @@ def get_page_items(request, theForm: ModelForm, theModel: Model, order_by: str =
     return form, page_items
 
 
-def download_csv_or_xlsx(request, df: pd.DataFrame, filename: str):
-    anul = request.GET.get("anul")
-    anul = int(anul) if anul else timezone.now().year
-    filetype = request.GET.get("filetype").lower()
+def download_dataframe(request, df: pd.DataFrame, filename: str):
+    """Scrie DataFrame-ul intr-un singur CSV sau XLSX (dupa ?filetype=) si il
+    trimite direct ca fisier, fara arhiva zip."""
+    filetype = (request.GET.get("filetype") or "").lower()
 
     if filetype not in ["csv", "xlsx"]:
         return redirect("/registre/")
 
     extracts_folder = get_extracts_path()
-
-    if filename == "registru_inventar":
-        filename = f"{filename}.{filetype}"
-    else:
-        filename = f"{anul}_{filename}.{filetype}"
-
-    filepath = os.path.join(extracts_folder, filename)
-
-    content_type = "application/octet-stream"
+    filepath = os.path.join(extracts_folder, f"{filename}.{filetype}")
 
     if filetype == "csv":
         content_type = "text/csv"
         df.to_csv(filepath, index=False)
-    if filetype == "xlsx":
+    else:
         content_type = (
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
@@ -123,58 +115,36 @@ def download_csv_or_xlsx(request, df: pd.DataFrame, filename: str):
     return response
 
 
+def download_csv_or_xlsx(request, df: pd.DataFrame, filename: str):
+    anul = request.GET.get("anul")
+    anul = int(anul) if anul else timezone.now().year
+
+    if filename != "registru_inventar":
+        filename = f"{anul}_{filename}"
+
+    return download_dataframe(request, df, filename)
 
 
-def download_zip(request, theModel: Model, order_by: str = "-data_inserarii"):
-    results = theModel.objects.all().order_by(order_by)
-    paginator = Paginator(results, 500_000)
-    filetype = request.GET.get("filetype").lower()
+def download_model_csv_or_xlsx(
+    request, theModel: Model, filename: str, order_by: str = "-data_inserarii"
+):
+    """Exporta toate inregistrarile modelului intr-un singur CSV/XLSX,
+    fara paginare si fara zip."""
+    filetype = (request.GET.get("filetype") or "").lower()
 
-    if filetype not in ["csv", "xlsx"]:        
+    if filetype not in ["csv", "xlsx"]:
         return redirect("/registre/")
 
-    page_number = 1
-    extracts_folder = get_extracts_path()
+    data = list(theModel.objects.all().order_by(order_by).values())
 
-    files = []
+    # openpyxl nu accepta datetime cu timezone sau liste/dict-uri direct in
+    # celule; le convertim la valori care pot fi scrise in Excel/CSV.
+    for item in data:
+        for key, value in item.items():
+            if isinstance(value, datetime) and value.tzinfo is not None:
+                item[key] = value.replace(tzinfo=None)
+            elif isinstance(value, (list, dict)):
+                item[key] = json.dumps(value, ensure_ascii=False)
 
-    while True:
-        page_items = paginator.get_page(page_number)
-        if not page_items:
-            break
-
-        # Convert datetime fields to be timezone-unaware
-        data = list(page_items.object_list.values())
-        for item in data:
-            for key, value in item.items():
-                if isinstance(value, datetime) and value.tzinfo is not None:
-                    item[key] = value.replace(tzinfo=None)
-
-        df = pd.DataFrame(data)
-        filename = os.path.join(extracts_folder, f"page_{page_number}.{filetype}")
-        
-        if filetype == "csv":
-            df.to_csv(filename, index=False)
-        if filetype == "xlsx":
-            df.to_excel(filename, index=False)
-            make_excel_pretty(filename)
-
-        files.append(filename)
-
-        if not page_items.has_next():
-            break
-
-        page_number += 1
-
-    zip_filename = os.path.join(extracts_folder, f"{theModel.__qualname__.replace('Model', '')}.zip")
-    with ZipFile(zip_filename, "w") as zipf:
-        for file in files:
-            zipf.write(file, os.path.basename(file))
-
-    response = HttpResponse(
-        open(zip_filename, "rb"), content_type="application/zip"
-    )
-    response["Content-Disposition"] = (
-        f"attachment; filename={os.path.basename(zip_filename)}"
-    )
-    return response
+    df = pd.DataFrame(data)
+    return download_dataframe(request, df, filename)

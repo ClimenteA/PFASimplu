@@ -1,8 +1,6 @@
 import itertools
 import os
-import shutil
 from copy import copy
-from zipfile import ZipFile
 
 import matplotlib
 import pandas as pd
@@ -19,11 +17,10 @@ from documente.models import DocumenteModel
 from incasari.models import IncasariModel, SursaVenit
 from setari.models import SetariModel
 from utils.calcule import calculeaza_taxe_si_impozite
-from utils.mijloc_fix_pdf import create_fisa_mijloc_fix_pdf
 from utils.pretty_excel import make_excel_pretty
 from utils.tva import calculeaza_jurnal_cumparari
 from utils.valuta import ron_to_eur
-from utils.views import download_csv_or_xlsx
+from utils.views import download_csv_or_xlsx, download_dataframe
 
 # prevent thread issue with flaskwebgui
 matplotlib.use("SVG")
@@ -100,7 +97,6 @@ def jurnal_cumparari_dataframe(jurnal):
 class RegistruJurnalDescarcaView(View):
 
     def get(self, request):
-        filetype = request.GET.get("filetype").lower()
         anul = get_year_from_request(request)
         incasari, cheltuieli = incasari_cheltuieli_dupa_anul_inserarii(anul)
         data = get_registru_jurnal_incasari_si_plati(request, incasari, cheltuieli)
@@ -108,65 +104,10 @@ class RegistruJurnalDescarcaView(View):
         if not data:
             return redirect("/registre/")
 
-        file_ids = list(
-            set([d["documentId"] for d in data if d["documentId"] is not None])
-        )
-
-        query = Q()
-        for file_id in file_ids:
-            query |= Q(fisier__startswith=file_id)
-
-        incasari_fisiere = incasari.filter(query)
-        cheltuieli_fisiere = cheltuieli.filter(query)
-
-        rjip_files_path = get_extracts_path("rjip")
-
-        rjip_files = []
-        for item in incasari_fisiere:
-            fp = shutil.copy2(
-                item.fisier.path,
-                os.path.join(rjip_files_path, os.path.basename(item.fisier.path)),
-            )
-            rjip_files.append(fp)
-
-        for item in cheltuieli_fisiere:
-            fp = shutil.copy2(
-                item.fisier.path,
-                os.path.join(rjip_files_path, os.path.basename(item.fisier.path)),
-            )
-            rjip_files.append(fp)
-
         df = registru_jurnal_dataframe(data)
-
-        extracts_path = get_extracts_path()
-
-        if filetype == "xlsx":
-            rjip_fp = os.path.join(
-                extracts_path, "registru_jurnal_incasari_si_plati.xlsx"
-            )
-            df.to_excel(rjip_fp, index=False)
-            make_excel_pretty(rjip_fp)
-        elif filetype == "csv":
-            rjip_fp = os.path.join(
-                extracts_path, "registru_jurnal_incasari_si_plati.csv"
-            )
-            df.to_csv(rjip_fp, index=False)
-        else:
-            return redirect("/registre/")
-
-        zip_filename = os.path.join(extracts_path, f"registru_jurnal_{anul}.zip")
-        with ZipFile(zip_filename, "w") as zipf:
-            for file in rjip_files:
-                zipf.write(file, os.path.join("documente", os.path.basename(file)))
-            zipf.write(rjip_fp, os.path.basename(rjip_fp))
-
-        response = HttpResponse(
-            open(zip_filename, "rb"), content_type="application/zip"
+        return download_dataframe(
+            request, df, "registru_jurnal_incasari_si_plati"
         )
-        response["Content-Disposition"] = (
-            f"attachment; filename={os.path.basename(zip_filename)}"
-        )
-        return response
 
 
 class RegistruFiscalDescarcaView(View):
@@ -187,55 +128,18 @@ class RegistruFiscalDescarcaView(View):
 class RegistruInventarDescarcaView(View):
 
     def get(self, request):
-        filetype = request.GET.get("filetype").lower()
         data = get_registru_inventar(dbid=True)
         if not data:
             messages.add_message(request, messages.ERROR, "Registrul-inventar este gol, nu exista nimic de exportat.", extra_tags="🟥 Eroare!")
             return redirect("/registre/")
 
-        src_filepaths = []
+        # Doar numele documentului ajunge in export; fisierele nu sunt citite
+        # sau copiate, deci documentele lipsa de pe disc nu blocheaza descarcarea.
         for item in data:
-            if item["mijloc_fix"]:
-                zip_filepath = create_fisa_mijloc_fix_pdf(item["db_id"], item["nr_crt"])
-                item["fisier"] = os.path.basename(zip_filepath)
-                src_filepaths.append(zip_filepath)
-            else:
-                src_filepaths.append(item["fisier"])
-                item["fisier"] = os.path.basename(item["fisier"])
-
-        ri_files_path = get_extracts_path("ri")
-        ri_files = []
-        for sfp in src_filepaths:
-            fp = shutil.copy2(sfp, os.path.join(ri_files_path, os.path.basename(sfp)))
-            ri_files.append(fp)
+            item["fisier"] = os.path.basename(item["fisier"])
 
         df = registru_inventar_dataframe(data)
-
-        extracts_path = get_extracts_path()
-
-        if filetype == "xlsx":
-            ri_fp = os.path.join(extracts_path, "registru_inventar.xlsx")
-            df.to_excel(ri_fp, index=False)
-            make_excel_pretty(ri_fp)
-        elif filetype == "csv":
-            ri_fp = os.path.join(extracts_path, "registru_inventar.csv")
-            df.to_csv(ri_fp, index=False)
-        else:
-            return redirect("/registre/")
-
-        zip_filename = os.path.join(extracts_path, "registru_inventar.zip")
-        with ZipFile(zip_filename, "w") as zipf:
-            for file in ri_files:
-                zipf.write(file, os.path.join("documente", os.path.basename(file)))
-            zipf.write(ri_fp, os.path.basename(ri_fp))
-
-        response = HttpResponse(
-            open(zip_filename, "rb"), content_type="application/zip"
-        )
-        response["Content-Disposition"] = (
-            f"attachment; filename={os.path.basename(zip_filename)}"
-        )
-        return response
+        return download_dataframe(request, df, "registru_inventar")
 
 
 class RegistruJurnalCumparariDescarcaView(View):

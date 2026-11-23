@@ -14,7 +14,11 @@ from utils.tva import (
     get_observatii_declaratie,
 )
 from utils.tva_documente import genereaza_pachet_tva
-from utils.views import get_page_items, download_zip, handle_delete_id_query_param
+from utils.views import (
+    get_page_items,
+    download_model_csv_or_xlsx,
+    handle_delete_id_query_param,
+)
 from .forms import CheltuieliForm
 from .models import CheltuialaModel, TipAchizitie
 
@@ -22,7 +26,7 @@ from .models import CheltuialaModel, TipAchizitie
 class CheltuieliDescarcareView(View):
 
     def get(self, request):
-        return download_zip(request, CheltuialaModel)
+        return download_model_csv_or_xlsx(request, CheltuialaModel, "cheltuieli")
 
 
 class CheltuieliTVADescarcaView(View):

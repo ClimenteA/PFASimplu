@@ -338,6 +338,11 @@
 {% if app_version %}
 <p class="pico-color-slate-500" style="text-align: center; margin-top: 3rem;">
     <small>PFASimplu V{{ app_version }}</small>
+    {% if latest_app_version %}
+    <small {% if update_available %}class="pico-background-yellow-900" style="padding: 0.1rem 0.5rem; border-radius: var(--pico-border-radius);" {% endif %}>
+        {% if update_available %}Versiune noua disponibila: {% endif %}V{{ latest_app_version }} (GitHub)
+    </small>
+    {% endif %}
 </p>
 {% endif %}
 

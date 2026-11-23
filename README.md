@@ -184,7 +184,7 @@ Oricand, dar musai inainte de a completa Declaratia Unica: cardurile cu totaluri
 **Ce face aplicatia in spate cu fisierele:**
 - fiecare fisier urcat sau generat (facturi PDF/XML, justificative, fise mijloc fix) e salvat in `media/` cu un prefix-id unic de 8 caractere (ex. `0x4rf2KW_factura_PFT-1.pdf`), ca sa nu existe coliziuni de nume; la re-incarcarea unui fisier deja prefixat, prefixul vechi e inlocuit;
 - in modul multi-user fisierele stau in `media/user_<id>/` si pot fi descarcate doar de proprietar;
-- zip-urile si exporturile generate (registre + documente, D301/D390, exportul pe an) se construiesc temporar in `media/extracts/` si se livreaza la download;
+- exporturile CSV/XLSX ale registrelor si zip-urile generate (D301/D390, exportul pe an) se construiesc temporar in `media/extracts/` si se livreaza la download;
 - la stergerea unei inregistrari din aplicatie, fisierul atasat ei este sters automat de pe disc (django-cleanup); `Sterge toate datele` din Setari sterge si baza de date si fisierele;
 - cursurile BNR se iau online prin `cursvalutarbnr` si se cache-uiesc local, deci anii trecuti functioneaza si offline.
 
@@ -201,7 +201,7 @@ Cu butonul `Exporta datele din aplicatie` descarci un zip cu datele pentru **anu
 - `documente/`, `cheltuieli/`, `incasari/` - documentele justificative urcate in aplicatie pentru anul selectat;
 - registrele anului in format `.xlsx`: Registrul Jurnal, Registrul Inventar, Registrul Fiscal si Jurnalul de cumparari;
 - `fise_mijloace_fixe/` - fisele mijloacelor fixe (PDF);
-- `SUMAR.html` - metricile anului, in acelasi stil ca aplicatia (se deschide in orice browser): total incasari/cheltuieli, venit net, taxe si impozite de platit (CAS, CASS, impozit), medii lunare, cea mai mare incasare/cheltuiala, incasari pe surse, cheltuieli pe deductibilitate si tabelele de amortizare per mijloc fix pana la amortizarea completa.
+- `SUMAR.html` - metricile anului, in acelasi stil ca aplicatia (se deschide in orice browser): total incasari/cheltuieli, venit net, taxe si impozite de platit (CAS, CASS, impozit), ultima serie si numar de factura emisa (in anul exportat si in aplicatie), medii lunare, cea mai mare incasare/cheltuiala, incasari pe surse, cheltuieli pe deductibilitate si tabelele de amortizare per mijloc fix pana la amortizarea completa.
 
 
 Daca ai **cod special de TVA intracomunitar (art. 317 Cod fiscal)** si cumperi servicii din UE/non-UE (ex. Google, Cloudflare, OpenAI), deschide sectiunea `TVA intracomunitar (D301/D390)` si completeaza:
@@ -319,7 +319,7 @@ Pentru PFA-urile cu **cod special de TVA intracomunitar (art. 317 Cod fiscal)** 
 1. **Adaugi cheltuielile** cu origine UE/non-UE (vezi [Cheltuieli](#cheltuieli)) - cursul BNR, baza si TVA-ul se calculeaza automat;
 2. **Filtrezi pe luna** - din selectorul „Cheltuieli externe (TVA)" de deasupra tabelului alegi luna de raportare (lunile cu facturi UE/non-UE, grupate dupa data facturii); tabelul arata doar facturile pentru care trebuie completate declaratiile;
 3. **Descarci** - un click pe butonul `Descarca` si primesti un zip cu declaratiile completate in **Markdown**, **grupate in cate un folder pentru fiecare cod fiscal**, cu prefix dupa tipul codului:
-   - **`VIES-<cod>`** (codul special de TVA intracomunitar, art. 317): **D301** (sectiunile 4 + 4.1) + **D390 VIES** (tip S, cod operator fara prefixul tarii, baza rotunjita la intreg) + jurnalul de cumparari in **Excel** doar cu facturile UE + **facturile furnizorilor** (subfolder `facturi/`);
+   - **`TVA-<cod>`** (codul special de TVA intracomunitar, art. 317): **D301** (sectiunile 4 + 4.1) + **D390 VIES** (tip S, cod operator fara prefixul tarii, baza rotunjita la intreg) + jurnalul de cumparari in **Excel** doar cu facturile UE + **facturile furnizorilor** (subfolder `facturi/`);
    - **`CIF-<cod>`** (codul normal al PFA-ului): **D301** (doar sectiunea 4) + jurnalul de cumparari in **Excel** doar cu facturile non-UE + **facturile furnizorilor** (subfolder `facturi/`);
    - fiecare D301 contine antetul, sectiunile cu toate valorile, termenul si **instructiunea de plata** (IBAN trezorerie, cod bugetar `20A100101`, suma, CIF platitor);
    - jurnalul de cumparari pe toata luna este disponibil si separat in [Registre](#registre) > `Jurnal Cumparaturi` (CSV/XLSX), cu referinta `15-16`;
@@ -344,7 +344,7 @@ Aici gasesti tabelul cu toate obiectele de inventar si mijloacele/activele fixe 
 Pentru a scoate un obiect de inventar din uz trebuie sa dai click in coloana Mod. pe iconita de modificare. 
 Formularul va fi completat cu datele salvate anterior pe care acum le poti modifica si salva (bifezi „Scoate din uz").
 
-Registrul-inventar complet, impreuna cu documentele justificative si fisele mijloacelor fixe, se descarca din pagina [Registre](#registre) (tab `Registru inventar`, iconitele CSV/XLSX).
+Registrul-inventar se descarca din pagina [Registre](#registre) (tab `Registru inventar`, iconitele CSV/XLSX), direct ca fisier CSV sau XLSX.
 
 
 ![inventar](readmepics/inventar.png)
@@ -359,8 +359,7 @@ Poti alege anul si sa vezi sumele din grafic si total carduri in EUR sau RON.
 
 Taxele se calculeaza pe regulile din anul selectat (vezi `utils/calcule.py`): din 2025, daca venitul net este 0 sau negativ nu datorezi CASS; pentru venit net pozitiv CASS este 10% din venitul net, cu o baza minima de 6 salarii minime brute si o baza maxima de 60 de salarii (72 din 2026). CAS (25%) se datoreaza doar peste pragul de 12 salarii minime, iar impozitul pe venit (10%) se aplica la venitul net din care se scad CAS si CASS. Cei scutiti (profesii liberale cu casa de asigurari proprie, pensionari etc.) pot bifa scutirile in [Setari](#setari).
 
-Poti descarca registrele dand click fie pe iconita de csv sau xlsx. 
-In cazul Registrului jurnal si Registrului Inventar un fisier zip va fi descarcat in folderul Downloads care va contine datele registrului intr-un fisier xlsx sau csv (depinde ce icon ai ales) si un folder Documente in care vor fi toate documentele justificative. Toate fisierele salvate in aplicatie vor avea un prefix id de 8 caractere dupa care le puteti gasi (ex: `0x4rf2KW_Factura_etc.pdf`).  
+Poti descarca registrele dand click fie pe iconita de csv sau xlsx. Se descarca direct un singur fisier CSV sau XLSX cu datele registrului, fara arhiva zip si fara documentele justificative. Toate fisierele salvate in aplicatie vor avea un prefix id de 8 caractere dupa care le puteti gasi (ex: `0x4rf2KW_Factura_etc.pdf`).  
 
 In tab-ul **Jurnal Cumparaturi** gasesti **Jurnalul de cumpărări**: daca ai cheltuieli cu servicii din UE/non-UE (taxare inversa), jurnalul pentru cumparari cu referinta `15-16`, baza impozitabila, TVA autolichidata si totalurile, descarcabil in CSV sau XLSX (pe luna sau pe tot anul).
 
@@ -420,7 +419,7 @@ uv run manage.py createsuperuser   # apoi /admin/
 | `cheltuieli/` | cheltuieli, deductibilitate, amortizare, taxare inversa TVA |
 | `documente/` | arhiva ANAF (D212, dovezi plata, recipise D301/D390) cu parsing PDF |
 | `inventar/` | obiecte de inventar si mijloace fixe |
-| `registre/` | dashboard + registrele contabile, exporturi CSV/XLSX/zip |
+| `registre/` | dashboard + registrele contabile, exporturi CSV/XLSX |
 | `conturi/` | login/inregistrare/logout (doar mod multi-user) |
 | `utils/` | calcule taxe (`calcule.py`), TVA (`tva.py`, `tva_documente.py`), curs BNR (`valuta.py`), fisiere (`files.py`), PDF-uri (`mijloc_fix_pdf.py`) |
 | `templates/` + `static/` | UI: PicoCSS + Alpine.js, typeahead; fara build step de frontend |

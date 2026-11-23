@@ -60,3 +60,17 @@ uv run pytest tests/ -v -k "setari or mijloace"
 | `conftest.py` | fixture-uri: server Django izolat, acces DB, Faker `ro_RO`, limite an/luna |
 | `helpers.py` | completare formulare (Alpine.js): setari, facturi, incasari, cheltuieli |
 | `test_an_complet.py` | scenariul pe un an, parametrizat pe luni + verificari finale |
+
+Testele `test_09_descarcare_registru_jurnal` si
+`test_10_descarcare_registru_inventar` verifica butoanele CSV/XLSX din pagina
+`/registre/`: apasa iconita din tabul corespunzator, captureaza download-ul si
+verifica fisierul CSV/XLSX rezultat (registrul cu antetul corect), fara zip si
+fara documente justificative. Scenario include un mijloc fix cu "/" in nume,
+care altfel craseaza exportul.
+Testul `test_11_export_fara_document_justificativ` simuleaza un document
+justificativ disparut de pe disc si verifica faptul ca ambele exporturi se
+descarca in continuare (exportul nu mai citeste documentele).
+Testul `test_12_descarcare_liste_fara_zip` verifica iconitele CSV/XLSX din
+`/facturi/`, `/incasari/` si `/cheltuieli/`: fiecare descarca un singur fisier
+cu toate inregistrarile, fara zip si fara paginare.
+

@@ -3,7 +3,11 @@ from django.contrib import messages
 from django.core.files.base import ContentFile
 from django.shortcuts import render, HttpResponseRedirect, get_object_or_404
 from django.utils import timezone
-from utils.views import get_page_items, download_zip, handle_delete_id_query_param
+from utils.views import (
+    get_page_items,
+    download_model_csv_or_xlsx,
+    handle_delete_id_query_param,
+)
 from utils.valuta import TipTranzactie
 from facturi.models import FacturaModel, ModalitatePlata
 from .forms import IncasariForm
@@ -13,7 +17,7 @@ from .models import IncasariModel
 class IncasariDescarcareView(View):
 
     def get(self, request):
-        return download_zip(request, IncasariModel)
+        return download_model_csv_or_xlsx(request, IncasariModel, "incasari")
 
 
 class IncasariView(View):

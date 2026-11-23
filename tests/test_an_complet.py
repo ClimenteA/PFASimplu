@@ -70,7 +70,9 @@ FURNIZORI_NON_UE = [
 MIJLOACE_FIXE = [
     {
         "luna": 1,
-        "nume": "Laptop Dell Latitude 7450",
+        # Numele contine "/" ca sa acopere exportul Registrului-inventar:
+        # felul documentului ajunge in numele unui zip si trebuie sanitizat.
+        "nume": "Laptop Dell Latitude 7450 / docking station",
         "cod": "2.2.9.",
         "ani": 3,
         "suma": (6500, 9500),
@@ -536,10 +538,10 @@ def test_07_declaratii_tva_din_cheltuieli(page, db):
     download.save_as(zip_path)
     with ZipFile(zip_path) as zf:
         names = zf.namelist()
-        # Cate un folder pe cod, cu prefix: VIES (cod intracomunitar) si CIF (cod normal).
+        # Cate un folder pe cod, cu prefix: TVA (cod intracomunitar) si CIF (cod normal).
         foldere = {n.split("/")[0] for n in names}
         assert len(foldere) == 2
-        assert any(f.startswith("VIES-") for f in foldere)
+        assert any(f.startswith("TVA-") for f in foldere)
         assert any(f.startswith("CIF-") for f in foldere)
         for cod in foldere:
             assert f"{cod}/D301_{TEST_YEAR}_{luna:02d}.md" in names
@@ -550,10 +552,10 @@ def test_07_declaratii_tva_din_cheltuieli(page, db):
             # Jurnalul fiecarui folder contine doar factura declarata pe codul lui.
             assert len(df) == 1
             assert (df["Referinta cod"] == "15-16").all()
-        # D390 doar in folderul VIES (UE).
+        # D390 doar in folderul TVA (UE).
         d390_names = [n for n in names if "D390_" in n]
         assert len(d390_names) == 1
-        assert d390_names[0].startswith("VIES-") and d390_names[0].endswith(".md")
+        assert d390_names[0].startswith("TVA-") and d390_names[0].endswith(".md")
         # Fara XML-uri in zip.
         assert not any(n.endswith(".xml") for n in names)
 
@@ -655,6 +657,14 @@ def test_08_export_date_pe_an(page, db):
         assert "Total taxe si impozite estimate" in sumar
         assert "Numar incasari inregistrate" in sumar and str(nr_incasari) in sumar
         assert "Numar cheltuieli inregistrate" in sumar and str(nr_cheltuieli) in sumar
+        ultima_factura = db.execute(
+            "SELECT serie, numar FROM facturi_facturamodel "
+            "ORDER BY data_emitere DESC, id DESC LIMIT 1"
+        ).fetchone()
+        assert ultima_factura  # scenariul emite facturi in fiecare luna
+        assert "Ultima factura emisa" in sumar
+        assert f"<td>{ultima_factura[0]}</td>" in sumar
+        assert f"<td>{ultima_factura[1]}</td>" in sumar
         assert "Cea mai mare incasare" in sumar
         assert "Cea mai mare cheltuiala" in sumar
         assert "Venit net mediu pe luna (dupa taxe)" in sumar
@@ -669,4 +679,204 @@ def test_08_export_date_pe_an(page, db):
             "SELECT COUNT(*) FROM cheltuieli_cheltuialamodel WHERE mijloc_fix = 1 AND scos_din_uz = 0"
         ).fetchone()[0]
         assert sumar.count("Tabel Amortizare") == nr_mf_active
+
+
+def _salveaza_descarcarea(page, link, filename: str):
+    """Apasa un link de descarcare si salveaza fisierul rezultat."""
+    import tempfile
+
+    with page.expect_download() as download_info:
+        link.click()
+    download = download_info.value
+    assert download.suggested_filename == filename
+    file_path = Path(tempfile.mkdtemp()) / download.suggested_filename
+    download.save_as(file_path)
+    return file_path
+
+
+def _descarca_din_registru(page, tab_selector: str, filetype: str, filename: str):
+    """Apasa iconita CSV/XLSX dintr-un tab al paginii Registre si salveaza
+    fisierul descarcat (CSV sau XLSX), fara arhiva zip."""
+    tab = page.locator(tab_selector)
+    expect(tab).to_be_visible()
+    return _salveaza_descarcarea(
+        page, tab.locator(f"a[href*='filetype={filetype}'] i"), filename
+    )
+
+
+def test_09_descarcare_registru_jurnal(page, db):
+    """Iconitele CSV si XLSX din tabul 'Registru jurnal' descarca direct un
+    singur fisier cu registrul (antet si totaluri lunare), fara documente."""
+    import pandas as pd
+
+    nr_incasari = db.execute(
+        "SELECT COUNT(*) FROM incasari_incasarimodel WHERE data_inserarii LIKE ?",
+        (f"{TEST_YEAR}%",),
+    ).fetchone()[0]
+    nr_cheltuieli = db.execute(
+        "SELECT COUNT(*) FROM cheltuieli_cheltuialamodel WHERE data_inserarii LIKE ?",
+        (f"{TEST_YEAR}%",),
+    ).fetchone()[0]
+
+    page.goto(f"/registre/?anul={TEST_YEAR}")
+    page.get_by_role("button", name="Registru jurnal").click()
+
+    for filetype, extensie in (("CSV", "csv"), ("XLSX", "xlsx")):
+        nume_registru = f"registru_jurnal_incasari_si_plati.{extensie}"
+        file_path = _descarca_din_registru(
+            page,
+            "div[x-show=\"active == 'rjip'\"]",
+            filetype,
+            nume_registru,
+        )
+
+        if extensie == "csv":
+            df = pd.read_csv(file_path)
+        else:
+            df = pd.read_excel(file_path)
+        for coloana in (
+            "Nr.Crt.",
+            "Data",
+            "Documentul (fel, numar)",
+            "Felul operatiunii (explicatii)",
+            "Incasari Numerar",
+            "Incasari Banca",
+            "Plati Numerar",
+            "Plati Banca",
+        ):
+            assert coloana in df.columns
+        assert len(df) >= nr_incasari + nr_cheltuieli  # + randurile de total lunar
+        explicatii = df["Felul operatiunii (explicatii)"].astype(str)
+        assert explicatii.str.contains("Incasare").any()
+        assert explicatii.str.contains("Cheltuiala").any()
+        assert explicatii.str.contains("Calcul total luna").any()
+
+
+def test_10_descarcare_registru_inventar(page, db):
+    """Iconitele CSV si XLSX din tabul 'Registru inventar' descarca direct un
+    singur fisier cu registrul, fara documente sau fisele mijloacelor fixe."""
+    import pandas as pd
+
+    nr_inventar = db.execute(
+        "SELECT COUNT(*) FROM cheltuieli_cheltuialamodel "
+        "WHERE (obiect_de_inventar = 1 OR mijloc_fix = 1) AND scos_din_uz = 0"
+    ).fetchone()[0]
+    assert nr_inventar > 0
+
+    page.goto(f"/registre/?anul={TEST_YEAR}")
+    page.get_by_role("button", name="Registru inventar").click()
+
+    for filetype, extensie in (("CSV", "csv"), ("XLSX", "xlsx")):
+        nume_registru = f"registru_inventar.{extensie}"
+        file_path = _descarca_din_registru(
+            page,
+            "div[x-show=\"active == 'rinv'\"]",
+            filetype,
+            nume_registru,
+        )
+
+        if extensie == "csv":
+            df = pd.read_csv(file_path)
+        else:
+            df = pd.read_excel(file_path)
+        for coloana in (
+            "Nr.Crt.",
+            "Denumirea elementelor inventariate",
+            "Valoare inventar",
+            "Data",
+            "Document",
+        ):
+            assert coloana in df.columns
+        assert len(df) == nr_inventar
+        denumiri = df["Denumirea elementelor inventariate"].astype(str)
+        assert denumiri.str.contains("/").any()  # numele cu slash din scenariu
+
+
+def test_11_export_fara_document_justificativ(page, db):
+    """Un document justificativ sters/mutat de pe disc nu trebuie sa blocheze
+    descarcarea registrelor; exportul nici nu mai citeste documentele, ci
+    scrie direct fisierul CSV/XLSX."""
+    import uuid
+
+    import pandas as pd
+
+    incasare = db.execute(
+        "SELECT id, fisier FROM incasari_incasarimodel "
+        "WHERE data_inserarii LIKE ? LIMIT 1",
+        (f"{TEST_YEAR}%",),
+    ).fetchone()
+    mijloc_fix = db.execute(
+        "SELECT id, fisier FROM cheltuieli_cheltuialamodel "
+        "WHERE mijloc_fix = 1 LIMIT 1"
+    ).fetchone()
+    assert incasare and mijloc_fix
+
+    fisier_lipsa = f"{uuid.uuid4().hex[:8]}_document_lipsa.pdf"
+    try:
+        for tabel, rand in (
+            ("incasari_incasarimodel", incasare),
+            ("cheltuieli_cheltuialamodel", mijloc_fix),
+        ):
+            db.execute(
+                f"UPDATE {tabel} SET fisier = ? WHERE id = ?",
+                (fisier_lipsa, rand["id"]),
+            )
+        db.commit()
+
+        page.goto(f"/registre/?anul={TEST_YEAR}")
+        page.get_by_role("button", name="Registru jurnal").click()
+        csv_path = _descarca_din_registru(
+            page,
+            "div[x-show=\"active == 'rjip'\"]",
+            "CSV",
+            "registru_jurnal_incasari_si_plati.csv",
+        )
+        assert len(pd.read_csv(csv_path)) > 0
+
+        page.get_by_role("button", name="Registru inventar").click()
+        xlsx_path = _descarca_din_registru(
+            page,
+            "div[x-show=\"active == 'rinv'\"]",
+            "XLSX",
+            "registru_inventar.xlsx",
+        )
+        assert len(pd.read_excel(xlsx_path)) > 0
+    finally:
+        for tabel, rand in (
+            ("incasari_incasarimodel", incasare),
+            ("cheltuieli_cheltuialamodel", mijloc_fix),
+        ):
+            db.execute(
+                f"UPDATE {tabel} SET fisier = ? WHERE id = ?",
+                (rand["fisier"], rand["id"]),
+            )
+        db.commit()
+
+
+def test_12_descarcare_liste_fara_zip(page, db):
+    """Iconitele CSV/XLSX din Facturi, Incasari si Cheltuieli descarca un
+    singur fisier cu toate inregistrarile, fara zip si fara paginare."""
+    import pandas as pd
+
+    for page_path, tabel, nume_fisier in (
+        ("/facturi/", "facturi_facturamodel", "facturi"),
+        ("/incasari/", "incasari_incasarimodel", "incasari"),
+        ("/cheltuieli/", "cheltuieli_cheltuialamodel", "cheltuieli"),
+    ):
+        nr_inregistrari = db.execute(f"SELECT COUNT(*) FROM {tabel}").fetchone()[0]
+        assert nr_inregistrari > 0
+
+        page.goto(page_path)
+        for filetype, extensie in (("CSV", "csv"), ("XLSX", "xlsx")):
+            file_path = _salveaza_descarcarea(
+                page,
+                page.locator(f"a[href*='filetype={filetype}'] i").first,
+                f"{nume_fisier}.{extensie}",
+            )
+
+            if extensie == "csv":
+                df = pd.read_csv(file_path)
+            else:
+                df = pd.read_excel(file_path)
+            assert len(df) == nr_inregistrari
 

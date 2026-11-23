@@ -106,6 +106,46 @@
         </div>
 
         <div class="container mt-4">
+            <h2>Ultima factura emisa</h2>
+            <table class="striped">
+                <thead>
+                    <tr>
+                        <th>Perioada</th>
+                        <th>Serie</th>
+                        <th>Numar</th>
+                        <th>Data emitere</th>
+                        <th>Total de plata (RON)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if ultima_factura_an %}
+                    <tr>
+                        <td>Ultima factura emisa in {{ anul }}</td>
+                        <td>{{ ultima_factura_an.serie }}</td>
+                        <td>{{ ultima_factura_an.numar }}</td>
+                        <td>{{ ultima_factura_an.data_emitere }}</td>
+                        <td>{{ ultima_factura_an.total_de_plata }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td>Ultima factura emisa in {{ anul }}</td>
+                        <td colspan="4">Nicio factura emisa in acest an.</td>
+                    </tr>
+                    {% endif %}
+                    {% if ultima_factura and ultima_factura.serie_numar != ultima_factura_an.serie_numar %}
+                    <tr>
+                        <td>Ultima factura emisa in aplicatie</td>
+                        <td>{{ ultima_factura.serie }}</td>
+                        <td>{{ ultima_factura.numar }}</td>
+                        <td>{{ ultima_factura.data_emitere }}</td>
+                        <td>{{ ultima_factura.total_de_plata }}</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="container mt-4">
             <h2>Medii lunare</h2>
             <p>Calculate pe {{ luni }} luni{% if an_curent %} (anul curent, pana in luna de azi){% endif %}.</p>
             <table class="striped">
