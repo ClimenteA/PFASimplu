@@ -352,13 +352,14 @@ class GenerareDocumenteTests(TestCase):
         self.assertIsNotNone(pachet)
         with ZipFile(pachet["zip_path"]) as zf:
             names = zf.namelist()
-        # Un folder pentru codul TVA intracomunitar, cu declaratiile + jurnalul.
-        self.assertIn("52937756/D301_2026_10.md", names)
-        self.assertIn("52937756/D390_2026_10.md", names)
-        self.assertIn("52937756/Jurnal_cumparari_2026_10.xlsx", names)
-        # Fara XML-uri si fara PDF-uri.
+        # Folder cu prefix VIES pentru codul TVA intracomunitar.
+        self.assertIn("VIES-52937756/D301_2026_10.md", names)
+        self.assertIn("VIES-52937756/D390_2026_10.md", names)
+        self.assertIn("VIES-52937756/Jurnal_cumparari_2026_10.xlsx", names)
+        # Factura furnizorului atasata cheltuielii, inclusa in folder.
+        self.assertIn("VIES-52937756/facturi/factura.pdf", names)
+        # Fara XML-uri si fara PDF-uri generate (doar factura atasata).
         self.assertFalse(any(n.endswith(".xml") for n in names))
-        self.assertFalse(any(n.endswith(".pdf") for n in names))
 
     def test_jurnal_xlsx_grupat_pe_cod(self, _mock):
         import io
@@ -372,8 +373,8 @@ class GenerareDocumenteTests(TestCase):
         pachet = genereaza_pachet_tva(2026, 10, self.setari)
         with ZipFile(pachet["zip_path"]) as zf:
             # Fiecare folder are jurnalul doar cu facturile declarate pe codul lui.
-            df_ue = pd.read_excel(io.BytesIO(zf.read("52937756/Jurnal_cumparari_2026_10.xlsx")))
-            df_non = pd.read_excel(io.BytesIO(zf.read("43000098/Jurnal_cumparari_2026_10.xlsx")))
+            df_ue = pd.read_excel(io.BytesIO(zf.read("VIES-52937756/Jurnal_cumparari_2026_10.xlsx")))
+            df_non = pd.read_excel(io.BytesIO(zf.read("CIF-43000098/Jurnal_cumparari_2026_10.xlsx")))
         self.assertEqual(df_ue["Document Numar"].tolist(), ["PBW-2026-003576"])
         self.assertEqual(df_non["Document Numar"].tolist(), ["IN-79973856"])
         self.assertTrue((df_ue["Referinta cod"] == "15-16").all())
@@ -430,8 +431,9 @@ class GenerareDocumenteTests(TestCase):
         pachet = genereaza_pachet_tva(2026, 9, self.setari)
         with ZipFile(pachet["zip_path"]) as zf:
             names = zf.namelist()
-        self.assertIn("43000098/D301_2026_09.md", names)
-        self.assertNotIn("43000098/D390_2026_09.md", names)
+        self.assertIn("CIF-43000098/D301_2026_09.md", names)
+        self.assertIn("CIF-43000098/facturi/factura.pdf", names)
+        self.assertNotIn("CIF-43000098/D390_2026_09.md", names)
         self.assertFalse(any("D390" in n for n in names))
         # Non-UE se declara pe CIF-ul normal
         self.assertEqual(pachet["d301"]["cif"], "43000098")
@@ -446,13 +448,13 @@ class GenerareDocumenteTests(TestCase):
         pachet = genereaza_pachet_tva(2026, 9, self.setari)
         with ZipFile(pachet["zip_path"]) as zf:
             names = zf.namelist()
-        self.assertIn("52937756/D301_2026_09.md", names)
-        self.assertIn("52937756/D390_2026_09.md", names)
-        self.assertIn("52937756/Jurnal_cumparari_2026_09.xlsx", names)
-        self.assertIn("43000098/D301_2026_09.md", names)
-        self.assertIn("43000098/Jurnal_cumparari_2026_09.xlsx", names)
+        self.assertIn("VIES-52937756/D301_2026_09.md", names)
+        self.assertIn("VIES-52937756/D390_2026_09.md", names)
+        self.assertIn("VIES-52937756/Jurnal_cumparari_2026_09.xlsx", names)
+        self.assertIn("CIF-43000098/D301_2026_09.md", names)
+        self.assertIn("CIF-43000098/Jurnal_cumparari_2026_09.xlsx", names)
         # D390 doar in folderul codului intracomunitar (UE).
-        self.assertNotIn("43000098/D390_2026_09.md", names)
+        self.assertNotIn("CIF-43000098/D390_2026_09.md", names)
         coduri = [d["cif"] for d in pachet["d301_lista"]]
         self.assertEqual(coduri, ["52937756", "43000098"])
 

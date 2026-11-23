@@ -205,9 +205,9 @@ Pentru PFA-urile cu **cod special de TVA intracomunitar (art. 317 Cod fiscal)** 
 
 1. **Adaugi cheltuielile** cu origine UE/non-UE (vezi [Cheltuieli](#cheltuieli)) - cursul BNR, baza si TVA-ul se calculeaza automat;
 2. **Filtrezi pe luna** - din selectorul „Cheltuieli externe (TVA)" de deasupra tabelului alegi luna de raportare (lunile cu facturi UE/non-UE, grupate dupa data facturii); tabelul arata doar facturile pentru care trebuie completate declaratiile;
-3. **Descarci** - un click pe butonul `Descarca` si primesti un zip cu declaratiile completate in **Markdown**, **grupate in cate un folder pentru fiecare cod fiscal** (CIF / cod TVA intracomunitar) pe care se depun declaratii:
-   - folderul **codului TVA intracomunitar** (art. 317): **D301** (sectiunile 4 + 4.1) + **D390 VIES** (tip S, cod operator fara prefixul tarii, baza rotunjita la intreg) + jurnalul de cumparari in **Excel** doar cu facturile UE;
-   - folderul **CIF-ului normal**: **D301** (doar sectiunea 4) + jurnalul de cumparari in **Excel** doar cu facturile non-UE;
+3. **Descarci** - un click pe butonul `Descarca` si primesti un zip cu declaratiile completate in **Markdown**, **grupate in cate un folder pentru fiecare cod fiscal**, cu prefix dupa tipul codului:
+   - **`VIES-<cod>`** (codul special de TVA intracomunitar, art. 317): **D301** (sectiunile 4 + 4.1) + **D390 VIES** (tip S, cod operator fara prefixul tarii, baza rotunjita la intreg) + jurnalul de cumparari in **Excel** doar cu facturile UE + **facturile furnizorilor** (subfolder `facturi/`);
+   - **`CIF-<cod>`** (codul normal al PFA-ului): **D301** (doar sectiunea 4) + jurnalul de cumparari in **Excel** doar cu facturile non-UE + **facturile furnizorilor** (subfolder `facturi/`);
    - fiecare D301 contine antetul, sectiunile cu toate valorile, termenul si **instructiunea de plata** (IBAN trezorerie, cod bugetar `20A100101`, suma, CIF platitor);
    - jurnalul de cumparari pe toata luna este disponibil si separat in [Registre](#registre) > `Jurnal Cumparaturi` (PDF/CSV/XLSX), cu referinta `15-16`;
 4. **Depui** declaratiile online pe [declaratii.anaf.ro](https://declaratii.anaf.ro/), completand formularul cu valorile din fisierele Markdown (suma de control si nr. de evidenta a platii se genereaza de aplicatia oficiala ANAF la validare); termen: **25 inclusiv a lunii urmatoare**;

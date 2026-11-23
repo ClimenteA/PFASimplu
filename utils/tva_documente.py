@@ -11,6 +11,7 @@ si jurnalul de cumparari in Excel cu facturile declarate pe codul respectiv.
 """
 
 import os
+import re
 from zipfile import ZipFile
 
 import pandas as pd
@@ -26,6 +27,7 @@ from utils.tva import (
     calculeaza_d301_lista,
     calculeaza_d390,
     calculeaza_jurnal_cumparari,
+    get_cheltuieli_taxare_inversa,
     round2,
 )
 
@@ -346,11 +348,14 @@ def genereaza_jurnal_cumparari_xlsx(jurnal: dict, output_path: str):
 
 def genereaza_pachet_tva(anul: int, luna: int, setari: SetariModel | None = None) -> dict | None:
     """Genereaza intr-un singur zip documentele lunii, grupate pe codul fiscal:
-    cate un folder pentru fiecare CIF / cod TVA intracomunitar pe care se depun
-    declaratii (facturile UE pe codul special art. 317, cele non-UE pe CIF-ul
-    normal). Fiecare folder contine:
+    cate un folder pentru fiecare cod pe care se depun declaratii, cu prefix
+    dupa tipul codului:
+    - VIES-<cod> pentru codul special de TVA intracomunitar (facturile UE);
+    - CIF-<cod> pentru codul normal al PFA-ului (facturile non-UE).
+    Fiecare folder contine:
     - D301 completat in Markdown (si D390 VIES, pentru codul cu facturi UE);
-    - jurnalul de cumparari in Excel, doar cu facturile declarate pe codul lui.
+    - jurnalul de cumparari in Excel, doar cu facturile declarate pe codul lui;
+    - facturile furnizorilor (documentele justificative) pentru declaratiile din folder.
     Returneaza {'zip_path', 'd301', 'd301_lista', 'd390', 'jurnal'} sau None daca nu exista operatiuni."""
     setari = setari or SetariModel.objects.first()
     if not setari:
@@ -361,31 +366,49 @@ def genereaza_pachet_tva(anul: int, luna: int, setari: SetariModel | None = None
         return None
     d390 = calculeaza_d390(anul, luna, setari)
     jurnal = calculeaza_jurnal_cumparari(anul, luna)
+    cheltuieli = list(get_cheltuieli_taxare_inversa(anul, luna))
 
     folder = get_extracts_path("tva")
     prefix = f"{anul}_{luna:02d}"
     fisiere = []  # (cale_pe_disk, cale_in_zip)
 
     for d301 in d301_lista:
-        # Folder dedicat codului pe care se depune declaratia (CIF sau cod TVA intracomunitar).
+        # Folder dedicat codului pe care se depune declaratia, cu prefix dupa tip:
+        # VIES = cod TVA intracomunitar (art. 317), CIF = codul normal al PFA-ului.
         cod = d301["cif"]
-        subfolder = os.path.join(folder, cod)
+        nume_folder = f"{'VIES' if _este_cod_special(setari, cod) else 'CIF'}-{cod}"
+        subfolder = os.path.join(folder, nume_folder)
         os.makedirs(subfolder, exist_ok=True)
 
         d301_md = os.path.join(subfolder, f"D301_{prefix}.md")
         with open(d301_md, "w", encoding="utf-8") as f:
             f.write(genereaza_d301_md(d301, setari))
-        fisiere.append((d301_md, f"{cod}/{os.path.basename(d301_md)}"))
+        fisiere.append((d301_md, f"{nume_folder}/{os.path.basename(d301_md)}"))
 
         if d390 and d390["cif"] == cod:
             d390_md = os.path.join(subfolder, f"D390_{prefix}.md")
             with open(d390_md, "w", encoding="utf-8") as f:
                 f.write(genereaza_d390_md(d390, setari))
-            fisiere.append((d390_md, f"{cod}/{os.path.basename(d390_md)}"))
+            fisiere.append((d390_md, f"{nume_folder}/{os.path.basename(d390_md)}"))
+
+        # Facturile furnizorilor (documentele justificative atasate), per cod.
+        nr_docs = {r["nr_doc"] for r in d301["randuri"]}
+        nume_vazute = set()
+        for cheltuiala in cheltuieli:
+            if (cheltuiala.numar_factura or "") not in nr_docs or not cheltuiala.fisier:
+                continue
+            nume_factura = re.sub(r"^[A-Za-z0-9]{8}_", "", os.path.basename(cheltuiala.fisier.path))
+            # Daca doua facturi au fisiere cu acelasi nume, le distingem prin numarul facturii.
+            if nume_factura in nume_vazute:
+                baza, ext = os.path.splitext(nume_factura)
+                nume_factura = f"{baza}_{cheltuiala.numar_factura}{ext}"
+            nume_vazute.add(nume_factura)
+            fisiere.append(
+                (cheltuiala.fisier.path, f"{nume_folder}/facturi/{nume_factura}")
+            )
 
         # Jurnalul de cumparari doar cu facturile declarate pe acest cod.
         if jurnal:
-            nr_docs = {r["nr_doc"] for r in d301["randuri"]}
             randuri_cod = [r for r in jurnal["randuri"] if r["nr_doc"] in nr_docs]
             jurnal_cod = {
                 "anul": anul,
@@ -399,7 +422,7 @@ def genereaza_pachet_tva(anul: int, luna: int, setari: SetariModel | None = None
             }
             jurnal_xlsx = os.path.join(subfolder, f"Jurnal_cumparari_{prefix}.xlsx")
             genereaza_jurnal_cumparari_xlsx(jurnal_cod, jurnal_xlsx)
-            fisiere.append((jurnal_xlsx, f"{cod}/{os.path.basename(jurnal_xlsx)}"))
+            fisiere.append((jurnal_xlsx, f"{nume_folder}/{os.path.basename(jurnal_xlsx)}"))
 
     zip_path = os.path.join(get_extracts_path(), f"D301-D390_{prefix}.zip")
     with ZipFile(zip_path, "w") as zipf:

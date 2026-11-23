@@ -535,20 +535,24 @@ def test_07_declaratii_tva_din_cheltuieli(page, db):
     download.save_as(zip_path)
     with ZipFile(zip_path) as zf:
         names = zf.namelist()
-        # Cate un folder pe cod: UE pe codul special art. 317, non-UE pe CIF.
+        # Cate un folder pe cod, cu prefix: VIES (cod intracomunitar) si CIF (cod normal).
         foldere = {n.split("/")[0] for n in names}
         assert len(foldere) == 2
+        assert any(f.startswith("VIES-") for f in foldere)
+        assert any(f.startswith("CIF-") for f in foldere)
         for cod in foldere:
             assert f"{cod}/D301_{TEST_YEAR}_{luna:02d}.md" in names
             assert f"{cod}/Jurnal_cumparari_{TEST_YEAR}_{luna:02d}.xlsx" in names
+            # Factura furnizorului atasata cheltuielii, inclusa per cod.
+            assert any(n.startswith(f"{cod}/facturi/") for n in names)
             df = pd.read_excel(io.BytesIO(zf.read(f"{cod}/Jurnal_cumparari_{TEST_YEAR}_{luna:02d}.xlsx")))
             # Jurnalul fiecarui folder contine doar factura declarata pe codul lui.
             assert len(df) == 1
             assert (df["Referinta cod"] == "15-16").all()
-        # D390 doar in folderul codului intracomunitar (UE).
+        # D390 doar in folderul VIES (UE).
         d390_names = [n for n in names if "D390_" in n]
         assert len(d390_names) == 1
-        assert d390_names[0].endswith(".md")
+        assert d390_names[0].startswith("VIES-") and d390_names[0].endswith(".md")
         # Fara XML-uri in zip.
         assert not any(n.endswith(".xml") for n in names)
 
