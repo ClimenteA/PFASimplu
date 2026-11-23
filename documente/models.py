@@ -8,6 +8,7 @@ from django.utils.translation import gettext_lazy as _
 from pypdf import PdfReader  # https://pypdf.readthedocs.io/en/stable/index.html
 
 from utils.files import get_save_path
+from utils.models import UserOwnedModel, UserScopedManager
 
 
 # Plafonul TVA de 395000 RON pe an
@@ -100,7 +101,7 @@ def validate_year(value):
         raise ValidationError(f"{value} nu este un an valid.")
 
 
-class DocumenteModel(models.Model):
+class DocumenteModel(UserOwnedModel):
     tip_document = models.CharField(
         max_length=300, choices=TipDocument, default=TipDocument.DOCUMENT_UTIL
     )
@@ -173,6 +174,8 @@ class DocumenteModel(models.Model):
                 super().save(
                     update_fields=["document_pentru_anul", "tip_document", "mentiuni"]
                 )
+
+    objects = UserScopedManager()
 
     class Meta:
         app_label = "documente"

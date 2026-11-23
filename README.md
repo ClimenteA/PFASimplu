@@ -84,6 +84,57 @@ Pe windows comenzile make for avea prefixul `.\makefile.bat X` - unde X poate fi
 - allow bash in powershell - `Set-ExecutionPolicy Unrestricted -Scope Process`
 
 
+## Instalare pe VPS (Docker, mod multi-user)
+
+Aplicatia poate rula si pe un server, cu **login/inregistrare pe email + parola**
+(sistemul de autentificare inclus in Django) si **date izolate per utilizator**:
+fiecare cont isi vede doar propriile incasari, cheltuieli, facturi, documente si
+setari, iar fisierele urcate stau in `media/user_<id>/` si pot fi descarcate doar
+de proprietar.
+
+Modul multi-user se activeaza prin `PFASIMPLU_MULTI_USER=1` (setat automat in
+Docker). **Implicit aplicatia desktop ramane fara login**, exact ca pana acum -
+nu trebuie schimbat nimic la instalarea locala.
+
+Pe VPS (cu Docker si Docker Compose instalate):
+
+```bash
+git clone https://github.com/ClimenteA/PFASimplu && cd PFASimplu
+
+# reteaua comuna pentru proxy + aplicatii (o singura data)
+docker network create web
+
+# configurarea aplicatiei
+cp .env.prod.example .env.prod
+# editeaza .env.prod: PFASIMPLU_SECRET_KEY (aleator, lung),
+# PFASIMPLU_ALLOWED_HOSTS si PFASIMPLU_CSRF_TRUSTED_ORIGINS cu domeniul tau
+
+# proxy-ul TLS (Caddy) - o singura data pe VPS; pune domeniul tau in Caddyfile
+docker compose -f docker-compose.caddy.yml up -d
+
+# aplicatia
+docker compose up -d --build
+```
+
+- Baza de date SQLite si fisierele urcate raman pe gazda in `./data/`
+  (volume in `docker-compose.yml`) - poti face backup doar la acest folder.
+- La pornire containerul aplica migrarile si colectorul de fisiere statice automat.
+- Optional: seteaza `DJANGO_SUPERUSER_EMAIL` / `DJANGO_SUPERUSER_PASSWORD` in
+  `.env.prod` pentru a crea un cont de admin (`/admin/`) la prima pornire.
+- Optional: `PFASIMPLU_ALLOW_REGISTRATION=0` in `.env.prod` blocheaza crearea de
+  conturi noi (pagina de inregistrare devine 404); utilizatorii existenti se pot
+  autentifica in continuare. Util implicit: `1` (inregistrare deschisa).
+- Pentru test local fara domeniu/TLS: in Caddyfile inlocuieste domeniul cu `:80`
+  si in `.env.prod` pune `PFASIMPLU_ALLOWED_HOSTS=localhost` si
+  `PFASIMPLU_CSRF_TRUSTED_ORIGINS=http://localhost`.
+
+Pentru a rula modul multi-user si fara Docker (ex. pentru teste):
+
+```bash
+PFASIMPLU_MULTI_USER=1 uv run manage.py runserver
+```
+
+
 ## Setari 
 
 In pagina `Setari` trebuie sa adaugi datele pfa-ului tau.
@@ -215,14 +266,14 @@ Pentru PFA-urile cu **cod special de TVA intracomunitar (art. 317 Cod fiscal)** 
    - **`VIES-<cod>`** (codul special de TVA intracomunitar, art. 317): **D301** (sectiunile 4 + 4.1) + **D390 VIES** (tip S, cod operator fara prefixul tarii, baza rotunjita la intreg) + jurnalul de cumparari in **Excel** doar cu facturile UE + **facturile furnizorilor** (subfolder `facturi/`);
    - **`CIF-<cod>`** (codul normal al PFA-ului): **D301** (doar sectiunea 4) + jurnalul de cumparari in **Excel** doar cu facturile non-UE + **facturile furnizorilor** (subfolder `facturi/`);
    - fiecare D301 contine antetul, sectiunile cu toate valorile, termenul si **instructiunea de plata** (IBAN trezorerie, cod bugetar `20A100101`, suma, CIF platitor);
-   - jurnalul de cumparari pe toata luna este disponibil si separat in [Registre](#registre) > `Jurnal Cumparaturi` (PDF/CSV/XLSX), cu referinta `15-16`;
+   - jurnalul de cumparari pe toata luna este disponibil si separat in [Registre](#registre) > `Jurnal Cumparaturi` (CSV/XLSX), cu referinta `15-16`;
 4. **Depui** declaratiile online: ai nevoie de un **cont SPV inregistrat pe codul de TVA intracomunitar** (pe acel cont te loghezi si preiei recipisele). Intră pe [e-guvernare.ro](https://www.e-guvernare.ro/) → click pe **DEPUNERE DECLARATII ANAF** (redirecționează către [decl.anaf.mfinante.gov.ro](https://decl.anaf.mfinante.gov.ro/my.policy)) → **Authentificare cu certificat** (certificat digital calificat de la certDigital, DigiSign etc.) → completezi PDF-ul inteligent cu valorile din fisierele Markdown, îl validezi și semnezi (suma de control si nr. de evidenta a platii se genereaza de aplicatia oficiala ANAF la validare), îl urci, apoi te loghezi în SPV-ul pe codul TVA, descarci recipisa și verifici să fie fără erori de încărcare; termen: **25 inclusiv a lunii urmatoare**;
 5. **Incarci recipisa** in pagina [Documente](#documente) - tipul (D301/D390), perioada, CIF-ul si indexul de incarcare se detecteaza automat din PDF;
 6. **Platesti** TVA-ul in contul trezoreriei din Setari (instructiunea de plata din fisierul D301 are toate datele).
 
 Daca lipsesc date din Setari (cod TVA intracomunitar, IBAN trezorerie) apar avertizari la descarcare.
 
-**Jurnalul de cumparari** este disponibil si in pagina [Registre](#registre) (tab `Jurnal Cumparaturi`), cu descarcare PDF/CSV/XLSX pe luna sau pe tot anul. Totalul documentului include TVA autolichidata, chiar daca furnizorul a facturat 0% TVA.
+**Jurnalul de cumparari** este disponibil si in pagina [Registre](#registre) (tab `Jurnal Cumparaturi`), cu descarcare CSV/XLSX pe luna sau pe tot anul. Totalul documentului include TVA autolichidata, chiar daca furnizorul a facturat 0% TVA.
 
 > **Atentie:** codul TVA intracomunitar (art. 317) nu confera calitatea de platitor normal de TVA (art. 316). Aceasta functionalitate acopera regimul art. 317 (D301/D390), nu decontul D300. Pentru situatii speciale confirma tratamentul cu contabilul.
 
@@ -251,7 +302,7 @@ Si da, nu e gresit chiar daca ai 0 incasari (sau sub 6 salarii minime) trebuie s
 Poti descarca registrele dand click fie pe iconita de csv sau xlsx. 
 In cazul Registrului jurnal si Registrului Inventar un fisier zip va fi descarcat in folderul Downloads care va contine datele registrului intr-un fisier xlsx sau csv (depinde ce icon ai ales) si un folder Documente in care vor fi toate documentele justificative. Toate fisierele salvate in aplicatie for avea un prefix id de 8 caractere dupa care le puteti gasi (ex: `0x4rf2KW_Factura_etc.pdf`).  
 
-In tab-ul **Jurnale** gasesti **Jurnalul de cumpărări**: daca ai cheltuieli cu servicii din UE/non-UE (taxare inversa), jurnalul pentru cumparari cu referinta `15-16`, baza impozitabila, TVA autolichidata si totalurile, descarcabil in PDF, CSV sau XLSX (pe luna sau pe tot anul).
+In tab-ul **Jurnale** gasesti **Jurnalul de cumpărări**: daca ai cheltuieli cu servicii din UE/non-UE (taxare inversa), jurnalul pentru cumparari cu referinta `15-16`, baza impozitabila, TVA autolichidata si totalurile, descarcabil in CSV sau XLSX (pe luna sau pe tot anul).
 
 
 ![registre](readmepics/registre.jpeg)

@@ -3,7 +3,7 @@ import re
 from zipfile import ZipFile
 from cheltuieli.models import CheltuialaModel
 from fpdf_table import PDFTable, Align
-from core.settings import MEDIA_ROOT, get_extracts_path, get_font_path
+from core.settings import get_media_path, get_extracts_path, get_font_path
 
 
 
@@ -73,7 +73,7 @@ def create_fisa_mijloc_fix_pdf(db_id: int, nr_inventar: int, doar_pdf: bool = Fa
     for _ in range(20): 
         pdf.table_row(empty_rows, width_cols)
 
-    save_pdf_path = os.path.join(MEDIA_ROOT, nume_fisa)
+    save_pdf_path = os.path.join(get_media_path(), nume_fisa)
     pdf.output(save_pdf_path)
 
     if doar_pdf:

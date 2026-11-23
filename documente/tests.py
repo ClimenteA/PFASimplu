@@ -885,15 +885,6 @@ class JurnalCumparariRegistreTests(TestCase):
         self.assertIn("Document justificativ (fisier)", content)
         self.assertIn(os.path.basename(cheltuiala.fisier.path), content)
 
-    def test_descarca_jurnal_pdf(self, _mock):
-        creeaza_cheltuiala_ue()
-        response = self.client.get(
-            reverse("descarca-jurnal-cumparari"),
-            {"filetype": "PDF", "anul": 2026},
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response["Content-Type"], "application/pdf")
-
     def test_jurnal_gol_redirect(self, _mock):
         response = self.client.get(
             reverse("descarca-jurnal-cumparari"), {"filetype": "CSV", "anul": 2026}

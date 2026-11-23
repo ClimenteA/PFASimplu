@@ -14,7 +14,7 @@ from django.utils import timezone
 from django.views import View
 
 from cheltuieli.models import CheltuialaModel, Deductibilitate
-from core.settings import MEDIA_ROOT, get_extracts_path
+from core.settings import get_media_path, get_extracts_path
 from documente.models import DocumenteModel
 from incasari.models import IncasariModel, SursaVenit
 from setari.models import SetariModel
@@ -22,7 +22,6 @@ from utils.calcule import calculeaza_taxe_si_impozite
 from utils.mijloc_fix_pdf import create_fisa_mijloc_fix_pdf
 from utils.pretty_excel import make_excel_pretty
 from utils.tva import calculeaza_jurnal_cumparari
-from utils.tva_documente import genereaza_jurnal_cumparari_pdf
 from utils.valuta import ron_to_eur
 from utils.views import download_csv_or_xlsx
 
@@ -240,7 +239,7 @@ class RegistruInventarDescarcaView(View):
 
 
 class RegistruJurnalCumparariDescarcaView(View):
-    """Jurnalul pentru cumparari (TVA taxare inversa): PDF, CSV sau XLSX,
+    """Jurnalul pentru cumparari (TVA taxare inversa): CSV sau XLSX,
     pe luna (daca se da parametrul luna) sau pe tot anul."""
 
     def get(self, request):
@@ -258,27 +257,21 @@ class RegistruJurnalCumparariDescarcaView(View):
             )
             return redirect("/registre/")
 
-        setari = SetariModel.objects.first()
         perioada = f"{anul}_{luna:02d}" if luna else str(anul)
         extracts_path = get_extracts_path()
 
-        if filetype == "pdf":
-            fp = os.path.join(extracts_path, f"jurnal_cumparari_{perioada}.pdf")
-            genereaza_jurnal_cumparari_pdf(jurnal, setari, fp)
-            content_type = "application/pdf"
+        df = jurnal_cumparari_dataframe(jurnal)
+        if filetype == "xlsx":
+            fp = os.path.join(extracts_path, f"jurnal_cumparari_{perioada}.xlsx")
+            df.to_excel(fp, index=False)
+            make_excel_pretty(fp)
+            content_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        elif filetype == "csv":
+            fp = os.path.join(extracts_path, f"jurnal_cumparari_{perioada}.csv")
+            df.to_csv(fp, index=False)
+            content_type = "text/csv"
         else:
-            df = jurnal_cumparari_dataframe(jurnal)
-            if filetype == "xlsx":
-                fp = os.path.join(extracts_path, f"jurnal_cumparari_{perioada}.xlsx")
-                df.to_excel(fp, index=False)
-                make_excel_pretty(fp)
-                content_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            elif filetype == "csv":
-                fp = os.path.join(extracts_path, f"jurnal_cumparari_{perioada}.csv")
-                df.to_csv(fp, index=False)
-                content_type = "text/csv"
-            else:
-                return redirect("/registre/")
+            return redirect("/registre/")
 
         response = HttpResponse(open(fp, "rb"), content_type=content_type)
         response["Content-Disposition"] = f"attachment; filename={os.path.basename(fp)}"
@@ -1102,8 +1095,10 @@ def create_bar_plot(
 
     # Save the plot as an SVG file
     svgname = f"incasari_vs_cheltuieli_bar_chart_{currency}.svg"
-    svgfp = os.path.join(MEDIA_ROOT, svgname)
+    svgfp = os.path.join(get_media_path(), svgname)
     plt.savefig(svgfp, format="svg")
     plt.close(fig)
 
-    return "/media/" + svgname
+    from utils.multiuser import get_user_media_prefix
+
+    return "/media/" + get_user_media_prefix() + svgname

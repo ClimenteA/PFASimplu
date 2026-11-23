@@ -1,11 +1,12 @@
-from .settings import MEDIA_URL, MEDIA_ROOT
+from .settings import MEDIA_URL
 from django.contrib import admin
-from django.urls import path, include
-from django.conf.urls.static import static
+from django.urls import path, include, re_path
+from utils.files import media_serve_view
 
 
 urlpatterns = [
     path("", include("registre.urls")),
+    path("conturi/", include("conturi.urls")),
     path("cheltuieli/", include("cheltuieli.urls")),
     path("documente/", include("documente.urls")),
     path("facturi/", include("facturi.urls")),
@@ -17,4 +18,8 @@ urlpatterns = [
     path("__reload__/", include("django_browser_reload.urls")),
 ]
 
-urlpatterns += static(MEDIA_URL, document_root=MEDIA_ROOT)
+# In modul multi-user fisierele media sunt servite doar proprietarului
+# (vezi utils.files.media_serve_view); in modul desktop ca pana acum.
+urlpatterns += [
+    re_path(r"^media/(?P<path>.*)$", media_serve_view),
+]

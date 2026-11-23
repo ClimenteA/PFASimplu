@@ -6,7 +6,7 @@ class IncasariForm(ModelForm):
     class Meta:
         model = IncasariModel
         fields = "__all__"
-        exclude = ["actualizat_la", "suma_in_ron", "factura"]        
+        exclude = ["actualizat_la", "suma_in_ron", "factura", "user"]
         widgets = {
             "data_inserarii": DateInput(format=("%m/%d/%Y"), attrs={"type": "date"})
         }

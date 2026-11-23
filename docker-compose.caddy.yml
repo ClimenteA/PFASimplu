@@ -1,0 +1,32 @@
+# Proxy-ul TLS comun (Caddy), ca in exemplul tau.
+# Pornit o singura data pe VPS, separat de aplicatii:
+#
+#   docker network create web
+#   docker compose -f docker-compose.caddy.yml up -d
+#
+# Caddyfile-ul se monteaza din folderul curent; domeniul se seteaza
+# in .env.prod (PFASIMPLU_DOMAIN) sau direct in Caddyfile.
+
+services:
+  external-caddy-proxy:
+    container_name: external-caddy-proxy
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./staticfiles:/webapp/staticfiles:ro
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - web
+
+networks:
+  web:
+    external: true
+
+volumes:
+  caddy_data:
+  caddy_config:

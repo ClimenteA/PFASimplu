@@ -42,7 +42,7 @@ from utils.trezorerie import (
 )
 from .forms import SetariForm
 from .models import SetariModel
-from core.settings import MEDIA_ROOT, make_media_dir, get_extracts_path
+from core.settings import MEDIA_ROOT, make_media_dir, get_extracts_path, get_media_path
 
 
 lista_valute = [choice.value for choice in Valuta]
@@ -493,7 +493,9 @@ class SetariViewDropData(View):
         DocumenteModel.objects.all().delete()
         FacturaModel.objects.all().delete()
 
-        shutil.rmtree(MEDIA_ROOT, ignore_errors=True)
+        # In modul multi-user se sterge doar folderul media al utilizatorului
+        # curent, nu si datele celorlalti utilizatori.
+        shutil.rmtree(get_media_path(), ignore_errors=True)
         make_media_dir()
 
         return redirect("/setari/")

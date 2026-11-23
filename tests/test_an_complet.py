@@ -581,7 +581,7 @@ def test_08_export_date_pe_an(page, db):
     # Un document urcat in pagina Documente pentru anul testat.
     page.goto("/documente/")
     page.select_option("#id_tip_document", "Document util")
-    page.fill("#id_document_pentru_anul", str(TEST_YEAR))
+    page.fill("#id_document_pentru_anul", f"{TEST_YEAR}-06-15")
     page.fill("#id_mentiuni", "Document pentru testul de export")
     page.set_input_files("#id_fisier", pdf_justificativ("document_export"))
     page.get_by_role("button", name="Adauga document").click()

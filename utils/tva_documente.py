@@ -15,15 +15,12 @@ import re
 from zipfile import ZipFile
 
 import pandas as pd
-from fpdf_table import PDFTable, Align
 
-from core.settings import get_extracts_path, get_font_path
+from core.settings import get_extracts_path
 from setari.models import SetariModel
 from utils.pretty_excel import make_excel_pretty
 from utils.trezorerie import COD_BUGETAR_TVA, get_link_iban_trezorerie
 from utils.tva import (
-    COD_REFERINTA_JURNAL,
-    DENUMIRE_REFERINTA_JURNAL,
     calculeaza_d301_lista,
     calculeaza_d390,
     calculeaza_jurnal_cumparari,
@@ -273,65 +270,8 @@ def genereaza_d390_md(d390: dict, setari: SetariModel) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Jurnalul de cumparari (registru contabil) - PDF pentru pagina Registre
+# Jurnalul de cumparari (registru contabil) - XLSX pentru pachetul TVA
 # ---------------------------------------------------------------------------
-
-def _pdf_nou() -> PDFTable:
-    pdf = PDFTable()
-    pdf.add_fonts_custom(
-        font_name="arial",
-        font_extension="ttf",
-        font_dir=get_font_path(),
-        set_default=True,
-    )
-    return pdf
-
-
-def genereaza_jurnal_cumparari_pdf(jurnal: dict, setari: SetariModel, output_path: str):
-    pdf = _pdf_nou()
-    perioada = (
-        f'{LUNI_RO[jurnal["luna"]]} {jurnal["anul"]}'
-        if jurnal["luna"]
-        else f'anul {jurnal["anul"]}'
-    )
-    pdf.table_header(["JURNAL PENTRU CUMPARARI"], align=Align.L)
-    pdf.table_row([f"{_denumire_pfa(setari)}"], option="responsive")
-    pdf.table_row([f"Perioada: {perioada}"])
-    pdf.table_row([""])
-
-    width_cols = pdf.table_cols(0.5, 1.2, 1.9, 2.2, 1.7, 1.3, 1.2, 1.1, 0.8)
-    pdf.table_header(
-        ["Nr.", "Data", "Numar document", "Furnizor", "Cod fiscal", "Total doc. (cu TVA)", "Baza impozitare", "Valoare TVA", "Ref. cod"],
-        width_cols,
-        align=Align.C,
-    )
-    for r in jurnal["randuri"]:
-        pdf.table_row(
-            [
-                str(r["nr_crt"]),
-                r["data_doc"],
-                r["nr_doc"],
-                r["furnizor_denumire"],
-                r["furnizor_cod_fiscal"],
-                f'{r["total_document"]:.2f}',
-                f'{r["baza"]:.2f}',
-                f'{r["tva"]:.2f}',
-                r["cod_referinta"],
-            ],
-            width_cols,
-            option="responsive",
-        )
-    pdf.set_font(pdf.font, "B", pdf.text_normal_size)
-    pdf.table_row(
-        ["", "", "", "", "Total", f'{jurnal["total_document"]:.2f}', f'{jurnal["total_baza"]:.2f}', f'{jurnal["total_tva"]:.2f}', ""],
-        width_cols,
-    )
-    pdf.set_font(pdf.font, "", pdf.text_normal_size)
-    pdf.table_row([""])
-    pdf.table_row([f'Referinta {COD_REFERINTA_JURNAL}: {DENUMIRE_REFERINTA_JURNAL}'], option="responsive")
-    pdf.table_row(["Total document include TVA autolichidata, chiar daca furnizorul a facturat 0% TVA (reverse charge)."], option="responsive")
-    pdf.output(output_path)
-
 
 def genereaza_jurnal_cumparari_xlsx(jurnal: dict, output_path: str):
     """Jurnalul de cumparari in Excel, cu aceleasi coloane ca exportul din Registre."""

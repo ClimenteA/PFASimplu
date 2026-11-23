@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from utils.localitati import Localitati
+from utils.models import UserOwnedModel, UserScopedManager
 from utils.valuta import Valuta
 
 
@@ -28,7 +29,7 @@ def validate_iban_trezoreria(value):
         raise ValidationError(_("IBAN-ul trezoreriei nu este valid (cifra de control gresita). Verifica-l in lista ANAF."))
 
 
-class SetariModel(models.Model):
+class SetariModel(UserOwnedModel):
     nume = models.CharField(max_length=250)
     localitate = models.CharField(max_length=250, choices=Localitati)
     adresa = models.CharField(max_length=500)
@@ -61,6 +62,8 @@ class SetariModel(models.Model):
     cont_iban_trezoreria = models.CharField(
         max_length=34, blank=True, null=True, validators=[validate_iban_trezoreria]
     )
+
+    objects = UserScopedManager()
 
     class Meta:
         verbose_name_plural = "Setari"

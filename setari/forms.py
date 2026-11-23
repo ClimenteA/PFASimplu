@@ -17,7 +17,7 @@ class SetariForm(ModelForm):
 
     class Meta:
         model = SetariModel
-        exclude = ["actualizat_la"]
+        exclude = ["actualizat_la", "user"]
         widgets = {
             'scutit_cas': forms.CheckboxInput(),
             'scutit_cass': forms.CheckboxInput(),

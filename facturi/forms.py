@@ -6,6 +6,7 @@ class FacturaForm(ModelForm):
     class Meta:
         model = FacturaModel
         fields = "__all__"
+        exclude = ["user"]
         widgets = {
             "nota": Textarea(attrs={"rows": "1"}),
             "data_emitere": DateInput(format=("%m/%d/%Y"), attrs={"type": "date"}),

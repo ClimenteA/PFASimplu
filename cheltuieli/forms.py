@@ -13,6 +13,7 @@ class CheltuieliForm(ModelForm):
             "baza_in_lei",
             "tva_autolichidata",
             "curs_bnr_aplicat",  # completat automat din cursvalutarbnr
+            "user",
         ]
         widgets = {
             "cod_de_clasificare": TextInput(attrs={"placeholder": "2.2.9."}),
