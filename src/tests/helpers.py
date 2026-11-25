@@ -5,11 +5,11 @@ import sys
 from decimal import Decimal
 from pathlib import Path
 
-# pytest pune in sys.path doar directorul tests/ (nu si radacina proiectului),
-# asa ca o adaugam explicit pentru a importa utilitarul de calcul cu Decimal.
-REPO_ROOT = Path(__file__).resolve().parent.parent
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
+# pytest pune in sys.path doar directorul tests/ (nu si src/), asa ca adaugam
+# explicit sursele pentru a importa utilitarul de calcul cu Decimal.
+SRC_DIR = Path(__file__).resolve().parent.parent
+if str(SRC_DIR) not in sys.path:
+    sys.path.insert(0, str(SRC_DIR))
 
 from playwright.sync_api import Page, expect
 
@@ -169,7 +169,7 @@ def emite_factura(
     assert_saved(page)
 
     # Calculul se face cu Decimal (4 zecimale in intermediar, ROUND_HALF_UP la
-    # 2 zecimale pentru totalul final), ca in formularul din templates/facturi.html.
+    # 2 zecimale pentru totalul final), ca in formularul din src/templates/facturi.html.
     total = suma([D(int(p["unitati"])) * D(p["pret"]) for p in produse])
     return rotund2(total)
 

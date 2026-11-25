@@ -14,7 +14,7 @@ Ordinea fluxului, asa cum lucreaza un utilizator real:
        calculata corect, amortizari mijloace fixe.
 
 Datele sunt generate cu Faker (locale ro_RO). Baza de date de test ramane in
-tests/.runtime/test.db pentru inspectie ulterioara.
+src/tests/.runtime/test.db pentru inspectie ulterioara.
 """
 
 import datetime

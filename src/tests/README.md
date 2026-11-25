@@ -30,27 +30,27 @@ o luna; rulate in decembrie, acopera tot anul.
 uv run playwright install chromium
 
 # toate testele (headless)
-uv run pytest tests/ -v
+uv run pytest src/tests/ -v
 
 # cu browser vizibil / incetinit
-uv run pytest tests/ -v --headed
-uv run pytest tests/ -v --headed --slowmo 300
+uv run pytest src/tests/ -v --headed
+uv run pytest src/tests/ -v --headed --slowmo 300
 
 # doar o luna / doar o etapa
-uv run pytest tests/ -v -k "luna3"
-uv run pytest tests/ -v -k "setari or mijloace"
+uv run pytest src/tests/ -v -k "luna3"
+uv run pytest src/tests/ -v -k "setari or mijloace"
 ```
 
 ## Izolare
 
 - Serverul Django de test porneste automat pe un port liber, cu baza de date
-  separata `tests/.runtime/test.db` (prin variabila de mediu
-  `PFASIMPLU_DB_PATH`) — **datele reale din `dbsqlite/stocare.db` nu sunt
+  separata `src/tests/.runtime/test.db` (prin variabila de mediu
+  `PFASIMPLU_DB_PATH`) — **datele reale din `src/dbsqlite/stocare.db` nu sunt
   atinse**.
 - Migrarile sunt generate automat la fiecare rulare (proiectul nu le
   versioneaza, vezi `make purge-migration-dirs`).
 - Documentele justificative generate (PDF-uri minimale) sunt in
-  `tests/.runtime/files/`.
+  `src/tests/.runtime/files/`.
 - Baza de date de test ramane dupa rulare, pentru inspectie manuala.
 
 ## Structura

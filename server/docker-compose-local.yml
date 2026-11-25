@@ -1,6 +1,8 @@
 # Varianta dockerizata pentru uz local, mereu pornita.
+# Fisierul sta in server/, deci contextul de build si volumele de date sunt
+# cu o pozitie deasupra (radacina repo-ului).
 #
-#   docker compose -f docker-compose-local.yml up -d --build
+#   docker compose -f server/docker-compose-local.yml up -d --build
 #
 # Aplicatia e accesibila la http://localhost:8996 (port configurabil prin
 # variabila de mediu PFASIMPLU_PORT, ex: PFASIMPLU_PORT=9000 docker compose ...).
@@ -18,14 +20,16 @@ x-app-env: &app-env
   PFASIMPLU_CSRF_TRUSTED_ORIGINS: http://localhost:${PFASIMPLU_PORT:-8996},http://127.0.0.1:${PFASIMPLU_PORT:-8996}
 
 x-app-volumes: &app-volumes
-  - ./data/dbsqlite:/data/dbsqlite
-  - ./data/media:/data/media
-  - ./staticfiles:/app/staticfiles
+  - ../data/dbsqlite:/data/dbsqlite
+  - ../data/media:/data/media
+  - ../staticfiles:/app/staticfiles
 
 services:
   pfasimplu-local:
     container_name: pfasimplu-local
-    build: .
+    build:
+      context: ..
+      dockerfile: server/Dockerfile
     restart: unless-stopped
     ports:
       - "${PFASIMPLU_PORT:-8996}:8000"
@@ -34,7 +38,9 @@ services:
 
   pfasimplu-mcp-local:
     container_name: pfasimplu-mcp-local
-    build: .
+    build:
+      context: ..
+      dockerfile: server/Dockerfile
     restart: unless-stopped
     depends_on:
       - pfasimplu-local

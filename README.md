@@ -80,18 +80,18 @@ Aplicatia este facuta in Python (>= 3.12), Django cu SQLiteDB.
 - [instaleaza uv](https://docs.astral.sh/uv/getting-started/installation/) (managerul de pachete folosit de proiect);
 - `uv sync` - creeaza `.venv` si instaleaza dependintele (inclusiv cele de testare);
 - `make migrate-all` - creeaza/aplica migrarile pentru toate app-urile;
-- `make dev` - porneste serverul de dezvoltare la `http://127.0.0.1:8990` (aka `uv run manage.py runserver 8990`);
-- `make purge-db` - sterge `dbsqlite/stocare.db` (sqlite db) si toate folderele `migrations`;
+- `make dev` - porneste serverul de dezvoltare la `http://127.0.0.1:8990` (aka `uv run src/manage.py runserver 8990`);
+- `make purge-db` - sterge `src/dbsqlite/stocare.db` (sqlite db) si toate folderele `migrations`;
 - `make purge-migration-dirs` - sterge toate folderele `migrations`;
 - `make package` - creeaza aplicatia pfasimplu ca executabil pentru sistemul de operare pe care a fost rulat;
 - `make test-e2e` - ruleaza testele end-to-end (vezi sectiunea [Debug si testare (dezvoltatori)](#debug-si-testare-dezvoltatori)).
 
-Pe Windows comenzile make au echivalentul `.\makefile.bat X` - unde X poate fi `run`, `migrate-all`, `purge-db`, `purge-migration-dirs` etc. (ex: `.\makefile.bat run` porneste `python manage.py runserver` pe portul implicit 8000).
+Pe Windows comenzile make au echivalentul `.\makefile.bat X` - unde X poate fi `run`, `migrate-all`, `purge-db`, `purge-migration-dirs` etc. (ex: `.\makefile.bat run` porneste `python src/manage.py runserver` pe portul implicit 8000).
 
 - activate venv windows - `& D:/PFASimplu/.venv/Scripts/Activate.ps1`
 - allow bash in powershell - `Set-ExecutionPolicy Unrestricted -Scope Process`
 
-Datele aplicatiei stau local: baza de date in `dbsqlite/stocare.db`, fisierele urcate/generate in `media/`. Ambele sunt in `.gitignore` - nu se urca in git. Poti muta locatia lor cu variabilele de mediu `PFASIMPLU_DB_PATH` si `PFASIMPLU_MEDIA_ROOT` (util ca sa lucrezi/testezi fara sa atingi datele reale).
+Datele aplicatiei stau local: baza de date in `src/dbsqlite/stocare.db`, fisierele urcate/generate in `src/media/`. Ambele sunt in `.gitignore` - nu se urca in git. Poti muta locatia lor cu variabilele de mediu `PFASIMPLU_DB_PATH` si `PFASIMPLU_MEDIA_ROOT` (util ca sa lucrezi/testezi fara sa atingi datele reale).
 
 
 ## Instalare pe VPS (Docker, mod multi-user)
@@ -99,7 +99,7 @@ Datele aplicatiei stau local: baza de date in `dbsqlite/stocare.db`, fisierele u
 Aplicatia poate rula si pe un server, cu **login/inregistrare pe email + parola**
 (sistemul de autentificare inclus in Django) si **date izolate per utilizator**:
 fiecare cont isi vede doar propriile incasari, cheltuieli, facturi, documente si
-setari, iar fisierele urcate stau in `media/user_<id>/` si pot fi descarcate doar
+setari, iar fisierele urcate stau in `src/media/user_<id>/` si pot fi descarcate doar
 de proprietar.
 
 Modul multi-user se activeaza prin `PFASIMPLU_MULTI_USER=1` (setat automat in
@@ -112,41 +112,41 @@ Pe VPS (cu Docker si Docker Compose instalate):
 git clone https://github.com/ClimenteA/PFASimplu && cd PFASimplu
 
 # configurarea aplicatiei
-cp .env.prod.example .env.prod
-# editeaza .env.prod: PFASIMPLU_SECRET_KEY (aleator, lung),
+cp server/.env.prod.example server/.env.prod
+# editeaza server/.env.prod: PFASIMPLU_SECRET_KEY (aleator, lung),
 # PFASIMPLU_ALLOWED_HOSTS si PFASIMPLU_CSRF_TRUSTED_ORIGINS cu domeniul tau
 
-# aplicatia + proxy-ul TLS (Caddy); pune domeniul tau in Caddyfile
-docker compose up -d --build   # sau: make start
+# aplicatia + proxy-ul TLS (Caddy); pune domeniul tau in server/Caddyfile
+docker compose -f server/docker-compose.yml up -d --build   # sau: make start
 ```
 
 - Baza de date SQLite si fisierele urcate raman pe gazda in `./data/`
-  (volume in `docker-compose.yml`) - poti face backup doar la acest folder.
+  (volume in `server/docker-compose.yml`) - poti face backup doar la acest folder.
 - La pornire containerul aplica migrarile si colectorul de fisiere statice automat.
 - Optional: seteaza `DJANGO_SUPERUSER_EMAIL` / `DJANGO_SUPERUSER_PASSWORD` in
-  `.env.prod` pentru a crea un cont de admin (`/admin/`) la prima pornire.
-- Optional: `PFASIMPLU_ALLOW_REGISTRATION=0` in `.env.prod` blocheaza crearea de
+  `server/.env.prod` pentru a crea un cont de admin (`/admin/`) la prima pornire.
+- Optional: `PFASIMPLU_ALLOW_REGISTRATION=0` in `server/.env.prod` blocheaza crearea de
   conturi noi (pagina de inregistrare devine 404); utilizatorii existenti se pot
   autentifica in continuare. Util implicit: `1` (inregistrare deschisa).
-- Pentru test local fara domeniu/TLS: in Caddyfile inlocuieste domeniul cu `:80`
-  si in `.env.prod` pune `PFASIMPLU_ALLOWED_HOSTS=localhost` si
+- Pentru test local fara domeniu/TLS: in server/Caddyfile inlocuieste domeniul cu `:80`
+  si in `server/.env.prod` pune `PFASIMPLU_ALLOWED_HOSTS=localhost` si
   `PFASIMPLU_CSRF_TRUSTED_ORIGINS=http://localhost`.
 
 Pentru a rula varianta dockerizata local, mereu pornita (fara Caddy/TLS):
 
 ```bash
-docker compose -f docker-compose-local.yml up -d --build   # sau: make start-local
+docker compose -f server/docker-compose-local.yml up -d --build   # sau: make start-local
 ```
 
 Aplicatia e accesibila la `http://localhost:8996`. Portul se schimba prin
-`PFASIMPLU_PORT` (ex. `PFASIMPLU_PORT=9000 docker compose -f docker-compose-local.yml up -d`).
+`PFASIMPLU_PORT` (ex. `PFASIMPLU_PORT=9000 docker compose -f server/docker-compose-local.yml up -d`).
 Cu `restart: unless-stopped` si serviciul Docker pornit la boot, aplicatia revine
 singura dupa restartul calculatorului (mai putin daca a fost oprita manual).
 
 Pentru a rula modul multi-user si fara Docker (ex. pentru teste):
 
 ```bash
-PFASIMPLU_MULTI_USER=1 uv run manage.py runserver
+PFASIMPLU_MULTI_USER=1 uv run src/manage.py runserver
 ```
 
 
@@ -183,7 +183,7 @@ serverul MCP. Cheia i se trimite prin variabila de mediu
 ```bash
 opencode mcp add pfasimplu \
   --env PFASIMPLU_MCP_TOKEN=<CHEIA_TA> \
-  -- uv run --directory /cale/catre/PFASimplu python -m mcp_server.local
+  -- uv run --directory /cale/catre/PFASimplu/src python -m mcp_server.local
 ```
 
 Echivalent cu make (in folderul proiectului):
@@ -200,11 +200,11 @@ aplicatia desktop.
 
 ### 3. Varianta dockerizata locala, prin HTTP
 
-Serviciul MCP porneste odata cu `docker-compose-local.yml` si e expus pe
+Serviciul MCP porneste odata cu `server/docker-compose-local.yml` si e expus pe
 portul `8997` (`PFASIMPLU_MCP_PORT`):
 
 ```bash
-docker compose -f docker-compose-local.yml up -d --build
+docker compose -f server/docker-compose-local.yml up -d --build
 
 opencode mcp add pfasimplu-local \
   --url http://localhost:8997/mcp \
@@ -216,10 +216,10 @@ Fara Docker, pentru dezvoltare: `make mcp-http` (la `http://127.0.0.1:8001/mcp`)
 ### 4. Varianta de pe VPS, prin HTTPS
 
 Caddy expune serverul MCP pe subdomeniul `mcp.<PFASIMPLU_DOMAIN>`.
-Seteaza `PFASIMPLU_DOMAIN` in `.env.prod`, apoi:
+Seteaza `PFASIMPLU_DOMAIN` in `server/.env.prod`, apoi:
 
 ```bash
-docker compose up -d --build
+docker compose -f server/docker-compose.yml up -d --build
 
 # Exemplu de conectare (foloseste propriul domeniu si cheia generata in /setari):
 opencode mcp add chatcodfiscal \
@@ -229,7 +229,7 @@ opencode mcp add chatcodfiscal \
 
 Endpoint-ul e `https://mcp.<domeniu>/mcp`; `https://mcp.<domeniu>/health` e
 public (pentru monitoring). Daca testezi local fara domeniu/TLS, comenteaza
-blocul `mcp....` din Caddyfile.
+blocul `mcp....` din server/Caddyfile.
 
 ### Tooluri expuse
 
@@ -284,9 +284,9 @@ Oricand, dar musai inainte de a completa Declaratia Unica: cardurile cu totaluri
 **8. La final de an:** din `Setari` → `Exporta datele din aplicatie` alegi anul si primesti un zip cu toate documentele justificative, registrele in Excel, fisele mijloacelor fixe si `SUMAR.html` - arhiva completa pentru acel an, de pastrat pentru controlul ANAF.
 
 **Ce face aplicatia in spate cu fisierele:**
-- fiecare fisier urcat sau generat (facturi PDF/XML, justificative, fise mijloc fix) e salvat in `media/` cu un prefix-id unic de 8 caractere (ex. `0x4rf2KW_factura_PFT-1.pdf`), ca sa nu existe coliziuni de nume; la re-incarcarea unui fisier deja prefixat, prefixul vechi e inlocuit;
-- in modul multi-user fisierele stau in `media/user_<id>/` si pot fi descarcate doar de proprietar;
-- exporturile CSV/XLSX ale registrelor si zip-urile generate (D301/D390, exportul pe an) se construiesc temporar in `media/extracts/` si se livreaza la download;
+- fiecare fisier urcat sau generat (facturi PDF/XML, justificative, fise mijloc fix) e salvat in `src/media/` cu un prefix-id unic de 8 caractere (ex. `0x4rf2KW_factura_PFT-1.pdf`), ca sa nu existe coliziuni de nume; la re-incarcarea unui fisier deja prefixat, prefixul vechi e inlocuit;
+- in modul multi-user fisierele stau in `src/media/user_<id>/` si pot fi descarcate doar de proprietar;
+- exporturile CSV/XLSX ale registrelor si zip-urile generate (D301/D390, exportul pe an) se construiesc temporar in `src/media/extracts/` si se livreaza la download;
 - la stergerea unei inregistrari din aplicatie, fisierul atasat ei este sters automat de pe disc (django-cleanup); `Sterge toate datele` din Setari sterge si baza de date si fisierele;
 - cursurile BNR se iau online prin `cursvalutarbnr` si se cache-uiesc local, deci anii trecuti functioneaza si offline.
 
@@ -308,7 +308,7 @@ Cu butonul `Exporta datele din aplicatie` descarci un zip cu datele pentru **anu
 
 Daca ai **cod special de TVA intracomunitar (art. 317 Cod fiscal)** si cumperi servicii din UE/non-UE (ex. Google, Cloudflare, OpenAI), deschide sectiunea `TVA intracomunitar (D301/D390)` si completeaza:
 - **Cod TVA intracomunitar** - codul special din certificatul de inregistrare in scopuri de TVA, fara prefixul RO. Este diferit de CIF-ul normal al PFA-ului: pentru facturi din UE se foloseste codul special, pentru non-UE codul normal (aplicatia alege automat codul corect);
-- **IBAN trezorerie pentru plata TVA** - se completeaza **automat cand selectezi localitatea** (campul `Alege localitatea`): aplicatia are tabelul IBAN-urilor extras din [sursele oficiale ANAF](https://www.anaf.ro/anaf/internet/ANAF/asistenta_contribuabili/plata_oblig_fiscale/coduri_iban) (202 trezorerii operative, inclusiv sectoarele Bucurestiului) si stie contul `20A100101 - TVA incasata pentru operatiuni interne` pentru localitatea ta. Linkul PDF-ului ANAF ramane afisat ca sa poti verifica. Daca tabelul `static/iban_trezorerie.json` lipseste, aplicatia il descarca automat de pe ANAF la prima salvare a Setarilor (necesita conexiune la internet; dureaza cateva minute). Daca localitatea nu are trezorerie operativa proprie (sate/comune), cauta IBAN-ul in lista ANAF pentru judetul tau si completeaza-l manual. TVA-ul din D301 NU se plateste in contul unic.
+- **IBAN trezorerie pentru plata TVA** - se completeaza **automat cand selectezi localitatea** (campul `Alege localitatea`): aplicatia are tabelul IBAN-urilor extras din [sursele oficiale ANAF](https://www.anaf.ro/anaf/internet/ANAF/asistenta_contribuabili/plata_oblig_fiscale/coduri_iban) (202 trezorerii operative, inclusiv sectoarele Bucurestiului) si stie contul `20A100101 - TVA incasata pentru operatiuni interne` pentru localitatea ta. Linkul PDF-ului ANAF ramane afisat ca sa poti verifica. Daca tabelul `src/static/iban_trezorerie.json` lipseste, aplicatia il descarca automat de pe ANAF la prima salvare a Setarilor (necesita conexiune la internet; dureaza cateva minute). Daca localitatea nu are trezorerie operativa proprie (sate/comune), cauta IBAN-ul in lista ANAF pentru judetul tau si completeaza-l manual. TVA-ul din D301 NU se plateste in contul unic.
 
 ![setari](readmepics/setari.png)
 
@@ -459,9 +459,9 @@ Aici ai o vedere de ansamblu asupra incasarilor, cheltuielilor precum si taxele/
 
 Poti alege anul si sa vezi sumele din grafic si total carduri in EUR sau RON.
 
-Taxele se calculeaza pe regulile din anul selectat (vezi `utils/calcule.py`): din 2025, daca venitul net este 0 sau negativ nu datorezi CASS; pentru venit net pozitiv CASS este 10% din venitul net, cu o baza minima de 6 salarii minime brute si o baza maxima de 60 de salarii (72 din 2026). CAS (25%) se datoreaza doar peste pragul de 12 salarii minime, iar impozitul pe venit (10%) se aplica la venitul net din care se scad CAS si CASS. Cei scutiti (profesii liberale cu casa de asigurari proprie, pensionari etc.) pot bifa scutirile in [Setari](#setari).
+Taxele se calculeaza pe regulile din anul selectat (vezi `src/utils/calcule.py`): din 2025, daca venitul net este 0 sau negativ nu datorezi CASS; pentru venit net pozitiv CASS este 10% din venitul net, cu o baza minima de 6 salarii minime brute si o baza maxima de 60 de salarii (72 din 2026). CAS (25%) se datoreaza doar peste pragul de 12 salarii minime, iar impozitul pe venit (10%) se aplica la venitul net din care se scad CAS si CASS. Cei scutiti (profesii liberale cu casa de asigurari proprie, pensionari etc.) pot bifa scutirile in [Setari](#setari).
 
-Toate calculele financiare se fac cu `Decimal` (vezi `utils/decimale.py`), cu precizie de 4 zecimale pentru valorile intermediare. Sumele finale (totaluri, taxe de plata) se rotunjesc la 2 zecimale cu regula „ce e peste .5 urca, ce e sub .5 coboara" (`ROUND_HALF_UP`), nu cu rotunjirea implicita a Pythonului.
+Toate calculele financiare se fac cu `Decimal` (vezi `src/utils/decimale.py`), cu precizie de 4 zecimale pentru valorile intermediare. Sumele finale (totaluri, taxe de plata) se rotunjesc la 2 zecimale cu regula „ce e peste .5 urca, ce e sub .5 coboara" (`ROUND_HALF_UP`), nu cu rotunjirea implicita a Pythonului.
 
 Poti descarca registrele dand click fie pe iconita de csv sau xlsx. Se descarca direct un singur fisier CSV sau XLSX cu datele registrului, fara arhiva zip si fara documentele justificative. Toate fisierele salvate in aplicatie vor avea un prefix id de 8 caractere dupa care le puteti gasi (ex: `0x4rf2KW_Factura_etc.pdf`).  
 
@@ -475,7 +475,7 @@ In tab-ul **Jurnal Cumparaturi** gasesti **Jurnalul de cumpărări**: daca ai ch
 
 Poti verifica oricand daca a aparut o versiune noua a aplicatiei pe pagina de [Github Releases](https://github.com/ClimenteA/PFASimplu/releases) (pagina de unde ai descarcat prima data aplicatia). Din Assets descarca ultima versiune pentru sistemul tau de operare.
 
-Versiunea pe care o rulezi apare in subsolul paginii `Setari` (ex. `PFASimplu V3.0.0`). La actualizare, datele tale raman pe loc (baza de date `dbsqlite/stocare.db` si folderul `media/` nu sunt atinse de executabil); inlocuiesti doar executabilul/fisierele aplicatiei. Pentru siguranta, inainte de actualizare poti face un export pe an din `Setari` → `Exporta datele din aplicatie`.
+Versiunea pe care o rulezi apare in subsolul paginii `Setari` (ex. `PFASimplu V3.0.0`). La actualizare, datele tale raman pe loc (baza de date `src/dbsqlite/stocare.db` si folderul `src/media/` nu sunt atinse de executabil); inlocuiesti doar executabilul/fisierele aplicatiei. Pentru siguranta, inainte de actualizare poti face un export pe an din `Setari` → `Exporta datele din aplicatie`.
 
 
 ## Debug si testare (dezvoltatori)
@@ -488,22 +488,23 @@ make migrate-all        # migrarile tuturor app-urilor
 make dev                # http://127.0.0.1:8990, cu auto-reload la modificari de cod
 ```
 
-Implicit `DEBUG=1` (vezi `core/settings.py`), deci erorile Django se afiseaza complet in browser, iar `django-browser-reload` reincarca pagina la modificari de template-uri/cod. Pentru a lucra fara sa atingi datele reale:
+Implicit `DEBUG=1` (vezi `src/core/settings.py`), deci erorile Django se afiseaza complet in browser, iar `django-browser-reload` reincarca pagina la modificari de template-uri/cod. Pentru a lucra fara sa atingi datele reale:
 
 ```bash
-PFASIMPLU_DB_PATH=/tmp/demo.db PFASIMPLU_MEDIA_ROOT=/tmp/demo-media uv run manage.py runserver 8990
+PFASIMPLU_DB_PATH=/tmp/demo.db PFASIMPLU_MEDIA_ROOT=/tmp/demo-media uv run src/manage.py runserver 8990
 ```
 
-Alte variabile de mediu utile (toate in `core/settings.py`):
+Alte variabile de mediu utile (toate in `src/core/settings.py`):
 
 | Variabila | Rol | Implicit |
 |---|---|---|
-| `PFASIMPLU_DB_PATH` / `PFASIMPLU_DB_DIR` | locatia bazei de date SQLite | `dbsqlite/stocare.db` |
-| `PFASIMPLU_MEDIA_ROOT` | folderul fisierelor urcate/generate | `media/` |
+| `PFASIMPLU_DB_PATH` / `PFASIMPLU_DB_DIR` | locatia bazei de date SQLite | `src/dbsqlite/stocare.db` |
+| `PFASIMPLU_MEDIA_ROOT` | folderul fisierelor urcate/generate | `src/media/` |
+| `PFASIMPLU_STATIC_ROOT` | folderul fisierelor statice colectate (setat in Docker) | `src/staticfiles/` |
 | `PFASIMPLU_MULTI_USER` | `1` = login pe email + parola, date izolate per user | `0` (desktop, fara login) |
 | `PFASIMPLU_DEBUG` | `0` = mod productie (fara trace-uri in browser) | `1` |
 | `PFASIMPLU_ALLOW_REGISTRATION` | `0` = blocheaza crearea de conturi (mod multi-user) | `1` |
-| `PFASIMPLU_SECRET_KEY`, `PFASIMPLU_ALLOWED_HOSTS`, `PFASIMPLU_CSRF_TRUSTED_ORIGINS` | necesare pe server (vezi `.env.prod.example`) | - |
+| `PFASIMPLU_SECRET_KEY`, `PFASIMPLU_ALLOWED_HOSTS`, `PFASIMPLU_CSRF_TRUSTED_ORIGINS` | necesare pe server (vezi `server/.env.prod.example`) | - |
 | `PFASIMPLU_DOMAIN` | domeniul folosit de Caddy (inclusiv `mcp.<domeniu>`) | `pfa.exemplu.ro` |
 | `PFASIMPLU_MCP_PORT` | portul serverului MCP in container | `8001` |
 | `PFASIMPLU_MCP_TOKEN` | cheia MCP pentru transportul stdio (local) | - |
@@ -511,14 +512,22 @@ Alte variabile de mediu utile (toate in `core/settings.py`):
 Modul multi-user local (pentru a testa login-ul si izolarea datelor):
 
 ```bash
-PFASIMPLU_MULTI_USER=1 uv run manage.py runserver
+PFASIMPLU_MULTI_USER=1 uv run src/manage.py runserver
 # creeaza un cont din /conturi/inregistrare/ sau un admin:
-uv run manage.py createsuperuser   # apoi /admin/
+uv run src/manage.py createsuperuser   # apoi /admin/
 ```
 
 ### Structura codului
 
-| App / folder | Rol |
+Radacina repo-ului contine configuratia proiectului (`pyproject.toml`, `uv.lock`, `Makefile`), documentatia si datele de rulare. Codul aplicatiei sta in `src/`, iar fisierele de deploy Docker in `server/`.
+
+| Folder | Rol |
+|---|---|
+| `src/` | sursele aplicatiei: app-urile Django, `core/`, `mcp_server/`, `templates/`, `static/`, `tests/`, `docs/` si datele locale (`media/`, `dbsqlite/`, `stocare/`) |
+| `server/` | `Dockerfile`, `docker-compose*.yml`, `server/Caddyfile`, `docker-entrypoint.sh`, `.env.prod.example` |
+| `readmepics/` | imagini folosite in acest README |
+
+| App / folder (in `src/`) | Rol |
 |---|---|
 | `setari/` | datele PFA-ului, IBAN-uri, cod TVA intracomunitar, export/stergere date, cheia MCP |
 | `mcp_server/` | server FastMCP: tool-uri, autorizare Bearer, transport stdio (`local.py`) si HTTP (`http_app.py`) |
@@ -535,26 +544,26 @@ uv run manage.py createsuperuser   # apoi /admin/
 
 ### Teste end-to-end
 
-Testele ruleaza un scenariu complet pe anul curent (Setari → Facturi → Incasari → Cheltuieli, inclusiv taxare inversa si mijloace fixe) intr-un browser real, pe o **bază de date izolata** (`tests/.runtime/test.db`) - datele reale nu sunt atinse. Detalii in [tests/README.md](tests/README.md).
+Testele ruleaza un scenariu complet pe anul curent (Setari → Facturi → Incasari → Cheltuieli, inclusiv taxare inversa si mijloace fixe) intr-un browser real, pe o **bază de date izolata** (`src/tests/.runtime/test.db`) - datele reale nu sunt atinse. Detalii in [tests/README.md](src/tests/README.md).
 
 ```bash
 make test-e2e           # instaleaza Chromium (daca lipseste) + ruleaza toate testele
 
 # echivalent, cu optiuni:
 uv run playwright install chromium          # o singura data
-uv run pytest tests/ -v                     # headless
-uv run pytest tests/ -v --headed --slowmo 300   # cu browser vizibil
-uv run pytest tests/ -v -k "luna3"          # doar o luna / o etapa
+uv run pytest src/tests/ -v                     # headless
+uv run pytest src/tests/ -v --headed --slowmo 300   # cu browser vizibil
+uv run pytest src/tests/ -v -k "luna3"          # doar o luna / o etapa
 ```
 
-Dupa rulare, baza de date de test ramane in `tests/.runtime/` pentru inspectie manuala (o poti deschide cu orice client SQLite sau porni aplicatia pe ea cu `PFASIMPLU_DB_PATH`).
+Dupa rulare, baza de date de test ramane in `src/tests/.runtime/` pentru inspectie manuala (o poti deschide cu orice client SQLite sau porni aplicatia pe ea cu `PFASIMPLU_DB_PATH`).
 
 ### Depanare
 
-- **Serverul nu porneste / port ocupat**: `make dev` foloseste portul 8990; schimba-l cu `uv run manage.py runserver <port>`.
+- **Serverul nu porneste / port ocupat**: `make dev` foloseste portul 8990; schimba-l cu `uv run src/manage.py runserver <port>`.
 - **Erori de migrari dupa modificari de modele**: `make migrate-all`; daca migrarile sunt corupte, `make purge-migration-dirs` apoi `make migrate-all` (atenție: pe o baza de date existenta cu schema veche poate fi nevoie de `make purge-db`, care **sterge datele**).
 - **Curs BNR indisponibil**: `cursvalutarbnr` ia cursurile online si le cache-uieste in folderul temporar al sistemului (`cache_cursvalutarbnr`); prima rulare necesita internet.
-- **Fisiere lipsa dupa mutarea bazei de date**: fisierele sunt referite relativ la `PFASIMPLU_MEDIA_ROOT` - muta si folderul `media/` odata cu `stocare.db`.
+- **Fisiere lipsa dupa mutarea bazei de date**: fisierele sunt referite relativ la `PFASIMPLU_MEDIA_ROOT` - muta si folderul `src/media/` odata cu `stocare.db`.
 - **Login obligatoriu fara sa vrei**: verifica sa nu ai `PFASIMPLU_MULTI_USER=1` in mediu.
 
 

@@ -82,7 +82,7 @@ Consecinte:
 - Ordinea apelurilor din `save()` conteaza (taxarea inversa inainte de
   conversie, comentariu la `cheltuieli/models.py:320`), deci valorile pot
   divergea daca o ruta ocoleste `save()` (exact ce face e2e-ul la
-  `tests/test_an_complet.py:820-824` prin SQL direct).
+  `src/tests/test_an_complet.py:820-824` prin SQL direct).
 - `grupa`, `durata_normala_de_functionare`, `cota_de_amortizare` si cele 4
   campuri an/luna sunt citite **o singura data** in tot codul de productie:
   in `utils/mijloc_fix_pdf.py:46-53`. 6 coloane pentru o singura fisa PDF.
@@ -93,9 +93,9 @@ Consecinte:
 ### P2 — JSON ca baza de date mini-table (prioritate mare)
 
 - `FacturaModel.produse_sau_servicii` (`JSONField(default=list)`): 7 chei per
-  linie, validare doar in JavaScript (`templates/facturi.html:266-271`),
+  linie, validare doar in JavaScript (`src/templates/facturi.html:266-271`),
   fara schema in model. Citit la generarea PDF/XML
-  (`facturi/models.py:446-455`, `templates/efactura.xml:87-105`) si exportat
+  (`src/facturi/models.py:446-455`, `src/templates/efactura.xml:87-105`) si exportat
   ca string in CSV/XLSX (`utils/views.py:140-147`).
 - `SetariModel.conturi_iban` (`JSONField`): lista de
   `{"valuta", "iban"}`, cu unicitate per valuta validata doar in
@@ -114,7 +114,7 @@ decide in `save()` daca are loc o parsare de PDF, cu **doua apeluri
 ### P4 — Tipuri si enumerari inconsistente (prioritate medie)
 
 - `FacturaModel.data_emitere` / `data_scadenta` sunt `DateTimeField`, dar
-  codul le foloseste doar ca date (`.date()` la `facturi/models.py:423-424`,
+  codul le foloseste doar ca date (`.date()` la `src/facturi/models.py:423-424`,
   widget `type="date"`).
 - `facturi.ModalitatePlata` foloseste codurile `"42"` / `"10"`, in timp ce
   `utils.TipTranzactie` foloseste `"BANCAR"` / `"NUMERAR"` pentru aceeasi
@@ -142,7 +142,7 @@ diferente cu acelasi nume; factura emisa fara incasare nu apare in
 
 ### P6 — Efecte secundare in `save()` (prioritate scazuta, dar de rezolvat)
 
-- `FacturaModel.save()` (`facturi/models.py:403-470`) regenereaza PDF-ul (si
+- `FacturaModel.save()` (`src/facturi/models.py:403-470`) regenereaza PDF-ul (si
   XML-ul) la **fiecare** salvare, folosind un fisier tmp cu nume fix.
 - `SetariView.post` sterge toate randurile `SetariModel` si le resalveaza
   (`setari/views.py:183`) pentru a simula singletonul.
@@ -262,7 +262,7 @@ utilizatorul nu il seteaza), `data_*amortizarii`, `amortizare_lunara`,
 `COTIZATII`), cu etichetele romanesti actuale in `label`. Fiind baza noua,
 nu e nevoie de compatibilitate cu valorile vechi.
 
-### 4.3 `facturi/models.py` + linii
+### 4.3 `src/facturi/models.py` + linii
 
 ```python
 class FacturaModel(UserOwnedModel):
@@ -392,7 +392,7 @@ managerului `objects` normal, nu a celui user-scoped, ceea ce e deja cazul.
 ## 5. Plan de implementare (baza noua)
 
 1. **Pregatire (fara schimbare de comportament)**
-   - Branch nou; se noteaza ca `dbsqlite/stocare.db` si `tests/.runtime/test.db`
+   - Branch nou; se noteaza ca `src/dbsqlite/stocare.db` si `src/tests/.runtime/test.db`
      se pot sterge.
    - Se muta `CODURI_CLASIFICARE` in `cheltuieli/catalog.py`.
    - Se introduc modulele `cheltuieli/calcul.py`, `facturi/generare.py`,
@@ -401,8 +401,8 @@ managerului `objects` normal, nu a celui user-scoped, ceea ce e deja cazul.
    - Se rescriu modelele in ordinea: `utils` -> `incasari` -> `cheltuieli`
      -> `facturi` -> `setari` -> `documente`.
    - Se sterg toate `*/migrations/0001_initial.py` si se ruleaza:
-     `python manage.py makemigrations cheltuieli documente facturi incasari setari`
-     apoi `python manage.py migrate --noinput` pe o baza goala.
+     `python src/manage.py makemigrations cheltuieli documente facturi incasari setari`
+     apoi `python src/manage.py migrate --noinput` pe o baza goala.
    - Nu se scriu migrari de date (nu exista date de pastrat).
 3. **Adaptarea consumatorilor**
    - Formulare: `CheltuieliForm.exclude` se curata de campurile care nu mai
@@ -419,17 +419,17 @@ managerului `objects` normal, nu a celui user-scoped, ceea ce e deja cazul.
    - `utils/tva.py`, `utils/tva_documente.py`, `utils/mijloc_fix_pdf.py`,
      `setari/views.py` (SUMAR + export) se folosesc de noile servicii.
 4. **Teste**
-   - Unit (`python manage.py test documente conturi`): se pastreaza valorile
+   - Unit (`python src/manage.py test documente conturi`): se pastreaza valorile
      asteptate (Cortecs 112.2387 / 23.5701 etc.), se inlocuiesc doar
      atribuirile directe ale campurilor derivate
      (`documente/tests.py:127-129,136,146-148,177-180,927-929`).
    - E2E (`make test-e2e`): se rescriu interogarile SQL brute care citesc
-     coloanele eliminate — `tests/test_an_complet.py:233,374-412,448-500,
+     coloanele eliminate — `src/tests/test_an_complet.py:233,374-412,448-500,
      564-633,679,762,808-847`; se verifica prin interfata/model, nu prin
      coloane de cache. Se actualizeaza valorile choice din
-     `tests/helpers.py:22-32` si `tip_tranzactie="42"` -> `"BANCAR"`.
+     `src/tests/helpers.py:22-32` si `tip_tranzactie="42"` -> `"BANCAR"`.
 5. **Verificare finala**
-   - `python manage.py check`, unit tests, e2e tests.
+   - `python src/manage.py check`, unit tests, e2e tests.
    - Exportul anual (`/setari/` -> Descarca date) comparat cu cel vechi ca
      header de coloane si valori (in special `Valoare inventar`,
      `Amortizare lunara`, jurnalul de cumparari si `SUMAR.html`).
@@ -463,7 +463,7 @@ managerului `objects` normal, nu a celui user-scoped, ceea ce e deja cazul.
   cache; rescrierea lor e obligatorie daca se alege D1. Fara ea, testele vor
   esua cu "no such column", nu din cauza functionalitatii.
 * **Schimbarea codurilor de choice** afecteaza datele introduse deja in
-  `tests/.runtime/test.db` (se sterge odata cu baza) si valorile hardcodate
+  `src/tests/.runtime/test.db` (se sterge odata cu baza) si valorile hardcodate
   din e2e.
 * **Parsarea PDF-ului** e best-effort; mutarea ei din `save()` in view poate
   schimba comportamentul la editarea unui document (parsingul se va face doar
@@ -496,27 +496,27 @@ managerului `objects` normal, nu a celui user-scoped, ceea ce e deja cazul.
 |---|---|
 | `utils/models.py`, `utils/valuta.py`, `utils/curs_bnr.py` (nou) | baza comuna, curs BNR stocat |
 | `cheltuieli/models.py`, `cheltuieli/catalog.py` (nou), `cheltuieli/calcul.py` (nou), `cheltuieli/forms.py`, `cheltuieli/views.py` | campuri derivate -> proprietati, filtre ORM |
-| `facturi/models.py`, `facturi/forms.py`, `facturi/generare.py` (nou), `facturi/views.py` | linii copil, DateField, tip tranzactie, generare documente |
+| `src/facturi/models.py`, `facturi/forms.py`, `facturi/generare.py` (nou), `facturi/views.py` | linii copil, DateField, tip tranzactie, generare documente |
 | `incasari/models.py`, `incasari/forms.py`, `incasari/views.py` | data incasarii, suma_in_ron proprietate |
 | `setari/models.py`, `setari/forms.py`, `setari/views.py` | conturi copil, CAEN lista, singleton, export |
 | `documente/models.py`, `documente/services.py` (nou), `documente/forms.py`, `documente/views.py` | data/suma structurate, parsare in serviciu |
 | `registre/views.py`, `utils/tva.py`, `utils/tva_documente.py`, `utils/mijloc_fix_pdf.py`, `mcp_server/tools.py` | consumatori de valori derivate |
-| `templates/{cheltuieli,facturi,incasari,inventar,setari,registre,sumar}.html`, `templates/efactura.xml` | nume campuri / choices |
-| `tests/helpers.py`, `tests/test_an_complet.py`, `documente/tests.py`, `conturi/tests.py` | asteptari si SQL brut |
+| `src/templates/{cheltuieli,facturi,incasari,inventar,setari,registre,sumar}.html`, `src/templates/efactura.xml` | nume campuri / choices |
+| `src/tests/helpers.py`, `src/tests/test_an_complet.py`, `documente/tests.py`, `conturi/tests.py` | asteptari si SQL brut |
 | `*/migrations/0001_initial.py` | regenerate de la zero |
 
 ---
 
 ## 8. Starea implementarii (actualizat dupa implementare)
 
-Schema de mai sus a fost implementata. Verificari: `manage.py check` OK,
+Schema de mai sus a fost implementata. Verificari: `src/manage.py check` OK,
 `manage.py test documente conturi` -> **82 teste OK**,
-`pytest tests/` -> **32 teste e2e OK**. Migrarile vechi au fost sterse si
+`pytest src/tests/` -> **32 teste e2e OK**. Migrarile vechi au fost sterse si
 regenerate (`0001_initial.py` pentru fiecare app, inclusiv noul app `utils`).
 
 Module/noi fisiere:
 - `utils/cursuri.py` — modelul `CursBnr` (app `utils`, adaugat in
-  `INSTALLED_APPS`, `Makefile` si `tests/conftest.py`) + functiile de curs.
+  `INSTALLED_APPS`, `Makefile` si `src/tests/conftest.py`) + functiile de curs.
 - `cheltuieli/catalog.py` (~3000 linii) si `cheltuieli/calcul.py` — catalogul
   si toate calculele; `calculeaza_deduceri_anului(an)` face o singura trecere
   si e cache-uit pe o semnalatura care include si incasarile (plafonul de

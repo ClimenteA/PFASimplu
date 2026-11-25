@@ -1,28 +1,34 @@
 # Aplicatia PFASimplu (mod multi-user) + proxy-ul TLS (Caddy) pentru VPS.
+# Fisierul sta in server/, deci contextul de build si volumele de date sunt
+# cu o pozitie deasupra (radacina repo-ului).
 #
-#   cp .env.prod.example .env.prod     # si completeaza valorile
-#   docker compose up -d --build
+#   cp server/.env.prod.example server/.env.prod    # si completeaza valorile
+#   docker compose -f server/docker-compose.yml up -d --build
 #
-# Caddyfile-ul se monteaza din folderul curent; domeniul se seteaza
+# Caddyfile-ul se monteaza din acest folder (server/); domeniul se seteaza
 # in .env.prod (PFASIMPLU_DOMAIN) sau direct in Caddyfile.
 
 services:
   pfasimplu-app:
     container_name: pfasimplu-app
-    build: .
+    build:
+      context: ..
+      dockerfile: server/Dockerfile
     restart: unless-stopped
     expose:
       - "8000"
     env_file:
       - .env.prod
     volumes:
-      - ./data/dbsqlite:/data/dbsqlite
-      - ./data/media:/data/media
-      - ./staticfiles:/app/staticfiles
+      - ../data/dbsqlite:/data/dbsqlite
+      - ../data/media:/data/media
+      - ../staticfiles:/app/staticfiles
 
   pfasimplu-mcp:
     container_name: pfasimplu-mcp
-    build: .
+    build:
+      context: ..
+      dockerfile: server/Dockerfile
     restart: unless-stopped
     depends_on:
       - pfasimplu-app
@@ -33,8 +39,8 @@ services:
     env_file:
       - .env.prod
     volumes:
-      - ./data/dbsqlite:/data/dbsqlite
-      - ./data/media:/data/media
+      - ../data/dbsqlite:/data/dbsqlite
+      - ../data/media:/data/media
     # Serverul MCP e un proces ASGI separat de waitress (Django e WSGI).
     # Autorizarea se face cu cheia generata in /setari (Bearer).
     command: ["python", "-m", "uvicorn", "mcp_server.http_app:app", "--host", "0.0.0.0", "--port", "8001"]
@@ -50,7 +56,7 @@ services:
     env_file:
       - .env.prod
     volumes:
-      - ./staticfiles:/webapp/staticfiles:ro
+      - ../staticfiles:/webapp/staticfiles:ro
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config

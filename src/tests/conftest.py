@@ -1,16 +1,16 @@
 """Infrastructura testelor end-to-end (Playwright + Faker).
 
 Testele ruleaza impotriva unui server Django pornit pe o baza de date SQLite
-separata (`tests/.runtime/test.db`), ca sa nu atinga datele reale din
-`dbsqlite/stocare.db`. Migrarile sunt generate automat la fiecare rulare
+separata (`src/tests/.runtime/test.db`), ca sa nu atinga datele reale din
+`src/dbsqlite/stocare.db`. Migrarile sunt generate automat la fiecare rulare
 (proiectul nu tine migrarile in git - vezi `make purge-migration-dirs`).
 
 Rulare:
-    uv run pytest tests/ -v                 # headless
-    uv run pytest tests/ -v --headed        # cu browser vizibil
-    uv run pytest tests/ -v --slowmo 300    # incetinit, pentru urmarire
+    uv run pytest src/tests/ -v                 # headless
+    uv run pytest src/tests/ -v --headed        # cu browser vizibil
+    uv run pytest src/tests/ -v --slowmo 300    # incetinit, pentru urmarire
 
-Dupa rulare, baza de date de test ramane in tests/.runtime/ si poate fi
+Dupa rulare, baza de date de test ramane in src/tests/.runtime/ si poate fi
 inspectata (sau incarcata in aplicatie) pentru verificari manuale.
 """
 
@@ -26,9 +26,14 @@ from pathlib import Path
 import pytest
 from faker import Faker
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+SRC_DIR = Path(__file__).resolve().parent.parent
 RUNTIME_DIR = Path(__file__).resolve().parent / ".runtime"
 FILES_DIR = RUNTIME_DIR / "files"
+
+# pytest pune in sys.path doar directorul tests/, asa ca adaugam src/ pentru
+# a importa app-urile Django din procesul de test.
+if str(SRC_DIR) not in sys.path:
+    sys.path.insert(0, str(SRC_DIR))
 
 # Testele folosesc si ORM-ul Django (pentru valorile calculate ca proprietati),
 # deci procesul de pytest trebuie sa vada aceeasi baza ca serverul de test.
@@ -67,7 +72,7 @@ def django_server():
     env["PFASIMPLU_DB_PATH"] = str(db_path)
     env["DJANGO_SETTINGS_MODULE"] = "core.settings"
 
-    manage = [sys.executable, str(REPO_ROOT / "manage.py")]
+    manage = [sys.executable, str(SRC_DIR / "manage.py")]
 
     # Proiectul nu versioneza migrarile: le generam la fiecare rulare.
     # `makemigrations` fara argumente NU detecteaza app-urile fara folder
@@ -75,7 +80,7 @@ def django_server():
     apps_fara_migratii = [
         app
         for app in ("utils", "cheltuieli", "documente", "facturi", "incasari", "setari")
-        if not (REPO_ROOT / app / "migrations").exists()
+        if not (SRC_DIR / app / "migrations").exists()
     ]
     cmds = []
     if apps_fara_migratii:
@@ -83,7 +88,7 @@ def django_server():
     cmds.append(["migrate", "--noinput"])
     for cmd in cmds:
         result = subprocess.run(
-            manage + cmd, cwd=REPO_ROOT, env=env, capture_output=True, text=True
+            manage + cmd, cwd=SRC_DIR, env=env, capture_output=True, text=True
         )
         assert result.returncode == 0, f"{cmd} a esuat:\n{result.stdout}\n{result.stderr}"
 
@@ -94,7 +99,7 @@ def django_server():
     server_log = open(RUNTIME_DIR / "server.log", "w")
     server = subprocess.Popen(
         manage + ["runserver", f"127.0.0.1:{port}", "--noreload"],
-        cwd=REPO_ROOT,
+        cwd=SRC_DIR,
         env=env,
         stdout=server_log,
         stderr=subprocess.STDOUT,

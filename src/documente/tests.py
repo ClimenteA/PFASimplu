@@ -13,6 +13,7 @@ Declaratiile se descarca din pagina Cheltuieli (filtru pe luna + Descarca):
 import datetime
 import os
 import tempfile
+from pathlib import Path
 from unittest.mock import patch
 from zipfile import ZipFile
 
@@ -841,9 +842,10 @@ class FluxCheltuieliTVATests(TestCase):
         self.assertNotContains(response, "Consumabile")
 
     def test_recipisa_detectata_la_incarcare(self, _mock):
-        # PDF recipisa real din exemplele depuse
+        # PDF recipisa real din exemplele depuse (src/stocare/)
         recipisa_path = (
-            "stocare/completare-declaratii-tva/DTVA-OCT-2026/"
+            Path(__file__).resolve().parent.parent
+            / "stocare/completare-declaratii-tva/DTVA-OCT-2026/"
             "recipisa_d301_cif_52937756_oct_2026_1296415962.pdf"
         )
         with open(recipisa_path, "rb") as f:

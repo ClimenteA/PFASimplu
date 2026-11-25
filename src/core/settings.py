@@ -4,8 +4,11 @@ import shutil
 from pathlib import Path
 
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# BASE_DIR = radacina surselor (src/), care contine app-urile, templates/,
+# static/, media/ si dbsqlite/. PROJECT_ROOT = radacina repo-ului, unde sta
+# pyproject.toml (in executabilul PyInstaller ambele sunt sub _internal/).
 BASE_DIR = Path(__file__).resolve().parent.parent
+PROJECT_ROOT = BASE_DIR.parent
 
 
 def _get_app_version() -> str:
@@ -13,11 +16,13 @@ def _get_app_version() -> str:
     In build-ul PyInstaller fisierul e inclus prin pfasimplu.spec."""
     import tomllib
 
-    try:
-        with open(BASE_DIR / "pyproject.toml", "rb") as f:
-            return tomllib.load(f)["project"]["version"]
-    except (OSError, KeyError, tomllib.TOMLDecodeError):
-        return ""
+    for pyproject in (BASE_DIR / "pyproject.toml", PROJECT_ROOT / "pyproject.toml"):
+        try:
+            with open(pyproject, "rb") as f:
+                return tomllib.load(f)["project"]["version"]
+        except (OSError, KeyError, tomllib.TOMLDecodeError):
+            continue
+    return ""
 
 
 APP_VERSION = _get_app_version()
@@ -194,7 +199,9 @@ static_files_path = os.path.join(BASE_DIR, "static")
 
 STATIC_URL = "static/"
 STATICFILES_DIRS = [static_files_path]
-STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+# In Docker fisierele statice se scriu in /app/staticfiles (volum montat),
+# deci radacina poate fi suprascrisa prin variabila de mediu.
+STATIC_ROOT = os.environ.get("PFASIMPLU_STATIC_ROOT") or os.path.join(BASE_DIR, "staticfiles")
 
 def get_font_path():
 
