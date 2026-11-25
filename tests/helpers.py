@@ -1,11 +1,20 @@
 """Helper-e Playwright pentru formularele PFASimplu (Alpine.js / Pico CSS)."""
 
 import re
+import sys
+from decimal import Decimal
 from pathlib import Path
+
+# pytest pune in sys.path doar directorul tests/ (nu si radacina proiectului),
+# asa ca o adaugam explicit pentru a importa utilitarul de calcul cu Decimal.
+REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
 from playwright.sync_api import Page, expect
 
 from conftest import FILES_DIR
+from utils.decimale import D, rotund2, suma
 
 # Cota standard de TVA folosita de aplicatie la taxarea inversa (art. 291).
 COTA_TVA = 0.21
@@ -113,7 +122,7 @@ def emite_factura(
     adresa: str = "STR. TESTULUI NR. 1, BUCURESTI",
     localitate: str = "",
     nota: str = "",
-) -> float:
+) -> Decimal:
     """Emite o factura prin formularul Alpine din pagina Facturi.
 
     `produse` = [{nume, cod_unitate, unitati, pret}, ...].
@@ -159,8 +168,10 @@ def emite_factura(
     page.get_by_role("button", name="Creeaza factura").click()
     assert_saved(page)
 
-    total = sum(int(p["unitati"]) * float(p["pret"]) for p in produse)
-    return round(total, 2)
+    # Calculul se face cu Decimal (4 zecimale in intermediar, ROUND_HALF_UP la
+    # 2 zecimale pentru totalul final), ca in formularul din templates/facturi.html.
+    total = suma([D(int(p["unitati"])) * D(p["pret"]) for p in produse])
+    return rotund2(total)
 
 
 def incasare_din_factura(page: Page, serie: str, numar: int, data_incasarii) -> None:

@@ -12,6 +12,7 @@ from utils.localitati import Localitati
 from utils.files import get_save_path
 from utils.models import UserOwnedModel, UserScopedManager
 from utils.valuta import Valuta
+from utils.decimale import rotund2
 from setari.models import SetariModel
 from core.settings import get_media_path, get_font_path
 from fpdf_table import PDFTable, Align
@@ -315,7 +316,7 @@ class FacturaModel(UserOwnedModel):
     tip_tranzactie = models.CharField(
         max_length=250, choices=ModalitatePlata, default=ModalitatePlata.BANCAR
     )
-    total_de_plata = models.FloatField()
+    total_de_plata = models.DecimalField(max_digits=14, decimal_places=4)
     valuta = models.CharField(max_length=3, choices=Valuta, default=Valuta.RON)
     # Produse sau servicii
     # id, numar_unitati, total_de_plata, nume_produs_sau_serviciu, cod_unitate, pret_pe_unitate, subtotal
@@ -441,7 +442,7 @@ class FacturaModel(UserOwnedModel):
             "email_client": self.email,
             "telefon_client": self.telefon,
             "cod_modalitate_plata": self.tip_tranzactie,
-            "total_de_plata": str(self.total_de_plata),
+            "total_de_plata": str(rotund2(self.total_de_plata)),
             "produse_sau_servicii": [
                 {
                 **i, 

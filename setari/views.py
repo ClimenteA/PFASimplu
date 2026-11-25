@@ -3,6 +3,8 @@ import os
 import re
 import shutil
 import zipfile
+from decimal import InvalidOperation
+
 from django.shortcuts import render, redirect, HttpResponse
 from django.http import JsonResponse
 from django.contrib import messages
@@ -28,6 +30,7 @@ from registre.views import (
     registru_jurnal_dataframe,
 )
 from utils.calcule import calculeaza_taxe_si_impozite
+from utils.decimale import D, rotund2
 from utils.github_data import get_latest_app_version
 from utils.localitati import lista_localitati
 from utils.mijloc_fix_pdf import create_fisa_mijloc_fix_pdf
@@ -251,7 +254,7 @@ class SetariViewDownloadData(View):
 
         total_incasari_brut = IncasariModel.get_total_incasari(anul)
         total_cheltuieli = CheltuialaModel.get_total_cheltuieli(anul)
-        total_incasari_net = round(total_incasari_brut - total_cheltuieli, 2)
+        total_incasari_net = rotund2(D(total_incasari_brut) - D(total_cheltuieli))
 
         ref_data = get_registru_de_evidenta_fiscala(
             request, total_incasari_brut, total_incasari_net, total_cheltuieli, anul=anul
@@ -343,7 +346,7 @@ class SetariViewDownloadData(View):
         de export), cu PicoCSS incarcate de pe CDN - se deschide in orice
         browser, cu conexiune la internet."""
 
-        fmt = lambda v: f"{v:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+        fmt = lambda v: f"{rotund2(D(v)):,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
         setari = SetariModel.objects.first()
         if setari:
@@ -382,7 +385,7 @@ class SetariViewDownloadData(View):
         # Pentru anul curent media se calculeaza pe lunile trecute, nu pe 12.
         today = timezone.now().date()
         luni = today.month if anul == today.year else 12
-        venit_net_dupa_taxe = round(total_incasari_net - la_stat["total_taxe_impozite"], 2)
+        venit_net_dupa_taxe = rotund2(D(total_incasari_net) - D(la_stat["total_taxe_impozite"]))
 
         incasari_pe_luni = IncasariModel.get_total_incasari_pe_luni(anul)
         cheltuieli_pe_luni = CheltuialaModel.get_total_cheltuieli_pe_luni(anul)
@@ -392,17 +395,17 @@ class SetariViewDownloadData(View):
 
         # Plati la stat deja facute in anul selectat (dovezi de plata urcate
         # in pagina Documente, cu suma extrasa automat din PDF).
-        plati_la_stat_an = 0
+        plati_la_stat_an = D(0)
         for doc in documente:
             if doc.tip_document == "Dovada plata taxe si impozite" and doc.mentiuni:
                 match = re.search(r"Plata spv ([\d.,]+) RON", doc.mentiuni)
                 if match:
                     try:
-                        plati_la_stat_an += float(match.group(1).replace(",", "."))
-                    except ValueError:
+                        plati_la_stat_an += D(match.group(1).replace(",", "."))
+                    except (ValueError, InvalidOperation):
                         pass
-        plati_la_stat_an = round(plati_la_stat_an, 2)
-        rest_de_plata = round(la_stat["total_taxe_impozite"] - plati_la_stat_an, 2)
+        plati_la_stat_an = rotund2(plati_la_stat_an)
+        rest_de_plata = rotund2(D(la_stat["total_taxe_impozite"]) - plati_la_stat_an)
 
         taxe = [
             ("CAS (pensie 25%)", fmt(la_stat["cas_pensie"])),
@@ -441,10 +444,10 @@ class SetariViewDownloadData(View):
             ],
             "luni": luni,
             "medii_lunare": [
-                ("Incasari medii pe luna", fmt(total_incasari_brut / luni)),
-                ("Cheltuieli medii pe luna", fmt(total_cheltuieli / luni)),
-                ("Venit net mediu pe luna (dupa taxe)", fmt(venit_net_dupa_taxe / luni)),
-                ("Taxe si impozite medii pe luna", fmt(la_stat["total_taxe_impozite"] / luni)),
+                ("Incasari medii pe luna", fmt(rotund2(D(total_incasari_brut) / D(luni)))),
+                ("Cheltuieli medii pe luna", fmt(rotund2(D(total_cheltuieli) / D(luni)))),
+                ("Venit net mediu pe luna (dupa taxe)", fmt(rotund2(D(venit_net_dupa_taxe) / D(luni)))),
+                ("Taxe si impozite medii pe luna", fmt(rotund2(D(la_stat["total_taxe_impozite"]) / D(luni)))),
             ],
             "taxe": taxe,
             "tva_autolichidata": bool(jurnal_cumparari),
@@ -501,7 +504,7 @@ class SetariViewDownloadData(View):
             sfarsit = mf.data_amortizarii_complete.replace(day=1)
 
             randuri = []
-            total = 0
+            total = D(0)
             cursor = inceput
             while cursor <= sfarsit:
                 randuri.append({
@@ -510,7 +513,7 @@ class SetariViewDownloadData(View):
                     "suma": fmt(mf.amortizare_lunara),
                     "estimat": cursor > today.replace(day=1),
                 })
-                total += mf.amortizare_lunara
+                total += D(mf.amortizare_lunara)
                 # luna urmatoare
                 cursor = (
                     datetime.date(cursor.year + 1, 1, 1)

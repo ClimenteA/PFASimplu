@@ -1,5 +1,6 @@
 import re
 from datetime import datetime
+from decimal import InvalidOperation
 
 import xmltodict
 from django.core.exceptions import ValidationError
@@ -7,6 +8,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from pypdf import PdfReader  # https://pypdf.readthedocs.io/en/stable/index.html
 
+from utils.decimale import D, rotund2
 from utils.files import get_save_path
 from utils.models import UserOwnedModel, UserScopedManager
 
@@ -119,16 +121,16 @@ class DocumenteModel(UserOwnedModel):
             tip_document=TipDocument.DOVADA_PLATA_TAXE_SI_IMPOZITE,
         )
 
-        platite = 0
+        platite = D(0)
         for r in results:
             plata_match = re.search(r"Plata spv ([\d.,]+) RON", r.mentiuni or "")
             if plata_match:
                 try:
-                    platite += float(plata_match.group(1).replace(",", "."))
-                except ValueError:
+                    platite += D(plata_match.group(1).replace(",", "."))
+                except (ValueError, InvalidOperation):
                     pass
 
-        return round(platite, 2)
+        return rotund2(platite)
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
@@ -270,7 +272,7 @@ def pdf_parser(pdf_path: str):
         ).group(
             1
         )  # 19.03.2024
-        suma = float(
+        suma = D(
             suma_ghiseul_match.group(1).replace(".", "").replace(",", ".")
         )  # 18.00,89
         return {

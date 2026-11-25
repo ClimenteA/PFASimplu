@@ -28,6 +28,7 @@ from documente.models import (
     recipisa_parser,
 )
 from setari.models import SetariModel
+from utils.decimale import D, rotund4
 from utils.tari import este_tara_ue
 from utils.trezorerie import get_link_iban_trezorerie, get_judet_din_localitate
 from utils.tva import (
@@ -36,7 +37,6 @@ from utils.tva import (
     calculeaza_d390,
     calculeaza_jurnal_cumparari,
     get_luni_cu_taxare_inversa,
-    round2,
     termen_depunere,
 )
 from utils.tva_documente import genereaza_pachet_tva
@@ -124,15 +124,16 @@ class TaxareInversaCheltuialaTests(TestCase):
 
     def test_calcul_automat_ue(self, _mock):
         c = creeaza_cheltuiala_ue()
-        self.assertEqual(c.curs_bnr_aplicat, 5.3447)
-        self.assertEqual(c.baza_in_lei, 112.24)
-        self.assertEqual(c.tva_autolichidata, 23.57)
+        self.assertEqual(c.curs_bnr_aplicat, D("5.3447"))
+        self.assertEqual(c.baza_in_lei, D("112.2387"))
+        self.assertEqual(c.tva_autolichidata, D("23.5701"))
 
     def test_tva_adaugata_la_deducere(self, _mock):
         c = creeaza_cheltuiala_ue()
         # TVA autolichidata este cheltuiala deductibila a PFA-ului (art. 317):
-        # deducerea = suma_in_ron (cursul OMFP al platii) + TVA autolichidat
-        self.assertEqual(c.deducere_in_ron, round(c.suma_in_ron + 23.57, 2))
+        # deducerea = suma_in_ron (cursul zilei bancare anterioare: 21 x 5.3)
+        #            + TVA autolichidat (112.2387 x 0.21 = 23.5701)
+        self.assertEqual(c.deducere_in_ron, rotund4(D("111.3000") + D("23.5701")))
 
     def test_cheltuiala_romania_neschimbata(self, _mock):
         c = CheltuialaModel.objects.create(
@@ -144,7 +145,7 @@ class TaxareInversaCheltuialaTests(TestCase):
         )
         self.assertIsNone(c.tva_autolichidata)
         self.assertIsNone(c.baza_in_lei)
-        self.assertEqual(c.deducere_in_ron, 100.0)
+        self.assertEqual(c.deducere_in_ron, D("100.0"))
         self.assertEqual(c.tip_achizitie, TipAchizitie.ROMANIA)
 
     def test_ue_non_ue_dedus_din_tara(self, _mock):
@@ -173,14 +174,14 @@ class TaxareInversaCheltuialaTests(TestCase):
     def test_curs_bnr_automat_la_editare(self, _mock):
         # Cursul nu mai poate fi suprascris manual: se ia automat din cursvalutarbnr.
         c = creeaza_cheltuiala_ue()
-        c.curs_bnr_aplicat = 5.5
+        c.curs_bnr_aplicat = D("5.5")
         c.save()
-        self.assertEqual(c.curs_bnr_aplicat, 5.3447)
-        self.assertEqual(c.baza_in_lei, 112.24)
+        self.assertEqual(c.curs_bnr_aplicat, D("5.3447"))
+        self.assertEqual(c.baza_in_lei, D("112.2387"))
 
     def test_data_facturii_fallback_pe_data_cheltuielii(self, _mock):
         c = creeaza_cheltuiala_ue(data_facturii=None)
-        self.assertEqual(c.curs_bnr_aplicat, 5.3447)
+        self.assertEqual(c.curs_bnr_aplicat, D("5.3447"))
 
 
 @override_settings(MEDIA_ROOT=tempfile.mkdtemp(prefix="pfasimplu_test_media_"))
@@ -197,14 +198,14 @@ class CalculDeclaratiiTests(TestCase):
         self.assertIsNotNone(d301)
         # Codul special de TVA intracomunitar, nu CIF-ul normal
         self.assertEqual(d301["cif"], "52937756")
-        self.assertEqual(d301["baza4"], 112.24)
-        self.assertEqual(d301["tva4"], 23.57)
+        self.assertEqual(d301["baza4"], D("112.24"))
+        self.assertEqual(d301["tva4"], D("23.57"))
         # Factura UE apare si in sectiunea 4 si in 4.1 (tip_operatie 5)
-        self.assertEqual(d301["baza5"], 112.24)
-        self.assertEqual(d301["tva5"], 23.57)
+        self.assertEqual(d301["baza5"], D("112.24"))
+        self.assertEqual(d301["tva5"], D("23.57"))
         tipuri = [r["tip_operatie"] for r in d301["randuri"]]
         self.assertEqual(tipuri, ["4", "5"])
-        self.assertEqual(d301["total_de_plata"], 23.57)
+        self.assertEqual(d301["total_de_plata"], D("23.57"))
         self.assertEqual(d301["termen"], datetime.date(2026, 11, 25))
 
     def test_d301_non_ue_doar_sectiunea_4(self, _mock):
@@ -213,7 +214,8 @@ class CalculDeclaratiiTests(TestCase):
         self.assertIsNotNone(d301)
         # Non-UE se declara pe CIF-ul normal din Setari, nu pe codul special art. 317.
         self.assertEqual(d301["cif"], "43000098")
-        self.assertEqual(d301["baza4"], round(21.0 * 4.5839, 2))
+        # 21 x 4.5839 = 96.2619 -> rotunjire finala la 2 zecimale: 96.26
+        self.assertEqual(d301["baza4"], D("96.26"))
         self.assertEqual(d301["baza5"], 0)
         self.assertEqual(d301["tva5"], 0)
         tipuri = [r["tip_operatie"] for r in d301["randuri"]]
@@ -280,14 +282,14 @@ class CalculDeclaratiiTests(TestCase):
         self.assertEqual(d301_ue["cif"], "52937756")
         self.assertEqual(d301_non["cif"], "43000098")
         # Google (UE): sectiunea 4 + sectiunea 4.1
-        self.assertEqual(d301_ue["baza4"], 226.58)
-        self.assertEqual(d301_ue["baza5"], 226.58)
+        self.assertEqual(d301_ue["baza4"], D("226.58"))
+        self.assertEqual(d301_ue["baza5"], D("226.58"))
         # Cloudflare + Kilo (non-UE): doar sectiunea 4
-        self.assertEqual(d301_non["baza4"], round2(96.26 + 231.97))
+        self.assertEqual(d301_non["baza4"], D("328.24"))
         self.assertEqual(d301_non["baza5"], 0)
 
         d301 = calculeaza_d301(2026, 9, self.setari)
-        self.assertEqual(d301["baza4"], 226.58)
+        self.assertEqual(d301["baza4"], D("226.58"))
         self.assertEqual(len([r for r in d301["randuri"] if r["tip_operatie"] == "4"]), 1)
         self.assertEqual(len([r for r in d301["randuri"] if r["tip_operatie"] == "5"]), 1)
 
@@ -317,10 +319,10 @@ class CalculDeclaratiiTests(TestCase):
         rand = jurnal["randuri"][0]
         self.assertEqual(rand["cod_referinta"], "15-16")
         self.assertEqual(rand["furnizor_cod_fiscal"], "ATU77164426")
-        self.assertEqual(rand["baza"], 112.24)
-        self.assertEqual(rand["tva"], 23.57)
-        self.assertEqual(rand["total_document"], 135.81)
-        self.assertEqual(jurnal["total_tva"], 23.57)
+        self.assertEqual(rand["baza"], D("112.24"))
+        self.assertEqual(rand["tva"], D("23.57"))
+        self.assertEqual(rand["total_document"], D("135.81"))
+        self.assertEqual(jurnal["total_tva"], D("23.57"))
 
     def test_luna_fara_operatiuni(self, _mock):
         self.assertIsNone(calculeaza_d301(2026, 1, self.setari))
@@ -922,9 +924,9 @@ class CheltuieliFormularViewTests(TestCase):
         })
         self.assertEqual(response.status_code, 302)
         c = CheltuialaModel.objects.get(numar_factura="PBW-2026-003576")
-        self.assertEqual(c.baza_in_lei, 112.24)
-        self.assertEqual(c.tva_autolichidata, 23.57)
-        self.assertEqual(c.curs_bnr_aplicat, 5.3447)
+        self.assertEqual(c.baza_in_lei, D("112.2387"))
+        self.assertEqual(c.tva_autolichidata, D("23.5701"))
+        self.assertEqual(c.curs_bnr_aplicat, D("5.3447"))
 
     def test_typeahead_furnizor(self, _mock):
         creeaza_cheltuiala_ue()

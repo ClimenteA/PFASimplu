@@ -53,8 +53,10 @@ class UserOwnedModel(models.Model):
 
 
 class CommonIncasariCheltuieliModel(UserOwnedModel):
-    suma_in_ron = models.FloatField(null=True, blank=True)
-    suma = models.FloatField()
+    # Sumele se pastreaza cu 4 zecimale; sumele finale se rotunjesc separat
+    # la 2 zecimale cu ROUND_HALF_UP (vezi utils.decimale).
+    suma_in_ron = models.DecimalField(max_digits=14, decimal_places=4, null=True, blank=True)
+    suma = models.DecimalField(max_digits=14, decimal_places=4)
     valuta = models.CharField(max_length=3, choices=Valuta, default=Valuta.RON)
     tip_tranzactie = models.CharField(
         max_length=7, choices=TipTranzactie, default=TipTranzactie.BANCAR

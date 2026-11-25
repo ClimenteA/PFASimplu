@@ -12,12 +12,13 @@ Reguli (conform ghidului din stocare/completare-declaratii-tva):
 
 import datetime
 import os
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import Decimal
 
 from django.db.models import Q
 
 from cheltuieli.models import CheltuialaModel, TipAchizitie
 from setari.models import SetariModel
+from utils.decimale import D, rotund2, rotund_intreg, suma
 from utils.tari import denumire_tara
 
 
@@ -27,12 +28,14 @@ DENUMIRE_REFERINTA_JURNAL = (
 )
 
 
-def round2(value) -> float:
-    return float(Decimal(str(value)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
+def round2(value) -> Decimal:
+    """Suma finala, 2 zecimale, rotunjire .5 in sus (alias catre rotund2)."""
+    return rotund2(value)
 
 
 def round_lei_intreg(value) -> int:
-    return int(Decimal(str(value)).quantize(Decimal("1"), rounding=ROUND_HALF_UP))
+    """Rotunjire la intreg, .5 in sus (alias catre rotund_intreg)."""
+    return rotund_intreg(value)
 
 
 def termen_depunere(anul: int, luna: int) -> datetime.date:
@@ -106,10 +109,10 @@ def _snapshot_d301(cheltuieli: list, anul: int, luna: int, cif: str, are_ue: boo
     randuri4 = [r for r in randuri if r["tip_operatie"] == "4"]
     randuri5 = [r for r in randuri if r["tip_operatie"] == "5"]
 
-    baza4 = round2(sum(r["baza"] for r in randuri4))
-    tva4 = round2(sum(r["tva"] for r in randuri4))
-    baza5 = round2(sum(r["baza"] for r in randuri5))
-    tva5 = round2(sum(r["tva"] for r in randuri5))
+    baza4 = round2(suma([r["baza"] for r in randuri4]))
+    tva4 = round2(suma([r["tva"] for r in randuri4]))
+    baza5 = round2(suma([r["baza"] for r in randuri5]))
+    tva5 = round2(suma([r["tva"] for r in randuri5]))
 
     return {
         "anul": anul,
@@ -184,8 +187,8 @@ def calculeaza_d390(anul: int, luna: int, setari: SetariModel | None = None) -> 
         tara = (cheltuiala.furnizor_tara or "").strip().upper()
         cod_operator = cod_complet.removeprefix(tara)
         cheie = (tara, cod_operator, (cheltuiala.furnizor_denumire or "").strip().upper())
-        operatori.setdefault(cheie, 0)
-        operatori[cheie] += cheltuiala.baza_in_lei or 0
+        operatori.setdefault(cheie, Decimal(0))
+        operatori[cheie] += D(cheltuiala.baza_in_lei or 0)
 
     randuri = []
     for idx, ((tara, cod_operator, denumire), baza) in enumerate(operatori.items(), start=1):
@@ -197,11 +200,11 @@ def calculeaza_d390(anul: int, luna: int, setari: SetariModel | None = None) -> 
                 "tara_denumire": denumire_tara(tara),
                 "cod_operator": cod_operator,
                 "denumire_operator": denumire,
-                "baza": round_lei_intreg(baza),
+                "baza": rotund_intreg(baza),
             }
         )
 
-    total_baza = sum(r["baza"] for r in randuri)
+    total_baza = int(suma([r["baza"] for r in randuri]))
 
     return {
         "anul": anul,
@@ -227,8 +230,8 @@ def calculeaza_jurnal_cumparari(anul: int, luna: int | None = None) -> dict | No
     randuri = []
     for idx, cheltuiala in enumerate(cheltuieli, start=1):
         data = _data_document(cheltuiala)
-        baza = cheltuiala.baza_in_lei or 0
-        tva = cheltuiala.tva_autolichidata or 0
+        baza = D(cheltuiala.baza_in_lei or 0)
+        tva = D(cheltuiala.tva_autolichidata or 0)
         randuri.append(
             {
                 "nr_crt": idx,
@@ -236,9 +239,9 @@ def calculeaza_jurnal_cumparari(anul: int, luna: int | None = None) -> dict | No
                 "nr_doc": cheltuiala.numar_factura or "",
                 "furnizor_denumire": cheltuiala.furnizor_denumire or "",
                 "furnizor_cod_fiscal": cheltuiala.furnizor_cod_fiscal or "",
-                "total_document": round2(baza + tva),
-                "baza": round2(baza),
-                "tva": round2(tva),
+                "total_document": rotund2(baza + tva),
+                "baza": rotund2(baza),
+                "tva": rotund2(tva),
                 "cod_referinta": COD_REFERINTA_JURNAL,
                 "fisier": os.path.basename(cheltuiala.fisier.path) if cheltuiala.fisier else "",
             }
@@ -248,9 +251,9 @@ def calculeaza_jurnal_cumparari(anul: int, luna: int | None = None) -> dict | No
         "anul": anul,
         "luna": luna,
         "randuri": randuri,
-        "total_document": round2(sum(r["total_document"] for r in randuri)),
-        "total_baza": round2(sum(r["baza"] for r in randuri)),
-        "total_tva": round2(sum(r["tva"] for r in randuri)),
+        "total_document": rotund2(suma([r["total_document"] for r in randuri])),
+        "total_baza": rotund2(suma([r["baza"] for r in randuri])),
+        "total_tva": rotund2(suma([r["tva"] for r in randuri])),
     }
 
 

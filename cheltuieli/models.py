@@ -13,10 +13,12 @@ from utils.tari import TARI_CHOICES, este_tara_ue
 from utils.validators import validate_not_future_date
 from utils.models import CommonIncasariCheltuieliModel
 from utils.calcule import get_venit_net, get_venit_brut
+from decimal import Decimal
+from utils.decimale import D, rotund2, rotund4, suma
 
 
 # Cota standard de TVA (art. 291 alin. (1) Cod fiscal), folosita la taxarea inversa.
-COTA_TVA_STANDARD = 0.21
+COTA_TVA_STANDARD = D("0.21")
 
 
 class TipAchizitie(models.TextChoices):
@@ -87,7 +89,7 @@ class CheltuialaModel(CommonIncasariCheltuieliModel):
         choices=Deductibilitate,
         default=Deductibilitate.DEDUCTIBILA_INTEGRAL,
     )
-    deducere_in_ron = models.FloatField(null=True, blank=True)
+    deducere_in_ron = models.DecimalField(max_digits=14, decimal_places=4, null=True, blank=True)
     obiect_de_inventar = models.BooleanField(null=True, blank=True, default=False)
     mijloc_fix = models.BooleanField(null=True, blank=True, default=False)
     cod_de_clasificare = models.CharField(max_length=100, null=True, blank=True)
@@ -103,8 +105,8 @@ class CheltuialaModel(CommonIncasariCheltuieliModel):
     anul_amortizarii_complete = models.IntegerField(null=True, blank=True)
     luna_amortizarii_complete = models.IntegerField(null=True, blank=True)
     ani_amortizare = models.IntegerField(null=True, blank=True)
-    amortizare_lunara = models.FloatField(null=True, blank=True)
-    cota_de_amortizare = models.FloatField(null=True, blank=True)
+    amortizare_lunara = models.DecimalField(max_digits=14, decimal_places=4, null=True, blank=True)
+    cota_de_amortizare = models.DecimalField(max_digits=14, decimal_places=4, null=True, blank=True)
     scos_din_uz = models.BooleanField(null=True, blank=True, default=False)
     modalitate_iesire_din_uz = models.CharField(
         max_length=300,
@@ -134,9 +136,9 @@ class CheltuialaModel(CommonIncasariCheltuieliModel):
         null=True, blank=True, validators=[validate_not_future_date]
     )
     # Calculate automat la salvare, din cursul BNR (cursvalutarbnr).
-    curs_bnr_aplicat = models.FloatField(null=True, blank=True)
-    baza_in_lei = models.FloatField(null=True, blank=True)
-    tva_autolichidata = models.FloatField(null=True, blank=True)
+    curs_bnr_aplicat = models.DecimalField(max_digits=14, decimal_places=4, null=True, blank=True)
+    baza_in_lei = models.DecimalField(max_digits=14, decimal_places=4, null=True, blank=True)
+    tva_autolichidata = models.DecimalField(max_digits=14, decimal_places=4, null=True, blank=True)
 
     @property
     def este_taxare_inversa(self) -> bool:
@@ -204,11 +206,11 @@ class CheltuialaModel(CommonIncasariCheltuieliModel):
         self.curs_bnr_aplicat = curs_bnr_data_exigibilitatii(
             self.valuta, data_exigibilitatii
         )
-        self.baza_in_lei = round(self.suma * self.curs_bnr_aplicat, 2)
-        self.tva_autolichidata = round(self.baza_in_lei * COTA_TVA_STANDARD, 2)
+        self.baza_in_lei = rotund4(D(self.suma) * D(self.curs_bnr_aplicat))
+        self.tva_autolichidata = rotund4(D(self.baza_in_lei) * COTA_TVA_STANDARD)
 
     def eur_to_ron(self, suma):
-        return round((to_ron(1, "EUR", self.data_inserarii) * suma), 2)
+        return rotund4(D(to_ron(1, "EUR", self.data_inserarii)) * D(suma))
 
     def deducere_suma_fixa_pe_an(
         self, suma_in_eur: int, deductibila_selected: Deductibilitate
@@ -222,12 +224,12 @@ class CheltuialaModel(CommonIncasariCheltuieliModel):
         ).aggregate(total_sum=Sum("suma_in_ron"))
 
         if result["total_sum"] is None:
-            total = self.suma_in_ron
+            total = D(self.suma_in_ron)
         else:
-            total = result["total_sum"] + self.suma_in_ron
+            total = D(result["total_sum"]) + D(self.suma_in_ron)
 
         if total > euro_in_ron:
-            remaining = round((euro_in_ron - (total - self.suma_in_ron)), 2)
+            remaining = rotund2(euro_in_ron - (total - D(self.suma_in_ron)))
             if remaining < 1:
                 remaining = 0
             raise ValidationError(
@@ -255,16 +257,16 @@ class CheltuialaModel(CommonIncasariCheltuieliModel):
         sume_cheltuieli_pe_luni = {}
         for month in range(1, 13):
             month_date = datetime.date(year, month, 1)
-            val_fara_amortizare = data_dict.get(month_date, 0)
+            val_fara_amortizare = D(data_dict.get(month_date, 0))
 
             amortizari = CheltuialaModel.objects.filter(
                 Q(data_inceperii_amortizarii__lte=month_date) & Q(data_amortizarii_complete__gte=month_date),
                 mijloc_fix=True,
             )
 
-            val_amortizari = 0
+            val_amortizari = Decimal(0)
             for amortizare in amortizari:
-                val_amortizari += amortizare.amortizare_lunara
+                val_amortizari += D(amortizare.amortizare_lunara)
 
             sume_cheltuieli_pe_luni[month] = val_fara_amortizare + val_amortizari
 
@@ -301,18 +303,18 @@ class CheltuialaModel(CommonIncasariCheltuieliModel):
             mijloc_fix=False, data_inserarii__year=year
         ).aggregate(totalc=Sum("deducere_in_ron"))
 
-        total_cheltuieli = total_cheltuieli_result["totalc"] or 0
+        total_cheltuieli = D(total_cheltuieli_result["totalc"] or 0)
 
         cheltuieli_mijloc_fix_results = CheltuialaModel.objects.filter(
             Q(data_punerii_in_functiune__year__lte=year) & Q(data_amortizarii_complete__year__gte=year),
             mijloc_fix=True,
         )
 
-        total_amortizari = 0
+        total_amortizari = Decimal(0)
         for row in cheltuieli_mijloc_fix_results:
-            total_amortizari += row.amortizare_lunara * row.luni_amortizare_in_an(year)
+            total_amortizari += D(row.amortizare_lunara) * D(row.luni_amortizare_in_an(year))
 
-        return round(total_cheltuieli + total_amortizari, 2)
+        return rotund2(suma([total_cheltuieli, total_amortizari]))
 
     def save(self, *args, **kwargs):
         # Pentru taxare inversa calculam cursul/baza/TVA inainte de suma_in_ron,
@@ -325,17 +327,17 @@ class CheltuialaModel(CommonIncasariCheltuieliModel):
 
         # TVA-ul autolichidat (platit la ANAF prin D301) este cheltuiala a PFA-ului
         # cu cod special art. 317: se adauga la baza deductibila a facturii.
-        tva_de_adaugat = getattr(self, "tva_autolichidata", None) or 0
+        tva_de_adaugat = D(getattr(self, "tva_autolichidata", None) or 0)
 
         if self.deductibila in [
             Deductibilitate.DEDUCTIBILA_INTEGRAL.value,
             Deductibilitate.DEDUCTIBILA_INTEGRAL_SALARII.value,
         ]:
-            return round(self.suma_in_ron + tva_de_adaugat, 2)
+            return rotund4(D(self.suma_in_ron) + tva_de_adaugat)
 
         if self.deductibila == Deductibilitate.DEDUCTIBILA_INTEGRAL_INVENTAR.value:
             self.obiect_de_inventar = True
-            return round(self.suma_in_ron + tva_de_adaugat, 2)
+            return rotund4(D(self.suma_in_ron) + tva_de_adaugat)
 
         if self.deductibila == Deductibilitate.DEDUCTIBILA_INTEGRAL_AMORTIZATA.value:
             if not self.data_punerii_in_functiune:
@@ -364,9 +366,9 @@ class CheltuialaModel(CommonIncasariCheltuieliModel):
                     clasificare["durata_amortizare_in_ani"].split("-")[0]
                 )
 
-            self.amortizare_lunara = round((self.suma_in_ron / (self.ani_amortizare * 12)), 2)
-            self.cota_de_amortizare = round(
-                ((self.amortizare_lunara / self.suma_in_ron) * 100), 2
+            self.amortizare_lunara = rotund4(D(self.suma_in_ron) / D(self.ani_amortizare * 12))
+            self.cota_de_amortizare = rotund4(
+                D(self.amortizare_lunara) / D(self.suma_in_ron) * D(100)
             )
 
             self.data_inceperii_amortizarii = (
@@ -380,13 +382,13 @@ class CheltuialaModel(CommonIncasariCheltuieliModel):
             self.anul_amortizarii_complete = self.data_amortizarii_complete.year
             self.luna_amortizarii_complete = self.data_amortizarii_complete.month
 
-            return round(self.suma_in_ron + tva_de_adaugat, 2)
+            return rotund4(D(self.suma_in_ron) + tva_de_adaugat)
 
         if (
             self.deductibila
             == Deductibilitate.DEDUCTIBILA_PARTIAL_AUTO_CASA_UTILITATI.value
         ):
-            return round((self.suma_in_ron / 2) + tva_de_adaugat, 2)  # 50% + TVA autolichidat integral
+            return rotund4(D(self.suma_in_ron) / D(2) + tva_de_adaugat)  # 50% + TVA autolichidat integral
 
         if self.deductibila == Deductibilitate.DEDUCTIBILA_PARTIAL_PROTOCOL.value:
             # Art. 68 alin. (6): baza de calcul = venit brut - cheltuieli deductibile, altele
@@ -396,16 +398,15 @@ class CheltuialaModel(CommonIncasariCheltuieliModel):
                 deductibila=Deductibilitate.DEDUCTIBILA_PARTIAL_PROTOCOL.value,
                 data_inserarii__year=self.data_inserarii.year,
             ).exclude(pk=self.pk).aggregate(total_sum=Sum("deducere_in_ron"))
-            protocol_deja_dedus = result["total_sum"] or 0
-            baza_de_calcul = get_venit_net(self.data_inserarii.year) + protocol_deja_dedus
-            suma_admisa_protocol = round(baza_de_calcul * 0.02, 2)  # 2% din baza de calcul
+            protocol_deja_dedus = D(result["total_sum"] or 0)
+            baza_de_calcul = D(get_venit_net(self.data_inserarii.year)) + protocol_deja_dedus
+            suma_admisa_protocol = rotund4(D(baza_de_calcul) * D("0.02"))  # 2% din baza de calcul
 
-            suma_curenta_protocol = protocol_deja_dedus + self.suma_in_ron
+            suma_curenta_protocol = protocol_deja_dedus + D(self.suma_in_ron)
 
             if suma_curenta_protocol > suma_admisa_protocol:
-                remaining = round(
-                    (suma_admisa_protocol - (suma_curenta_protocol - self.suma_in_ron)),
-                    2,
+                remaining = rotund2(
+                    suma_admisa_protocol - (suma_curenta_protocol - D(self.suma_in_ron))
                 )
                 if remaining < 1:
                     remaining = 0
@@ -425,11 +426,11 @@ class CheltuialaModel(CommonIncasariCheltuieliModel):
             ).aggregate(total_s=Sum("deducere_in_ron"))
 
             if result_salarii["total_s"] is None:
-                total_salarii = 0
+                total_salarii = D(0)
             else:
-                total_salarii = result_salarii["total_s"]
+                total_salarii = D(result_salarii["total_s"])
 
-            suma_admisa_sociale = round(total_salarii * 0.05, 2)  # 5% din total salarii
+            suma_admisa_sociale = rotund4(D(total_salarii) * D("0.05"))  # 5% din total salarii
 
             result = CheltuialaModel.objects.filter(
                 deductibila=Deductibilitate.DEDUCTIBILA_PARTIAL_SOCIALE.value,
@@ -437,13 +438,13 @@ class CheltuialaModel(CommonIncasariCheltuieliModel):
             ).aggregate(total_sum=Sum("deducere_in_ron"))
 
             if result["total_sum"] is None:
-                suma_curenta_sociale = self.suma_in_ron
+                suma_curenta_sociale = D(self.suma_in_ron)
             else:
-                suma_curenta_sociale = result["total_sum"] + self.suma_in_ron
+                suma_curenta_sociale = D(result["total_sum"]) + D(self.suma_in_ron)
 
             if suma_curenta_sociale > suma_admisa_sociale:
-                remaining = round(
-                    (suma_admisa_sociale - (suma_curenta_sociale - self.suma_in_ron)), 2
+                remaining = rotund2(
+                    suma_admisa_sociale - (suma_curenta_sociale - D(self.suma_in_ron))
                 )
                 if remaining < 1:
                     remaining = 0
@@ -459,9 +460,9 @@ class CheltuialaModel(CommonIncasariCheltuieliModel):
             self.deductibila
             == Deductibilitate.DEDUCTIBILA_PARTIAL_CONTRIBUTII_OBLIGATORII_ASOC_ORG.value
         ):
-            venit_brut = get_venit_brut(self.data_inserarii.year)
-            suma_admisa_contrib_asoc_org = round(
-                venit_brut * 0.05, 2
+            venit_brut = D(get_venit_brut(self.data_inserarii.year))
+            suma_admisa_contrib_asoc_org = rotund4(
+                D(venit_brut) * D("0.05")
             )  # 5% din venit brut
 
             result = CheltuialaModel.objects.filter(
@@ -470,17 +471,14 @@ class CheltuialaModel(CommonIncasariCheltuieliModel):
             ).aggregate(total_sum=Sum("deducere_in_ron"))
 
             if result["total_sum"] is None:
-                suma_curenta_contrib_asoc_org = self.suma_in_ron
+                suma_curenta_contrib_asoc_org = D(self.suma_in_ron)
             else:
-                suma_curenta_contrib_asoc_org = result["total_sum"] + self.suma_in_ron
+                suma_curenta_contrib_asoc_org = D(result["total_sum"]) + D(self.suma_in_ron)
 
             if suma_curenta_contrib_asoc_org > suma_admisa_contrib_asoc_org:
-                remaining = round(
-                    (
-                        suma_admisa_contrib_asoc_org
-                        - (suma_curenta_contrib_asoc_org - self.suma_in_ron)
-                    ),
-                    2,
+                remaining = rotund2(
+                    suma_admisa_contrib_asoc_org
+                    - (suma_curenta_contrib_asoc_org - D(self.suma_in_ron))
                 )
                 if remaining < 1:
                     remaining = 0

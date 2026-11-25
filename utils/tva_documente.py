@@ -18,6 +18,7 @@ import pandas as pd
 
 from core.settings import get_extracts_path
 from setari.models import SetariModel
+from utils.decimale import D, suma
 from utils.pretty_excel import make_excel_pretty
 from utils.trezorerie import COD_BUGETAR_TVA, get_link_iban_trezorerie
 from utils.tva import (
@@ -40,7 +41,7 @@ def _fmt_num(value) -> str:
     """Numere fara zecimale inutile: 21.0 -> '21', 112.24 -> '112.24'."""
     if value is None:
         return "0"
-    text = f"{value:.4f}".rstrip("0").rstrip(".")
+    text = f"{D(value):.4f}".rstrip("0").rstrip(".")
     return text or "0"
 
 
@@ -363,9 +364,9 @@ def genereaza_pachet_tva(anul: int, luna: int, setari: SetariModel | None = None
                 "randuri": [
                     {**r, "nr_crt": idx} for idx, r in enumerate(randuri_cod, start=1)
                 ],
-                "total_document": round2(sum(r["total_document"] for r in randuri_cod)),
-                "total_baza": round2(sum(r["baza"] for r in randuri_cod)),
-                "total_tva": round2(sum(r["tva"] for r in randuri_cod)),
+                "total_document": round2(suma([r["total_document"] for r in randuri_cod])),
+                "total_baza": round2(suma([r["baza"] for r in randuri_cod])),
+                "total_tva": round2(suma([r["tva"] for r in randuri_cod])),
             }
             jurnal_xlsx = os.path.join(subfolder, f"Jurnal_cumparari_{prefix}.xlsx")
             genereaza_jurnal_cumparari_xlsx(jurnal_cod, jurnal_xlsx)
