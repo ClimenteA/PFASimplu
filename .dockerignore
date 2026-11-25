@@ -1,17 +1,20 @@
+# Docker citeste .dockerignore doar din radacina contextului de build
+# (radacina repo-ului), deci acest fisier ramane aici, nu in server/.
 .venv
 .git
 .vscode
 .pytest_cache
 __pycache__
 *.pyc
-dbsqlite
-media
+src/dbsqlite
+src/media
 staticfiles
 data
 build
 dist
-tests/.runtime
+src/tests/.runtime
 test-results
+.env
 .env.prod
 *.db
 readmepics

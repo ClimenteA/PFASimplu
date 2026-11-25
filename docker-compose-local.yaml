@@ -1,0 +1,56 @@
+# Varianta dockerizata pentru uz local, mereu pornita, FARA Caddy / TLS.
+# Toate fisierele de deploy sunt in radacina repo-ului.
+#
+#   cp .env.example .env     # generat automat de install.sh
+#   docker compose -f docker-compose-local.yaml up -d --build
+#
+# Aplicatia: http://localhost:8990  (PFASIMPLU_PORT in .env)
+# MCP:       http://localhost:8997/mcp  (PFASIMPLU_MCP_PORT in .env)
+#
+# Loginul este obligatoriu: la prima deschidere creaza un cont in
+# http://localhost:8990/conturi/inregistrare/ (sau foloseste /admin/).
+#
+# Baza de date si fisierele urcate/generate sunt direct pe gazda, in
+# src/dbsqlite si src/media (ca in vechea versiune locala); se vad si se
+# pot copia/backup-ui, si nu sunt afectate de rebuild-ul imaginii.
+#
+# "restart: unless-stopped" + serviciul Docker pornit la boot => aplicatia
+# revine singura dupa restartul calculatorului (mai putin daca a fost oprita
+# manual inainte).
+
+services:
+  pfasimplu-local:
+    container_name: pfasimplu-local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "${PFASIMPLU_PORT:-8990}:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./src/dbsqlite:/data/dbsqlite
+      - ./src/media:/data/media
+      - ./staticfiles:/app/staticfiles
+
+  pfasimplu-mcp-local:
+    container_name: pfasimplu-mcp-local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - pfasimplu-local
+    # Migrarile/staticle le face containerul aplicatiei, nu si asta.
+    entrypoint: []
+    ports:
+      - "${PFASIMPLU_MCP_PORT:-8997}:8001"
+    env_file:
+      - .env
+    volumes:
+      - ./src/dbsqlite:/data/dbsqlite
+      - ./src/media:/data/media
+    # Serverul MCP e un proces ASGI separat de waitress (Django e WSGI).
+    # Autorizarea se face cu cheia generata in /setari (Bearer).
+    command: ["python", "-m", "uvicorn", "mcp_server.http_app:app", "--host", "0.0.0.0", "--port", "8001"]

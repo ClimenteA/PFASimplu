@@ -19,9 +19,11 @@ COPY . .
 # Directoarele de date (montate ca volume in docker-compose).
 RUN mkdir -p /data/dbsqlite /data/media /app/staticfiles
 
-ENV PFASIMPLU_DB_DIR=/data/dbsqlite \
+# Sursele Django (core, app-urile, mcp_server) sunt in /app/src.
+ENV PYTHONPATH=/app/src \
+    PFASIMPLU_DB_DIR=/data/dbsqlite \
     PFASIMPLU_MEDIA_ROOT=/data/media \
-    PFASIMPLU_MULTI_USER=1 \
+    PFASIMPLU_STATIC_ROOT=/app/staticfiles \
     PFASIMPLU_DEBUG=0 \
     PFASIMPLU_MCP_PORT=8001
 

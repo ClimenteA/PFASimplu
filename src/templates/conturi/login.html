@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block page-title %} Login - PFASimplu {% endblock %}
+
+{% block body %}
+<article style="max-width: 600px; margin: 3rem auto; padding: 2rem;">
+    <header>
+        <h3 style="margin-bottom: 0;">Autentificare</h3>
+    </header>
+
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ next }}">
+
+        {% if form.non_field_errors %}
+        {% for error in form.non_field_errors %}
+        <p style="color: var(--pico-color-red-450);">{{ error }}</p>
+        {% endfor %}
+        {% endif %}
+
+        <label>
+            Email
+            <input type="email" name="username" value="{{ form.username.value|default:'' }}" required autofocus
+                autocomplete="email" {% if form.username.errors %}aria-invalid="true" {% endif %}>
+            {% for error in form.username.errors %}
+            <small style="color: var(--pico-color-red-450);">{{ error }}</small>
+            {% endfor %}
+        </label>
+
+        <label>
+            Parola
+            <input type="password" name="password" required autocomplete="current-password"
+                {% if form.password.errors %}aria-invalid="true" {% endif %}>
+            {% for error in form.password.errors %}
+            <small style="color: var(--pico-color-red-450);">{{ error }}</small>
+            {% endfor %}
+        </label>
+
+        <button type="submit">Intra in cont</button>
+    </form>
+
+    <footer>
+        {% if allow_registration %}
+        Nu ai cont? <a href="{% url 'inregistrare' %}">Inregistreaza-te</a>
+        {% endif %}
+    </footer>
+</article>
+{% endblock %}
