@@ -8,11 +8,10 @@ incarcat lazy din `cursvalutarbnr` si refolosit de toate calculele.
 
 import datetime
 
+import cursvalutarbnr
 from django.db import models
 
 from .decimale import D, rotund4
-
-import cursvalutarbnr
 
 
 class CursBnr(models.Model):
@@ -45,7 +44,7 @@ def _curs_din_bnr(currency: str, zi: datetime.date):
     rates = cursvalutarbnr.get_bnr_rates(zi)
     zile = [
         datetime.date.fromisoformat(d)
-        for d in rates.keys()
+        for d in rates
         if datetime.date.fromisoformat(d) <= zi
     ]
     if not zile:
@@ -81,7 +80,7 @@ def curs_bnr_ziua_bancara_anterioara(currency: str, dateValue):
     rates = cursvalutarbnr.get_bnr_rates(zi)
     zile = [
         datetime.date.fromisoformat(d)
-        for d in rates.keys()
+        for d in rates
         if datetime.date.fromisoformat(d) < zi
     ]
     if not zile:

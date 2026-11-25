@@ -24,20 +24,28 @@ class LoginView(View):
     def get(self, request):
         if request.user.is_authenticated:
             return redirect(_next_sigur(request))
-        return render(request, "conturi/login.html", {
-            "form": EmailAuthenticationForm(request),
-            "next": request.GET.get("next", ""),
-        })
+        return render(
+            request,
+            "conturi/login.html",
+            {
+                "form": EmailAuthenticationForm(request),
+                "next": request.GET.get("next", ""),
+            },
+        )
 
     def post(self, request):
         form = EmailAuthenticationForm(request, data=request.POST)
         if form.is_valid():
             login(request, form.get_user())
             return redirect(_next_sigur(request))
-        return render(request, "conturi/login.html", {
-            "form": form,
-            "next": request.POST.get("next", ""),
-        })
+        return render(
+            request,
+            "conturi/login.html",
+            {
+                "form": form,
+                "next": request.POST.get("next", ""),
+            },
+        )
 
 
 class InregistrareView(View):
@@ -50,7 +58,9 @@ class InregistrareView(View):
             raise Http404()
         if request.user.is_authenticated:
             return redirect("/")
-        return render(request, "conturi/inregistrare.html", {"form": EmailUserCreationForm()})
+        return render(
+            request, "conturi/inregistrare.html", {"form": EmailUserCreationForm()}
+        )
 
     def post(self, request):
         if not settings.ALLOW_REGISTRATION:
@@ -64,7 +74,6 @@ class InregistrareView(View):
 
 
 class LogoutView(View):
-
     def post(self, request):
         logout(request)
         return redirect(settings.LOGOUT_REDIRECT_URL)

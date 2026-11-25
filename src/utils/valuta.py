@@ -1,22 +1,23 @@
 import datetime
-from django.db import models
-from django.utils.translation import gettext_lazy as _
+from functools import cache
+
 import cursvalutarbnr  # noqa: F401  (patch-uit in teste: utils.valuta.cursvalutarbnr)
 from cursvalutarbnr import ron_exchange_rate
-from functools import lru_cache
+from django.db import models
+from django.utils.translation import gettext_lazy as _
 
-from .decimale import D, rotund2
 # Cursurile sunt pastrate in tabelul CursBnr si incarcate o singura data;
 # functiile isi pastreaza numele si semnatura din versiunea anterioara.
 from .cursuri import (  # noqa: F401
     CursBnr,
-    curs_bnr_ziua_bancara_anterioara,
     curs_bnr_data_exigibilitatii,
+    curs_bnr_ziua_bancara_anterioara,
     to_ron,
 )
+from .decimale import D, rotund2
 
 
-@lru_cache(maxsize=None)
+@cache
 def ron_to_eur(amount, year: int):
     january = datetime.date(year, 1, 5).isoformat()
     # Conversia pentru afisare e o suma finala: 2 zecimale, .5 in sus.
@@ -29,7 +30,7 @@ class TipTranzactie(models.TextChoices):
 
 
 class Valuta(models.TextChoices):
-    RON = "RON", _('RON - Romania')
+    RON = "RON", _("RON - Romania")
     EUR = "EUR", _("EUR - European Union Zone")
     USD = "USD", _("USD - USA")
     GBP = "GBP", _("GBP - UK")

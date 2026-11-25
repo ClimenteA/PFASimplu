@@ -31,7 +31,7 @@ from documente.models import (
 from setari.models import SetariModel
 from utils.decimale import D, rotund4
 from utils.tari import este_tara_ue
-from utils.trezorerie import get_link_iban_trezorerie, get_judet_din_localitate
+from utils.trezorerie import get_judet_din_localitate, get_link_iban_trezorerie
 from utils.tva import (
     calculeaza_d301,
     calculeaza_d301_lista,
@@ -41,7 +41,6 @@ from utils.tva import (
     termen_depunere,
 )
 from utils.tva_documente import genereaza_pachet_tva
-
 
 # Cursuri BNR fixe pentru teste (nu cerem reteaua).
 CURSURI_TEST = {
@@ -62,58 +61,61 @@ def mock_get_bnr_rates(dateValue):
 
 
 def creeaza_setari(**kwargs):
-    defaults = dict(
-        nume="CLIMENTE ALIN IONEL PERSOANA FIZICA AUTORIZATA",
-        localitate="RO-IS, jud. Iasi, Iasi",
-        adresa="str. SOS. NATIONALA, nr. 182, bl. A2, sc. A, ap. 3, jud. IASI",
-        nr_reg_com="F22/123/2020",
-        cif="43000098",
-        email="test@example.com",
-
-        caen_principal="6201",
-        cod_tva_intracomunitar="52937756",
-        cont_iban_trezoreria="RO41TREZ40620A100101XTVA",
-    )
+    defaults = {
+        "nume": "CLIMENTE ALIN IONEL PERSOANA FIZICA AUTORIZATA",
+        "localitate": "RO-IS, jud. Iasi, Iasi",
+        "adresa": "str. SOS. NATIONALA, nr. 182, bl. A2, sc. A, ap. 3, jud. IASI",
+        "nr_reg_com": "F22/123/2020",
+        "cif": "43000098",
+        "email": "test@example.com",
+        "caen_principal": "6201",
+        "cod_tva_intracomunitar": "52937756",
+        "cont_iban_trezoreria": "RO41TREZ40620A100101XTVA",
+    }
     defaults.update(kwargs)
     return SetariModel.objects.create(**defaults)
 
 
 def creeaza_cheltuiala_ue(**kwargs):
     """Factura Cortecs (Austria): 21 EUR, 02.10.2026."""
-    defaults = dict(
-        nume_cheltuiala="Top-up AI inference Cortecs",
-        suma=21.0,
-        valuta="EUR",
-        tip_tranzactie="BANCAR",
-        data_inserarii=datetime.date(2026, 10, 2),
-        tip_achizitie=TipAchizitie.SERVICII_UE,
-        furnizor_denumire="CORTECS GMBH",
-        furnizor_cod_fiscal="ATU77164426",
-        furnizor_tara="AT",
-        numar_factura="PBW-2026-003576",
-        data_facturii=datetime.date(2026, 10, 2),
-        fisier=SimpleUploadedFile("factura.pdf", b"%PDF-1.4 test", content_type="application/pdf"),
-    )
+    defaults = {
+        "nume_cheltuiala": "Top-up AI inference Cortecs",
+        "suma": 21.0,
+        "valuta": "EUR",
+        "tip_tranzactie": "BANCAR",
+        "data_inserarii": datetime.date(2026, 10, 2),
+        "tip_achizitie": TipAchizitie.SERVICII_UE,
+        "furnizor_denumire": "CORTECS GMBH",
+        "furnizor_cod_fiscal": "ATU77164426",
+        "furnizor_tara": "AT",
+        "numar_factura": "PBW-2026-003576",
+        "data_facturii": datetime.date(2026, 10, 2),
+        "fisier": SimpleUploadedFile(
+            "factura.pdf", b"%PDF-1.4 test", content_type="application/pdf"
+        ),
+    }
     defaults.update(kwargs)
     return CheltuialaModel.objects.create(**defaults)
 
 
 def creeaza_cheltuiala_non_ue(**kwargs):
     """Factura Cloudflare (SUA): 21 USD, 19.09.2026."""
-    defaults = dict(
-        nume_cheltuiala="Cloudflare subscription",
-        suma=21.0,
-        valuta="USD",
-        tip_tranzactie="BANCAR",
-        data_inserarii=datetime.date(2026, 9, 19),
-        tip_achizitie=TipAchizitie.SERVICII_NON_UE,
-        furnizor_denumire="CLOUDFLARE INC",
-        furnizor_cod_fiscal="27-0805829",
-        furnizor_tara="US",
-        numar_factura="IN-79973856",
-        data_facturii=datetime.date(2026, 9, 19),
-        fisier=SimpleUploadedFile("factura.pdf", b"%PDF-1.4 test", content_type="application/pdf"),
-    )
+    defaults = {
+        "nume_cheltuiala": "Cloudflare subscription",
+        "suma": 21.0,
+        "valuta": "USD",
+        "tip_tranzactie": "BANCAR",
+        "data_inserarii": datetime.date(2026, 9, 19),
+        "tip_achizitie": TipAchizitie.SERVICII_NON_UE,
+        "furnizor_denumire": "CLOUDFLARE INC",
+        "furnizor_cod_fiscal": "27-0805829",
+        "furnizor_tara": "US",
+        "numar_factura": "IN-79973856",
+        "data_facturii": datetime.date(2026, 9, 19),
+        "fisier": SimpleUploadedFile(
+            "factura.pdf", b"%PDF-1.4 test", content_type="application/pdf"
+        ),
+    }
     defaults.update(kwargs)
     return CheltuialaModel.objects.create(**defaults)
 
@@ -155,7 +157,8 @@ class TaxareInversaCheltuialaTests(TestCase):
         self.assertEqual(c.tip_achizitie, TipAchizitie.SERVICII_UE)
         # UK este non-UE dupa Brexit
         c2 = creeaza_cheltuiala_non_ue(
-            furnizor_tara="GB", tip_achizitie=TipAchizitie.SERVICII_UE,
+            furnizor_tara="GB",
+            tip_achizitie=TipAchizitie.SERVICII_UE,
             numar_factura="UK-1",
         )
         self.assertEqual(c2.tip_achizitie, TipAchizitie.SERVICII_NON_UE)
@@ -292,8 +295,12 @@ class CalculDeclaratiiTests(TestCase):
 
         d301 = calculeaza_d301(2026, 9, self.setari)
         self.assertEqual(d301["baza4"], D("226.58"))
-        self.assertEqual(len([r for r in d301["randuri"] if r["tip_operatie"] == "4"]), 1)
-        self.assertEqual(len([r for r in d301["randuri"] if r["tip_operatie"] == "5"]), 1)
+        self.assertEqual(
+            len([r for r in d301["randuri"] if r["tip_operatie"] == "4"]), 1
+        )
+        self.assertEqual(
+            len([r for r in d301["randuri"] if r["tip_operatie"] == "5"]), 1
+        )
 
         d390 = calculeaza_d390(2026, 9, self.setari)
         self.assertEqual(d390["nr_operatori"], 1)
@@ -311,8 +318,12 @@ class CalculDeclaratiiTests(TestCase):
         d301_lista = calculeaza_d301_lista(2026, 9, setari_fara_cod)
         self.assertEqual(len(d301_lista), 1)
         self.assertEqual(d301_lista[0]["cif"], "43000098")
-        self.assertEqual(len([r for r in d301_lista[0]["randuri"] if r["tip_operatie"] == "4"]), 2)
-        self.assertEqual(len([r for r in d301_lista[0]["randuri"] if r["tip_operatie"] == "5"]), 1)
+        self.assertEqual(
+            len([r for r in d301_lista[0]["randuri"] if r["tip_operatie"] == "4"]), 2
+        )
+        self.assertEqual(
+            len([r for r in d301_lista[0]["randuri"] if r["tip_operatie"] == "5"]), 1
+        )
 
     def test_jurnal_cumparari(self, _mock):
         creeaza_cheltuiala_ue()
@@ -367,6 +378,7 @@ class GenerareDocumenteTests(TestCase):
 
     def test_jurnal_xlsx_grupat_pe_cod(self, _mock):
         import io
+
         import pandas as pd
 
         creeaza_cheltuiala_ue()
@@ -377,8 +389,12 @@ class GenerareDocumenteTests(TestCase):
         pachet = genereaza_pachet_tva(2026, 10, self.setari)
         with ZipFile(pachet["zip_path"]) as zf:
             # Fiecare folder are jurnalul doar cu facturile declarate pe codul lui.
-            df_ue = pd.read_excel(io.BytesIO(zf.read("TVA-52937756/Jurnal_cumparari_2026_10.xlsx")))
-            df_non = pd.read_excel(io.BytesIO(zf.read("CIF-43000098/Jurnal_cumparari_2026_10.xlsx")))
+            df_ue = pd.read_excel(
+                io.BytesIO(zf.read("TVA-52937756/Jurnal_cumparari_2026_10.xlsx"))
+            )
+            df_non = pd.read_excel(
+                io.BytesIO(zf.read("CIF-43000098/Jurnal_cumparari_2026_10.xlsx"))
+            )
         self.assertEqual(df_ue["Document Numar"].tolist(), ["PBW-2026-003576"])
         self.assertEqual(df_non["Document Numar"].tolist(), ["IN-79973856"])
         self.assertTrue((df_ue["Referinta cod"] == "15-16").all())
@@ -487,6 +503,7 @@ Nu există erori de validare.
 
     def _creeaza_pdf_cu_text(self, text):
         from fpdf import FPDF
+
         from core.settings import get_font_path
 
         pdf = FPDF()
@@ -514,7 +531,9 @@ Nu există erori de validare.
         self.assertIn("1296415962", data["mentiuni"])
 
     def test_recipisa_d390(self):
-        text = self.RECIPISA_D301.replace("D301", "D390").replace("1296415962", "1296475983")
+        text = self.RECIPISA_D301.replace("D301", "D390").replace(
+            "1296415962", "1296475983"
+        )
         path = self._creeaza_pdf_cu_text(text)
         data = recipisa_parser(path)
         self.assertEqual(data["tip_declaratie"], "D390")
@@ -529,7 +548,6 @@ Nu există erori de validare.
 
 
 class SetariTVAFieldsTests(TestCase):
-
     def test_iban_trezorerie_valid(self):
         s = creeaza_setari()
         self.assertEqual(s.cont_iban_trezoreria, "RO41TREZ40620A100101XTVA")
@@ -537,13 +555,19 @@ class SetariTVAFieldsTests(TestCase):
     def test_iban_trezorerie_invalid_form(self):
         from setari.forms import SetariForm
 
-        form = SetariForm(data={
-            "nume": "TEST PFA", "localitate": "RO-IS, jud. Iasi, Iasi",
-            "adresa": "str. Test", "nr_reg_com": "F1", "cif": "123",
-            "email": "t@t.ro", "caen_principal": "6201",
-            "conturi_iban": "[]",
-            "cont_iban_trezoreria": "RO00TREZ40620A100101XTVA",
-        })
+        form = SetariForm(
+            data={
+                "nume": "TEST PFA",
+                "localitate": "RO-IS, jud. Iasi, Iasi",
+                "adresa": "str. Test",
+                "nr_reg_com": "F1",
+                "cif": "123",
+                "email": "t@t.ro",
+                "caen_principal": "6201",
+                "conturi_iban": "[]",
+                "cont_iban_trezoreria": "RO00TREZ40620A100101XTVA",
+            }
+        )
         self.assertFalse(form.is_valid())
         self.assertIn("cont_iban_trezoreria", form.errors)
 
@@ -557,11 +581,23 @@ class SetariTVAFieldsTests(TestCase):
     def test_link_trezorerie_din_localitate(self):
         self.assertEqual(get_judet_din_localitate("RO-IS, jud. Iasi, Iasi"), "Iasi")
         # Localitate cu trezorerie cunoscuta -> link direct la PDF-ul ANAF (sursa IBAN-ului)
-        self.assertIn("iban_TREZ405_TREZ406.pdf", get_link_iban_trezorerie("RO-IS, jud. Iasi, Iasi"))
+        self.assertIn(
+            "iban_TREZ405_TREZ406.pdf",
+            get_link_iban_trezorerie("RO-IS, jud. Iasi, Iasi"),
+        )
         # Localitate fara trezorerie operativa proprie -> pagina judetului
-        self.assertIn("Iasi.htm", get_link_iban_trezorerie("RO-IS, jud. Iasi, com. Todiresti, Boldesti"))
-        self.assertIn("Satu_Mare.htm", get_link_iban_trezorerie("RO-SM, jud. Satu Mare, com. X, Y"))
-        self.assertIn("Caras_Severin.htm", get_link_iban_trezorerie("RO-CS, jud. Caras-Severin, com. X, Y"))
+        self.assertIn(
+            "Iasi.htm",
+            get_link_iban_trezorerie("RO-IS, jud. Iasi, com. Todiresti, Boldesti"),
+        )
+        self.assertIn(
+            "Satu_Mare.htm",
+            get_link_iban_trezorerie("RO-SM, jud. Satu Mare, com. X, Y"),
+        )
+        self.assertIn(
+            "Caras_Severin.htm",
+            get_link_iban_trezorerie("RO-CS, jud. Caras-Severin, com. X, Y"),
+        )
 
     def test_tari_ue_non_ue(self):
         self.assertTrue(este_tara_ue("AT"))
@@ -623,19 +659,23 @@ class IbanTrezorerieAutoTests(TestCase):
         # Sate fara trezorerie proprie NU trebuie sa primeasca IBAN-ul
         # unui oras doar pentru ca impart un cuvant din nume.
         cazuri = [
-            "RO-MM, jud. Maramures, Boiu Mare",          # nu Baia Mare
-            "RO-HR, jud. Harghita, Cristuru Secuiesc",   # nu Odorheiu Secuiesc
-            "RO-AB, jud. Alba, com. Bucium, Valea Alba", # nu Alba Iulia
+            "RO-MM, jud. Maramures, Boiu Mare",  # nu Baia Mare
+            "RO-HR, jud. Harghita, Cristuru Secuiesc",  # nu Odorheiu Secuiesc
+            "RO-AB, jud. Alba, com. Bucium, Valea Alba",  # nu Alba Iulia
             "RO-IS, jud. Iasi, com. Todiresti, Boldesti",
         ]
         for localitate in cazuri:
-            self.assertIsNone(get_iban_trezorerie_pentru_localitate(localitate), localitate)
+            self.assertIsNone(
+                get_iban_trezorerie_pentru_localitate(localitate), localitate
+            )
 
     def test_toate_ibanurile_valid_mod97(self):
         import json
         import os
 
-        path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "static", "iban_trezorerie.json")
+        path = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)), "static", "iban_trezorerie.json"
+        )
         with open(path, encoding="utf-8") as f:
             date = json.load(f)
         self.assertGreaterEqual(len(date["trezorerii"]), 200)
@@ -674,14 +714,21 @@ class IbanTrezorerieAutoTests(TestCase):
         acesta se completeaza automat din localitate (server-side)."""
         from django.urls import reverse
 
-        self.client.post(reverse("setari"), {
-            "nume": "TEST PFA", "localitate": "RO-IS, jud. Iasi, Iasi",
-            "adresa": "str. Test", "nr_reg_com": "F1", "cif": "123",
-            "email": "t@t.ro", "caen_principal": "6201",
-            "conturi_iban": "[]",
-            "cod_tva_intracomunitar": "",
-            "cont_iban_trezoreria": "",
-        })
+        self.client.post(
+            reverse("setari"),
+            {
+                "nume": "TEST PFA",
+                "localitate": "RO-IS, jud. Iasi, Iasi",
+                "adresa": "str. Test",
+                "nr_reg_com": "F1",
+                "cif": "123",
+                "email": "t@t.ro",
+                "caen_principal": "6201",
+                "conturi_iban": "[]",
+                "cod_tva_intracomunitar": "",
+                "cont_iban_trezoreria": "",
+            },
+        )
         s = SetariModel.objects.first()
         self.assertEqual(s.cont_iban_trezoreria, "RO41TREZ40620A100101XTVA")
 
@@ -689,50 +736,69 @@ class IbanTrezorerieAutoTests(TestCase):
         """IBAN-ul introdus manual nu se suprascrie la salvare."""
         from django.urls import reverse
 
-        self.client.post(reverse("setari"), {
-            "nume": "TEST PFA", "localitate": "RO-IS, jud. Iasi, Iasi",
-            "adresa": "str. Test", "nr_reg_com": "F1", "cif": "123",
-            "email": "t@t.ro", "caen_principal": "6201",
-            "conturi_iban": "[]",
-            "cod_tva_intracomunitar": "",
-            "cont_iban_trezoreria": "RO63TREZ40720A100101XTVA",  # Pascani, manual
-        })
+        self.client.post(
+            reverse("setari"),
+            {
+                "nume": "TEST PFA",
+                "localitate": "RO-IS, jud. Iasi, Iasi",
+                "adresa": "str. Test",
+                "nr_reg_com": "F1",
+                "cif": "123",
+                "email": "t@t.ro",
+                "caen_principal": "6201",
+                "conturi_iban": "[]",
+                "cod_tva_intracomunitar": "",
+                "cont_iban_trezoreria": "RO63TREZ40720A100101XTVA",  # Pascani, manual
+            },
+        )
         s = SetariModel.objects.first()
         self.assertEqual(s.cont_iban_trezoreria, "RO63TREZ40720A100101XTVA")
 
     @patch("utils.trezorerie._get_trezorerii")
     @patch("utils.scrape_iban_trezorerie.scrape")
     @patch("utils.scrape_iban_trezorerie.salveaza_json")
-    def test_salvare_ruleaza_scraper_daca_json_lipseste(self, mock_salveaza, mock_scrape, mock_cache):
+    def test_salvare_ruleaza_scraper_daca_json_lipseste(
+        self, mock_salveaza, mock_scrape, mock_cache
+    ):
         """Daca iban_trezorerie.json lipseste, la salvarea Setarilor se ruleaza
         automat scraper-ul ANAF si IBAN-ul se completeaza din datele proaspete."""
         from django.urls import reverse
 
-        randuri_proaspete = [{
-            "judet": "Iasi",
-            "cod_trezorerie": "TREZ406",
-            "nume_trezorerie": "Trezorerie operativa Municipiul Iasi",
-            "localitate": "iasi",
-            "iban": "RO41TREZ40620A100101XTVA",
-            "cod_bugetar": "20A100101",
-            "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ405_TREZ406.pdf",
-        }]
+        randuri_proaspete = [
+            {
+                "judet": "Iasi",
+                "cod_trezorerie": "TREZ406",
+                "nume_trezorerie": "Trezorerie operativa Municipiul Iasi",
+                "localitate": "iasi",
+                "iban": "RO41TREZ40620A100101XTVA",
+                "cod_bugetar": "20A100101",
+                "sursa": "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ405_TREZ406.pdf",
+            }
+        ]
         mock_scrape.return_value = randuri_proaspete
         # Prima verificare: tabel gol -> scrape; dupa salvare: date disponibile.
         # itertools.chain: dupa primele 2 apeluri, tot datele proaspete.
         import itertools
+
         mock_cache.side_effect = itertools.chain(
             [[], randuri_proaspete], itertools.repeat(randuri_proaspete)
         )
 
-        response = self.client.post(reverse("setari"), {
-            "nume": "TEST PFA", "localitate": "RO-IS, jud. Iasi, Iasi",
-            "adresa": "str. Test", "nr_reg_com": "F1", "cif": "123",
-            "email": "t@t.ro", "caen_principal": "6201",
-            "conturi_iban": "[]",
-            "cod_tva_intracomunitar": "",
-            "cont_iban_trezoreria": "",
-        })
+        response = self.client.post(
+            reverse("setari"),
+            {
+                "nume": "TEST PFA",
+                "localitate": "RO-IS, jud. Iasi, Iasi",
+                "adresa": "str. Test",
+                "nr_reg_com": "F1",
+                "cif": "123",
+                "email": "t@t.ro",
+                "caen_principal": "6201",
+                "conturi_iban": "[]",
+                "cod_tva_intracomunitar": "",
+                "cont_iban_trezoreria": "",
+            },
+        )
         self.assertEqual(response.status_code, 302)
         mock_scrape.assert_called_once()
         mock_salveaza.assert_called_once_with(randuri_proaspete)
@@ -747,14 +813,22 @@ class IbanTrezorerieAutoTests(TestCase):
         cu avertisment, fara IBAN automat."""
         from django.urls import reverse
 
-        response = self.client.post(reverse("setari"), {
-            "nume": "TEST PFA", "localitate": "RO-IS, jud. Iasi, Iasi",
-            "adresa": "str. Test", "nr_reg_com": "F1", "cif": "123",
-            "email": "t@t.ro", "caen_principal": "6201",
-            "conturi_iban": "[]",
-            "cod_tva_intracomunitar": "",
-            "cont_iban_trezoreria": "",
-        }, follow=True)
+        response = self.client.post(
+            reverse("setari"),
+            {
+                "nume": "TEST PFA",
+                "localitate": "RO-IS, jud. Iasi, Iasi",
+                "adresa": "str. Test",
+                "nr_reg_com": "F1",
+                "cif": "123",
+                "email": "t@t.ro",
+                "caen_principal": "6201",
+                "conturi_iban": "[]",
+                "cod_tva_intracomunitar": "",
+                "cont_iban_trezoreria": "",
+            },
+            follow=True,
+        )
         self.assertEqual(response.status_code, 200)
         s = SetariModel.objects.first()
         self.assertIsNotNone(s)  # setarile s-au salvat
@@ -767,14 +841,21 @@ class IbanTrezorerieAutoTests(TestCase):
         """Cu tabelul deja disponibil, scraper-ul NU se ruleaza la salvare."""
         from django.urls import reverse
 
-        self.client.post(reverse("setari"), {
-            "nume": "TEST PFA", "localitate": "RO-IS, jud. Iasi, Iasi",
-            "adresa": "str. Test", "nr_reg_com": "F1", "cif": "123",
-            "email": "t@t.ro", "caen_principal": "6201",
-            "conturi_iban": "[]",
-            "cod_tva_intracomunitar": "",
-            "cont_iban_trezoreria": "",
-        })
+        self.client.post(
+            reverse("setari"),
+            {
+                "nume": "TEST PFA",
+                "localitate": "RO-IS, jud. Iasi, Iasi",
+                "adresa": "str. Test",
+                "nr_reg_com": "F1",
+                "cif": "123",
+                "email": "t@t.ro",
+                "caen_principal": "6201",
+                "conturi_iban": "[]",
+                "cod_tva_intracomunitar": "",
+                "cont_iban_trezoreria": "",
+            },
+        )
         mock_scrape.assert_not_called()
         s = SetariModel.objects.first()
         self.assertEqual(s.cont_iban_trezoreria, "RO41TREZ40620A100101XTVA")
@@ -821,8 +902,8 @@ class FluxCheltuieliTVATests(TestCase):
         self.assertNotContains(response, "tva/genereaza")
 
     def test_filtru_extern_pe_luna(self, _mock):
-        creeaza_cheltuiala_ue()       # octombrie, UE
-        creeaza_cheltuiala_non_ue()   # septembrie, non-UE
+        creeaza_cheltuiala_ue()  # octombrie, UE
+        creeaza_cheltuiala_non_ue()  # septembrie, non-UE
         CheltuialaModel.objects.create(
             nume_cheltuiala="Consumabile",
             suma=100.0,
@@ -849,12 +930,18 @@ class FluxCheltuieliTVATests(TestCase):
             "recipisa_d301_cif_52937756_oct_2026_1296415962.pdf"
         )
         with open(recipisa_path, "rb") as f:
-            upload = SimpleUploadedFile("recipisa.pdf", f.read(), content_type="application/pdf")
+            upload = SimpleUploadedFile(
+                "recipisa.pdf", f.read(), content_type="application/pdf"
+            )
 
         response = self.client.post(
             reverse("documente"),
-            {"tip_document": TipDocument.DOCUMENT_UTIL, "mentiuni": "", "fisier": upload,
-             "parse_tip_document": True},
+            {
+                "tip_document": TipDocument.DOCUMENT_UTIL,
+                "mentiuni": "",
+                "fisier": upload,
+                "parse_tip_document": True,
+            },
         )
         self.assertEqual(response.status_code, 302)
 
@@ -871,7 +958,6 @@ class FluxCheltuieliTVATests(TestCase):
 @override_settings(MEDIA_ROOT=tempfile.mkdtemp(prefix="pfasimplu_test_media_"))
 @patch("utils.valuta.cursvalutarbnr.get_bnr_rates", side_effect=mock_get_bnr_rates)
 class JurnalCumparariRegistreTests(TestCase):
-
     def setUp(self):
         self.setari = creeaza_setari()
 
@@ -906,25 +992,30 @@ class CheltuieliFormularViewTests(TestCase):
         self.setari = creeaza_setari()
 
     def test_post_cheltuiala_ue_calculeaza_automat(self, _mock):
-        upload = SimpleUploadedFile("factura.pdf", b"%PDF-1.4 test", content_type="application/pdf")
-        response = self.client.post(reverse("cheltuieli"), {
-            "nume_cheltuiala": "Cortecs AI",
-            "deductibila": Deductibilitate.DEDUCTIBILA_INTEGRAL,
-            "suma": "21.00",
-            "valuta": "EUR",
-            "tip_tranzactie": "BANCAR",
-            "data_inserarii": "2026-10-02",
-            "tip_achizitie": TipAchizitie.SERVICII_UE,
-            "furnizor_denumire": "CORTECS GMBH",
-            "furnizor_cod_fiscal": "ATU77164426",
-            "furnizor_tara": "AT",
-            "numar_factura": "PBW-2026-003576",
-            "data_facturii": "2026-10-02",
-            "fisier": upload,
-            "obiect_de_inventar": False,
-            "mijloc_fix": False,
-            "scos_din_uz": False,
-        })
+        upload = SimpleUploadedFile(
+            "factura.pdf", b"%PDF-1.4 test", content_type="application/pdf"
+        )
+        response = self.client.post(
+            reverse("cheltuieli"),
+            {
+                "nume_cheltuiala": "Cortecs AI",
+                "deductibila": Deductibilitate.DEDUCTIBILA_INTEGRAL,
+                "suma": "21.00",
+                "valuta": "EUR",
+                "tip_tranzactie": "BANCAR",
+                "data_inserarii": "2026-10-02",
+                "tip_achizitie": TipAchizitie.SERVICII_UE,
+                "furnizor_denumire": "CORTECS GMBH",
+                "furnizor_cod_fiscal": "ATU77164426",
+                "furnizor_tara": "AT",
+                "numar_factura": "PBW-2026-003576",
+                "data_facturii": "2026-10-02",
+                "fisier": upload,
+                "obiect_de_inventar": False,
+                "mijloc_fix": False,
+                "scos_din_uz": False,
+            },
+        )
         self.assertEqual(response.status_code, 302)
         c = CheltuialaModel.objects.get(numar_factura="PBW-2026-003576")
         self.assertEqual(c.baza_in_lei, D("112.2387"))
@@ -933,9 +1024,7 @@ class CheltuieliFormularViewTests(TestCase):
 
     def test_typeahead_furnizor(self, _mock):
         creeaza_cheltuiala_ue()
-        response = self.client.get(
-            reverse("cheltuieli-cauta-furnizor", args=["cort"])
-        )
+        response = self.client.get(reverse("cheltuieli-cauta-furnizor", args=["cort"]))
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertEqual(len(data), 1)

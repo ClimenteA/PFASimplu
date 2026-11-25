@@ -1,10 +1,11 @@
 from django.conf import settings
 from django.db import models
+from django.utils import timezone
+
 from .files import get_save_path
 from .multiuser import get_current_user
-from .valuta import Valuta, TipTranzactie, to_ron
 from .validators import validate_not_future_date
-from django.utils import timezone
+from .valuta import TipTranzactie, Valuta, to_ron
 
 
 class UserScopedManager(models.Manager):

@@ -11,9 +11,9 @@ SRC_DIR = Path(__file__).resolve().parent.parent
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
+from conftest import FILES_DIR
 from playwright.sync_api import Page, expect
 
-from conftest import FILES_DIR
 from utils.decimale import D, rotund2, suma
 
 # Cota standard de TVA folosita de aplicatie la taxarea inversa (art. 291).
@@ -186,8 +186,16 @@ def incasare_din_factura(page: Page, serie: str, numar: int, data_incasarii) -> 
     # confundam factura 11 cu 111 etc.
     rand = (
         page.locator("#tabel-facturi tbody tr")
-        .filter(has=page.locator("td:nth-child(8)").filter(has_text=re.compile(f"^{serie}$")))
-        .filter(has=page.locator("td:nth-child(9)").filter(has_text=re.compile(f"^{numar}$")))
+        .filter(
+            has=page.locator("td:nth-child(8)").filter(
+                has_text=re.compile(f"^{serie}$")
+            )
+        )
+        .filter(
+            has=page.locator("td:nth-child(9)").filter(
+                has_text=re.compile(f"^{numar}$")
+            )
+        )
         .first
     )
     # Click pe iconita din link: centrul bounding box-ului unui <a> inline

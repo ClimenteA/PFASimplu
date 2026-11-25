@@ -81,7 +81,5 @@ def genereaza_documente(factura: FacturaModel):
             save=False,
         )
 
-    factura.save(
-        update_fields=["fisier_efactura_xml", "fisier_factura_pdf"]
-    )
+    factura.save(update_fields=["fisier_efactura_xml", "fisier_factura_pdf"])
     return factura

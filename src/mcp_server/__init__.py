@@ -3,4 +3,4 @@
 - `mcp_server.http_app` -> transport HTTP (Docker), cu autorizare Bearer
 """
 
-__all__ = ["server", "tools", "auth"]
+__all__ = ["auth", "server", "tools"]

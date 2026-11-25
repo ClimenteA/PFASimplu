@@ -1,17 +1,19 @@
 import datetime
 import re
-from unidecode import unidecode
+
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from utils.views import one_month_from_now
-from utils.localitati import Localitati
-from utils.files import get_save_path
-from utils.models import UserOwnedModel, UserScopedManager
-from utils.valuta import Valuta, TipTranzactie
-from utils.decimale import D, rotund2, suma
+from fpdf_table import Align, PDFTable
+from unidecode import unidecode
+
 from core.settings import get_font_path
-from fpdf_table import PDFTable, Align
+from utils.decimale import D, rotund2, suma
+from utils.files import get_save_path
+from utils.localitati import Localitati
+from utils.models import UserOwnedModel, UserScopedManager
+from utils.valuta import TipTranzactie, Valuta
+from utils.views import one_month_from_now
 
 
 class ModalitatePlata(models.TextChoices):
@@ -42,158 +44,305 @@ class TipFactura(models.TextChoices):
 
 factura_romana_pdf = {
     "header_factura": "FACTURA",
-    'header_date_factura': ['Serie', 'Numar', 'Data factura', 'Data scadenta'],
-    'header_date_client_furnizor': ['Detalii', 'Furnizor', 'Client'],
-    'nume_lang': 'Nume',
-    'nr_reg_com_lang': 'Nr.Reg.Com.',
-    'cif_lang': 'CUI/CIF/VAT',
-    'adresa_lang': 'Adresa',
-    'email_lang': 'Email',
-    'telefon_lang': 'Telefon',
-    'iban_lang': 'IBAN',
-    'header_produse_servicii': ['Nr.Crt.', 'Denumire produse sau servicii', 'U.M.', 'Cantitate', 'Pret unitar fara T.V.A.', 'Valoarea'], 
+    "header_date_factura": ["Serie", "Numar", "Data factura", "Data scadenta"],
+    "header_date_client_furnizor": ["Detalii", "Furnizor", "Client"],
+    "nume_lang": "Nume",
+    "nr_reg_com_lang": "Nr.Reg.Com.",
+    "cif_lang": "CUI/CIF/VAT",
+    "adresa_lang": "Adresa",
+    "email_lang": "Email",
+    "telefon_lang": "Telefon",
+    "iban_lang": "IBAN",
+    "header_produse_servicii": [
+        "Nr.Crt.",
+        "Denumire produse sau servicii",
+        "U.M.",
+        "Cantitate",
+        "Pret unitar fara T.V.A.",
+        "Valoarea",
+    ],
     "header_total_de_plata": "Total de plata:",
 }
 
 
 factura_engleza_pdf = {
     "header_factura": "FACTURA/INVOICE",
-    'header_date_factura': ['Serie/Series', 'Numar/Number', 'Data factura/Invoice Date', 'Data scadenta/Due Date'],
-    'header_date_client_furnizor': ['Detalii/Details', 'Furnizor/Supplier', 'Client'],
-    'nume_lang': 'Nume/Name',
-    'nr_reg_com_lang': 'Nr.Reg.Com.',
-    'cif_lang': 'CUI/CIF/VAT',
-    'adresa_lang': 'Adresa/Address',
-    'email_lang': 'Email',
-    'telefon_lang': 'Telefon/Phone',
-    'iban_lang': 'IBAN',
-    'header_produse_servicii': ['Nr.Crt./No.', 'Denumire produse sau servicii/Name of products or services', 'U.M./Unit', 'Cantitate/Quantity', 'Pret unitar fara T.V.A./Unit price without VAT', 'Valoarea/Value'], 
+    "header_date_factura": [
+        "Serie/Series",
+        "Numar/Number",
+        "Data factura/Invoice Date",
+        "Data scadenta/Due Date",
+    ],
+    "header_date_client_furnizor": ["Detalii/Details", "Furnizor/Supplier", "Client"],
+    "nume_lang": "Nume/Name",
+    "nr_reg_com_lang": "Nr.Reg.Com.",
+    "cif_lang": "CUI/CIF/VAT",
+    "adresa_lang": "Adresa/Address",
+    "email_lang": "Email",
+    "telefon_lang": "Telefon/Phone",
+    "iban_lang": "IBAN",
+    "header_produse_servicii": [
+        "Nr.Crt./No.",
+        "Denumire produse sau servicii/Name of products or services",
+        "U.M./Unit",
+        "Cantitate/Quantity",
+        "Pret unitar fara T.V.A./Unit price without VAT",
+        "Valoarea/Value",
+    ],
     "header_total_de_plata": "Total de plata/Total amount:",
 }
 
 
 factura_germana_pdf = {
     "header_factura": "FACTURA/RECHNUNG",
-    'header_date_factura': ['Serie/Serie', 'Numar/Nummer', 'Data factura/Rechnungsdatum', 'Data scadenta/Fälligkeitsdatum'],
-    'header_date_client_furnizor': ['Detalii/Details', 'Furnizor/Lieferant', 'Client/Kunde'],
-    'nume_lang': 'Nume/Name',
-    'nr_reg_com_lang': 'Nr.Reg.Com.',
-    'cif_lang': 'CUI/CIF/VAT',
-    'adresa_lang': 'Adresa/Adresse',
-    'email_lang': 'Email',
-    'telefon_lang': 'Telefon',
-    'iban_lang': 'IBAN',
-    'header_produse_servicii': ['Nr.Crt./Nr.', 'Denumire produse sau servicii/Name der Produkte oder Dienstleistungen', 'U.M./Unit', 'Cantitate/Menge', 'Pret unitar fara T.V.A./Stückpreis ohne MwSt.', 'Valoarea/Wert'], 
+    "header_date_factura": [
+        "Serie/Serie",
+        "Numar/Nummer",
+        "Data factura/Rechnungsdatum",
+        "Data scadenta/Fälligkeitsdatum",
+    ],
+    "header_date_client_furnizor": [
+        "Detalii/Details",
+        "Furnizor/Lieferant",
+        "Client/Kunde",
+    ],
+    "nume_lang": "Nume/Name",
+    "nr_reg_com_lang": "Nr.Reg.Com.",
+    "cif_lang": "CUI/CIF/VAT",
+    "adresa_lang": "Adresa/Adresse",
+    "email_lang": "Email",
+    "telefon_lang": "Telefon",
+    "iban_lang": "IBAN",
+    "header_produse_servicii": [
+        "Nr.Crt./Nr.",
+        "Denumire produse sau servicii/Name der Produkte oder Dienstleistungen",
+        "U.M./Unit",
+        "Cantitate/Menge",
+        "Pret unitar fara T.V.A./Stückpreis ohne MwSt.",
+        "Valoarea/Wert",
+    ],
     "header_total_de_plata": "Total de plata/Gesamt zu zahlen:",
 }
 
 factura_franceza_pdf = {
     "header_factura": "FACTURA/FACTURE",
-    'header_date_factura': ['Serie/Série', 'Numar/Numéro', 'Data factura/Date de facture', "Data scadenta/Date d'échéance"],
-    'header_date_client_furnizor': ['Detalii/Détails', 'Furnizor/Fournisseur', 'Client'],
-    'nume_lang': 'Nume/Nom',
-    'nr_reg_com_lang': 'Nr.Reg.Com.',
-    'cif_lang': 'CUI/CIF/VAT',
-    'adresa_lang': 'Adresa/Adresse',
-    'email_lang': 'Email',
-    'telefon_lang': 'Telefon/Téléphone',
-    'iban_lang': 'IBAN',
-    'header_produse_servicii': ['Nr.Crt./No.', 'Denumire produse sau servicii/Nom des produits ou services', 'U.M./Unité', 'Cantitate/Quantité', 'Pret unitar fara T.V.A./Prix unitaire hors TVA', 'Valoarea/Valeur'], 
+    "header_date_factura": [
+        "Serie/Série",
+        "Numar/Numéro",
+        "Data factura/Date de facture",
+        "Data scadenta/Date d'échéance",
+    ],
+    "header_date_client_furnizor": [
+        "Detalii/Détails",
+        "Furnizor/Fournisseur",
+        "Client",
+    ],
+    "nume_lang": "Nume/Nom",
+    "nr_reg_com_lang": "Nr.Reg.Com.",
+    "cif_lang": "CUI/CIF/VAT",
+    "adresa_lang": "Adresa/Adresse",
+    "email_lang": "Email",
+    "telefon_lang": "Telefon/Téléphone",
+    "iban_lang": "IBAN",
+    "header_produse_servicii": [
+        "Nr.Crt./No.",
+        "Denumire produse sau servicii/Nom des produits ou services",
+        "U.M./Unité",
+        "Cantitate/Quantité",
+        "Pret unitar fara T.V.A./Prix unitaire hors TVA",
+        "Valoarea/Valeur",
+    ],
     "header_total_de_plata": "Total de plata/Total à payer:",
 }
 
 
 factura_spaniola_pdf = {
     "header_factura": "FACTURA",
-    'header_date_factura': ['Serie/Serie', 'Numar/Número', 'Data factura/Fecha de factura', "Data scadenta/Fecha de vencimiento"],
-    'header_date_client_furnizor': ['Detalii/Detalles', 'Furnizor/Proveedor', 'Client/Cliente'],
-    'nume_lang': 'Nume/Nombre',
-    'nr_reg_com_lang': 'Nr.Reg.Com.',
-    'cif_lang': 'CUI/CIF/VAT',
-    'adresa_lang': 'Adresa/Dirección',
-    'email_lang': 'Email',
-    'telefon_lang': 'Telefon/Teléfono',
-    'iban_lang': 'IBAN',
-    'header_produse_servicii': ['Nr.Crt./No.', 'Denumire produse sau servicii/Nombre de productos o servicios', 'U.M./Unidad', 'Cantitate/Cantidad', 'Pret unitar fara T.V.A./Precio unitario sin IVA', 'Valoarea/Valor'], 
+    "header_date_factura": [
+        "Serie/Serie",
+        "Numar/Número",
+        "Data factura/Fecha de factura",
+        "Data scadenta/Fecha de vencimiento",
+    ],
+    "header_date_client_furnizor": [
+        "Detalii/Detalles",
+        "Furnizor/Proveedor",
+        "Client/Cliente",
+    ],
+    "nume_lang": "Nume/Nombre",
+    "nr_reg_com_lang": "Nr.Reg.Com.",
+    "cif_lang": "CUI/CIF/VAT",
+    "adresa_lang": "Adresa/Dirección",
+    "email_lang": "Email",
+    "telefon_lang": "Telefon/Teléfono",
+    "iban_lang": "IBAN",
+    "header_produse_servicii": [
+        "Nr.Crt./No.",
+        "Denumire produse sau servicii/Nombre de productos o servicios",
+        "U.M./Unidad",
+        "Cantitate/Cantidad",
+        "Pret unitar fara T.V.A./Precio unitario sin IVA",
+        "Valoarea/Valor",
+    ],
     "header_total_de_plata": "Total de plata/Total a pagar:",
 }
 
 
 factura_italiana_pdf = {
     "header_factura": "FACTURA/FATTURA",
-    'header_date_factura': ['Serie/Serie', 'Numar/Numero', 'Data factura/Data della fattura', "Data scadenta/Data di scadenza"],
-    'header_date_client_furnizor': ['Detalii/Dettagli', 'Furnizor/Fornitore', 'Client/Cliente'],
-    'nume_lang': 'Nume/Nome',
-    'nr_reg_com_lang': 'Nr.Reg.Com.',
-    'cif_lang': 'CUI/CIF/VAT',
-    'adresa_lang': 'Adresa/Indirizzo',
-    'email_lang': 'Email',
-    'telefon_lang': 'Telefon/Telefono',
-    'iban_lang': 'IBAN',
-    'header_produse_servicii': ['Nr.Crt./No.', 'Denumire produse sau servicii/Nome dei prodotti o servizi', 'U.M./Unità', 'Cantitate/Quantità', 'Pret unitar fara T.V.A./Prezzo unitario senza IVA', 'Valoarea/Valore'], 
+    "header_date_factura": [
+        "Serie/Serie",
+        "Numar/Numero",
+        "Data factura/Data della fattura",
+        "Data scadenta/Data di scadenza",
+    ],
+    "header_date_client_furnizor": [
+        "Detalii/Dettagli",
+        "Furnizor/Fornitore",
+        "Client/Cliente",
+    ],
+    "nume_lang": "Nume/Nome",
+    "nr_reg_com_lang": "Nr.Reg.Com.",
+    "cif_lang": "CUI/CIF/VAT",
+    "adresa_lang": "Adresa/Indirizzo",
+    "email_lang": "Email",
+    "telefon_lang": "Telefon/Telefono",
+    "iban_lang": "IBAN",
+    "header_produse_servicii": [
+        "Nr.Crt./No.",
+        "Denumire produse sau servicii/Nome dei prodotti o servizi",
+        "U.M./Unità",
+        "Cantitate/Quantità",
+        "Pret unitar fara T.V.A./Prezzo unitario senza IVA",
+        "Valoarea/Valore",
+    ],
     "header_total_de_plata": "Total de plata/Total a pagare:",
 }
 
 
 factura_daneza_pdf = {
     "header_factura": "FACTURA/FAKTURA",
-    'header_date_factura': ['Serie/Serie', 'Numar/Numero', 'Data factura/Fakturadato', "Data scadenta/Forfaldsdato"],
-    'header_date_client_furnizor': ['Detalii/Detaljer', 'Furnizor/Leverandør', 'Client/Kunde'],
-    'nume_lang': 'Nume/Navn',
-    'nr_reg_com_lang': 'Nr.Reg.Com.',
-    'cif_lang': 'CUI/CIF/VAT',
-    'adresa_lang': 'Adresa/Adresse',
-    'email_lang': 'Email',
-    'telefon_lang': 'Telefon',
-    'iban_lang': 'IBAN',
-    'header_produse_servicii': ['Nr.Crt./Nr.', 'Denumire produse sau servicii/Produkt- eller servicenames', 'U.M./Enhed', 'Cantitate/Mængde', 'Pret unitar fara T.V.A./Enhedspris uden moms', 'Valoarea/Værdi'], 
+    "header_date_factura": [
+        "Serie/Serie",
+        "Numar/Numero",
+        "Data factura/Fakturadato",
+        "Data scadenta/Forfaldsdato",
+    ],
+    "header_date_client_furnizor": [
+        "Detalii/Detaljer",
+        "Furnizor/Leverandør",
+        "Client/Kunde",
+    ],
+    "nume_lang": "Nume/Navn",
+    "nr_reg_com_lang": "Nr.Reg.Com.",
+    "cif_lang": "CUI/CIF/VAT",
+    "adresa_lang": "Adresa/Adresse",
+    "email_lang": "Email",
+    "telefon_lang": "Telefon",
+    "iban_lang": "IBAN",
+    "header_produse_servicii": [
+        "Nr.Crt./Nr.",
+        "Denumire produse sau servicii/Produkt- eller servicenames",
+        "U.M./Enhed",
+        "Cantitate/Mængde",
+        "Pret unitar fara T.V.A./Enhedspris uden moms",
+        "Valoarea/Værdi",
+    ],
     "header_total_de_plata": "Total de plata/Total at betale:",
 }
 
 
 factura_olandeza_pdf = {
     "header_factura": "FACTURA/FACTUUR",
-    'header_date_factura': ['Serie/Serie', 'Numar/Nummer', 'Data factura/Factuurdatum', "Data scadenta/Vervaldatum"],
-    'header_date_client_furnizor': ['Detalii/Details', 'Furnizor/Leverancier', 'Client/Klant'],
-    'nume_lang': 'Nume',
-    'nr_reg_com_lang': 'Nr.Reg.Com.',
-    'cif_lang': 'CUI/CIF/VAT',
-    'adresa_lang': 'Adresa/Adres',
-    'email_lang': 'Email',
-    'telefon_lang': 'Telefon/Telefoon',
-    'iban_lang': 'IBAN',
-    'header_produse_servicii': ['Nr.Crt./No.', 'Denumire produse sau servicii/Naam van de producten of diensten', 'U.M./Meeteenheid', 'Cantitate/Hoeveelheid', 'Pret unitar fara T.V.A./Eenheidsprijs zonder BTW.', 'Valoarea/Waarde'], 
+    "header_date_factura": [
+        "Serie/Serie",
+        "Numar/Nummer",
+        "Data factura/Factuurdatum",
+        "Data scadenta/Vervaldatum",
+    ],
+    "header_date_client_furnizor": [
+        "Detalii/Details",
+        "Furnizor/Leverancier",
+        "Client/Klant",
+    ],
+    "nume_lang": "Nume",
+    "nr_reg_com_lang": "Nr.Reg.Com.",
+    "cif_lang": "CUI/CIF/VAT",
+    "adresa_lang": "Adresa/Adres",
+    "email_lang": "Email",
+    "telefon_lang": "Telefon/Telefoon",
+    "iban_lang": "IBAN",
+    "header_produse_servicii": [
+        "Nr.Crt./No.",
+        "Denumire produse sau servicii/Naam van de producten of diensten",
+        "U.M./Meeteenheid",
+        "Cantitate/Hoeveelheid",
+        "Pret unitar fara T.V.A./Eenheidsprijs zonder BTW.",
+        "Valoarea/Waarde",
+    ],
     "header_total_de_plata": "Total de plata/Totale betaling:",
 }
 
 
 factura_suedeza_pdf = {
     "header_factura": "FACTURA/FAKTURA",
-    'header_date_factura': ['Serie/Serie', 'Numar/Nummer', 'Data factura/Datum för faktura', "Data scadenta/Utgångsdatum"],
-    'header_date_client_furnizor': ['Detalii/Detaljer', 'Furnizor/Familjeförsörjare', 'Client/Kund'],
-    'nume_lang': 'Nume/Namn',
-    'nr_reg_com_lang': 'Nr.Reg.Com.',
-    'cif_lang': 'CUI/CIF/VAT',
-    'adresa_lang': 'Adresa/Adress',
-    'email_lang': 'Email',
-    'telefon_lang': 'Telefon',
-    'iban_lang': 'IBAN',
-    'header_produse_servicii': ['Nr.Crt./No.', 'Denumire produse sau servicii/Namn på produkter eller tjänster', 'U.M./Måttenhet', 'Cantitate/Kvantitet', 'Pret unitar fara T.V.A./Enhetspris utan moms.', 'Valoarea/Värde'], 
+    "header_date_factura": [
+        "Serie/Serie",
+        "Numar/Nummer",
+        "Data factura/Datum för faktura",
+        "Data scadenta/Utgångsdatum",
+    ],
+    "header_date_client_furnizor": [
+        "Detalii/Detaljer",
+        "Furnizor/Familjeförsörjare",
+        "Client/Kund",
+    ],
+    "nume_lang": "Nume/Namn",
+    "nr_reg_com_lang": "Nr.Reg.Com.",
+    "cif_lang": "CUI/CIF/VAT",
+    "adresa_lang": "Adresa/Adress",
+    "email_lang": "Email",
+    "telefon_lang": "Telefon",
+    "iban_lang": "IBAN",
+    "header_produse_servicii": [
+        "Nr.Crt./No.",
+        "Denumire produse sau servicii/Namn på produkter eller tjänster",
+        "U.M./Måttenhet",
+        "Cantitate/Kvantitet",
+        "Pret unitar fara T.V.A./Enhetspris utan moms.",
+        "Valoarea/Värde",
+    ],
     "header_total_de_plata": "Total de plata/Total betalning:",
 }
 
 factura_finlandeza_pdf = {
     "header_factura": "FACTURA/LASKU",
-    'header_date_factura': ['Serie/Sarja', 'Numar/Numero', 'Data factura/Laskun päivämäärä', "Data scadenta/Vanhentumispäivä"],
-    'header_date_client_furnizor': ['Detalii/Tiedot', 'Furnizor/Toimittaja', 'Client/Asiakas'],
-    'nume_lang': 'Nume/Nimi',
-    'nr_reg_com_lang': 'Nr.Reg.Com.',
-    'cif_lang': 'CUI/CIF/VAT',
-    'adresa_lang': 'Adresa/Osoite',
-    'email_lang': 'Email',
-    'telefon_lang': 'Telefon/Puhelin',
-    'iban_lang': 'IBAN',
-    'header_produse_servicii': ['Nr.Crt./No.', 'Denumire produse sau servicii/Tuotteiden tai palveluiden nimet', 'U.M./Mittayksikkö', 'Cantitate/Määrä', 'Pret unitar fara T.V.A./Yksikköhinta ilman arvonlisäveroa.', 'Valoarea/Arvo'], 
+    "header_date_factura": [
+        "Serie/Sarja",
+        "Numar/Numero",
+        "Data factura/Laskun päivämäärä",
+        "Data scadenta/Vanhentumispäivä",
+    ],
+    "header_date_client_furnizor": [
+        "Detalii/Tiedot",
+        "Furnizor/Toimittaja",
+        "Client/Asiakas",
+    ],
+    "nume_lang": "Nume/Nimi",
+    "nr_reg_com_lang": "Nr.Reg.Com.",
+    "cif_lang": "CUI/CIF/VAT",
+    "adresa_lang": "Adresa/Osoite",
+    "email_lang": "Email",
+    "telefon_lang": "Telefon/Puhelin",
+    "iban_lang": "IBAN",
+    "header_produse_servicii": [
+        "Nr.Crt./No.",
+        "Denumire produse sau servicii/Tuotteiden tai palveluiden nimet",
+        "U.M./Mittayksikkö",
+        "Cantitate/Määrä",
+        "Pret unitar fara T.V.A./Yksikköhinta ilman arvonlisäveroa.",
+        "Valoarea/Arvo",
+    ],
     "header_total_de_plata": "Total de plata/Maksu yhteensä:",
 }
 
@@ -217,67 +366,92 @@ def creeaza_factura_pdf(data: dict, pdf_output_path: str):
 
     data = pdf_template_mapper[data["tip_factura"]](data)
 
-    pdf = PDFTable()    
+    pdf = PDFTable()
 
     pdf.add_fonts_custom(
-        font_name="arial", 
-        font_extension="ttf", 
-        font_dir=get_font_path(), 
-        set_default=True
+        font_name="arial",
+        font_extension="ttf",
+        font_dir=get_font_path(),
+        set_default=True,
     )
 
     # Date identificare factura
-    pdf.table_header([data['header_factura']], align=Align.L)
-    pdf.table_row([''])
+    pdf.table_header([data["header_factura"]], align=Align.L)
+    pdf.table_row([""])
 
-    width_cols = pdf.table_cols(2,2,4,4)
-    pdf.table_header(data['header_date_factura'], width_cols, align=Align.L)
-    pdf.table_row([data['serie'], data['numar'], data['data_emitere'], data['data_scadenta']], width_cols)
-    pdf.table_row([''])
-
+    width_cols = pdf.table_cols(2, 2, 4, 4)
+    pdf.table_header(data["header_date_factura"], width_cols, align=Align.L)
+    pdf.table_row(
+        [data["serie"], data["numar"], data["data_emitere"], data["data_scadenta"]],
+        width_cols,
+    )
+    pdf.table_row([""])
 
     # Date client/furnizor
-    pdf.table_header(data['header_date_client_furnizor'], align=Align.L)
+    pdf.table_header(data["header_date_client_furnizor"], align=Align.L)
 
     contact_info = [
-        [data['nume_lang'] or "", data['nume_furnizor'] or "", data['nume_client']] or "",
-        [data['nr_reg_com_lang'] or "", data['nr_reg_com_furnizor'] or "", data['nr_reg_com_client'] or ""],
-        [data['cif_lang'] or "", data['cif_furnizor'] or "", data['cif_client'] or ""],
-        [data['adresa_lang'] or "", data['adresa_furnizor'] or "", data['adresa_client'] or ""],
-        [data['email_lang'] or "", data['email_furnizor'] or "", data['email_client'] or ""],
-        [data['telefon_lang'] or "", data['telefon_furnizor'] or "", data['telefon_client'] or ""],
-        [data['iban_lang'] or "", data['iban_furnizor'] or "", data['iban_client'] or ""]
+        [data["nume_lang"] or "", data["nume_furnizor"] or "", data["nume_client"]],
+        [
+            data["nr_reg_com_lang"] or "",
+            data["nr_reg_com_furnizor"] or "",
+            data["nr_reg_com_client"] or "",
+        ],
+        [data["cif_lang"] or "", data["cif_furnizor"] or "", data["cif_client"] or ""],
+        [
+            data["adresa_lang"] or "",
+            data["adresa_furnizor"] or "",
+            data["adresa_client"] or "",
+        ],
+        [
+            data["email_lang"] or "",
+            data["email_furnizor"] or "",
+            data["email_client"] or "",
+        ],
+        [
+            data["telefon_lang"] or "",
+            data["telefon_furnizor"] or "",
+            data["telefon_client"] or "",
+        ],
+        [
+            data["iban_lang"] or "",
+            data["iban_furnizor"] or "",
+            data["iban_client"] or "",
+        ],
     ]
 
     for ci in contact_info:
-        pdf.table_row(ci, width_list=[30, 80, 80], option='responsive')
-        
-    pdf.table_row([''])
+        pdf.table_row(ci, width_list=[30, 80, 80], option="responsive")
+
+    pdf.table_row([""])
 
     # Produse sau servicii
     width_cols = pdf.table_cols(1, 4, 1, 2, 2, 2)
     pdf.set_font(pdf.font, "B", pdf.text_normal_size)
-    pdf.table_row(data['header_produse_servicii'], width_cols, option='responsive')
+    pdf.table_row(data["header_produse_servicii"], width_cols, option="responsive")
     pdf.set_font(pdf.font, "", pdf.text_normal_size)
 
-    for ps in data['produse_sau_servicii']:
+    for ps in data["produse_sau_servicii"]:
         psrow = [
-            ps['id'], 
-            ps['nume_produs_sau_serviciu'],
-            ps['cod_unitate'],
-            ps['numar_unitati'], 
-            ps['pret_pe_unitate'], 
-            ps['subtotal'], 
+            ps["id"],
+            ps["nume_produs_sau_serviciu"],
+            ps["cod_unitate"],
+            ps["numar_unitati"],
+            ps["pret_pe_unitate"],
+            ps["subtotal"],
         ]
-        pdf.table_row(psrow, width_cols, option='responsive')
-        
+        pdf.table_row(psrow, width_cols, option="responsive")
+
     # Total si nota
     if data["nota"]:
-        pdf.table_row([f'Note/Obs.: {data["nota"]}'])
+        pdf.table_row([f"Note/Obs.: {data['nota']}"])
     else:
-        pdf.table_row([''])
+        pdf.table_row([""])
 
-    pdf.table_header([f"{data['header_total_de_plata']} {data['total_de_plata']} {data['valuta']}"], align=Align.R)
+    pdf.table_header(
+        [f"{data['header_total_de_plata']} {data['total_de_plata']} {data['valuta']}"],
+        align=Align.R,
+    )
 
     pdf.output(pdf_output_path)
 

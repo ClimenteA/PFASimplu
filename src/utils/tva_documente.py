@@ -29,11 +29,19 @@ from utils.tva import (
     round2,
 )
 
-
 LUNI_RO = {
-    1: "ianuarie", 2: "februarie", 3: "martie", 4: "aprilie",
-    5: "mai", 6: "iunie", 7: "iulie", 8: "august",
-    9: "septembrie", 10: "octombrie", 11: "noiembrie", 12: "decembrie",
+    1: "ianuarie",
+    2: "februarie",
+    3: "martie",
+    4: "aprilie",
+    5: "mai",
+    6: "iunie",
+    7: "iulie",
+    8: "august",
+    9: "septembrie",
+    10: "octombrie",
+    11: "noiembrie",
+    12: "decembrie",
 }
 
 
@@ -63,7 +71,9 @@ def _adresa_declarant(setari: SetariModel) -> str:
 
 
 def _este_cod_special(setari: SetariModel, cif: str) -> bool:
-    cod_special = (setari.cod_tva_intracomunitar or "").strip().upper().removeprefix("RO")
+    cod_special = (
+        (setari.cod_tva_intracomunitar or "").strip().upper().removeprefix("RO")
+    )
     return bool(cod_special) and cif == cod_special
 
 
@@ -79,9 +89,9 @@ D301_HEADER_SECTIUNE = (
 
 def _d301_rand_md(r: dict) -> str:
     return (
-        f'| {r["nr_crt"]} | `{r["nr_doc"]}` / `{r["data_doc"]}` '
-        f'| {_md_num(r["val_valuta"])} | `{r["tip_valuta"]}` '
-        f'| {_md_num(r["curs_valutar"])} | {_md_num(r["baza"])} | {_md_num(r["tva"])} |'
+        f"| {r['nr_crt']} | `{r['nr_doc']}` / `{r['data_doc']}` "
+        f"| {_md_num(r['val_valuta'])} | `{r['tip_valuta']}` "
+        f"| {_md_num(r['curs_valutar'])} | {_md_num(r['baza'])} | {_md_num(r['tva'])} |"
     )
 
 
@@ -97,12 +107,12 @@ def genereaza_d301_md(d301: dict, setari: SetariModel) -> str:
         calitate = "persoană fizică autorizată (CIF normal), pentru achizițiile de servicii din afara UE"
 
     linii = [
-        f'# D301 - Decont special de TVA - {LUNI_RO[d301["luna"]]} {d301["anul"]}',
+        f"# D301 - Decont special de TVA - {LUNI_RO[d301['luna']]} {d301['anul']}",
         "",
-        f'**Perioada de raportare:** luna {d301["luna"]:02d} / anul {d301["anul"]}  ',
-        f'**Cod de identificare fiscală:** `RO{d301["cif"]}` - {tip_cod}  ',
-        f'**Denumire:** {_denumire_pfa(setari)}  ',
-        f'**Domiciliul fiscal:** {_adresa_declarant(setari)}',
+        f"**Perioada de raportare:** luna {d301['luna']:02d} / anul {d301['anul']}  ",
+        f"**Cod de identificare fiscală:** `RO{d301['cif']}` - {tip_cod}  ",
+        f"**Denumire:** {_denumire_pfa(setari)}  ",
+        f"**Domiciliul fiscal:** {_adresa_declarant(setari)}",
         "",
         "> **Atenție la codul folosit:** achizițiile din UE se declară pe **codul special de TVA",
         "> intracomunitar** din Setări, iar cele din afara UE pe **CIF-ul normal** al PFA-ului.",
@@ -112,14 +122,14 @@ def genereaza_d301_md(d301: dict, setari: SetariModel) -> str:
         "",
         "| Câmp | Valoare |",
         "|---|---|",
-        f'| Cod de identificare fiscală | `{d301["cif"]}` - {tip_cod} |',
+        f"| Cod de identificare fiscală | `{d301['cif']}` - {tip_cod} |",
         "| Prefix | `RO` (bifat) |",
         f"| Denumire / Nume, Prenume | `{_denumire_pfa(setari)}` |",
         f"| Domiciliul fiscal | `{_adresa_declarant(setari)}` |",
-        f'| Cont | `{setari.get_iban_pentru_valuta("RON") or "-"}` |',
+        f"| Cont | `{setari.get_iban_pentru_valuta('RON') or '-'}` |",
         f"| Calitate | {calitate} |",
         "| Declarație rectificativă | nu se bifează |",
-        f'| Luna / Anul | `{d301["luna"]:02d}` / `{d301["anul"]}` |',
+        f"| Luna / Anul | `{d301['luna']:02d}` / `{d301['anul']}` |",
         "",
         "## 2. Secțiunile 1, 2 și 3",
         "",
@@ -136,7 +146,7 @@ def genereaza_d301_md(d301: dict, setari: SetariModel) -> str:
     if not randuri4:
         linii.append("| - | - | 0 | - | - | 0,00 | 0,00 |")
     linii.append(
-        f'| **TOTAL** | | | | | **{_md_num(d301["baza4"])}** | **{_md_num(d301["tva4"])}** |'
+        f"| **TOTAL** | | | | | **{_md_num(d301['baza4'])}** | **{_md_num(d301['tva4'])}** |"
     )
 
     linii += [
@@ -150,7 +160,7 @@ def genereaza_d301_md(d301: dict, setari: SetariModel) -> str:
         for r in randuri5:
             linii.append(_d301_rand_md(r))
         linii.append(
-            f'| **TOTAL** | | | | | **{_md_num(d301["baza5"])}** | **{_md_num(d301["tva5"])}** |'
+            f"| **TOTAL** | | | | | **{_md_num(d301['baza5'])}** | **{_md_num(d301['tva5'])}** |"
         )
         linii += [
             "",
@@ -167,8 +177,8 @@ def genereaza_d301_md(d301: dict, setari: SetariModel) -> str:
         "",
         "## 5. Termen și plată",
         "",
-        f'- Termen depunere: **{d301["termen"].strftime("%d.%m.%Y")}** (25 inclusiv a lunii următoare exigibilității).',
-        f'- TVA de plată rezultat din D301: **{_md_num(d301["total_de_plata"])} lei**.',
+        f"- Termen depunere: **{d301['termen'].strftime('%d.%m.%Y')}** (25 inclusiv a lunii următoare exigibilității).",
+        f"- TVA de plată rezultat din D301: **{_md_num(d301['total_de_plata'])} lei**.",
         "- „Suma de control” și „Nr. de evidență a plății” se generează automat de aplicația oficială ANAF; nu se inventează.",
         "",
         "### Instrucțiune de plată",
@@ -176,11 +186,11 @@ def genereaza_d301_md(d301: dict, setari: SetariModel) -> str:
         "| Element | Valoare |",
         "|---|---|",
         "| Beneficiar | Trezoreria Statului (trezoreria operativă de domiciliul fiscal) |",
-        f'| IBAN beneficiar | `{setari.cont_iban_trezoreria or "NECOMPLETAT - vezi Setari"}` |',
+        f"| IBAN beneficiar | `{setari.cont_iban_trezoreria or 'NECOMPLETAT - vezi Setari'}` |",
         f"| Cod bugetar | `{COD_BUGETAR_TVA}` - TVA încasată pentru operațiuni interne |",
-        f'| Cod identificare fiscală plătitor | `{d301["cif"]}` |',
-        f'| Sumă | `{_md_num(d301["total_de_plata"])} lei` |',
-        f'| Explicație plată | `TVA D301 {LUNI_RO[d301["luna"]]} {d301["anul"]}` |',
+        f"| Cod identificare fiscală plătitor | `{d301['cif']}` |",
+        f"| Sumă | `{_md_num(d301['total_de_plata'])} lei` |",
+        f"| Explicație plată | `TVA D301 {LUNI_RO[d301['luna']]} {d301['anul']}` |",
         "",
         "**NU se plătește în contul unic.** TVA din D301 se plătește în contul `20A100101` al trezoreriei.",
         f"Lista IBAN-uri ANAF: {get_link_iban_trezorerie(setari.localitate)}",
@@ -210,22 +220,22 @@ def genereaza_d390_md(d390: dict, setari: SetariModel) -> str:
     """D390 VIES completat in Markdown: date de identificare, rezumat,
     lista operatorilor intracomunitari (tip S) si termen."""
     linii = [
-        f'# D390 VIES - Declarație recapitulativă - {LUNI_RO[d390["luna"]]} {d390["anul"]}',
+        f"# D390 VIES - Declarație recapitulativă - {LUNI_RO[d390['luna']]} {d390['anul']}",
         "",
-        f'**Perioada de raportare:** luna {d390["luna"]:02d} / anul {d390["anul"]}  ',
-        f'**Cod de identificare fiscală:** `RO{d390["cif"]}` - cod special de TVA intracomunitar (art. 317)  ',
-        f'**Denumire:** {_denumire_pfa(setari)}  ',
-        f'**Domiciliul fiscal:** {_adresa_declarant(setari)}',
+        f"**Perioada de raportare:** luna {d390['luna']:02d} / anul {d390['anul']}  ",
+        f"**Cod de identificare fiscală:** `RO{d390['cif']}` - cod special de TVA intracomunitar (art. 317)  ",
+        f"**Denumire:** {_denumire_pfa(setari)}  ",
+        f"**Domiciliul fiscal:** {_adresa_declarant(setari)}",
         "",
         "## 1. Date de identificare",
         "",
         "| Câmp | Valoare |",
         "|---|---|",
-        f'| Anul / Luna | `{d390["anul"]}` / `{d390["luna"]:02d}` |',
-        f'| Cod de identificare fiscală | `RO{d390["cif"]}` |',
+        f"| Anul / Luna | `{d390['anul']}` / `{d390['luna']:02d}` |",
+        f"| Cod de identificare fiscală | `RO{d390['cif']}` |",
         f"| Denumire / Nume, Prenume | `{_denumire_pfa(setari)}` |",
         f"| Domiciliul fiscal | `{_adresa_declarant(setari)}` |",
-        f'| Număr total operatori intracomunitari | `{d390["nr_operatori"]}` |',
+        f"| Număr total operatori intracomunitari | `{d390['nr_operatori']}` |",
         "| Declarație rectificativă | nu se bifează |",
         "",
         "## 2. Rezumatul declarației",
@@ -236,7 +246,7 @@ def genereaza_d390_md(d390: dict, setari: SetariModel) -> str:
         "| T - Livrări în cadrul unei operațiuni triunghiulare | `0` |",
         "| A - Achiziții intracomunitare de bunuri | `0` |",
         "| P - Prestări intracomunitare de servicii | `0` |",
-        f'| **S - Achiziții intracomunitare de servicii** | **`{d390["bazaS"]}`** |',
+        f"| **S - Achiziții intracomunitare de servicii** | **`{d390['bazaS']}`** |",
         "| R - Livrări în regimul special pentru agricultori | `0` |",
         "",
         "## 3. Lista operațiunilor intracomunitare",
@@ -246,11 +256,11 @@ def genereaza_d390_md(d390: dict, setari: SetariModel) -> str:
     ]
     for r in d390["randuri"]:
         linii.append(
-            f'| {r["nr_crt"]} | `{r["tip"]}` | `{r["tara_denumire"]}-{r["tara"]}` '
-            f'| `{r["cod_operator"]}` | `{r["denumire_operator"]}` | `{r["baza"]}` |'
+            f"| {r['nr_crt']} | `{r['tip']}` | `{r['tara_denumire']}-{r['tara']}` "
+            f"| `{r['cod_operator']}` | `{r['denumire_operator']}` | `{r['baza']}` |"
         )
     linii += [
-        f'| **TOTAL GENERAL** | | | | | **`{d390["total_baza"]}`** |',
+        f"| **TOTAL GENERAL** | | | | | **`{d390['total_baza']}`** |",
         "",
         "> **Codul operatorului se scrie fără prefixul de țară** (țara este coloană separată):",
         "> `ATU77164426` → țara `Austria-AT`, cod `U77164426`. Nu dublați prefixul de țară.",
@@ -258,7 +268,7 @@ def genereaza_d390_md(d390: dict, setari: SetariModel) -> str:
         "",
         "## 4. Termen",
         "",
-        f'- Termen depunere: **{d390["termen"].strftime("%d.%m.%Y")}** (25 inclusiv a lunii următoare).',
+        f"- Termen depunere: **{d390['termen'].strftime('%d.%m.%Y')}** (25 inclusiv a lunii următoare).",
         "- D390 este informativă, fără plată. Se depune doar pentru operațiuni intracomunitare (UE);",
         "  pentru furnizori din afara UE nu se depune D390.",
         "",
@@ -273,6 +283,7 @@ def genereaza_d390_md(d390: dict, setari: SetariModel) -> str:
 # ---------------------------------------------------------------------------
 # Jurnalul de cumparari (registru contabil) - XLSX pentru pachetul TVA
 # ---------------------------------------------------------------------------
+
 
 def genereaza_jurnal_cumparari_xlsx(jurnal: dict, output_path: str):
     """Jurnalul de cumparari in Excel, cu aceleasi coloane ca exportul din Registre."""
@@ -294,7 +305,9 @@ def genereaza_jurnal_cumparari_xlsx(jurnal: dict, output_path: str):
     make_excel_pretty(output_path)
 
 
-def genereaza_pachet_tva(anul: int, luna: int, setari: SetariModel | None = None) -> dict | None:
+def genereaza_pachet_tva(
+    anul: int, luna: int, setari: SetariModel | None = None
+) -> dict | None:
     """Genereaza intr-un singur zip documentele lunii, grupate pe codul fiscal:
     cate un folder pentru fiecare cod pe care se depun declaratii, cu prefix
     dupa tipul codului:
@@ -345,7 +358,9 @@ def genereaza_pachet_tva(anul: int, luna: int, setari: SetariModel | None = None
         for cheltuiala in cheltuieli:
             if (cheltuiala.numar_factura or "") not in nr_docs or not cheltuiala.fisier:
                 continue
-            nume_factura = re.sub(r"^[A-Za-z0-9]{8}_", "", os.path.basename(cheltuiala.fisier.path))
+            nume_factura = re.sub(
+                r"^[A-Za-z0-9]{8}_", "", os.path.basename(cheltuiala.fisier.path)
+            )
             # Daca doua facturi au fisiere cu acelasi nume, le distingem prin numarul facturii.
             if nume_factura in nume_vazute:
                 baza, ext = os.path.splitext(nume_factura)
@@ -364,13 +379,17 @@ def genereaza_pachet_tva(anul: int, luna: int, setari: SetariModel | None = None
                 "randuri": [
                     {**r, "nr_crt": idx} for idx, r in enumerate(randuri_cod, start=1)
                 ],
-                "total_document": round2(suma([r["total_document"] for r in randuri_cod])),
+                "total_document": round2(
+                    suma([r["total_document"] for r in randuri_cod])
+                ),
                 "total_baza": round2(suma([r["baza"] for r in randuri_cod])),
                 "total_tva": round2(suma([r["tva"] for r in randuri_cod])),
             }
             jurnal_xlsx = os.path.join(subfolder, f"Jurnal_cumparari_{prefix}.xlsx")
             genereaza_jurnal_cumparari_xlsx(jurnal_cod, jurnal_xlsx)
-            fisiere.append((jurnal_xlsx, f"{nume_folder}/{os.path.basename(jurnal_xlsx)}"))
+            fisiere.append(
+                (jurnal_xlsx, f"{nume_folder}/{os.path.basename(jurnal_xlsx)}")
+            )
 
     zip_path = os.path.join(get_extracts_path(), f"D301-D390_{prefix}.zip")
     with ZipFile(zip_path, "w") as zipf:

@@ -1,4 +1,3 @@
-
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -11,15 +10,20 @@ class SursaVenit(models.TextChoices):
     ALTE_SURSE = "ALTE", _("Venit din alte surse")
     INCHIRIERI = "INCHIRIERI", _("Venit din cedarea folosintei bunurilor")
     CASTIG_INVESTITII = "INVESTITII", _("Venit si/sau castig din investitii")
-    DREPTURI_PROP_INTELECTUALA = "PROPRIETATE_INTELLECTUALA", _(
-        "Venit din drepturi de proprietate intelectuala"
+    DREPTURI_PROP_INTELECTUALA = (
+        "PROPRIETATE_INTELLECTUALA",
+        _("Venit din drepturi de proprietate intelectuala"),
     )
-    AGRICULTURA = "AGRICULTURA", _(
-        "Venit din activitati agricole, silvicultura si piscicultura"
+    AGRICULTURA = (
+        "AGRICULTURA",
+        _("Venit din activitati agricole, silvicultura si piscicultura"),
     )
-    DIVIDENTE_VENIT_DISTRUBUIT = "DIVIDENTE", _(
-        "Venit distribuit din asociere cu persoane juridice, contribuabili potrivit "
-        "prevederilor titlului II, titlului III sau Legii nr.170/2016"
+    DIVIDENTE_VENIT_DISTRUBUIT = (
+        "DIVIDENTE",
+        _(
+            "Venit distribuit din asociere cu persoane juridice, contribuabili potrivit "
+            "prevederilor titlului II, titlului III sau Legii nr.170/2016"
+        ),
     )
 
 

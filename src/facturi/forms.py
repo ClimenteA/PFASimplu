@@ -1,6 +1,6 @@
 from django import forms
 from django.db import transaction
-from django.forms import ModelForm, DateInput, Textarea
+from django.forms import DateInput, ModelForm, Textarea
 
 from .models import FacturaModel
 
@@ -24,7 +24,10 @@ class FacturaForm(ModelForm):
             raise forms.ValidationError("Factura trebuie sa aiba cel putin o linie.")
         for linie in linii:
             if not isinstance(linie, dict) or not {
-                "nume_produs_sau_serviciu", "cod_unitate", "numar_unitati", "pret_pe_unitate"
+                "nume_produs_sau_serviciu",
+                "cod_unitate",
+                "numar_unitati",
+                "pret_pe_unitate",
             }.issubset(linie):
                 raise forms.ValidationError("Datele liniilor facturii sunt invalide.")
         return linii
@@ -54,5 +57,5 @@ class FacturaForm(ModelForm):
                 obj.save()
             else:
                 factura.linii.create(**date)
-        for obj in existente[len(linii):]:
+        for obj in existente[len(linii) :]:
             obj.delete()

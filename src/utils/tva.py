@@ -22,7 +22,6 @@ from setari.models import SetariModel
 from utils.decimale import D, rotund2, rotund_intreg, suma
 from utils.tari import denumire_tara
 
-
 COD_REFERINTA_JURNAL = "15-16"
 DENUMIRE_REFERINTA_JURNAL = (
     "Cumparari pt. care cumparatorul este obligat la plata TVA art. 307"
@@ -52,14 +51,14 @@ def get_cheltuieli_taxare_inversa(anul: int, luna: int | None = None):
     query = q_taxare_inversa()
 
     if luna is not None:
-        query &= (
-            Q(data_facturii__year=anul, data_facturii__month=luna)
-            | Q(data_facturii__isnull=True, data_inserarii__year=anul, data_inserarii__month=luna)
+        query &= Q(data_facturii__year=anul, data_facturii__month=luna) | Q(
+            data_facturii__isnull=True,
+            data_inserarii__year=anul,
+            data_inserarii__month=luna,
         )
     else:
-        query &= (
-            Q(data_facturii__year=anul)
-            | Q(data_facturii__isnull=True, data_inserarii__year=anul)
+        query &= Q(data_facturii__year=anul) | Q(
+            data_facturii__isnull=True, data_inserarii__year=anul
         )
 
     return CheltuialaModel.objects.filter(query).order_by(
@@ -97,7 +96,9 @@ def _rand_d301(cheltuiala, nr_crt: int, tip_operatie: str) -> dict:
     }
 
 
-def _snapshot_d301(cheltuieli: list, anul: int, luna: int, cif: str, are_ue: bool) -> dict:
+def _snapshot_d301(
+    cheltuieli: list, anul: int, luna: int, cif: str, are_ue: bool
+) -> dict:
     """Snapshot-ul unei declaratii D301 pentru un grup de facturi (acelasi cod).
     Toate operatiunile intra in sectiunea 4, iar cele din UE si in sectiunea 4.1
     (tip_operatie 5)."""
@@ -130,7 +131,9 @@ def _snapshot_d301(cheltuieli: list, anul: int, luna: int, cif: str, are_ue: boo
     }
 
 
-def calculeaza_d301_lista(anul: int, luna: int, setari: SetariModel | None = None) -> list[dict]:
+def calculeaza_d301_lista(
+    anul: int, luna: int, setari: SetariModel | None = None
+) -> list[dict]:
     """Declaratiile D301 ale lunii, separate pe codul de identificare folosit:
     - facturile din UE se declara cu codul special de TVA intracomunitar (art. 317);
     - facturile din afara UE se declara cu CIF-ul normal al PFA-ului.
@@ -158,17 +161,23 @@ def calculeaza_d301_lista(anul: int, luna: int, setari: SetariModel | None = Non
             # cu toate facturile in sectiunea 4.
             declaratii = [_snapshot_d301(cheltuieli, anul, luna, cif_ue, are_ue=True)]
         else:
-            declaratii.append(_snapshot_d301(non_ue, anul, luna, cif_non_ue, are_ue=False))
+            declaratii.append(
+                _snapshot_d301(non_ue, anul, luna, cif_non_ue, are_ue=False)
+            )
     return declaratii
 
 
-def calculeaza_d301(anul: int, luna: int, setari: SetariModel | None = None) -> dict | None:
+def calculeaza_d301(
+    anul: int, luna: int, setari: SetariModel | None = None
+) -> dict | None:
     """Prima declaratie D301 a lunii (sau None daca nu exista operatiuni)."""
     declaratii = calculeaza_d301_lista(anul, luna, setari)
     return declaratii[0] if declaratii else None
 
 
-def calculeaza_d390(anul: int, luna: int, setari: SetariModel | None = None) -> dict | None:
+def calculeaza_d390(
+    anul: int, luna: int, setari: SetariModel | None = None
+) -> dict | None:
     """Snapshot-ul D390 VIES: doar achizitiile de servicii din UE (tip S),
     grupate pe operator intracomunitar, baza rotunjita la intreg.
     Codul operatorului se scrie fara prefixul de tara (tara e coloana separata)."""
@@ -176,9 +185,7 @@ def calculeaza_d390(anul: int, luna: int, setari: SetariModel | None = None) -> 
     if not setari:
         return None
 
-    cheltuieli_ue = [
-        c for c in get_cheltuieli_taxare_inversa(anul, luna) if c.este_ue
-    ]
+    cheltuieli_ue = [c for c in get_cheltuieli_taxare_inversa(anul, luna) if c.este_ue]
     if not cheltuieli_ue:
         return None
 
@@ -187,12 +194,18 @@ def calculeaza_d390(anul: int, luna: int, setari: SetariModel | None = None) -> 
         cod_complet = (cheltuiala.furnizor_cod_fiscal or "").strip().upper()
         tara = (cheltuiala.furnizor_tara or "").strip().upper()
         cod_operator = cod_complet.removeprefix(tara)
-        cheie = (tara, cod_operator, (cheltuiala.furnizor_denumire or "").strip().upper())
+        cheie = (
+            tara,
+            cod_operator,
+            (cheltuiala.furnizor_denumire or "").strip().upper(),
+        )
         operatori.setdefault(cheie, Decimal(0))
         operatori[cheie] += D(cheltuiala.baza_in_lei or 0)
 
     randuri = []
-    for idx, ((tara, cod_operator, denumire), baza) in enumerate(operatori.items(), start=1):
+    for idx, ((tara, cod_operator, denumire), baza) in enumerate(
+        operatori.items(), start=1
+    ):
         randuri.append(
             {
                 "nr_crt": idx,
@@ -244,7 +257,9 @@ def calculeaza_jurnal_cumparari(anul: int, luna: int | None = None) -> dict | No
                 "baza": rotund2(baza),
                 "tva": rotund2(tva),
                 "cod_referinta": COD_REFERINTA_JURNAL,
-                "fisier": os.path.basename(cheltuiala.fisier.path) if cheltuiala.fisier else "",
+                "fisier": os.path.basename(cheltuiala.fisier.path)
+                if cheltuiala.fisier
+                else "",
             }
         )
 
@@ -258,13 +273,17 @@ def calculeaza_jurnal_cumparari(anul: int, luna: int | None = None) -> dict | No
     }
 
 
-def get_observatii_declaratie(anul: int, luna: int, setari: SetariModel | None = None) -> list[str]:
+def get_observatii_declaratie(
+    anul: int, luna: int, setari: SetariModel | None = None
+) -> list[str]:
     """Atentionari inainte de generare/depunere."""
     setari = setari or SetariModel.objects.first()
     observatii = []
     cheltuieli = list(get_cheltuieli_taxare_inversa(anul, luna))
 
-    if any(c.este_ue for c in cheltuieli) and not (setari and setari.cod_tva_intracomunitar):
+    if any(c.este_ue for c in cheltuieli) and not (
+        setari and setari.cod_tva_intracomunitar
+    ):
         observatii.append(
             "Ai facturi din UE dar nu ai completat codul special de TVA intracomunitar in Setari. "
             "Declaratiile se vor genera cu CIF-ul normal, ceea ce poate fi gresit."

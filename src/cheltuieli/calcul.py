@@ -60,6 +60,7 @@ def q_scos_din_uz():
 
 # --- campuri derivate simple -------------------------------------------------
 
+
 def tip_achizitie(c):
     if not c.furnizor_tara:
         return TipAchizitie.ROMANIA.value
@@ -88,7 +89,9 @@ def curs_bnr_aplicat(c):
     data = c.data_facturii or c.data_inserarii
     if not data:
         raise ValidationError(
-            _("Pentru servicii din UE/non-UE trebuie completata data facturii (exigibilitatea TVA).")
+            _(
+                "Pentru servicii din UE/non-UE trebuie completata data facturii (exigibilitatea TVA)."
+            )
         )
     return curs_bnr_data_exigibilitatii(c.valuta, data)
 
@@ -107,6 +110,7 @@ def tva_autolichidata(c):
 
 # --- amortizare --------------------------------------------------------------
 
+
 def clasificare(c):
     """Intoarce inregistrarea din catalog pentru un mijloc fix."""
     if c.deductibila != Deductibilitate.DEDUCTIBILA_INTEGRAL_AMORTIZATA.value:
@@ -121,7 +125,11 @@ def clasificare(c):
     potriviri = [x for x in CODURI_CLASIFICARE if x["cod_clasificare"] == cod]
     if not potriviri:
         raise ValidationError(
-            _("Codul de clasificare '%s' nu exista in catalogul mijloacelor fixe." % c.cod_de_clasificare)
+            _(
+                "Codul de clasificare '{}' nu exista in catalogul mijloacelor fixe.".format(
+                    c.cod_de_clasificare
+                )
+            )
         )
     return potriviri[0]
 
@@ -253,8 +261,9 @@ def _eroare_plafon(remaining):
         remaining = D(0)
     return ValidationError(
         _(
-            "Nu putem deduce suma introdusa. Mai sunt %s RON disponibili pentru deducere."
-            % remaining
+            "Nu putem deduce suma introdusa. Mai sunt {} RON disponibili pentru deducere.".format(
+                remaining
+            )
         )
     )
 
@@ -288,10 +297,10 @@ def _reviziune(an):
 def calculeaza_deduceri_anului(an: int, candidat=None):
     """Dictionar {pk: deducere_in_ron} pentru tot anul, intr-o singura trecere.
 
-    Regulile cu plafon anual se evalueaza in ordinea (data_inserarii, id), exact
-    ca la introducerea randurilor in aplicatie. `candidat` inlocuieste randul
-    cu acelasi pk (sau se adauga la final cand e nou) si permite validarea in
-   ainte de salvare.
+     Regulile cu plafon anual se evalueaza in ordinea (data_inserarii, id), exact
+     ca la introducerea randurilor in aplicatie. `candidat` inlocuieste randul
+     cu acelasi pk (sau se adauga la final cand e nou) si permite validarea in
+    ainte de salvare.
     """
     rev = _reviziune(an)
     if candidat is None and an in _CACHE and _CACHE[an][0] == rev:
@@ -357,7 +366,10 @@ def calculeaza_deduceri_anului(an: int, candidat=None):
                 raise _eroare_plafon(admis - sociale_deja)
             deducere = base
             sociale_deja += deducere
-        elif cod == Deductibilitate.DEDUCTIBILA_PARTIAL_CONTRIBUTII_OBLIGATORII_ASOC_ORG.value:
+        elif (
+            cod
+            == Deductibilitate.DEDUCTIBILA_PARTIAL_CONTRIBUTII_OBLIGATORII_ASOC_ORG.value
+        ):
             admis = rotund4(incasari_totale * D("0.05"))
             if contrib_deja + base > admis:
                 raise _eroare_plafon(admis - contrib_deja)
@@ -392,7 +404,9 @@ def valideaza(c):
     if este_taxare_inversa(c):
         if not c.furnizor_denumire:
             raise ValidationError(
-                _("Pentru servicii din UE/non-UE trebuie completata denumirea furnizorului.")
+                _(
+                    "Pentru servicii din UE/non-UE trebuie completata denumirea furnizorului."
+                )
             )
         if not c.furnizor_tara:
             raise ValidationError(
@@ -400,14 +414,19 @@ def valideaza(c):
             )
         if este_ue(c) and not c.furnizor_cod_fiscal:
             raise ValidationError(
-                _("Pentru servicii din UE trebuie completat codul TVA al furnizorului (ex. ATU77164426).")
+                _(
+                    "Pentru servicii din UE trebuie completat codul TVA al furnizorului (ex. ATU77164426)."
+                )
             )
         if este_ue(c):
             cod = (c.furnizor_cod_fiscal or "").strip().upper()
             if not cod.startswith(c.furnizor_tara.upper()):
                 raise ValidationError(
-                    _("Codul TVA '%s' nu incepe cu prefixul tarii furnizorului (%s). Verifica factura."
-                      % (cod, c.furnizor_tara))
+                    _(
+                        "Codul TVA '{}' nu incepe cu prefixul tarii furnizorului ({}). Verifica factura.".format(
+                            cod, c.furnizor_tara
+                        )
+                    )
                 )
         if not c.numar_factura:
             raise ValidationError(
@@ -428,6 +447,7 @@ def valideaza(c):
 
 # --- totaluri pentru dashboard/registre -------------------------------------
 
+
 def get_total_cheltuieli(an):
     deduceri = calculeaza_deduceri_anului(an)
     total = D(0)
@@ -441,9 +461,11 @@ def get_total_cheltuieli_pe_luni(an):
     deduceri = calculeaza_deduceri_anului(an)
     rezultat = []
     for luna in range(1, 13):
-        zi = datetime.date(an, luna, 1)
+        datetime.date(an, luna, 1)
         total = D(0)
-        for c in CheltuialaModel.objects.filter(data_inserarii__year=an, data_inserarii__month=luna):
+        for c in CheltuialaModel.objects.filter(
+            data_inserarii__year=an, data_inserarii__month=luna
+        ):
             if not mijloc_fix(c):
                 total += D(deduceri.get(c.pk) or 0)
         for c in CheltuialaModel.objects.filter(q_mijloc_fix()):

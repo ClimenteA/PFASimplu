@@ -14,7 +14,7 @@ from .django_setup import setup_django
 
 setup_django()
 
-from setari.models import McpApiKey  # noqa: E402  (după django.setup())
+from setari.models import McpApiKey
 
 
 def _key_e_utilizabil(key: McpApiKey) -> bool:

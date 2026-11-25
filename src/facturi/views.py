@@ -1,24 +1,23 @@
-from django.views import View
 from django.contrib import messages
-from django.http import JsonResponse
-from django.shortcuts import render, redirect
 from django.db.models import OuterRef, Subquery
+from django.http import JsonResponse
+from django.shortcuts import redirect, render
+from django.views import View
+
+from setari.models import SetariModel
+from utils.localitati import lista_localitati
 from utils.views import (
-    get_page_items,
     download_model_csv_or_xlsx,
+    get_page_items,
     handle_delete_id_query_param,
 )
 
-from utils.localitati import lista_localitati
+from .forms import FacturaForm
 from .generare import genereaza_documente
 from .models import FacturaModel
-from .forms import FacturaForm
-from setari.models import SetariModel
-
 
 
 class FacturiSearchClientName(View):
-
     def get(self, request, client_name: str):
 
         subquery = (
@@ -37,13 +36,11 @@ class FacturiSearchClientName(View):
 
 
 class FacturiDescarcareView(View):
-
     def get(self, request):
         return download_model_csv_or_xlsx(request, FacturaModel, "facturi")
 
 
 class FacturiView(View):
-
     def get(self, request):
         result = SetariModel.objects.first()
         if not result:
@@ -53,7 +50,7 @@ class FacturiView(View):
                 "Introdu datele PFA-ului tau!",
                 extra_tags="🟥 Date necompletate!",
             )
-            return redirect('/setari/')
+            return redirect("/setari/")
 
         redirect_from_delete = handle_delete_id_query_param(request, FacturaModel)
         if redirect_from_delete:

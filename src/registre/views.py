@@ -17,7 +17,7 @@ from cheltuieli.calcul import (
     q_scos_din_uz,
 )
 from cheltuieli.models import CheltuialaModel, Deductibilitate
-from core.settings import get_media_path, get_extracts_path
+from core.settings import get_extracts_path, get_media_path
 from documente.models import DocumenteModel
 from incasari.models import IncasariModel, SursaVenit
 from setari.models import SetariModel
@@ -101,7 +101,6 @@ def jurnal_cumparari_dataframe(jurnal):
 
 
 class RegistruJurnalDescarcaView(View):
-
     def get(self, request):
         anul = get_year_from_request(request)
         incasari, cheltuieli = incasari_cheltuieli_dupa_anul_inserarii(anul)
@@ -111,13 +110,10 @@ class RegistruJurnalDescarcaView(View):
             return redirect("/registre/")
 
         df = registru_jurnal_dataframe(data)
-        return download_dataframe(
-            request, df, "registru_jurnal_incasari_si_plati"
-        )
+        return download_dataframe(request, df, "registru_jurnal_incasari_si_plati")
 
 
 class RegistruFiscalDescarcaView(View):
-
     def get(self, request):
         overview_data = get_cards_and_charts_data(request)
         data = get_registru_de_evidenta_fiscala(
@@ -132,11 +128,15 @@ class RegistruFiscalDescarcaView(View):
 
 
 class RegistruInventarDescarcaView(View):
-
     def get(self, request):
         data = get_registru_inventar(dbid=True)
         if not data:
-            messages.add_message(request, messages.ERROR, "Registrul-inventar este gol, nu exista nimic de exportat.", extra_tags="🟥 Eroare!")
+            messages.add_message(
+                request,
+                messages.ERROR,
+                "Registrul-inventar este gol, nu exista nimic de exportat.",
+                extra_tags="🟥 Eroare!",
+            )
             return redirect("/registre/")
 
         # Doar numele documentului ajunge in export; fisierele nu sunt citite
@@ -161,7 +161,8 @@ class RegistruJurnalCumparariDescarcaView(View):
         jurnal = calculeaza_jurnal_cumparari(anul, luna)
         if not jurnal:
             messages.add_message(
-                request, messages.ERROR,
+                request,
+                messages.ERROR,
                 "Jurnalul de cumparari este gol: nu exista cheltuieli cu taxare inversa (UE/non-UE).",
                 extra_tags="🟥 Eroare!",
             )
@@ -175,7 +176,9 @@ class RegistruJurnalCumparariDescarcaView(View):
             fp = os.path.join(extracts_path, f"jurnal_cumparari_{perioada}.xlsx")
             df.to_excel(fp, index=False)
             make_excel_pretty(fp)
-            content_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            content_type = (
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
         elif filetype == "csv":
             fp = os.path.join(extracts_path, f"jurnal_cumparari_{perioada}.csv")
             df.to_csv(fp, index=False)
@@ -189,7 +192,6 @@ class RegistruJurnalCumparariDescarcaView(View):
 
 
 class RegistreView(View):
-
     def get(self, request):
         overview_data = get_cards_and_charts_data(request)
         registru_fiscal = get_registru_de_evidenta_fiscala(
@@ -221,9 +223,9 @@ def get_obiecte_inventar():
     # Campurile derivate nu mai sunt coloane: folosim Q-urile din calcul.py.
     # `q_scos_din_uz()` selecteaza exact obiectele care AU data iesirii din uz,
     # deci negarea lor corespunde vechiului `scos_din_uz=False`.
-    results = CheltuialaModel.objects.filter(
-        q_inventar() & ~q_scos_din_uz()
-    ).order_by("data_inserarii")
+    results = CheltuialaModel.objects.filter(q_inventar() & ~q_scos_din_uz()).order_by(
+        "data_inserarii"
+    )
 
     return results
 
@@ -236,7 +238,6 @@ def get_registru_inventar(dbid: bool = True, obiecte_inventar=None):
     idx = 1
     rows = []
     for item in obiecte_inventar:
-
         data = {
             "nr_crt": idx,
             "nume_cheltuiala": item.nume_cheltuiala,
@@ -437,7 +438,9 @@ def incasari_cheltuieli_dupa_anul_inserarii(anul: int):
     return incasari, cheltuieli
 
 
-def get_registru_jurnal_incasari_si_plati(request, incasari=None, cheltuieli=None, anul=None):
+def get_registru_jurnal_incasari_si_plati(
+    request, incasari=None, cheltuieli=None, anul=None
+):
     # `anul` poate fi dat explicit (ex. exportul pe an din Setari).
     if anul is None:
         anul = get_year_from_request(request)
@@ -481,8 +484,12 @@ def get_registru_jurnal_incasari_si_plati(request, incasari=None, cheltuieli=Non
         prev_month = current_month
 
         if isinstance(entry, IncasariModel):
-            incasari_numerar = D(entry.suma_in_ron) if entry.tip_tranzactie == "NUMERAR" else D(0)
-            incasari_bancar = D(entry.suma_in_ron) if entry.tip_tranzactie == "BANCAR" else D(0)
+            incasari_numerar = (
+                D(entry.suma_in_ron) if entry.tip_tranzactie == "NUMERAR" else D(0)
+            )
+            incasari_bancar = (
+                D(entry.suma_in_ron) if entry.tip_tranzactie == "BANCAR" else D(0)
+            )
 
             total_incasari_numerar += incasari_numerar
             total_incasari_bancar += incasari_bancar
@@ -493,7 +500,12 @@ def get_registru_jurnal_incasari_si_plati(request, incasari=None, cheltuieli=Non
                     "data": entry.data_inserarii.isoformat(),
                     "documentul": entry.fisier,
                     "documentId": str(entry.fisier).split("_")[0],
-                    "felul_operatiunii": "Incasare" + (f" ({entry.suma} {entry.valuta})" if entry.valuta != "RON" else ""),
+                    "felul_operatiunii": "Incasare"
+                    + (
+                        f" ({entry.suma} {entry.valuta})"
+                        if entry.valuta != "RON"
+                        else ""
+                    ),
                     "incasari_numerar": incasari_numerar,
                     "incasari_banca": incasari_bancar,
                     "plati_numerar": D(0),
@@ -503,8 +515,12 @@ def get_registru_jurnal_incasari_si_plati(request, incasari=None, cheltuieli=Non
             )
 
         else:
-            cheltuieli_numerar = D(entry.suma_in_ron) if entry.tip_tranzactie == "NUMERAR" else D(0)
-            cheltuieli_bancar = D(entry.suma_in_ron) if entry.tip_tranzactie == "BANCAR" else D(0)
+            cheltuieli_numerar = (
+                D(entry.suma_in_ron) if entry.tip_tranzactie == "NUMERAR" else D(0)
+            )
+            cheltuieli_bancar = (
+                D(entry.suma_in_ron) if entry.tip_tranzactie == "BANCAR" else D(0)
+            )
 
             total_cheltuieli_numerar += cheltuieli_numerar
             total_cheltuieli_bancar += cheltuieli_bancar
@@ -515,7 +531,12 @@ def get_registru_jurnal_incasari_si_plati(request, incasari=None, cheltuieli=Non
                     "data": entry.data_inserarii.isoformat(),
                     "documentul": entry.fisier,
                     "documentId": str(entry.fisier).split("_")[0],
-                    "felul_operatiunii": f"Cheltuiala {entry.nume_cheltuiala}" + (f" ({entry.suma} {entry.valuta})" if entry.valuta != "RON" else ""),
+                    "felul_operatiunii": f"Cheltuiala {entry.nume_cheltuiala}"
+                    + (
+                        f" ({entry.suma} {entry.valuta})"
+                        if entry.valuta != "RON"
+                        else ""
+                    ),
                     "incasari_numerar": D(0),
                     "incasari_banca": D(0),
                     "plati_numerar": cheltuieli_numerar,
@@ -646,7 +667,7 @@ def get_cards_and_charts_data(request):
         total_cheltuieli_pe_toti_anii += D(tc)
         total_incasari_brut_pe_toti_anii += D(tib)
         incasari_net = rotund2(D(tib) - D(tc))
-        
+
         if furnizor:
             tiy = calculeaza_taxe_si_impozite(
                 max(incasari_net, 0),
@@ -669,8 +690,7 @@ def get_cards_and_charts_data(request):
         - total_de_platit_la_stat_pe_toti_anii
     )
 
-    if total_incasari_net_pe_toti_anii <= 0:
-        total_incasari_net_pe_toti_anii = 0
+    total_incasari_net_pe_toti_anii = max(0, total_incasari_net_pe_toti_anii)
 
     total_incasari_net_pe_toti_anii = rotund2(total_incasari_net_pe_toti_anii)
 

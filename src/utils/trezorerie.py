@@ -18,7 +18,9 @@ from functools import lru_cache
 
 from unidecode import unidecode
 
-ANAF_IBAN_BASE = "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/"
+ANAF_IBAN_BASE = (
+    "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/"
+)
 ANAF_CODURI_IBAN = (
     "https://www.anaf.ro/anaf/internet/ANAF/asistenta_contribuabili/"
     "plata_oblig_fiscale/coduri_iban"
@@ -66,7 +68,7 @@ def asigura_date_iban_trezorerie() -> bool:
         return True
 
     # Import local: scraper-ul trage requests/pypdf doar cand e nevoie.
-    from utils.scrape_iban_trezorerie import scrape, salveaza_json
+    from utils.scrape_iban_trezorerie import salveaza_json, scrape
 
     try:
         randuri = scrape(verbose=False)
@@ -116,9 +118,7 @@ def get_iban_trezorerie_pentru_localitate(localitate: str) -> dict | None:
     judet_n = _norm(judet)
     loc_n = _norm(nume_loc)
 
-    candidati = [
-        t for t in _get_trezorerii() if _norm(t["judet"]) == judet_n
-    ]
+    candidati = [t for t in _get_trezorerii() if _norm(t["judet"]) == judet_n]
     if not candidati:
         return None
 
@@ -152,7 +152,7 @@ def get_iban_trezorerie_pentru_localitate(localitate: str) -> dict | None:
         ("otelul ", "otelu "),
         ("viseul ", "viseu "),
     ]
-    for v in list(variante):
+    for v in variante:
         for lung, scurt in perechi:
             if lung in v:
                 variante.add(v.replace(lung, scurt))
@@ -170,8 +170,7 @@ def get_iban_trezorerie_pentru_localitate(localitate: str) -> dict | None:
     primul_cuvant = loc_n.split()[0]
     if len(primul_cuvant) >= 4:
         potriviri = [
-            t for t in candidati
-            if _norm(t["localitate"]).split()[0] == primul_cuvant
+            t for t in candidati if _norm(t["localitate"]).split()[0] == primul_cuvant
         ]
         if len(potriviri) == 1:
             return potriviri[0]
@@ -190,7 +189,7 @@ def get_iban_trezorerie_pentru_localitate(localitate: str) -> dict | None:
                 if _norm(t["localitate"]) == nume_comuna:
                     return t
             variante_comuna = {nume_comuna}
-            for v in list(variante_comuna):
+            for v in variante_comuna:
                 for lung, scurt in perechi:
                     if lung in v:
                         variante_comuna.add(v.replace(lung, scurt))

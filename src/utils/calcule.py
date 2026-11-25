@@ -34,9 +34,7 @@ def calculeaza_taxe_si_impozite(
     if anul in minim_brute_an_val:
         salariuMinimBrut = D(minim_brute_an_val[anul])
     else:
-        salariuMinimBrut = D(
-            minim_brute_an_val[max(list(minim_brute_an_val.keys()))]
-        )
+        salariuMinimBrut = D(minim_brute_an_val[max(list(minim_brute_an_val.keys()))])
 
     CAS = D(0)
     CASS = D(0)
@@ -57,12 +55,9 @@ def calculeaza_taxe_si_impozite(
         if venit_net > plafon12:
             CAS = rotund4(ProcentCAS * plafon12 / D(100))
             CASS = rotund4(ProcentCASS * plafon12 / D(100))
-        impozitPeVenit = rotund4(
-            ProcentImpozitVenit * (venit_net - CAS) / D(100)
-        )
+        impozitPeVenit = rotund4(ProcentImpozitVenit * (venit_net - CAS) / D(100))
 
     elif anul == 2023:
-
         if venit_net > plafon6:
             CASS = rotund4(ProcentCASS * plafon6 / D(100))
 
@@ -74,9 +69,7 @@ def calculeaza_taxe_si_impozite(
             CAS = rotund4(ProcentCAS * plafon24 / D(100))
             CASS = rotund4(ProcentCASS * plafon24 / D(100))
 
-        impozitPeVenit = rotund4(
-            ProcentImpozitVenit * (venit_net - CAS) / D(100)
-        )
+        impozitPeVenit = rotund4(ProcentImpozitVenit * (venit_net - CAS) / D(100))
 
     elif anul >= 2024:
         # CAS (art. 148): baza aleasa, minim 12 salarii intre 12 si 24 salarii,

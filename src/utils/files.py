@@ -6,11 +6,11 @@ from django.db import models
 
 from .multiuser import get_user_media_prefix
 
-
 chars = string.digits + string.ascii_letters
 
+
 def get_short_id(length: int = 8):
-    return ''.join(secrets.choice(chars) for _ in range(length))
+    return "".join(secrets.choice(chars) for _ in range(length))
 
 
 def get_save_path(instance: models.Model, filename: str):

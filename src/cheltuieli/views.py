@@ -1,13 +1,14 @@
 import json
 
-from django.views import View
 from django.contrib import messages
 from django.core.paginator import Paginator
-from django.http import JsonResponse, HttpResponse
-from django.shortcuts import render, HttpResponseRedirect, get_object_or_404
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import HttpResponseRedirect, get_object_or_404, render
 from django.utils import timezone
+from django.views import View
+
 from setari.models import SetariModel
-from utils.tari import TARI_UE_CHOICES, TARI_NON_UE_CHOICES
+from utils.tari import TARI_NON_UE_CHOICES, TARI_UE_CHOICES
 from utils.tva import (
     get_cheltuieli_taxare_inversa,
     get_luni_cu_taxare_inversa,
@@ -15,17 +16,17 @@ from utils.tva import (
 )
 from utils.tva_documente import genereaza_pachet_tva
 from utils.views import (
-    get_page_items,
     download_model_csv_or_xlsx,
+    get_page_items,
     handle_delete_id_query_param,
 )
+
 from .calcul import q_taxare_inversa
 from .forms import CheltuieliForm
 from .models import CheltuialaModel
 
 
 class CheltuieliDescarcareView(View):
-
     def get(self, request):
         return download_model_csv_or_xlsx(request, CheltuialaModel, "cheltuieli")
 
@@ -44,7 +45,8 @@ class CheltuieliTVADescarcaView(View):
         setari = SetariModel.objects.first()
         if not setari:
             messages.add_message(
-                request, messages.ERROR,
+                request,
+                messages.ERROR,
                 "Introdu mai intai datele PFA-ului in Setari!",
                 extra_tags="🟥 Date necompletate!",
             )
@@ -53,7 +55,8 @@ class CheltuieliTVADescarcaView(View):
         pachet = genereaza_pachet_tva(anul, luna, setari)
         if not pachet:
             messages.add_message(
-                request, messages.ERROR,
+                request,
+                messages.ERROR,
                 "Nu exista cheltuieli cu taxare inversa (UE/non-UE) pentru luna selectata.",
                 extra_tags="🟥 Eroare!",
             )
@@ -67,7 +70,7 @@ class CheltuieliTVADescarcaView(View):
         with open(pachet["zip_path"], "rb") as f:
             response = HttpResponse(f.read(), content_type="application/zip")
         response["Content-Disposition"] = (
-            f'attachment; filename=D301-D390_{anul}_{luna:02d}.zip'
+            f"attachment; filename=D301-D390_{anul}_{luna:02d}.zip"
         )
         return response
 
@@ -80,7 +83,8 @@ class CheltuieliSearchFurnizor(View):
         results = (
             CheltuialaModel.objects.filter(
                 furnizor_denumire__icontains=nume_furnizor,
-            ).filter(q_taxare_inversa())
+            )
+            .filter(q_taxare_inversa())
             .order_by("-data_inserarii")
             .values("furnizor_denumire", "furnizor_cod_fiscal", "furnizor_tara")
         )
@@ -99,7 +103,6 @@ class CheltuieliSearchFurnizor(View):
 
 
 class CheltuieliView(View):
-
     def get(self, request):
         redirect_from_delete = handle_delete_id_query_param(request, CheltuialaModel)
         if redirect_from_delete:
@@ -115,7 +118,8 @@ class CheltuieliView(View):
                 (c.data_facturii or c.data_inserarii).year
                 for c in CheltuialaModel.objects.filter(q_taxare_inversa())
                 if (c.data_facturii or c.data_inserarii)
-            } | {timezone.now().year},
+            }
+            | {timezone.now().year},
             reverse=True,
         )
         anul_extern = int(request.GET.get("anul_extern") or ani_externi[0])

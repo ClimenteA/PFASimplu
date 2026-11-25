@@ -1,16 +1,21 @@
 import os
 import tomllib
 import traceback
-import requests_cache
 from datetime import timedelta
+
+import requests_cache
+
 from core.settings import get_extracts_path, get_salarii_minim_brut_local
 
+cache_path = os.path.join(get_extracts_path(), "app_version_cache")
+requests_session = requests_cache.CachedSession(
+    cache_path, backend="filesystem", expire_after=timedelta(days=1)
+)
 
-cache_path = os.path.join(get_extracts_path(), 'app_version_cache')
-requests_session = requests_cache.CachedSession(cache_path, backend='filesystem', expire_after=timedelta(days=1))
 
-
-get_url = lambda filename: f"https://raw.githubusercontent.com/ClimenteA/PFASimplu/refs/heads/main/static/{filename}"
+get_url = lambda filename: (
+    f"https://raw.githubusercontent.com/ClimenteA/PFASimplu/refs/heads/main/static/{filename}"
+)
 
 
 def get_latest_app_version():

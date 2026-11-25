@@ -1,20 +1,21 @@
 import os
-from django.shortcuts import render
+
+from django.contrib import messages
+from django.core.paginator import Paginator
+from django.http import HttpResponse
+from django.shortcuts import HttpResponseRedirect, get_object_or_404, render
+from django.utils import timezone
+from django.views import View
+
 from cheltuieli.calcul import q_inventar
 from cheltuieli.models import CheltuialaModel
-from django.core.paginator import Paginator
-from django.views import View
-from django.contrib import messages
-from django.http import HttpResponse
-from django.shortcuts import render, HttpResponseRedirect, get_object_or_404
-from .forms import InventarForm
-from django.utils import timezone
-from utils.views import handle_delete_id_query_param
 from utils.mijloc_fix_pdf import create_fisa_mijloc_fix_pdf
+from utils.views import handle_delete_id_query_param
+
+from .forms import InventarForm
 
 
 class InventarDescarcaFisierView(View):
-
     def get(self, request):
         nr_inventar = request.GET.get("nr_inventar")
         db_id = request.GET.get("db_id")
@@ -31,13 +32,14 @@ class InventarDescarcaFisierView(View):
 
 
 class InventarView(View):
-
     def get(self, request):
 
-        redirect_from_delete = handle_delete_id_query_param(request, CheltuialaModel, redirect_to="/inventar/")
+        redirect_from_delete = handle_delete_id_query_param(
+            request, CheltuialaModel, redirect_to="/inventar/"
+        )
         if redirect_from_delete:
             return redirect_from_delete
-        
+
         page_number = request.GET.get("page")
         item_id = request.GET.get("id")
 
@@ -50,7 +52,9 @@ class InventarView(View):
         if not page_number:
             page_number = 1
 
-        results = CheltuialaModel.objects.filter(q_inventar()).order_by("-data_inserarii")
+        results = CheltuialaModel.objects.filter(q_inventar()).order_by(
+            "-data_inserarii"
+        )
 
         paginator = Paginator(results, 100)
         page_items = paginator.get_page(page_number)

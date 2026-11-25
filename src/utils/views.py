@@ -1,16 +1,19 @@
+import itertools
 import json
 import os
-import itertools
-import pandas as pd
 from datetime import datetime, timedelta
-from django.http import HttpResponse
-from django.core.paginator import Paginator
-from django.shortcuts import redirect, get_object_or_404
-from django.utils import timezone
-from django.forms import ModelForm
-from django.db.models import Model
+
+import pandas as pd
 from django.contrib import messages
+from django.core.paginator import Paginator
+from django.db.models import Model
+from django.forms import ModelForm
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, redirect
+from django.utils import timezone
+
 from core.settings import get_extracts_path
+
 from .pretty_excel import make_excel_pretty
 
 
@@ -18,7 +21,9 @@ def one_month_from_now():
     return timezone.now() + timedelta(days=30)
 
 
-def handle_delete_id_query_param(request, theModel: Model, redirect_to: str = None):
+def handle_delete_id_query_param(
+    request, theModel: Model, redirect_to: str | None = None
+):
 
     redirect_mapper = {
         "DocumenteModel": "/documente/",
@@ -37,11 +42,14 @@ def handle_delete_id_query_param(request, theModel: Model, redirect_to: str = No
             extra_tags="✅ Succes!",
         )
 
-        return redirect(redirect_to if redirect_to else redirect_mapper[theModel.__qualname__])
+        return redirect(
+            redirect_to if redirect_to else redirect_mapper[theModel.__qualname__]
+        )
 
 
-
-def get_page_items(request, theForm: ModelForm, theModel: Model, order_by: str = "-data_inserarii"):
+def get_page_items(
+    request, theForm: ModelForm, theModel: Model, order_by: str = "-data_inserarii"
+):
 
     item_id = request.GET.get("id")
     page_number = request.GET.get("page")
@@ -58,7 +66,7 @@ def get_page_items(request, theForm: ModelForm, theModel: Model, order_by: str =
         elif theForm.__qualname__ == "FacturaForm":
             serie = "INV"
             numar = 1
-            latest_invoice = theModel.objects.order_by('-numar').first()
+            latest_invoice = theModel.objects.order_by("-numar").first()
             if latest_invoice:
                 serie = latest_invoice.serie
                 numar = latest_invoice.numar + 1
@@ -75,8 +83,12 @@ def get_page_items(request, theForm: ModelForm, theModel: Model, order_by: str =
             form = theForm()
 
     if theModel.__qualname__ == "IncasariModel":
-        neincasate = theModel.objects.filter(data_incasarii__isnull=True).order_by("-actualizat_la")
-        incasate = theModel.objects.filter(data_incasarii__isnull=False).order_by(order_by)
+        neincasate = theModel.objects.filter(data_incasarii__isnull=True).order_by(
+            "-actualizat_la"
+        )
+        incasate = theModel.objects.filter(data_incasarii__isnull=False).order_by(
+            order_by
+        )
         results = list(itertools.chain(neincasate, incasate))
     else:
         results = theModel.objects.all().order_by(order_by)

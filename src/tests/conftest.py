@@ -94,7 +94,9 @@ def django_server():
         result = subprocess.run(
             manage + cmd, cwd=SRC_DIR, env=env, capture_output=True, text=True
         )
-        assert result.returncode == 0, f"{cmd} a esuat:\n{result.stdout}\n{result.stderr}"
+        assert result.returncode == 0, (
+            f"{cmd} a esuat:\n{result.stdout}\n{result.stderr}"
+        )
 
     # Toate paginile cer login, deci testele folosesc un cont creat in baza de test.
     create_user = (
@@ -104,9 +106,14 @@ def django_server():
     )
     result = subprocess.run(
         manage + ["shell", "-c", create_user],
-        cwd=SRC_DIR, env=env, capture_output=True, text=True,
+        cwd=SRC_DIR,
+        env=env,
+        capture_output=True,
+        text=True,
     )
-    assert result.returncode == 0, f"crearea contului de test a esuat:\n{result.stdout}\n{result.stderr}"
+    assert result.returncode == 0, (
+        f"crearea contului de test a esuat:\n{result.stdout}\n{result.stderr}"
+    )
 
     with socket.socket() as s:
         s.bind(("127.0.0.1", 0))

@@ -1,32 +1,32 @@
-from django.views import View
 from django.contrib import messages
 from django.core.files.base import ContentFile
-from django.shortcuts import render, HttpResponseRedirect, get_object_or_404
+from django.shortcuts import HttpResponseRedirect, get_object_or_404, render
 from django.utils import timezone
+from django.views import View
+
+from facturi.models import FacturaModel, ModalitatePlata
+from utils.valuta import TipTranzactie
 from utils.views import (
-    get_page_items,
     download_model_csv_or_xlsx,
+    get_page_items,
     handle_delete_id_query_param,
 )
-from utils.valuta import TipTranzactie
-from facturi.models import FacturaModel, ModalitatePlata
+
 from .forms import IncasariForm
 from .models import IncasariModel
 
 
 class IncasariDescarcareView(View):
-
     def get(self, request):
         return download_model_csv_or_xlsx(request, IncasariModel, "incasari")
 
 
 class IncasariView(View):
-
     def get(self, request):
         redirect_from_delete = handle_delete_id_query_param(request, IncasariModel)
         if redirect_from_delete:
             return redirect_from_delete
-        
+
         form, page_items = get_page_items(request, IncasariForm, IncasariModel)
 
         # Precompletare din factura (butonul "Incasata" din pagina Facturi)
@@ -126,7 +126,9 @@ class IncasariView(View):
                         "page_items": page_items,
                         "item_id": request.GET.get("id"),
                         "factura_id": factura_id,
-                        "fisier_factura": factura.fisier_factura_pdf if factura else None,
+                        "fisier_factura": factura.fisier_factura_pdf
+                        if factura
+                        else None,
                         "nume_fisier_factura": (
                             f"factura_{factura.serie}-{factura.numar}.pdf"
                             if factura and factura.fisier_factura_pdf

@@ -36,8 +36,12 @@ class SetariForm(ModelForm):
         model = SetariModel
         exclude = ["actualizat_la", "user", "caen_secondare"]
         widgets = {
-            "cod_tva_intracomunitar": forms.TextInput(attrs={"placeholder": "ex. 52937756 (fara RO)"}),
-            "cont_iban_trezoreria": forms.TextInput(attrs={"placeholder": "ex. RO41TREZ40620A100101XTVA"}),
+            "cod_tva_intracomunitar": forms.TextInput(
+                attrs={"placeholder": "ex. 52937756 (fara RO)"}
+            ),
+            "cont_iban_trezoreria": forms.TextInput(
+                attrs={"placeholder": "ex. RO41TREZ40620A100101XTVA"}
+            ),
         }
         labels = {
             "scutit_cas": "Scutit CAS",
@@ -51,7 +55,9 @@ class SetariForm(ModelForm):
         value = (self.cleaned_data.get("cod_tva_intracomunitar") or "").strip().upper()
         value = value.removeprefix("RO").replace(" ", "")
         if value and not value.isdigit():
-            raise forms.ValidationError("Codul TVA intracomunitar trebuie sa fie numeric (fara prefixul RO).")
+            raise forms.ValidationError(
+                "Codul TVA intracomunitar trebuie sa fie numeric (fara prefixul RO)."
+            )
         return value or None
 
     def clean_conturi_iban(self):
@@ -78,7 +84,9 @@ class SetariForm(ModelForm):
             if valuta not in valute_valide:
                 raise forms.ValidationError(f"Valuta {valuta} nu este valida.")
             if valuta in vazute:
-                raise forms.ValidationError(f"Exista deja un cont IBAN pentru valuta {valuta}.")
+                raise forms.ValidationError(
+                    f"Exista deja un cont IBAN pentru valuta {valuta}."
+                )
             validate_iban_length(iban)
             vazute.add(valuta)
             curatate.append({"valuta": valuta, "iban": iban})

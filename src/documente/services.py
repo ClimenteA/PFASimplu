@@ -62,8 +62,13 @@ def recipisa_parser(pdf_path: str):
     if cif:
         mentiuni += f" CIF {cif}"
     if index_match:
-        mentiuni += f" index incarcare {index_match.group(1)} din {index_match.group(2)}"
-    if "Nu există erori de validare" in pdf_text or "Nu exista erori de validare" in pdf_text:
+        mentiuni += (
+            f" index incarcare {index_match.group(1)} din {index_match.group(2)}"
+        )
+    if (
+        "Nu există erori de validare" in pdf_text
+        or "Nu exista erori de validare" in pdf_text
+    ):
         mentiuni += " - fara erori de validare"
 
     return {
@@ -88,7 +93,7 @@ def pdf_parser(pdf_path: str):
 
     # D212 cu fisier XML atasat
     xml = None
-    for name, content_list in reader.attachments.items():
+    for content_list in reader.attachments.values():
         for content in content_list:
             xml = content.decode("utf-8")
             break

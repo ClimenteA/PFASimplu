@@ -19,17 +19,17 @@ from .django_setup import setup_django
 
 setup_django()
 
-from cheltuieli.forms import CheltuieliForm  # noqa: E402
-from cheltuieli.models import CheltuialaModel  # noqa: E402
-from core.settings import APP_VERSION  # noqa: E402
-from documente.models import DocumenteModel  # noqa: E402
-from facturi.models import FacturaModel  # noqa: E402
-from incasari.forms import IncasariForm  # noqa: E402
-from incasari.models import IncasariModel  # noqa: E402
-from setari.models import SetariModel  # noqa: E402
-from utils.calcule import calculeaza_taxe_si_impozite  # noqa: E402
-from utils.decimale import D, rotund2  # noqa: E402
-from utils.multiuser import _current_user  # noqa: E402
+from cheltuieli.forms import CheltuieliForm
+from cheltuieli.models import CheltuialaModel
+from core.settings import APP_VERSION
+from documente.models import DocumenteModel
+from facturi.models import FacturaModel
+from incasari.forms import IncasariForm
+from incasari.models import IncasariModel
+from setari.models import SetariModel
+from utils.calcule import calculeaza_taxe_si_impozite
+from utils.decimale import D, rotund2
+from utils.multiuser import _current_user
 
 
 @contextmanager
@@ -46,7 +46,9 @@ def user_context():
         )
     user = get_user_model().objects.filter(pk=user_id).first()
     if user is None:
-        raise ValueError("Contul asociat cheii MCP nu mai exista. Genereaza o cheie noua in /setari.")
+        raise ValueError(
+            "Contul asociat cheii MCP nu mai exista. Genereaza o cheie noua in /setari."
+        )
     token = _current_user.set(user)
     try:
         yield user
@@ -194,7 +196,9 @@ def register_tools(mcp) -> None:
                 {
                     "id": f.id,
                     "serie_numar": f"{f.serie}-{f.numar}",
-                    "data_emitere": f.data_emitere.isoformat() if f.data_emitere else None,
+                    "data_emitere": f.data_emitere.isoformat()
+                    if f.data_emitere
+                    else None,
                     "client": f.nume,
                     "cif": f.cif,
                     "total_de_plata": _ban(f.total_de_plata),
@@ -245,9 +249,7 @@ def register_tools(mcp) -> None:
                 "total_incasari_brut": _ban(brut),
                 "total_cheltuieli": _ban(cheltuieli),
                 "venit_net": _ban(net),
-                "taxe_si_impozite_estimate": {
-                    k: _ban(v) for k, v in taxe.items()
-                },
+                "taxe_si_impozite_estimate": {k: _ban(v) for k, v in taxe.items()},
                 "facturi_neincasate": _ban(IncasariModel.get_total_neincasate(an)),
             }
             try:

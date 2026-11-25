@@ -9,11 +9,11 @@ Reguli folosite in toata aplicatia:
   nu se mosteneasca eroarea de reprezentare a float-ului.
 """
 
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import ROUND_HALF_UP, Decimal
 
 ZECIMALE_CALCUL = Decimal("0.0001")
 ZECIMALE_SUMA = Decimal("0.01")
-ZECIMALE_INTREG = Decimal("1")
+ZECIMALE_INTREG = Decimal(1)
 
 
 def D(value) -> Decimal:

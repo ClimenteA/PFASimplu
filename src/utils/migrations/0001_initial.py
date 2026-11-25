@@ -4,23 +4,33 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='CursBnr',
+            name="CursBnr",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('data', models.DateField()),
-                ('valuta', models.CharField(max_length=3)),
-                ('curs', models.DecimalField(decimal_places=4, max_digits=14)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("data", models.DateField()),
+                ("valuta", models.CharField(max_length=3)),
+                ("curs", models.DecimalField(decimal_places=4, max_digits=14)),
             ],
             options={
-                'constraints': [models.UniqueConstraint(fields=('data', 'valuta'), name='unic_curs_bnr_data_valuta')],
+                "constraints": [
+                    models.UniqueConstraint(
+                        fields=("data", "valuta"), name="unic_curs_bnr_data_valuta"
+                    )
+                ],
             },
         ),
     ]

@@ -2,39 +2,151 @@
 
 import django.db.models.deletion
 import django.utils.timezone
-import utils.files
-import utils.validators
 from django.conf import settings
 from django.db import migrations, models
 
+import utils.files
+import utils.validators
+
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('facturi', '0001_initial'),
+        ("facturi", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='IncasariModel',
+            name="IncasariModel",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('suma', models.DecimalField(decimal_places=4, max_digits=14)),
-                ('valuta', models.CharField(choices=[('RON', 'RON - Romania'), ('EUR', 'EUR - European Union Zone'), ('USD', 'USD - USA'), ('GBP', 'GBP - UK'), ('CHF', 'CHF - Switzerland'), ('CAD', 'CAD - Canada'), ('AED', 'AED - UAE'), ('AUD', 'AUD - Australia'), ('BGN', 'BGN - Bulgaria'), ('BRL', 'BRL - Brazil'), ('CNY', 'CNY - China'), ('CZK', 'CZK - Czech Republic'), ('DKK', 'DKK - Denmark'), ('EGP', 'EGP - Egypt'), ('HUF', 'HUF - Hungary'), ('INR', 'INR - India'), ('JPY', 'JPY - Japan'), ('KRW', 'KRW - South Korea'), ('MDL', 'MDL - Moldova'), ('MXN', 'MXN - Mexico'), ('NOK', 'NOK - Norway'), ('NZD', 'NZD - New Zealand'), ('PLN', 'PLN - Poland'), ('RSD', 'RSD - Serbia'), ('RUB', 'RUB - Russia'), ('SEK', 'SEK - Sweden'), ('THB', 'THB - Thailand'), ('TRY', 'TRY - Turkey'), ('UAH', 'UAH - Ukraine'), ('XAU', 'XAU - Gold'), ('XDR', 'XDR - IMF Special Drawing Rights'), ('ZAR', 'ZAR - South Africa')], default='RON', max_length=3)),
-                ('tip_tranzactie', models.CharField(choices=[('BANCAR', '💳 BANCAR'), ('NUMERAR', '💵 NUMERAR')], default='BANCAR', max_length=7)),
-                ('data_inserarii', models.DateField(blank=True, null=True, validators=[utils.validators.validate_not_future_date])),
-                ('fisier', models.FileField(max_length=100000, upload_to=utils.files.get_save_path)),
-                ('actualizat_la', models.DateTimeField(default=django.utils.timezone.now)),
-                ('sursa_venit', models.CharField(choices=[('ACTIVITATE', 'Venit din activitati independente'), ('ALTE', 'Venit din alte surse'), ('INCHIRIERI', 'Venit din cedarea folosintei bunurilor'), ('INVESTITII', 'Venit si/sau castig din investitii'), ('PROPRIETATE_INTELLECTUALA', 'Venit din drepturi de proprietate intelectuala'), ('AGRICULTURA', 'Venit din activitati agricole, silvicultura si piscicultura'), ('DIVIDENTE', 'Venit distribuit din asociere cu persoane juridice, contribuabili potrivit prevederilor titlului II, titlului III sau Legii nr.170/2016')], default='ACTIVITATE', max_length=30)),
-                ('data_incasarii', models.DateField(blank=True, null=True)),
-                ('factura', models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='incasare', to='facturi.facturamodel')),
-                ('user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='%(app_label)s_%(class)s_set', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("suma", models.DecimalField(decimal_places=4, max_digits=14)),
+                (
+                    "valuta",
+                    models.CharField(
+                        choices=[
+                            ("RON", "RON - Romania"),
+                            ("EUR", "EUR - European Union Zone"),
+                            ("USD", "USD - USA"),
+                            ("GBP", "GBP - UK"),
+                            ("CHF", "CHF - Switzerland"),
+                            ("CAD", "CAD - Canada"),
+                            ("AED", "AED - UAE"),
+                            ("AUD", "AUD - Australia"),
+                            ("BGN", "BGN - Bulgaria"),
+                            ("BRL", "BRL - Brazil"),
+                            ("CNY", "CNY - China"),
+                            ("CZK", "CZK - Czech Republic"),
+                            ("DKK", "DKK - Denmark"),
+                            ("EGP", "EGP - Egypt"),
+                            ("HUF", "HUF - Hungary"),
+                            ("INR", "INR - India"),
+                            ("JPY", "JPY - Japan"),
+                            ("KRW", "KRW - South Korea"),
+                            ("MDL", "MDL - Moldova"),
+                            ("MXN", "MXN - Mexico"),
+                            ("NOK", "NOK - Norway"),
+                            ("NZD", "NZD - New Zealand"),
+                            ("PLN", "PLN - Poland"),
+                            ("RSD", "RSD - Serbia"),
+                            ("RUB", "RUB - Russia"),
+                            ("SEK", "SEK - Sweden"),
+                            ("THB", "THB - Thailand"),
+                            ("TRY", "TRY - Turkey"),
+                            ("UAH", "UAH - Ukraine"),
+                            ("XAU", "XAU - Gold"),
+                            ("XDR", "XDR - IMF Special Drawing Rights"),
+                            ("ZAR", "ZAR - South Africa"),
+                        ],
+                        default="RON",
+                        max_length=3,
+                    ),
+                ),
+                (
+                    "tip_tranzactie",
+                    models.CharField(
+                        choices=[("BANCAR", "💳 BANCAR"), ("NUMERAR", "💵 NUMERAR")],
+                        default="BANCAR",
+                        max_length=7,
+                    ),
+                ),
+                (
+                    "data_inserarii",
+                    models.DateField(
+                        blank=True,
+                        null=True,
+                        validators=[utils.validators.validate_not_future_date],
+                    ),
+                ),
+                (
+                    "fisier",
+                    models.FileField(
+                        max_length=100000, upload_to=utils.files.get_save_path
+                    ),
+                ),
+                (
+                    "actualizat_la",
+                    models.DateTimeField(default=django.utils.timezone.now),
+                ),
+                (
+                    "sursa_venit",
+                    models.CharField(
+                        choices=[
+                            ("ACTIVITATE", "Venit din activitati independente"),
+                            ("ALTE", "Venit din alte surse"),
+                            ("INCHIRIERI", "Venit din cedarea folosintei bunurilor"),
+                            ("INVESTITII", "Venit si/sau castig din investitii"),
+                            (
+                                "PROPRIETATE_INTELLECTUALA",
+                                "Venit din drepturi de proprietate intelectuala",
+                            ),
+                            (
+                                "AGRICULTURA",
+                                "Venit din activitati agricole, silvicultura si piscicultura",
+                            ),
+                            (
+                                "DIVIDENTE",
+                                "Venit distribuit din asociere cu persoane juridice, contribuabili potrivit prevederilor titlului II, titlului III sau Legii nr.170/2016",
+                            ),
+                        ],
+                        default="ACTIVITATE",
+                        max_length=30,
+                    ),
+                ),
+                ("data_incasarii", models.DateField(blank=True, null=True)),
+                (
+                    "factura",
+                    models.OneToOneField(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="incasare",
+                        to="facturi.facturamodel",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="%(app_label)s_%(class)s_set",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name_plural': 'Incasari',
+                "verbose_name_plural": "Incasari",
             },
         ),
     ]

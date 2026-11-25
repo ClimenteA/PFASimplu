@@ -1,4 +1,4 @@
-from django.forms import ModelForm, DateInput
+from django.forms import DateInput, ModelForm
 
 from .models import IncasariModel
 

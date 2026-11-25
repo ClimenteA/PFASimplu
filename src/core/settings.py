@@ -3,8 +3,6 @@ import os
 import shutil
 from pathlib import Path
 
-
-
 # BASE_DIR = radacina surselor (src/), care contine app-urile, templates/,
 # static/, media/ si dbsqlite/. PROJECT_ROOT = radacina repo-ului, unde sta
 # pyproject.toml.
@@ -31,6 +29,7 @@ APP_VERSION = _get_app_version()
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
+
 def _env_bool(name: str, default: str = "0") -> bool:
     return os.environ.get(name, default).strip().lower() in ("1", "true", "yes", "on")
 
@@ -52,7 +51,9 @@ SECRET_KEY = os.environ.get("PFASIMPLU_SECRET_KEY") or (
 DEBUG = _env_bool("PFASIMPLU_DEBUG", "1")
 
 ALLOWED_HOSTS = [
-    h.strip() for h in os.environ.get("PFASIMPLU_ALLOWED_HOSTS", "*").split(",") if h.strip()
+    h.strip()
+    for h in os.environ.get("PFASIMPLU_ALLOWED_HOSTS", "*").split(",")
+    if h.strip()
 ]
 
 # Ex. PFASIMPLU_CSRF_TRUSTED_ORIGINS=https://pfa.exemplu.ro
@@ -113,9 +114,7 @@ MIDDLEWARE = [
 ]
 
 
-INTERNAL_IPS = [
-    "127.0.0.1", "localhost"
-]
+INTERNAL_IPS = ["127.0.0.1", "localhost"]
 
 ROOT_URLCONF = "core.urls"
 
@@ -152,7 +151,8 @@ DATABASES = {
         "ENGINE": "django.db.backends.sqlite3",
         # Testele end-to-end (folderul tests/) pot redirectiona baza de date
         # printr-o variabila de mediu, ca sa nu atinga datele reale.
-        "NAME": os.environ.get("PFASIMPLU_DB_PATH") or os.path.join(DB_DIR, "stocare.db"),
+        "NAME": os.environ.get("PFASIMPLU_DB_PATH")
+        or os.path.join(DB_DIR, "stocare.db"),
     },
     "OPTIONS": {
         "timeout": 20,
@@ -202,7 +202,10 @@ STATIC_URL = "static/"
 STATICFILES_DIRS = [static_files_path]
 # In Docker fisierele statice se scriu in /app/staticfiles (volum montat),
 # deci radacina poate fi suprascrisa prin variabila de mediu.
-STATIC_ROOT = os.environ.get("PFASIMPLU_STATIC_ROOT") or os.path.join(BASE_DIR, "staticfiles")
+STATIC_ROOT = os.environ.get("PFASIMPLU_STATIC_ROOT") or os.path.join(
+    BASE_DIR, "staticfiles"
+)
+
 
 def get_font_path():
     return os.path.join(static_files_path, "arial-font")
@@ -218,13 +221,14 @@ def get_salarii_minim_brut_local():
     return data
 
 
-
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.environ.get("PFASIMPLU_MEDIA_ROOT") or os.path.join(BASE_DIR, "media")
+
 
 def make_media_dir():
     if not os.path.exists(MEDIA_ROOT):
         os.makedirs(MEDIA_ROOT)
+
 
 make_media_dir()
 
@@ -243,7 +247,7 @@ def get_media_path():
 def get_extracts_path(extra_dir: str | None = None):
     extracts_path = os.path.join(get_media_path(), "extracts")
     if extra_dir:
-        extracts_path = os.path.join(extracts_path, extra_dir) 
+        extracts_path = os.path.join(extracts_path, extra_dir)
         shutil.rmtree(extracts_path, ignore_errors=True)
     os.makedirs(extracts_path, exist_ok=True)
     return extracts_path

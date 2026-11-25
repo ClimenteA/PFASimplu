@@ -1,8 +1,7 @@
-from .settings import MEDIA_URL
 from django.contrib import admin
-from django.urls import path, include, re_path
-from utils.files import media_serve_view
+from django.urls import include, path, re_path
 
+from utils.files import media_serve_view
 
 urlpatterns = [
     path("", include("registre.urls")),

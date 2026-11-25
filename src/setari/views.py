@@ -3,18 +3,25 @@ import os
 import shutil
 import zipfile
 
-from django.shortcuts import render, redirect, HttpResponse
-from django.http import JsonResponse
 from django.contrib import messages
 from django.db.models import Q
+from django.http import JsonResponse
+from django.shortcuts import HttpResponse, redirect, render
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django.views import View
+
 from cheltuieli.calcul import q_mijloc_fix, q_scos_din_uz
 from cheltuieli.models import CheltuialaModel
-from incasari.models import IncasariModel
+from core.settings import (
+    APP_VERSION,
+    get_extracts_path,
+    get_media_path,
+    make_media_dir,
+)
 from documente.models import DocumenteModel, TipDocument
 from facturi.models import FacturaModel
+from incasari.models import IncasariModel
 from registre.views import (
     LUNI_RO,
     get_cheltuieli_pe_deductibilitate,
@@ -34,24 +41,18 @@ from utils.github_data import get_latest_app_version
 from utils.localitati import lista_localitati
 from utils.mijloc_fix_pdf import create_fisa_mijloc_fix_pdf
 from utils.pretty_excel import make_excel_pretty
+from utils.trezorerie import (
+    ANAF_CODURI_IBAN,
+    COD_BUGETAR_TVA,
+    asigura_date_iban_trezorerie,
+    get_iban_trezorerie_pentru_localitate,
+    get_link_iban_trezorerie,
+)
 from utils.tva import calculeaza_jurnal_cumparari
 from utils.valuta import Valuta
-from utils.trezorerie import (
-    get_link_iban_trezorerie,
-    get_iban_trezorerie_pentru_localitate,
-    asigura_date_iban_trezorerie,
-    COD_BUGETAR_TVA,
-    ANAF_CODURI_IBAN,
-)
+
 from .forms import SetariForm
 from .models import McpApiKey, SetariModel
-from core.settings import (
-    APP_VERSION,
-    make_media_dir,
-    get_extracts_path,
-    get_media_path,
-)
-
 
 lista_valute = [choice.value for choice in Valuta]
 
@@ -101,14 +102,20 @@ def get_ani_export():
         (IncasariModel, "data_inserarii"),
         (CheltuialaModel, "data_inserarii"),
     ):
-        dates = model.objects.filter(**{f"{camp}__isnull": False}).values_list(camp, flat=True)
+        dates = model.objects.filter(**{f"{camp}__isnull": False}).values_list(
+            camp, flat=True
+        )
         ani.update(d.year for d in dates if d)
 
     ani.update(
-        d.year for d in DocumenteModel.objects.values_list("data_document", flat=True) if d
+        d.year
+        for d in DocumenteModel.objects.values_list("data_document", flat=True)
+        if d
     )
     ani.update(
-        d.year for d in DocumenteModel.objects.values_list("actualizat_la", flat=True) if d
+        d.year
+        for d in DocumenteModel.objects.values_list("actualizat_la", flat=True)
+        if d
     )
 
     return sorted(ani, reverse=True)
@@ -121,17 +128,20 @@ class SetariIbanTrezorerieView(View):
     def get(self, request):
         localitate = request.GET.get("localitate", "")
         potrivire = get_iban_trezorerie_pentru_localitate(localitate)
-        return JsonResponse({
-            "iban": potrivire["iban"] if potrivire else None,
-            "nume_trezorerie": potrivire["nume_trezorerie"] if potrivire else None,
-            "sursa": potrivire["sursa"] if potrivire else get_link_iban_trezorerie(localitate),
-            "pagina_anaf": ANAF_CODURI_IBAN,
-            "cod_bugetar": COD_BUGETAR_TVA,
-        })
+        return JsonResponse(
+            {
+                "iban": potrivire["iban"] if potrivire else None,
+                "nume_trezorerie": potrivire["nume_trezorerie"] if potrivire else None,
+                "sursa": potrivire["sursa"]
+                if potrivire
+                else get_link_iban_trezorerie(localitate),
+                "pagina_anaf": ANAF_CODURI_IBAN,
+                "cod_bugetar": COD_BUGETAR_TVA,
+            }
+        )
 
 
 class SetariView(View):
-
     def get(self, request):
         result = SetariModel.objects.first()
         form = SetariForm(instance=result)
@@ -283,9 +293,15 @@ class SetariViewDownloadData(View):
         total_incasari_net = rotund2(D(total_incasari_brut) - D(total_cheltuieli))
 
         ref_data = get_registru_de_evidenta_fiscala(
-            request, total_incasari_brut, total_incasari_net, total_cheltuieli, anul=anul
+            request,
+            total_incasari_brut,
+            total_incasari_net,
+            total_cheltuieli,
+            anul=anul,
         )
-        salveaza_xlsx(registru_fiscal_dataframe(ref_data), f"Registru_Fiscal_{anul}.xlsx")
+        salveaza_xlsx(
+            registru_fiscal_dataframe(ref_data), f"Registru_Fiscal_{anul}.xlsx"
+        )
 
         # Registrul-inventar: obiectele de inventar si mijloacele fixe active
         # (nu doar cele cumparate in anul selectat - inventarul e cumulativ).
@@ -321,8 +337,13 @@ class SetariViewDownloadData(View):
 
         # --- SUMAR.html cu metricile anului ---
         sumar = self.genereaza_sumar(
-            anul, incasari, cheltuieli, documente,
-            total_incasari_brut, total_cheltuieli, total_incasari_net,
+            anul,
+            incasari,
+            cheltuieli,
+            documente,
+            total_incasari_brut,
+            total_cheltuieli,
+            total_incasari_net,
             jurnal_cumparari,
         )
         sumar_fp = os.path.join(extracts_path, "SUMAR.html")
@@ -364,21 +385,33 @@ class SetariViewDownloadData(View):
 
     @staticmethod
     def genereaza_sumar(
-        anul, incasari, cheltuieli, documente,
-        total_incasari_brut, total_cheltuieli, total_incasari_net,
+        anul,
+        incasari,
+        cheltuieli,
+        documente,
+        total_incasari_brut,
+        total_cheltuieli,
+        total_incasari_net,
         jurnal_cumparari,
     ):
         """Metricile anului, ca pagina HTML standalone (SUMAR.html din zip-ul
         de export), cu PicoCSS incarcate de pe CDN - se deschide in orice
         browser, cu conexiune la internet."""
 
-        fmt = lambda v: f"{rotund2(D(v)):,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+        fmt = lambda v: (
+            f"{rotund2(D(v)):,.2f}".replace(",", "X")
+            .replace(".", ",")
+            .replace("X", ".")
+        )
 
         setari = SetariModel.objects.first()
         if setari:
             la_stat = calculeaza_taxe_si_impozite(
-                max(total_incasari_net, 0), anul,
-                setari.scutit_cas, setari.scutit_cass, setari.scutit_impozit,
+                max(total_incasari_net, 0),
+                anul,
+                setari.scutit_cas,
+                setari.scutit_cass,
+                setari.scutit_impozit,
             )
         else:
             la_stat = calculeaza_taxe_si_impozite(max(total_incasari_net, 0), anul)
@@ -402,7 +435,9 @@ class SetariViewDownloadData(View):
         ultima_factura_an = date_ultima_factura(
             FacturaModel.objects.filter(
                 Q(data_emitere__year=anul) | Q(data_inserarii__year=anul)
-            ).order_by("-data_emitere", "-id").first()
+            )
+            .order_by("-data_emitere", "-id")
+            .first()
         )
         ultima_factura = date_ultima_factura(
             FacturaModel.objects.order_by("-data_emitere", "-id").first()
@@ -411,20 +446,30 @@ class SetariViewDownloadData(View):
         # Pentru anul curent media se calculeaza pe lunile trecute, nu pe 12.
         today = timezone.now().date()
         luni = today.month if anul == today.year else 12
-        venit_net_dupa_taxe = rotund2(D(total_incasari_net) - D(la_stat["total_taxe_impozite"]))
+        venit_net_dupa_taxe = rotund2(
+            D(total_incasari_net) - D(la_stat["total_taxe_impozite"])
+        )
 
         incasari_pe_luni = IncasariModel.get_total_incasari_pe_luni(anul)
         cheltuieli_pe_luni = CheltuialaModel.get_total_cheltuieli_pe_luni(anul)
 
-        cea_mai_mare_incasare = max(incasari, key=lambda i: i.suma_in_ron or 0, default=None)
-        cea_mai_mare_cheltuiala = max(cheltuieli, key=lambda c: c.suma_in_ron or 0, default=None)
+        cea_mai_mare_incasare = max(
+            incasari, key=lambda i: i.suma_in_ron or 0, default=None
+        )
+        cea_mai_mare_cheltuiala = max(
+            cheltuieli, key=lambda c: c.suma_in_ron or 0, default=None
+        )
 
         # Plati la stat deja facute in anul selectat (dovezi de plata urcate
         # in pagina Documente, cu suma extrasa automat din PDF).
         plati_la_stat_an = rotund2(
             sum(
-                (D(doc.suma_plata) for doc in documente
-                 if doc.tip_document == TipDocument.DOVADA_PLATA_TAXE_SI_IMPOZITE.value),
+                (
+                    D(doc.suma_plata)
+                    for doc in documente
+                    if doc.tip_document
+                    == TipDocument.DOVADA_PLATA_TAXE_SI_IMPOZITE.value
+                ),
                 D(0),
             )
         )
@@ -440,7 +485,10 @@ class SetariViewDownloadData(View):
         ]
         if jurnal_cumparari:
             taxe.append(
-                ("TVA autolichidata (taxare inversa, D301)", fmt(jurnal_cumparari["total_tva"]))
+                (
+                    "TVA autolichidata (taxare inversa, D301)",
+                    fmt(jurnal_cumparari["total_tva"]),
+                )
             )
 
         context = {
@@ -456,9 +504,15 @@ class SetariViewDownloadData(View):
             "ultima_factura_an": ultima_factura_an,
             "incasari_cheltuieli": [
                 ("Total incasari (brut)", fmt(total_incasari_brut)),
-                ("Total cheltuieli deductibile (inclusiv amortizari)", fmt(total_cheltuieli)),
+                (
+                    "Total cheltuieli deductibile (inclusiv amortizari)",
+                    fmt(total_cheltuieli),
+                ),
                 ("Venit net (inainte de taxe)", fmt(total_incasari_net)),
-                ("Total taxe si impozite estimate", fmt(la_stat["total_taxe_impozite"])),
+                (
+                    "Total taxe si impozite estimate",
+                    fmt(la_stat["total_taxe_impozite"]),
+                ),
                 ("Venit net dupa taxe", fmt(venit_net_dupa_taxe)),
                 ("Facturi neincasate", fmt(total_neincasate)),
                 ("Numar incasari inregistrate", len(incasari)),
@@ -467,10 +521,22 @@ class SetariViewDownloadData(View):
             ],
             "luni": luni,
             "medii_lunare": [
-                ("Incasari medii pe luna", fmt(rotund2(D(total_incasari_brut) / D(luni)))),
-                ("Cheltuieli medii pe luna", fmt(rotund2(D(total_cheltuieli) / D(luni)))),
-                ("Venit net mediu pe luna (dupa taxe)", fmt(rotund2(D(venit_net_dupa_taxe) / D(luni)))),
-                ("Taxe si impozite medii pe luna", fmt(rotund2(D(la_stat["total_taxe_impozite"]) / D(luni)))),
+                (
+                    "Incasari medii pe luna",
+                    fmt(rotund2(D(total_incasari_brut) / D(luni))),
+                ),
+                (
+                    "Cheltuieli medii pe luna",
+                    fmt(rotund2(D(total_cheltuieli) / D(luni))),
+                ),
+                (
+                    "Venit net mediu pe luna (dupa taxe)",
+                    fmt(rotund2(D(venit_net_dupa_taxe) / D(luni))),
+                ),
+                (
+                    "Taxe si impozite medii pe luna",
+                    fmt(rotund2(D(la_stat["total_taxe_impozite"]) / D(luni))),
+                ),
             ],
             "taxe": taxe,
             "tva_autolichidata": bool(jurnal_cumparari),
@@ -478,12 +544,16 @@ class SetariViewDownloadData(View):
                 "suma": fmt(cea_mai_mare_incasare.suma_in_ron),
                 "data": cea_mai_mare_incasare.data_inserarii.isoformat(),
                 "detalii": cea_mai_mare_incasare.sursa_venit,
-            } if cea_mai_mare_incasare else None,
+            }
+            if cea_mai_mare_incasare
+            else None,
             "cea_mai_mare_cheltuiala": {
                 "suma": fmt(cea_mai_mare_cheltuiala.suma_in_ron),
                 "data": cea_mai_mare_cheltuiala.data_inserarii.isoformat(),
                 "detalii": cea_mai_mare_cheltuiala.nume_cheltuiala,
-            } if cea_mai_mare_cheltuiala else None,
+            }
+            if cea_mai_mare_cheltuiala
+            else None,
             "incasari_pe_surse": [
                 {"nume": i["nume"], "valoare": fmt(i["valoare"])}
                 for i in get_incasari_pe_surse(anul)
@@ -513,8 +583,12 @@ class SetariViewDownloadData(View):
         inceputul amortizarii pana la amortizarea completa - cat se poate deduce
         in fiecare luna. Lunile viitoare sunt estimate."""
         mijloace_fixe = [
-            mf for mf in CheltuialaModel.objects.filter(q_mijloc_fix()).exclude(q_scos_din_uz())
-            if mf.data_inceperii_amortizarii and mf.data_amortizarii_complete
+            mf
+            for mf in CheltuialaModel.objects.filter(q_mijloc_fix()).exclude(
+                q_scos_din_uz()
+            )
+            if mf.data_inceperii_amortizarii
+            and mf.data_amortizarii_complete
             and mf.amortizare_lunara
             and mf.data_amortizarii_complete.year >= anul
         ]
@@ -530,12 +604,14 @@ class SetariViewDownloadData(View):
             total = D(0)
             cursor = inceput
             while cursor <= sfarsit:
-                randuri.append({
-                    "an": cursor.year,
-                    "luna": LUNI_RO[cursor.month],
-                    "suma": fmt(mf.amortizare_lunara),
-                    "estimat": cursor > today.replace(day=1),
-                })
+                randuri.append(
+                    {
+                        "an": cursor.year,
+                        "luna": LUNI_RO[cursor.month],
+                        "suma": fmt(mf.amortizare_lunara),
+                        "estimat": cursor > today.replace(day=1),
+                    }
+                )
                 total += D(mf.amortizare_lunara)
                 # luna urmatoare
                 cursor = (
@@ -544,21 +620,22 @@ class SetariViewDownloadData(View):
                     else datetime.date(cursor.year, cursor.month + 1, 1)
                 )
 
-            tabele.append({
-                "nume": mf.nume_cheltuiala,
-                "valoare": fmt(mf.suma_in_ron),
-                "amortizare_lunara": fmt(mf.amortizare_lunara),
-                "perioada": f"{LUNI_RO[inceput.month]} {inceput.year} - {LUNI_RO[sfarsit.month]} {sfarsit.year}",
-                "ani": mf.ani_amortizare,
-                "randuri": randuri,
-                "total": fmt(total),
-            })
+            tabele.append(
+                {
+                    "nume": mf.nume_cheltuiala,
+                    "valoare": fmt(mf.suma_in_ron),
+                    "amortizare_lunara": fmt(mf.amortizare_lunara),
+                    "perioada": f"{LUNI_RO[inceput.month]} {inceput.year} - {LUNI_RO[sfarsit.month]} {sfarsit.year}",
+                    "ani": mf.ani_amortizare,
+                    "randuri": randuri,
+                    "total": fmt(total),
+                }
+            )
 
         return tabele
 
 
 class SetariViewDropData(View):
-
     def post(self, request):
 
         SetariModel.objects.all().delete()

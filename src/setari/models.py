@@ -3,10 +3,11 @@ import hmac
 import secrets
 
 from django.conf import settings
-from django.db import models
 from django.core.exceptions import ValidationError
-from django.utils.translation import gettext_lazy as _
+from django.db import models
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+
 from utils.localitati import Localitati
 from utils.models import UserOwnedModel
 from utils.valuta import Valuta
@@ -21,7 +22,9 @@ def validate_iban_trezoreria(value):
     """IBAN-ul trezoreriei are exact 24 de caractere si cifra de control valida."""
     iban = (value or "").replace(" ", "").upper()
     if len(iban) != 24:
-        raise ValidationError(_("IBAN-ul trezoreriei trebuie sa aiba exact 24 de caractere."))
+        raise ValidationError(
+            _("IBAN-ul trezoreriei trebuie sa aiba exact 24 de caractere.")
+        )
     if not iban.startswith("RO"):
         raise ValidationError(_("IBAN-ul trezoreriei trebuie sa inceapa cu RO."))
     rearranged = iban[4:] + iban[:4]
@@ -31,7 +34,9 @@ def validate_iban_trezoreria(value):
         raise ValidationError(_("IBAN-ul trezoreriei contine caractere invalide."))
     if int(numeric) % 97 != 1:
         raise ValidationError(
-            _("IBAN-ul trezoreriei nu este valid (cifra de control gresita). Verifica-l in lista ANAF.")
+            _(
+                "IBAN-ul trezoreriei nu este valid (cifra de control gresita). Verifica-l in lista ANAF."
+            )
         )
 
 
@@ -137,10 +142,12 @@ class McpApiKey(models.Model):
 
     @staticmethod
     def _hash_key(key: str, salt: str) -> str:
-        return hashlib.sha256(f"{salt}:{key}".encode("utf-8")).hexdigest()
+        return hashlib.sha256(f"{salt}:{key}".encode()).hexdigest()
 
     @classmethod
-    def generate(cls, user=None, nume: str = "Cheia mea MCP") -> tuple["McpApiKey", str]:
+    def generate(
+        cls, user=None, nume: str = "Cheia mea MCP"
+    ) -> tuple["McpApiKey", str]:
         key = cls.KEY_PREFIX + secrets.token_urlsafe(32)
         salt = secrets.token_hex(16)
         cls.objects.filter(user=user).delete()

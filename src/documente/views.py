@@ -1,14 +1,15 @@
-from django.views import View
 from django.contrib import messages
-from django.shortcuts import render, HttpResponseRedirect, get_object_or_404
+from django.shortcuts import HttpResponseRedirect, get_object_or_404, render
+from django.views import View
+
 from utils.views import get_page_items, handle_delete_id_query_param
+
 from .forms import DocumenteForm
 from .models import DocumenteModel
 from .services import parseaza_document
 
 
 class DocumenteView(View):
-
     def get(self, request):
         redirect_from_delete = handle_delete_id_query_param(request, DocumenteModel)
         if redirect_from_delete:
@@ -68,7 +69,12 @@ class DocumenteView(View):
                 date = parseaza_document(document.fisier.path)
                 if date:
                     actualizari = []
-                    for camp in ("tip_document", "data_document", "suma_plata", "mentiuni"):
+                    for camp in (
+                        "tip_document",
+                        "data_document",
+                        "suma_plata",
+                        "mentiuni",
+                    ):
                         if camp not in date:
                             continue
                         # Tipul detectat din PDF are prioritate fata de

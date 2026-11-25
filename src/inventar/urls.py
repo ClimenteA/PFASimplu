@@ -1,6 +1,6 @@
 from django.urls import path
-from .views import InventarView, InventarDescarcaFisierView
 
+from .views import InventarDescarcaFisierView, InventarView
 
 urlpatterns = [
     path("", InventarView.as_view(), name="inventar"),

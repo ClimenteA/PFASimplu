@@ -33,8 +33,11 @@ ANAF_CODURI_IBAN = (
     "https://www.anaf.ro/anaf/internet/ANAF/asistenta_contribuabili/"
     "plata_oblig_fiscale/coduri_iban"
 )
-STATIC_IBAN_BASE = "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/"
+STATIC_IBAN_BASE = (
+    "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/"
+)
 COD_BUGETAR_TVA = "20A100101"
+
 
 def get_output_path() -> str:
     """Calea de scriere a JSON-ului: folderul static/ al aplicatiei."""
@@ -105,7 +108,9 @@ def extrage_ibanuri_tva_din_pdf(pdf_bytes: bytes) -> dict[str, dict]:
         nume = nume_match.group(1).strip() if nume_match else ""
         nume = re.sub(r"\s+", " ", nume)
 
-        for iban in re.findall(r"RO\d{2}TREZ\d{3}" + COD_BUGETAR_TVA + r"[A-Z0-9]*", text):
+        for iban in re.findall(
+            r"RO\d{2}TREZ\d{3}" + COD_BUGETAR_TVA + r"[A-Z0-9]*", text
+        ):
             cod_trez = re.match(r"RO\d{2}(TREZ\d{3})", iban).group(1)
             if cod_trez not in rezultat:
                 rezultat[cod_trez] = {"nume": nume, "iban": iban}
@@ -121,14 +126,22 @@ def scrape(verbose: bool = True) -> list[dict]:
     html = fetch(ANAF_CODURI_IBAN).decode("utf-8", errors="replace")
 
     # Linkuri catre paginile .htm pe judet si PDF-urile directe (Bucuresti)
-    linkuri_htm = sorted(set(re.findall(
-        r"https://static\.anaf\.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/[A-Za-z_]+\.htm",
-        html,
-    )))
-    linkuri_pdf_directe = sorted(set(re.findall(
-        r"https://static\.anaf\.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ\d+_TREZ\d+\.pdf",
-        html,
-    )))
+    linkuri_htm = sorted(
+        set(
+            re.findall(
+                r"https://static\.anaf\.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/[A-Za-z_]+\.htm",
+                html,
+            )
+        )
+    )
+    linkuri_pdf_directe = sorted(
+        set(
+            re.findall(
+                r"https://static\.anaf\.ro/static/10/Anaf/AsistentaContribuabili_r/iban2014/iban_TREZ\d+_TREZ\d+\.pdf",
+                html,
+            )
+        )
+    )
 
     # PDF-urile operative de pe paginile judetelor
     pdfuri = {}  # url -> context (nume judet / nume trezorerie din link)
@@ -155,7 +168,9 @@ def scrape(verbose: bool = True) -> list[dict]:
     log(f"\nTotal PDF-uri de procesat: {len(pdfuri)}")
     randuri = []
     for url_pdf, context in sorted(pdfuri.items()):
-        log(f"PDF: {url_pdf.rsplit('/', 1)[-1]} ({context['nume_link'] or context['judet']})")
+        log(
+            f"PDF: {url_pdf.rsplit('/', 1)[-1]} ({context['nume_link'] or context['judet']})"
+        )
         try:
             pdf_bytes = fetch(url_pdf)
             ibanuri = extrage_ibanuri_tva_din_pdf(pdf_bytes)
@@ -164,15 +179,17 @@ def scrape(verbose: bool = True) -> list[dict]:
             continue
         for cod_trez, date in ibanuri.items():
             nume = date["nume"] or context["nume_link"]
-            randuri.append({
-                "judet": context["judet"],
-                "cod_trezorerie": cod_trez,
-                "nume_trezorerie": nume,
-                "localitate": extrage_localitate_din_nume(nume),
-                "iban": date["iban"],
-                "cod_bugetar": COD_BUGETAR_TVA,
-                "sursa": url_pdf,
-            })
+            randuri.append(
+                {
+                    "judet": context["judet"],
+                    "cod_trezorerie": cod_trez,
+                    "nume_trezorerie": nume,
+                    "localitate": extrage_localitate_din_nume(nume),
+                    "iban": date["iban"],
+                    "cod_bugetar": COD_BUGETAR_TVA,
+                    "sursa": url_pdf,
+                }
+            )
         time.sleep(0.3)
 
     # Deduplicare pe (cod_trezorerie, iban)
@@ -197,7 +214,9 @@ def salveaza_json(randuri: list[dict], output_path: str | None = None) -> str:
                 "sursa": ANAF_CODURI_IBAN,
                 "cod_bugetar": COD_BUGETAR_TVA,
                 "generat_la": time.strftime("%Y-%m-%d"),
-                "trezorerii": sorted(randuri, key=lambda r: (r["judet"], r["nume_trezorerie"])),
+                "trezorerii": sorted(
+                    randuri, key=lambda r: (r["judet"], r["nume_trezorerie"])
+                ),
             },
             f,
             ensure_ascii=False,
