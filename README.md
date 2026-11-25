@@ -62,7 +62,7 @@ Daca deschizi un `New issue` din tabul `Issues` din aceasta pagina si spui pas c
 
 ## Instalare pt. utilizatori
 
-Aplicatia **se ruleaza in Docker** (nu mai exista executabil / versiune desktop). Scriptul de instalare face totul: instaleaza Docker daca lipseste, trage codul din GitHub, construieste imaginea si porneste aplicatia la `http://localhost:8990`.
+Aplicatia **se ruleaza in Docker**. Scriptul de instalare face totul: instaleaza Docker daca lipseste, trage codul din GitHub, construieste imaginea si porneste aplicatia la `http://localhost:8990`.
 
 **Linux / macOS:**
 
@@ -90,7 +90,7 @@ Scriptul instaleaza Docker Desktop si git prin `winget`, daca lipsesc. Daca le i
 
 Dupa instalare, deschide `http://localhost:8990` si creeaza-ti contul in pagina de **inregistrare** (loginul este obligatoriu).
 
-**Daca ai folosit vechea versiune locala:** baza de date (`src/dbsqlite/stocare.db`) si fisierele (`src/media/`) sunt montate in container *exact la aceleasi cai* de pe disc. Copiaza aceste foldere in directorul de instalare inainte de a rula scriptul, iar aplicatia le va folosi. Ele nu sunt incluse in imaginea Docker si nu se urca in git, deci un `git pull` sau un rebuild nu le atinge. Fa backup periodic la `src/dbsqlite/` si `src/media/`.
+Baza de date (`src/dbsqlite/stocare.db`) si fisierele (`src/media/`) sunt montate in container de pe disc. Ele nu sunt incluse in imaginea Docker si nu se urca in git, deci un `git pull` sau un rebuild nu le atinge. Fa backup periodic la `src/dbsqlite/` si `src/media/`.
 
 
 ## Instalare pt. developeri
@@ -105,7 +105,7 @@ Aplicatia e facuta in Python (>= 3.12), Django cu SQLiteDB. Pentru utilizatori r
 
 Pe Windows, echivalentul comenzilor make e `.\makefile.bat X` (ex: `start-local`, `stop-local`, `logs-local`, `migrate-all`). Pentru teste: activeaza venvul cu `& D:/PFASimplu/.venv/Scripts/Activate.ps1` (daca PowerShell blocheaza, `Set-ExecutionPolicy Unrestricted -Scope Process`).
 
-Datele stau pe gazda in `src/dbsqlite/` si `src/media/` (mount-uri in `docker-compose-local.yaml`) si nu se urca in git. Vechea varianta locala folosea aceleasi cai, deci nu trebuie mutate. Configurarea locala e in `.env` (ignorat de git, cu valori mock in `.env.example`); .env.prod e doar pentru VPS.
+Datele stau pe gazda in `src/dbsqlite/` si `src/media/` (mount-uri in `docker-compose-local.yaml`) si nu se urca in git. Configurarea locala e in `.env` (ignorat de git, cu valori mock in `.env.example`); .env.prod e doar pentru VPS.
 
 
 ## Instalare pe VPS (Docker + Caddy)
@@ -494,12 +494,13 @@ in `.env` (local) ori `.env.prod` (VPS).
 
 ### Rulare cu uv run (dezvoltare)
 
-Se poate lucra si direct din sursa, cu auto-reload, fara Docker (nu e vorba de
-vechea aplicatie desktop – loginul e obligatoriu si aici):
+Se poate lucra si direct din sursa, cu auto-reload, fara Docker. Loginul e
+obligatoriu si aici:
 
 ```bash
 uv sync                 # dependinte (grupul dev: pytest, playwright, faker, ruff)
 make dev                # http://127.0.0.1:8990, cu auto-reload
+make dev-e2e            # aplicatia pe baza de date generata de teste (test.db)
 make dev-superuser      # optional, cont de admin pentru /admin/
 make test-e2e           # teste end-to-end
 make migrate-all        # regenerare migrari (daca ai modificat modelele)
@@ -570,7 +571,7 @@ uv run pytest src/tests/ -v --headed --slowmo 300   # cu browser vizibil
 uv run pytest src/tests/ -v -k "luna3"          # doar o luna / o etapa
 ```
 
-Dupa rulare, baza de date de test ramane in `src/tests/.runtime/` pentru inspectie manuala (o poti deschide cu orice client SQLite sau porni aplicatia pe ea cu `PFASIMPLU_DB_PATH`).
+Dupa rulare, baza de date de test ramane in `src/tests/.runtime/` pentru inspectie manuala (o poti deschide cu orice client SQLite sau rula aplicatia pe ea cu `make dev-e2e`). Logare: `test@pfasimplu.ro` / `parola-test-e2e-123`.
 
 ### Depanare
 

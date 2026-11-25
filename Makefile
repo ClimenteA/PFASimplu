@@ -1,4 +1,4 @@
-.PHONY: install dev dev-superuser test-e2e migrate-all purge-migration-dirs purge-db build-local start-local stop-local logs-local build start stop logs format lint ruff check
+.PHONY: install dev dev-e2e dev-superuser test-e2e migrate-all purge-migration-dirs purge-db build-local start-local stop-local logs-local build start stop logs format lint ruff check
 
 # Sursele aplicatiei sunt in src/. Comenzile de mai jos ruleaza din radacina
 # repo-ului, deci folosim calea explicita catre src/manage.py si PYTHONPATH=src
@@ -20,6 +20,13 @@ DEV_PORT ?= 8990
 dev:
 	uv run src/manage.py migrate --noinput
 	uv run src/manage.py runserver $(DEV_PORT)
+
+# Ruleaza aplicatia pe baza de date lasata de `make test-e2e`, pe acelasi port
+# ca `make dev`. Datele reale (src/dbsqlite/stocare.db) nu sunt atinse.
+# Login: test@pfasimplu.ro / parola-test-e2e-123 (contul creat de teste).
+dev-e2e:
+	test -f src/tests/.runtime/test.db || (echo "Ruleaza intai make test-e2e"; exit 1)
+	PFASIMPLU_DB_PATH=src/tests/.runtime/test.db uv run src/manage.py runserver $(DEV_PORT)
 
 # Cont de admin pentru /admin/ (in aceeasi baza de date).
 dev-superuser:

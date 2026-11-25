@@ -11,8 +11,8 @@
 # http://localhost:8990/conturi/inregistrare/ (sau foloseste /admin/).
 #
 # Baza de date si fisierele urcate/generate sunt direct pe gazda, in
-# src/dbsqlite si src/media (ca in vechea versiune locala); se vad si se
-# pot copia/backup-ui, si nu sunt afectate de rebuild-ul imaginii.
+# src/dbsqlite si src/media; se vad si se pot copia/backup-ui, si nu sunt
+# afectate de rebuild-ul imaginii.
 #
 # "restart: unless-stopped" + serviciul Docker pornit la boot => aplicatia
 # revine singura dupa restartul calculatorului (mai putin daca a fost oprita
