@@ -175,7 +175,7 @@ aceeasi baza de date si aceleasi fisiere ca aplicatia web.
 Intra in `Setari` si foloseste formularul mic **„Cheie de acces MCP”** de sub
 formularul principal:
 
-- apasa **Genereaza cheie MCP** (optional cu un nume, ex. „OpenCode laptop”);
+- apasa **Genereaza cheia** in sectiunea „Cheie de acces MCP (agenti AI)” de sub formularul principal;
 - **copiaza cheia imediat** - e afisata o singura data;
 - in baza de date se salveaza doar un hash (salt + SHA-256), niciodata cheia
   in clar; la fiecare request MCP hash-ul primit e comparat cu cel salvat;
@@ -183,7 +183,7 @@ formularul principal:
   lui, iar agentul vede si modifica doar datele acelui cont (inclusiv fisierele
   lui); o cheie fara cont e refuzata;
 - generarea unei chei noi **revoca automat** doar cheia contului curent, iar
-  butonul **Revoca** o sterge definitiv - efectul e imediat, fara restart;
+  butonul **Revoca cheia** o sterge definitiv - efectul e imediat, fara restart;
 - pastreaz-o secret si nu o pune in git / `.env`.
 
 ### 2. Varianta locala, prin HTTP
@@ -296,7 +296,17 @@ Daca ai **cod special de TVA intracomunitar (art. 317 Cod fiscal)** si cumperi s
 - **Cod TVA intracomunitar** - codul special din certificatul de inregistrare in scopuri de TVA, fara prefixul RO. Este diferit de CIF-ul normal al PFA-ului: pentru facturi din UE se foloseste codul special, pentru non-UE codul normal (aplicatia alege automat codul corect);
 - **IBAN trezorerie pentru plata TVA** - se completeaza **automat cand selectezi localitatea** (campul `Alege localitatea`): aplicatia are tabelul IBAN-urilor extras din [sursele oficiale ANAF](https://www.anaf.ro/anaf/internet/ANAF/asistenta_contribuabili/plata_oblig_fiscale/coduri_iban) (202 trezorerii operative, inclusiv sectoarele Bucurestiului) si stie contul `20A100101 - TVA incasata pentru operatiuni interne` pentru localitatea ta. Linkul PDF-ului ANAF ramane afisat ca sa poti verifica. Daca tabelul `src/static/iban_trezorerie.json` lipseste, aplicatia il descarca automat de pe ANAF la prima salvare a Setarilor (necesita conexiune la internet; dureaza cateva minute). Daca localitatea nu are trezorerie operativa proprie (sate/comune), cauta IBAN-ul in lista ANAF pentru judetul tau si completeaza-l manual. TVA-ul din D301 NU se plateste in contul unic.
 
-![setari](readmepics/setari.png)
+**Cheie de acces MCP (agenti AI):** sub formularul principal gasesti sectiunea
+„Cheie de acces MCP (agenti AI)”. Apasa **Genereaza cheia** (o cheie per cont) si
+copiaza-o imediat: e afisata in clar o singura data, iar in baza de date se
+salveaza doar un hash (salt + SHA-256). Cheia e legata de contul care a generat-o,
+deci agentul AI vede si modifica doar datele acelui cont. Generarea unei chei noi
+o revoca pe cea veche, iar butonul **Revoca cheia** o sterge definitiv, cu efect
+imediat. Cu aceasta cheie conectezi OpenCode sau alt agent AI conform sectiunii
+[Utilizare din agenti AI (MCP / OpenCode)](#utilizare-din-agenti-ai-mcp--opencode);
+nu o pune in git sau in `.env`.
+
+![setari - datele PFA si cheia de acces MCP](readmepics/setari.png)
 
 
 
