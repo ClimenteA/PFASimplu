@@ -410,9 +410,9 @@
 <p class="pico-color-slate-500" style="text-align: center; margin-top: 3rem;">
     <small>
         PFASimplu V{{ app_version }}
-        {% if latest_app_version %}
+        {% if update_available %}
         <a href="{{ repo_url }}" target="_blank" rel="noopener noreferrer"
-            {% if update_available %}class="pico-background-yellow-900" style="padding: 0.1rem 0.5rem; border-radius: var(--pico-border-radius);" {% endif %}>(disponibil V{{ latest_app_version }})</a>
+            class="pico-background-yellow-900" style="padding: 0.1rem 0.5rem; border-radius: var(--pico-border-radius);">(disponibil V{{ latest_app_version }})</a>
         {% endif %}
     </small>
 </p>
