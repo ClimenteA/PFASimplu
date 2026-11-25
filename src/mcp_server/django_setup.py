@@ -1,4 +1,4 @@
-"""Initializare Django pentru procesele MCP (stdio / HTTP).
+"""Initializare Django pentru procesul MCP (HTTP).
 
 Serverul MCP ruleaza intr-un proces separat fata de aplicatia web (waitress),
 dar foloseste aceeasi baza de date si acelasi folder media.

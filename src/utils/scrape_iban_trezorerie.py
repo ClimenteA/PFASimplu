@@ -37,13 +37,8 @@ STATIC_IBAN_BASE = "https://static.anaf.ro/static/10/Anaf/AsistentaContribuabili
 COD_BUGETAR_TVA = "20A100101"
 
 def get_output_path() -> str:
-    """Calea de scriere a JSON-ului: static/ in dezvoltare,
-    _internal/static/ in executabilul PyInstaller (folderul static e read-only
-    in unele instalari; _internal este langa executabil si scriibil)."""
+    """Calea de scriere a JSON-ului: folderul static/ al aplicatiei."""
     base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    pyinstaller_static = os.path.join(base, "_internal", "static")
-    if os.path.isdir(pyinstaller_static):
-        return os.path.join(pyinstaller_static, "iban_trezorerie.json")
     return os.path.join(base, "static", "iban_trezorerie.json")
 
 

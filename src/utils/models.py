@@ -8,27 +8,24 @@ from django.utils import timezone
 
 
 class UserScopedManager(models.Manager):
-    """Manager care izoleaza datele per utilizator in modul multi-user.
+    """Manager care izoleaza datele per utilizator.
 
-    In modul desktop (implicit) se comporta ca managerul standard.
-    In modul multi-user filtreaza automat dupa utilizatorul cererii curente;
-    fara utilizator in context (admin, shell, comenzi de management) nu
-    filtreaza - paginile web cer oricum autentificare prin middleware.
+    Filtreaza automat dupa utilizatorul cererii curente; fara utilizator in
+    context (admin, shell, comenzi de management) nu filtreaza - paginile web
+    cer oricum autentificare prin middleware.
     """
 
     def get_queryset(self):
         qs = super().get_queryset()
-        if settings.MULTI_USER:
-            user = get_current_user()
-            if user is not None and not user.is_superuser:
-                return qs.filter(user=user)
+        user = get_current_user()
+        if user is not None and not user.is_superuser:
+            return qs.filter(user=user)
         return qs
 
 
 class UserOwnedModel(models.Model):
     """Baza pentru toate modelele cu date ale utilizatorului.
-    `user` ramane null in modul desktop; in modul multi-user se completeaza
-    automat la salvare cu utilizatorul autentificat."""
+    Campul `user` se completeaza automat la salvare cu utilizatorul autentificat."""
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -41,7 +38,7 @@ class UserOwnedModel(models.Model):
     objects = UserScopedManager()
 
     def save(self, *args, **kwargs):
-        if settings.MULTI_USER and self.user_id is None:
+        if self.user_id is None:
             user = get_current_user()
             if user is not None:
                 self.user = user

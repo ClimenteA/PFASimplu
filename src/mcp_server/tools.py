@@ -11,7 +11,6 @@ import binascii
 from contextlib import contextmanager
 from typing import Any
 
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 
@@ -41,10 +40,10 @@ def user_context():
     fisierele: agentul vede si modifica doar ce apartine acelui cont.
     """
     user_id = current_key_user_id()
-    if not settings.MULTI_USER or user_id is None:
-        # Modul desktop: o singura baza de date, fara conturi.
-        yield None
-        return
+    if user_id is None:
+        raise ValueError(
+            "Cheia MCP nu are cont asociat. Genereaza o cheie noua in /setari."
+        )
     user = get_user_model().objects.filter(pk=user_id).first()
     if user is None:
         raise ValueError("Contul asociat cheii MCP nu mai exista. Genereaza o cheie noua in /setari.")

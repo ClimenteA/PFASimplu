@@ -32,13 +32,6 @@ _JSON_PATHS = [
         "static",
         "iban_trezorerie.json",
     ),
-    # Calea din executabilul PyInstaller (_internal/static)
-    os.path.join(
-        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-        "_internal",
-        "static",
-        "iban_trezorerie.json",
-    ),
 ]
 
 

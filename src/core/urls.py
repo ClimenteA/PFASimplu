@@ -18,8 +18,8 @@ urlpatterns = [
     path("__reload__/", include("django_browser_reload.urls")),
 ]
 
-# In modul multi-user fisierele media sunt servite doar proprietarului
-# (vezi utils.files.media_serve_view); in modul desktop ca pana acum.
+# Fisierele media sunt servite doar proprietarului autentificat
+# (vezi utils.files.media_serve_view).
 urlpatterns += [
     re_path(r"^media/(?P<path>.*)$", media_serve_view),
 ]

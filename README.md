@@ -12,7 +12,7 @@ Aplicatie pentru simplificarea gestiunii contabilitatii facuta in partida simpla
 - [Poate aplicatia sa faca X,Y,Z?](#poate-aplicatia-sa-faca-xyz)
 - [Instalare pt. utilizatori](#instalare-pt-utilizatori)
 - [Instalare pt. developeri](#instalare-pt-developeri)
-- [Instalare pe VPS (Docker, mod multi-user)](#instalare-pe-vps-docker-mod-multi-user)
+- [Instalare pe VPS (Docker + Caddy)](#instalare-pe-vps-docker--caddy)
 - [Utilizare din agenti AI (MCP / OpenCode)](#utilizare-din-agenti-ai-mcp--opencode)
 - [Ghid de utilizare: de la instalare la rutina zilnica](#ghid-de-utilizare-de-la-instalare-la-rutina-zilnica)
 - [Setari](#setari)
@@ -26,7 +26,8 @@ Aplicatie pentru simplificarea gestiunii contabilitatii facuta in partida simpla
 - [Registre](#registre)
 - [Actualizare aplicatie](#actualizare-aplicatie)
 - [Debug si testare (dezvoltatori)](#debug-si-testare-dezvoltatori)
-  - [Rulare locala pentru dezvoltare](#rulare-locala-pentru-dezvoltare)
+  - [Rulare in Docker pentru dezvoltare](#rulare-in-docker-pentru-dezvoltare)
+  - [Rulare cu uv run (dezvoltare)](#rulare-cu-uv-run-dezvoltare)
   - [Structura codului](#structura-codului)
   - [Teste end-to-end](#teste-end-to-end)
   - [Depanare](#depanare)
@@ -61,50 +62,65 @@ Daca deschizi un `New issue` din tabul `Issues` din aceasta pagina si spui pas c
 
 ## Instalare pt. utilizatori
 
-Din sectiunea `Releases` din aceasta pagina descarca zip-ul pentru sistemul tau de operare. 
-Odata descarcat click dreapta unzip si rulezi executabilul `pfasimplu.exe`.
-Daca ai MacOS va trebui sa urmezi sectiunea *Instalare pt. developeri*. 
+Aplicatia **se ruleaza in Docker** (nu mai exista executabil / versiune desktop). Scriptul de instalare face totul: instaleaza Docker daca lipseste, trage codul din GitHub, construieste imaginea si porneste aplicatia la `http://localhost:8990`.
 
-- [Click aici](https://github.com/ClimenteA/PFASimplu/releases) si descarca zip-ul din `Assets` pentru sistemul tau de operare (Windows, Ubuntu);
+**Linux / macOS:**
 
-Daca executabilul nu functioneaza pe Windows va trebui sa instalezi [latest-microsoft-visual-c-redistributable-version x64 (click)](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#latest-microsoft-visual-c-redistributable-version).
+```bash
+curl -fsSL https://raw.githubusercontent.com/ClimenteA/PFASimplu/main/install.sh | bash
+```
 
-Executabilul nu are un certificat digital, asa ca sistemul de operare (windows/macos) iti va spune ca executabilul este un posibil virus sau ca este de la "un unknown publisher". Poti urma sectiunea *Instalare pt. developeri* daca vrei sa eviti asta. Sa fii safe: nu descarca acest executabil din alta locatie decat cea din acest GitHub repo!
+Daca ai deja repo-ul, poti rula direct `./install.sh` (din radacina). Scriptul foloseste directorul `$HOME/PFASimplu`; pentru porturi si alte setari editeaza `.env` (vezi mai jos). Poti schimba directorul cu `PFASIMPLU_DIR`.
+
+Fara script, configurationarea manuala e:
+
+```bash
+cp .env.example .env        # valori mock, nimic secret; .env e in .gitignore
+docker compose -f docker-compose-local.yaml up -d --build
+```
+
+**Windows** (PowerShell sau Command Prompt):
+
+```
+curl -o install.bat https://raw.githubusercontent.com/ClimenteA/PFASimplu/main/install.bat
+install.bat
+```
+
+Scriptul instaleaza Docker Desktop si git prin `winget`, daca lipsesc. Daca le instaleaza la prima rulare, porneste Docker Desktop si **re-ruleaza scriptul**.
+
+Dupa instalare, deschide `http://localhost:8990` si creeaza-ti contul in pagina de **inregistrare** (loginul este obligatoriu).
+
+**Daca ai folosit vechea versiune locala:** baza de date (`src/dbsqlite/stocare.db`) si fisierele (`src/media/`) sunt montate in container *exact la aceleasi cai* de pe disc. Copiaza aceste foldere in directorul de instalare inainte de a rula scriptul, iar aplicatia le va folosi. Ele nu sunt incluse in imaginea Docker si nu se urca in git, deci un `git pull` sau un rebuild nu le atinge. Fa backup periodic la `src/dbsqlite/` si `src/media/`.
 
 
 ## Instalare pt. developeri
 
-Aplicatia este facuta in Python (>= 3.12), Django cu SQLiteDB. 
+Aplicatia e facuta in Python (>= 3.12), Django cu SQLiteDB. Pentru utilizatori ruleaza in Docker; pentru dezvoltare se poate folosi si `uv run` (vezi [Rulare cu uv run](#rulare-cu-uv-run-dezvoltare)).
 
-- clone repo;
-- [instaleaza uv](https://docs.astral.sh/uv/getting-started/installation/) (managerul de pachete folosit de proiect);
-- `uv sync` - creeaza `.venv` si instaleaza dependintele (inclusiv cele de testare);
-- `make migrate-all` - creeaza/aplica migrarile pentru toate app-urile;
-- `make dev` - porneste serverul de dezvoltare la `http://127.0.0.1:8990` (aka `uv run src/manage.py runserver 8990`);
-- `make purge-db` - sterge `src/dbsqlite/stocare.db` (sqlite db) si toate folderele `migrations`;
-- `make purge-migration-dirs` - sterge toate folderele `migrations`;
-- `make package` - creeaza aplicatia pfasimplu ca executabil pentru sistemul de operare pe care a fost rulat;
-- `make test-e2e` - ruleaza testele end-to-end (vezi sectiunea [Debug si testare (dezvoltatori)](#debug-si-testare-dezvoltatori)).
+- clone repo si `./install.sh` (sau `make start-local`) pentru aplicatie;
+- [instaleaza uv](https://docs.astral.sh/uv/getting-started/installation/) si `uv sync`, apoi `make dev` pentru serverul de dezvoltare cu auto-reload;
+- `make test-e2e` - ruleaza testele end-to-end (vezi [Debug si testare](#debug-si-testare-dezvoltatori));
+- `make migrate-all` / `make purge-db` / `make purge-migration-dirs` - utilitare pentru migrari;
+- `make logs-local` / `make stop-local` - loguri, respectiv oprirea aplicatiei locale.
 
-Pe Windows comenzile make au echivalentul `.\makefile.bat X` - unde X poate fi `run`, `migrate-all`, `purge-db`, `purge-migration-dirs` etc. (ex: `.\makefile.bat run` porneste `python src/manage.py runserver` pe portul implicit 8000).
+Pe Windows, echivalentul comenzilor make e `.\makefile.bat X` (ex: `start-local`, `stop-local`, `logs-local`, `migrate-all`). Pentru teste: activeaza venvul cu `& D:/PFASimplu/.venv/Scripts/Activate.ps1` (daca PowerShell blocheaza, `Set-ExecutionPolicy Unrestricted -Scope Process`).
 
-- activate venv windows - `& D:/PFASimplu/.venv/Scripts/Activate.ps1`
-- allow bash in powershell - `Set-ExecutionPolicy Unrestricted -Scope Process`
-
-Datele aplicatiei stau local: baza de date in `src/dbsqlite/stocare.db`, fisierele urcate/generate in `src/media/`. Ambele sunt in `.gitignore` - nu se urca in git. Poti muta locatia lor cu variabilele de mediu `PFASIMPLU_DB_PATH` si `PFASIMPLU_MEDIA_ROOT` (util ca sa lucrezi/testezi fara sa atingi datele reale).
+Datele stau pe gazda in `src/dbsqlite/` si `src/media/` (mount-uri in `docker-compose-local.yaml`) si nu se urca in git. Vechea varianta locala folosea aceleasi cai, deci nu trebuie mutate. Configurarea locala e in `.env` (ignorat de git, cu valori mock in `.env.example`); .env.prod e doar pentru VPS.
 
 
-## Instalare pe VPS (Docker, mod multi-user)
+## Instalare pe VPS (Docker + Caddy)
 
-Aplicatia poate rula si pe un server, cu **login/inregistrare pe email + parola**
-(sistemul de autentificare inclus in Django) si **date izolate per utilizator**:
-fiecare cont isi vede doar propriile incasari, cheltuieli, facturi, documente si
-setari, iar fisierele urcate stau in `src/media/user_<id>/` si pot fi descarcate doar
-de proprietar.
+Aplicatia ruleaza cu **login/inregistrare pe email + parola** (obligatoriu si in
+varianta locala) si **date izolate per utilizator**: fiecare cont isi vede doar
+propriile incasari, cheltuieli, facturi, documente si setari, iar fisierele
+urcate stau in `src/media/user_<id>/` si pot fi descarcate doar de proprietar.
 
-Modul multi-user se activeaza prin `PFASIMPLU_MULTI_USER=1` (setat automat in
-Docker). **Implicit aplicatia desktop ramane fara login**, exact ca pana acum -
-nu trebuie schimbat nimic la instalarea locala.
+Sunt doua fisiere Docker Compose:
+
+| Fisier | Continut | Acces |
+|---|---|---|
+| `docker-compose.yaml` | aplicatia + MCP + Caddy (TLS automat) - pentru VPS | `https://<domeniu>` si `https://mcp.<domeniu>/mcp` |
+| `docker-compose-local.yaml` | aplicatia + MCP, **fara Caddy** - pentru uz local | `http://localhost:8990` si `http://localhost:8997/mcp` |
 
 Pe VPS (cu Docker si Docker Compose instalate):
 
@@ -112,50 +128,47 @@ Pe VPS (cu Docker si Docker Compose instalate):
 git clone https://github.com/ClimenteA/PFASimplu && cd PFASimplu
 
 # configurarea aplicatiei
-cp server/.env.prod.example server/.env.prod
-# editeaza server/.env.prod: PFASIMPLU_SECRET_KEY (aleator, lung),
+cp .env.prod.example .env.prod
+# editeaza .env.prod: PFASIMPLU_SECRET_KEY (aleator, lung),
 # PFASIMPLU_ALLOWED_HOSTS si PFASIMPLU_CSRF_TRUSTED_ORIGINS cu domeniul tau
 
-# aplicatia + proxy-ul TLS (Caddy); pune domeniul tau in server/Caddyfile
-docker compose -f server/docker-compose.yml up -d --build   # sau: make start
+# aplicatia + proxy-ul TLS (Caddy); pune domeniul tau in Caddyfile
+docker compose -f docker-compose.yaml up -d --build   # sau: make start
 ```
 
-- Baza de date SQLite si fisierele urcate raman pe gazda in `./data/`
-  (volume in `server/docker-compose.yml`) - poti face backup doar la acest folder.
+- Baza de date SQLite si fisierele urcate raman pe gazda, in `src/dbsqlite/`
+  si `src/media/` (bind mount in ambele compose-uri) - acestea sunt singurele
+  foldere de care ai nevoie pentru backup. Nu sunt incluse in imagine sau in git.
 - La pornire containerul aplica migrarile si colectorul de fisiere statice automat.
 - Optional: seteaza `DJANGO_SUPERUSER_EMAIL` / `DJANGO_SUPERUSER_PASSWORD` in
-  `server/.env.prod` pentru a crea un cont de admin (`/admin/`) la prima pornire.
-- Optional: `PFASIMPLU_ALLOW_REGISTRATION=0` in `server/.env.prod` blocheaza crearea de
+  `.env.prod` pentru a crea un cont de admin (`/admin/`) la prima pornire.
+- Optional: `PFASIMPLU_ALLOW_REGISTRATION=0` in `.env.prod` blocheaza crearea de
   conturi noi (pagina de inregistrare devine 404); utilizatorii existenti se pot
   autentifica in continuare. Util implicit: `1` (inregistrare deschisa).
-- Pentru test local fara domeniu/TLS: in server/Caddyfile inlocuieste domeniul cu `:80`
-  si in `server/.env.prod` pune `PFASIMPLU_ALLOWED_HOSTS=localhost` si
+- Pentru test local fara domeniu/TLS: in Caddyfile inlocuieste domeniul cu `:80`
+  si in `.env.prod` pune `PFASIMPLU_ALLOWED_HOSTS=localhost` si
   `PFASIMPLU_CSRF_TRUSTED_ORIGINS=http://localhost`.
 
-Pentru a rula varianta dockerizata local, mereu pornita (fara Caddy/TLS):
+Varianta locala (fara Caddy/TLS), mereu pornita:
 
 ```bash
-docker compose -f server/docker-compose-local.yml up -d --build   # sau: make start-local
+cp .env.example .env        # daca nu exista deja; continut mock, nu secrete
+docker compose -f docker-compose-local.yaml up -d --build   # sau: make start-local / ./install.sh
 ```
 
-Aplicatia e accesibila la `http://localhost:8996`. Portul se schimba prin
-`PFASIMPLU_PORT` (ex. `PFASIMPLU_PORT=9000 docker compose -f server/docker-compose-local.yml up -d`).
-Cu `restart: unless-stopped` si serviciul Docker pornit la boot, aplicatia revine
-singura dupa restartul calculatorului (mai putin daca a fost oprita manual).
-
-Pentru a rula modul multi-user si fara Docker (ex. pentru teste):
-
-```bash
-PFASIMPLU_MULTI_USER=1 uv run src/manage.py runserver
-```
+Aplicatia e accesibila la `http://localhost:8990`. Portul se schimba prin
+`PFASIMPLU_PORT` in `.env` (ex. `PFASIMPLU_PORT=9000`), iar cel al MCP prin
+`PFASIMPLU_MCP_PORT` (implicit `8997`). Cu `restart: unless-stopped` si serviciul
+Docker pornit la boot, aplicatia revine singura dupa restartul calculatorului
+(mai putin daca a fost oprita manual inainte).
 
 
 ## Utilizare din agenti AI (MCP / OpenCode)
 
 Aplicatia poate fi conectata la OpenCode (sau alt agent AI) prin
 [Model Context Protocol](https://modelcontextprotocol.io/), folosind
-`fastmcp`. Ruleaza in ambele moduri: **stdio** (aplicatia locala) si **HTTP**
-(varianta dockerizata, locala sau pe VPS).
+`fastmcp`. Serverul MCP ruleaza in Docker (HTTP), local sau pe VPS, si foloseste
+aceeasi baza de date si aceleasi fisiere ca aplicatia web.
 
 ### 1. Genereaza cheia de autorizare
 
@@ -166,60 +179,33 @@ formularul principal:
 - **copiaza cheia imediat** - e afisata o singura data;
 - in baza de date se salveaza doar un hash (salt + SHA-256), niciodata cheia
   in clar; la fiecare request MCP hash-ul primit e comparat cu cel salvat;
-- cheia e **legata de contul care a generat-o**: in modul multi-user fiecare
-  utilizator are cheia lui, iar agentul vede si modifica doar datele acelui
-  cont (inclusiv fisierele lui); in modul desktop cheia nu are user, fiind o
-  singura baza de date locala;
+- cheia e **legata de contul care a generat-o**: fiecare utilizator are cheia
+  lui, iar agentul vede si modifica doar datele acelui cont (inclusiv fisierele
+  lui); o cheie fara cont e refuzata;
 - generarea unei chei noi **revoca automat** doar cheia contului curent, iar
   butonul **Revoca** o sterge definitiv - efectul e imediat, fara restart;
 - pastreaz-o secret si nu o pune in git / `.env`.
 
-### 2. Varianta locala, prin stdio
+### 2. Varianta locala, prin HTTP
 
-Pentru instalarea din sursa (sau `make dev`), agentul porneste el insusi
-serverul MCP. Cheia i se trimite prin variabila de mediu
-`PFASIMPLU_MCP_TOKEN` (e verificata la pornire si la fiecare tool call):
-
-```bash
-opencode mcp add pfasimplu \
-  --env PFASIMPLU_MCP_TOKEN=<CHEIA_TA> \
-  -- uv run --directory /cale/catre/PFASimplu/src python -m mcp_server.local
-```
-
-Echivalent cu make (in folderul proiectului):
-
-```bash
-PFASIMPLU_MCP_TOKEN=<CHEIA_TA> make mcp-local
-```
-
-Daca vrei executabil, nu sursa: `make package-mcp` (pe Windows
-`.\makefile.bat package-mcp`) construieste `dist/pfasimplu-mcp/pfasimplu-mcp.exe`;
-il folosesti in comanda OpenCode de mai sus, dupa `--`, in loc de `uv run ...`.
-Executabilul foloseste aceeasi baza de date si acelasi folder media ca
-aplicatia desktop.
-
-### 3. Varianta dockerizata locala, prin HTTP
-
-Serviciul MCP porneste odata cu `server/docker-compose-local.yml` si e expus pe
+Serviciul MCP porneste odata cu `docker-compose-local.yaml` si e expus pe
 portul `8997` (`PFASIMPLU_MCP_PORT`):
 
 ```bash
-docker compose -f server/docker-compose-local.yml up -d --build
+docker compose -f docker-compose-local.yaml up -d --build
 
 opencode mcp add pfasimplu-local \
   --url http://localhost:8997/mcp \
   --header 'Authorization=Bearer <CHEIA_TA>'
 ```
 
-Fara Docker, pentru dezvoltare: `make mcp-http` (la `http://127.0.0.1:8001/mcp`).
-
-### 4. Varianta de pe VPS, prin HTTPS
+### 3. Varianta de pe VPS, prin HTTPS
 
 Caddy expune serverul MCP pe subdomeniul `mcp.<PFASIMPLU_DOMAIN>`.
-Seteaza `PFASIMPLU_DOMAIN` in `server/.env.prod`, apoi:
+Seteaza `PFASIMPLU_DOMAIN` in `.env.prod`, apoi:
 
 ```bash
-docker compose -f server/docker-compose.yml up -d --build
+docker compose -f docker-compose.yaml up -d --build
 
 # Exemplu de conectare (foloseste propriul domeniu si cheia generata in /setari):
 opencode mcp add chatcodfiscal \
@@ -229,7 +215,7 @@ opencode mcp add chatcodfiscal \
 
 Endpoint-ul e `https://mcp.<domeniu>/mcp`; `https://mcp.<domeniu>/health` e
 public (pentru monitoring). Daca testezi local fara domeniu/TLS, comenteaza
-blocul `mcp....` din server/Caddyfile.
+blocul `mcp....` din Caddyfile.
 
 ### Tooluri expuse
 
@@ -244,11 +230,11 @@ blocul `mcp....` din server/Caddyfile.
 **Nu exista tool-uri de stergere** (drop-data, delete etc.) - operatiile
 distructive raman doar in interfata web.
 
-In modul multi-user nu trebuie sa trimiti niciun ID de utilizator: identitatea
-vine din cheia generata in `/setari`. Serverul seteaza contextul contului
-respectiv pentru fiecare tool call, deci agentul nu poate citi sau modifica
-datele altui cont. O cheie fara user (generata inainte de aceasta schimbare)
-este refuzata in modul multi-user - genereaza una noua.
+Nu trebuie sa trimiti niciun ID de utilizator: identitatea vine din cheia
+generata in `/setari`. Serverul seteaza contextul contului respectiv pentru
+fiecare tool call, deci agentul nu poate citi sau modifica datele altui cont.
+O cheie fara user (generata inainte de aceasta schimbare) este refuzata -
+genereaza una noua.
 
 
 ## Ghid de utilizare: de la instalare la rutina zilnica
@@ -257,7 +243,7 @@ Ordinea conteaza: aplicatia foloseste datele din `Setari` in toate celelalte pag
 
 **1. Prima deschidere - completeaza Setari**
 
-Deschide aplicatia (executabilul descarcat, sau `make dev` → `http://127.0.0.1:8990`) si mergi intai in pagina `Setari`: numele PFA-ului, CIF, adresa, localitatea (aleasa din sugestii), conturile IBAN (unul per moneda: RON, EUR etc.), codul CAEN. Bifeaza scutirile doar daca ai statut special (pensionar, persoana cu handicap etc.). Daca ai cod special de TVA intracomunitar (art. 317), deschide sectiunea `TVA intracomunitar (D301/D390)` si completeaza codul - IBAN-ul trezoreriei se completeaza automat la alegerea localitatii. Salveaza. Fara acest pas, facturile nu au datele emitentului corecte.
+Deschide aplicatia la `http://localhost:8990`, autentifica-te (sau inregistreaza-te la prima folosire) si mergi intai in pagina `Setari`: numele PFA-ului, CIF, adresa, localitatea (aleasa din sugestii), conturile IBAN (unul per moneda: RON, EUR etc.), codul CAEN. Bifeaza scutirile doar daca ai statut special (pensionar, persoana cu handicap etc.). Daca ai cod special de TVA intracomunitar (art. 317), deschide sectiunea `TVA intracomunitar (D301/D390)` si completeaza codul - IBAN-ul trezoreriei se completeaza automat la alegerea localitatii. Salveaza. Fara acest pas, facturile nu au datele emitentului corecte.
 
 **2. Emite prima factura (pagina Facturi)**
 
@@ -285,7 +271,7 @@ Oricand, dar musai inainte de a completa Declaratia Unica: cardurile cu totaluri
 
 **Ce face aplicatia in spate cu fisierele:**
 - fiecare fisier urcat sau generat (facturi PDF/XML, justificative, fise mijloc fix) e salvat in `src/media/` cu un prefix-id unic de 8 caractere (ex. `0x4rf2KW_factura_PFT-1.pdf`), ca sa nu existe coliziuni de nume; la re-incarcarea unui fisier deja prefixat, prefixul vechi e inlocuit;
-- in modul multi-user fisierele stau in `src/media/user_<id>/` si pot fi descarcate doar de proprietar;
+- fisierele stau in `src/media/user_<id>/` (directoarele sunt montate de pe gazda in container) si pot fi descarcate doar de proprietar;
 - exporturile CSV/XLSX ale registrelor si zip-urile generate (D301/D390, exportul pe an) se construiesc temporar in `src/media/extracts/` si se livreaza la download;
 - la stergerea unei inregistrari din aplicatie, fisierul atasat ei este sters automat de pe disc (django-cleanup); `Sterge toate datele` din Setari sterge si baza de date si fisierele;
 - cursurile BNR se iau online prin `cursvalutarbnr` si se cache-uiesc local, deci anii trecuti functioneaza si offline.
@@ -473,71 +459,99 @@ In tab-ul **Jurnal Cumparaturi** gasesti **Jurnalul de cumpărări**: daca ai ch
 
 ## Actualizare aplicatie
 
-Poti verifica oricand daca a aparut o versiune noua a aplicatiei pe pagina de [Github Releases](https://github.com/ClimenteA/PFASimplu/releases) (pagina de unde ai descarcat prima data aplicatia). Din Assets descarca ultima versiune pentru sistemul tau de operare.
+Versiunea pe care o rulezi apare in subsolul paginii `Setari` (ex. `PFASimplu V3.0.0`), iar versiunile noi se publica in [Github Releases](https://github.com/ClimenteA/PFASimplu/releases).
 
-Versiunea pe care o rulezi apare in subsolul paginii `Setari` (ex. `PFASimplu V3.0.0`). La actualizare, datele tale raman pe loc (baza de date `src/dbsqlite/stocare.db` si folderul `src/media/` nu sunt atinse de executabil); inlocuiesti doar executabilul/fisierele aplicatiei. Pentru siguranta, inainte de actualizare poti face un export pe an din `Setari` → `Exporta datele din aplicatie`.
+**Actualizare locala:** re-ruleaza scriptul de instalare (`./install.sh` sau `install.bat`). El face `git pull`, reconstruieste imaginea si reporneste containerele. Baza de date si fisierele raman pe loc: sunt in `src/dbsqlite/` si `src/media/` pe disc, nu in imagine. Echivalent manual:
+
+```bash
+git pull
+docker compose -f docker-compose-local.yaml up -d --build
+```
+
+Pe VPS, folosesti `docker-compose.yaml`. Pentru siguranta, inainte de actualizare poti face un export pe an din `Setari` → `Exporta datele din aplicatie` (sau copiaza direct cele doua foldere).
 
 
 ## Debug si testare (dezvoltatori)
 
-### Rulare locala pentru dezvoltare
+### Rulare in Docker pentru dezvoltare
 
 ```bash
-uv sync                 # dependinte (inclusiv grupul dev: pytest, playwright, faker)
-make migrate-all        # migrarile tuturor app-urilor
-make dev                # http://127.0.0.1:8990, cu auto-reload la modificari de cod
+make start-local        # http://localhost:8990 (fara Caddy), restart: unless-stopped
+make logs-local         # logurile aplicatiei
+make stop-local
+
+make start              # varianta cu Caddy (necesita .env.prod)
 ```
 
-Implicit `DEBUG=1` (vezi `src/core/settings.py`), deci erorile Django se afiseaza complet in browser, iar `django-browser-reload` reincarca pagina la modificari de template-uri/cod. Pentru a lucra fara sa atingi datele reale:
+Aplicatia ruleaza in container cu `PFASIMPLU_DEBUG=0`. Pe HTTP (localhost)
+cookie-urile `Secure` sunt dezactivate prin `PFASIMPLU_SECURE_COOKIES=0`,
+altfel browserul nu ar trimite sesiunea de login. In spatele Caddy/HTTPS se
+foloseste valoarea implicita (`1`).
+
+Loginul e obligatoriu: creaza un cont la `/conturi/inregistrare/` sau un
+superutilizator prin `DJANGO_SUPERUSER_EMAIL` / `DJANGO_SUPERUSER_PASSWORD`
+in `.env` (local) ori `.env.prod` (VPS).
+
+### Rulare cu uv run (dezvoltare)
+
+Se poate lucra si direct din sursa, cu auto-reload, fara Docker (nu e vorba de
+vechea aplicatie desktop – loginul e obligatoriu si aici):
 
 ```bash
-PFASIMPLU_DB_PATH=/tmp/demo.db PFASIMPLU_MEDIA_ROOT=/tmp/demo-media uv run src/manage.py runserver 8990
+uv sync                 # dependinte (grupul dev: pytest, playwright, faker, ruff)
+make dev                # http://127.0.0.1:8990, cu auto-reload
+make dev-superuser      # optional, cont de admin pentru /admin/
+make test-e2e           # teste end-to-end
+make migrate-all        # regenerare migrari (daca ai modificat modelele)
 ```
 
-Alte variabile de mediu utile (toate in `src/core/settings.py`):
+`make dev` foloseste **aceeasi baza de date si acelasi folder media ca Docker-ul
+local** (`src/dbsqlite/stocare.db` si `src/media/`), deci datele se pastreaza
+cand treci de la `make dev` la `make start-local`. Daca ambele ruleaza pe 8990,
+opreste unul dintre ele sau schimba portul cu `make dev DEV_PORT=8991`.
+Pe Windows: `.\makefile.bat dev` (si `dev-superuser`).
+
+Variabile de mediu utile (`src/core/settings.py` si fisierele compose):
 
 | Variabila | Rol | Implicit |
 |---|---|---|
-| `PFASIMPLU_DB_PATH` / `PFASIMPLU_DB_DIR` | locatia bazei de date SQLite | `src/dbsqlite/stocare.db` |
-| `PFASIMPLU_MEDIA_ROOT` | folderul fisierelor urcate/generate | `src/media/` |
-| `PFASIMPLU_STATIC_ROOT` | folderul fisierelor statice colectate (setat in Docker) | `src/staticfiles/` |
-| `PFASIMPLU_MULTI_USER` | `1` = login pe email + parola, date izolate per user | `0` (desktop, fara login) |
+| `PFASIMPLU_DB_PATH` / `PFASIMPLU_DB_DIR` | locatia bazei de date SQLite (in Docker: `/data/dbsqlite`, montat din `src/dbsqlite/`) | `src/dbsqlite/stocare.db` |
+| `PFASIMPLU_MEDIA_ROOT` | folderul fisierelor urcate/generate (in Docker: `/data/media`, montat din `src/media/`) | `src/media/` |
+| `PFASIMPLU_STATIC_ROOT` | folderul fisierelor statice colectate | `src/staticfiles/` |
+| `PFASIMPLU_PORT` | portul aplicatiei in compose-ul local | `8990` |
 | `PFASIMPLU_DEBUG` | `0` = mod productie (fara trace-uri in browser) | `1` |
-| `PFASIMPLU_ALLOW_REGISTRATION` | `0` = blocheaza crearea de conturi (mod multi-user) | `1` |
-| `PFASIMPLU_SECRET_KEY`, `PFASIMPLU_ALLOWED_HOSTS`, `PFASIMPLU_CSRF_TRUSTED_ORIGINS` | necesare pe server (vezi `server/.env.prod.example`) | - |
+| `PFASIMPLU_SECURE_COOKIES` | `0` = cookie-uri normale (HTTP local) | `1` cand `DEBUG=0` |
+| `PFASIMPLU_ALLOW_REGISTRATION` | `0` = blocheaza crearea de conturi | `1` |
+| `PFASIMPLU_SECRET_KEY`, `PFASIMPLU_ALLOWED_HOSTS`, `PFASIMPLU_CSRF_TRUSTED_ORIGINS` | necesare pe server (vezi `.env.prod.example`) | - |
 | `PFASIMPLU_DOMAIN` | domeniul folosit de Caddy (inclusiv `mcp.<domeniu>`) | `pfa.exemplu.ro` |
-| `PFASIMPLU_MCP_PORT` | portul serverului MCP in container | `8001` |
-| `PFASIMPLU_MCP_TOKEN` | cheia MCP pentru transportul stdio (local) | - |
-
-Modul multi-user local (pentru a testa login-ul si izolarea datelor):
-
-```bash
-PFASIMPLU_MULTI_USER=1 uv run src/manage.py runserver
-# creeaza un cont din /conturi/inregistrare/ sau un admin:
-uv run src/manage.py createsuperuser   # apoi /admin/
-```
+| `PFASIMPLU_MCP_PORT` | portul MCP pe gazda in compose-ul local | `8997` |
 
 ### Structura codului
 
-Radacina repo-ului contine configuratia proiectului (`pyproject.toml`, `uv.lock`, `Makefile`), documentatia si datele de rulare. Codul aplicatiei sta in `src/`, iar fisierele de deploy Docker in `server/`.
+Radacina repo-ului contine configuratia proiectului, documentatia, fisierele Docker si scripturile de instalare. Codul aplicatiei sta in `src/`.
 
-| Folder | Rol |
+| Folder / fisier | Rol |
 |---|---|
-| `src/` | sursele aplicatiei: app-urile Django, `core/`, `mcp_server/`, `templates/`, `static/`, `tests/`, `docs/` si datele locale (`media/`, `dbsqlite/`, `stocare/`) |
-| `server/` | `Dockerfile`, `docker-compose*.yml`, `server/Caddyfile`, `docker-entrypoint.sh`, `.env.prod.example` |
+| `src/` | sursele aplicatiei: app-urile Django, `core/`, `mcp_server/`, `templates/`, `static/`, `tests/` si datele locale (`media/`, `dbsqlite/`) |
+| `Dockerfile`, `docker-entrypoint.sh` | imaginea aplicatiei (migrari + collectstatic la pornire) |
+| `docker-compose.yaml` | varianta VPS: aplicatie + MCP + Caddy |
+| `docker-compose-local.yaml` | varianta locala: aplicatie + MCP, fara Caddy |
+| `Caddyfile`, `.env.prod.example` | configurare TLS/domeniu pentru VPS |
+| `.env.example` / `.env` | configurare locala (mock, ignorata de git) |
+| `install.sh`, `install.bat` | instalare completa: Docker + git + build + start |
 | `readmepics/` | imagini folosite in acest README |
 
 | App / folder (in `src/`) | Rol |
 |---|---|
 | `setari/` | datele PFA-ului, IBAN-uri, cod TVA intracomunitar, export/stergere date, cheia MCP |
-| `mcp_server/` | server FastMCP: tool-uri, autorizare Bearer, transport stdio (`local.py`) si HTTP (`http_app.py`) |
+| `mcp_server/` | server FastMCP: tool-uri, autorizare Bearer si transport HTTP (`http_app.py`) |
 | `facturi/` | emitere facturi: PDF multi-limba + XML e-factura (UBL) |
 | `incasari/` | incasari + documente justificative, conversie BNR |
 | `cheltuieli/` | cheltuieli, deductibilitate, amortizare, taxare inversa TVA |
 | `documente/` | arhiva ANAF (D212, dovezi plata, recipise D301/D390) cu parsing PDF |
 | `inventar/` | obiecte de inventar si mijloace fixe |
 | `registre/` | dashboard + registrele contabile, exporturi CSV/XLSX |
-| `conturi/` | login/inregistrare/logout (doar mod multi-user) |
+| `conturi/` | login/inregistrare/logout (obligatorii) si izolarea datelor pe cont |
 | `utils/` | calcule taxe (`calcule.py`), TVA (`tva.py`, `tva_documente.py`), curs BNR (`valuta.py`), fisiere (`files.py`), PDF-uri (`mijloc_fix_pdf.py`) |
 | `templates/` + `static/` | UI: PicoCSS + Alpine.js, typeahead; fara build step de frontend |
 | `tests/` | teste end-to-end Playwright (vezi mai jos) |
@@ -560,11 +574,13 @@ Dupa rulare, baza de date de test ramane in `src/tests/.runtime/` pentru inspect
 
 ### Depanare
 
-- **Serverul nu porneste / port ocupat**: `make dev` foloseste portul 8990; schimba-l cu `uv run src/manage.py runserver <port>`.
+- **Serverul nu porneste / port ocupat**: portul aplicatiei e `PFASIMPLU_PORT` in `.env` (implicit 8990), cel al MCP `PFASIMPLU_MCP_PORT` (implicit 8997); dupa modificare, `docker compose -f docker-compose-local.yaml up -d`.
 - **Erori de migrari dupa modificari de modele**: `make migrate-all`; daca migrarile sunt corupte, `make purge-migration-dirs` apoi `make migrate-all` (atenție: pe o baza de date existenta cu schema veche poate fi nevoie de `make purge-db`, care **sterge datele**).
 - **Curs BNR indisponibil**: `cursvalutarbnr` ia cursurile online si le cache-uieste in folderul temporar al sistemului (`cache_cursvalutarbnr`); prima rulare necesita internet.
 - **Fisiere lipsa dupa mutarea bazei de date**: fisierele sunt referite relativ la `PFASIMPLU_MEDIA_ROOT` - muta si folderul `src/media/` odata cu `stocare.db`.
-- **Login obligatoriu fara sa vrei**: verifica sa nu ai `PFASIMPLU_MULTI_USER=1` in mediu.
+- **Login nu functioneaza pe HTTP local**: verifica `PFASIMPLU_SECURE_COOKIES=0` in `.env` (cookie-urile `Secure` nu sunt trimise de browser pe `http://localhost`).
+- **Datele nu se vad dupa rebuild**: sunt bind-mount-uite din `src/dbsqlite/` si `src/media/`; nu le stergi si nu le muta fara sa actualizezi compose-ul.
+- **Eroare `env_file` lipseste**: copiaza `.env.example` in `.env` inainte de `docker compose`.
 
 
 ## Observatii

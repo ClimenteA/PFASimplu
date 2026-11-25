@@ -47,7 +47,6 @@ from .forms import SetariForm
 from .models import McpApiKey, SetariModel
 from core.settings import (
     APP_VERSION,
-    MULTI_USER,
     make_media_dir,
     get_extracts_path,
     get_media_path,
@@ -68,7 +67,7 @@ def _este_versiune_mai_noua(remote: str, local: str) -> bool:
         return False
 
 
-def get_setari_context(form, request=None):
+def get_setari_context(form, request):
     result = SetariModel.objects.first()
     localitate = form.initial.get("localitate") or (result.localitate if result else "")
     latest_app_version = get_latest_app_version()
@@ -83,17 +82,12 @@ def get_setari_context(form, request=None):
         "app_version": APP_VERSION,
         "latest_app_version": latest_app_version,
         "update_available": _este_versiune_mai_noua(latest_app_version, APP_VERSION),
-        "mcp_key": (
-            McpApiKey.objects.filter(user=request.user).first()
-            if request is not None and MULTI_USER and request.user.is_authenticated
-            else McpApiKey.objects.first()
-        ),
+        "mcp_key": McpApiKey.objects.filter(user=request.user).first(),
         "mcp_key_once": None,
     }
     # Cheia in clar e afisata o singura data, imediat dupa generare, si apoi
     # stearsa din sesiune (nu ramane in istoric/URL/logs).
-    if request is not None:
-        context["mcp_key_once"] = request.session.pop("mcp_key_once", None)
+    context["mcp_key_once"] = request.session.pop("mcp_key_once", None)
     return context
 
 
@@ -195,8 +189,7 @@ class SetariMcpKeyGenerateView(View):
     Cheia in clar ajunge doar in sesiune, ca sa fie afisata o singura data."""
 
     def post(self, request):
-        user = request.user if MULTI_USER and request.user.is_authenticated else None
-        _, key = McpApiKey.generate(user)
+        _, key = McpApiKey.generate(request.user)
         # Cheia e afisata direct in campul password de pe pagina Setari;
         # un mesaj-modal ar acoperi butonul de copiat chiar cand e nevoie de el.
         request.session["mcp_key_once"] = key
@@ -208,8 +201,7 @@ class SetariMcpKeyRevokeView(View):
     """Revoca definitiv cheia MCP curenta."""
 
     def post(self, request):
-        user = request.user if MULTI_USER and request.user.is_authenticated else None
-        McpApiKey.revoke(user)
+        McpApiKey.revoke(request.user)
         request.session.pop("mcp_key_once", None)
         # Fara mesaj-modal: vrem ca sectiunea MCP sa fie vizibila dupa scroll.
         return redirect("/setari/#cheie-mcp")

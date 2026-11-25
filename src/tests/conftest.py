@@ -43,6 +43,10 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings")
 # e folosit doar pentru verificari sincrone pe baza de date de test.
 os.environ.setdefault("DJANGO_ALLOW_ASYNC_UNSAFE", "1")
 
+# Contul folosit de testele end-to-end (loginul e obligatoriu in aplicatie).
+TEST_EMAIL = "test@pfasimplu.ro"
+TEST_PASSWORD = "parola-test-e2e-123"
+
 # Anul acoperit de teste: anul curent. Aplicatia nu accepta date din viitor
 # (validate_not_future_date), deci lunile viitoare sunt sarite automat.
 TEST_YEAR = datetime.date.today().year
@@ -92,6 +96,18 @@ def django_server():
         )
         assert result.returncode == 0, f"{cmd} a esuat:\n{result.stdout}\n{result.stderr}"
 
+    # Toate paginile cer login, deci testele folosesc un cont creat in baza de test.
+    create_user = (
+        "from django.contrib.auth.models import User; "
+        f"u = '{TEST_EMAIL}'; "
+        f"User.objects.filter(username=u).exists() or User.objects.create_user(u, u, '{TEST_PASSWORD}')"
+    )
+    result = subprocess.run(
+        manage + ["shell", "-c", create_user],
+        cwd=SRC_DIR, env=env, capture_output=True, text=True,
+    )
+    assert result.returncode == 0, f"crearea contului de test a esuat:\n{result.stdout}\n{result.stderr}"
+
     with socket.socket() as s:
         s.bind(("127.0.0.1", 0))
         port = s.getsockname()[1]
@@ -111,7 +127,7 @@ def django_server():
         if server.poll() is not None:
             raise RuntimeError("Serverul Django s-a oprit neasteptat la pornire.")
         try:
-            with urllib.request.urlopen(base_url + "/setari/", timeout=2) as r:
+            with urllib.request.urlopen(base_url + "/conturi/login/", timeout=2) as r:
                 if r.status == 200:
                     break
         except Exception:
@@ -146,6 +162,17 @@ def browser_context_args(browser_context_args, django_server):
         "base_url": django_server["base_url"],
         "viewport": {"width": 1600, "height": 1000},
     }
+
+
+@pytest.fixture(autouse=True)
+def login_e2e(page):
+    """Autentifica browserul de test inainte de fiecare scenariu."""
+    page.goto("/conturi/login/")
+    page.fill('input[name="username"]', TEST_EMAIL)
+    page.fill('input[name="password"]', TEST_PASSWORD)
+    page.click('button[type="submit"]')
+    if page.url.rstrip("/").endswith("/conturi/login"):
+        pytest.fail("Autentificarea contului de test a esuat.")
 
 
 @pytest.fixture(scope="session")

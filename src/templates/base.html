@@ -65,7 +65,7 @@
                     Setari
                 </a>
             </li>
-            {% if multi_user and user.is_authenticated %}
+            {% if user.is_authenticated %}
             <li>
                 <form method="post" action="{% url 'logout' %}" style="margin: 0; display: inline;">
                     {% csrf_token %}

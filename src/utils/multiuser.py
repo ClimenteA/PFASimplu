@@ -1,7 +1,6 @@
-"""Izolarea datelor per utilizator (modul multi-user, pentru server/VPS).
+"""Izolarea datelor per utilizator.
 
-Implicit aplicatia ruleaza ca aplicatie desktop, fara login
-(PFASIMPLU_MULTI_USER=0). Cand PFASIMPLU_MULTI_USER=1:
+Aplicatia cere login (email + parola) in toate modurile de rulare:
 - toate paginile cer autentificare (mai putin login/inregistrare);
 - fiecare model de date are un camp `user`, iar managerul implicit
   filtreaza automat dupa utilizatorul cererii curente;
@@ -29,25 +28,22 @@ def get_current_user():
 
 
 def multiuser_context(request):
-    """Context pentru template-uri: modul multi-user activ sau nu."""
+    """Context pentru template-uri."""
     return {
-        "multi_user": settings.MULTI_USER,
         "allow_registration": settings.ALLOW_REGISTRATION,
     }
 
 
 def get_user_media_prefix() -> str:
-    """Prefixul folderului media al utilizatorului curent: 'user_<id>/' in
-    modul multi-user, '' in modul desktop (fara login)."""
-    if not settings.MULTI_USER:
-        return ""
+    """Prefixul folderului media al utilizatorului curent: 'user_<id>/'.
+    Fara utilizator in context (comenzi de management) returneaza ''."""
     user = get_current_user()
     if user is None:
         return ""
     return f"user_{user.id}/"
 
 
-# Cai accesibile fara autentificare in modul multi-user.
+# Cai accesibile fara autentificare.
 def _cai_publice() -> tuple[str, ...]:
     return (
         settings.LOGIN_URL,
@@ -60,8 +56,7 @@ def _cai_publice() -> tuple[str, ...]:
 
 class MultiUserMiddleware:
     """Seteaza utilizatorul curent pentru izolarea datelor si cere
-    autentificare pe toate paginile cand PFASIMPLU_MULTI_USER=1.
-    In modul desktop (implicit) nu face nimic.
+    autentificare pe toate paginile.
 
     Trebuie plasat dupa django.contrib.auth.middleware.AuthenticationMiddleware.
     """
@@ -70,9 +65,6 @@ class MultiUserMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        if not settings.MULTI_USER:
-            return self.get_response(request)
-
         user = request.user if request.user.is_authenticated else None
         token = _current_user.set(user)
         try:

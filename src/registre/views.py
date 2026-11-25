@@ -28,7 +28,7 @@ from utils.tva import calculeaza_jurnal_cumparari
 from utils.valuta import ron_to_eur
 from utils.views import download_csv_or_xlsx, download_dataframe
 
-# prevent thread issue with flaskwebgui
+# SVG inseamna ca graficele nu au nevoie de backend GUI.
 matplotlib.use("SVG")
 
 import matplotlib.pyplot as plt

@@ -1,15 +1,12 @@
 """Autorizarea serverului MCP prin cheia generata in /setari.
 
-Fiecare cheie e legata de contul care a generat-o (in modul desktop e fara
-user). Cheia in clar nu e salvata nicieri: in DB avem doar hash-ul cu salt.
-Verificarea se face la fiecare request HTTP (Bearer) si la fiecare tool call
-in modul stdio, deci revocarea cheii are efect imediat.
+Fiecare cheie e legata de contul care a generat-o. Cheia in clar nu e salvata
+nicieri: in DB avem doar hash-ul cu salt. Verificarea se face la fiecare
+request HTTP (Bearer), deci revocarea cheii are efect imediat.
 """
 
 import asyncio
-import os
 
-from django.conf import settings
 from fastmcp.server.auth import AccessToken, TokenVerifier
 from fastmcp.server.dependencies import get_access_token
 
@@ -19,12 +16,10 @@ setup_django()
 
 from setari.models import McpApiKey  # noqa: E402  (după django.setup())
 
-LOCAL_TOKEN_ENV = "PFASIMPLU_MCP_TOKEN"
-
 
 def _key_e_utilizabil(key: McpApiKey) -> bool:
-    """In modul multi-user o cheie fara user nu are voie sa acceseze date."""
-    return not settings.MULTI_USER or key.user_id is not None
+    """O cheie fara cont asociat nu are voie sa acceseze date."""
+    return key.user_id is not None
 
 
 class DatabaseTokenVerifier(TokenVerifier):
@@ -36,7 +31,7 @@ class DatabaseTokenVerifier(TokenVerifier):
             return None
         return AccessToken(
             token=token,
-            client_id=f"pfasimplu-user-{key.user_id or 'desktop'}",
+            client_id=f"pfasimplu-user-{key.user_id}",
             scopes=[],
             claims={
                 "user_id": key.user_id,
@@ -46,35 +41,9 @@ class DatabaseTokenVerifier(TokenVerifier):
         )
 
 
-def verify_local_token() -> McpApiKey:
-    """Verifica cheia din mediul procesului stdio si o returneaza.
-
-    OpenCode (sau alt client) o poate trimite prin `--env PFASIMPLU_MCP_TOKEN=...`.
-    Lipsa cheii / o cheie gresita opreste serverul la pornire.
-    """
-    token = os.environ.get(LOCAL_TOKEN_ENV, "").strip()
-    if not token:
-        raise ValueError(
-            f"Lipseste cheia MCP. Genereaza una in /setari si pune-o in "
-            f"variabila de mediu {LOCAL_TOKEN_ENV}."
-        )
-    key = McpApiKey.verify(token)
-    if key is None or not _key_e_utilizabil(key):
-        raise ValueError(
-            f"Cheia MCP din {LOCAL_TOKEN_ENV} nu este valida sau a fost revocata. "
-            "Genereaza una noua in /setari."
-        )
-    return key
-
-
 def current_key_user_id() -> int | None:
-    """ID-ul contului asociat cheii curente, indiferent de transport.
-
-    - HTTP: FastMCP pune claims-urile verificate in contextul requestului;
-    - stdio: reluam verificarea cheii din mediu (revocare imediata).
-    """
+    """ID-ul contului asociat cheii curente (claims-urile requestului HTTP)."""
     token = get_access_token()
-    if token is not None:
-        return token.claims.get("user_id")
-    key = verify_local_token()
-    return key.user_id
+    if token is None:
+        raise ValueError("Requestul MCP nu are o cheie de acces valida.")
+    return token.claims.get("user_id")

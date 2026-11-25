@@ -24,12 +24,11 @@ ENV PYTHONPATH=/app/src \
     PFASIMPLU_DB_DIR=/data/dbsqlite \
     PFASIMPLU_MEDIA_ROOT=/data/media \
     PFASIMPLU_STATIC_ROOT=/app/staticfiles \
-    PFASIMPLU_MULTI_USER=1 \
     PFASIMPLU_DEBUG=0 \
     PFASIMPLU_MCP_PORT=8001
 
 # 8000 = aplicatia web (waitress), 8001 = serverul MCP (uvicorn/FastMCP).
 EXPOSE 8000 8001
 
-ENTRYPOINT ["./server/docker-entrypoint.sh"]
+ENTRYPOINT ["./docker-entrypoint.sh"]
 CMD ["python", "-m", "waitress", "--threads=6", "--listen=*:8000", "core.wsgi:application"]

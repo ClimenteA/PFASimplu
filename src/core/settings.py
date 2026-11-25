@@ -1,19 +1,19 @@
-import os
 import json
+import os
 import shutil
 from pathlib import Path
 
 
+
 # BASE_DIR = radacina surselor (src/), care contine app-urile, templates/,
 # static/, media/ si dbsqlite/. PROJECT_ROOT = radacina repo-ului, unde sta
-# pyproject.toml (in executabilul PyInstaller ambele sunt sub _internal/).
+# pyproject.toml.
 BASE_DIR = Path(__file__).resolve().parent.parent
 PROJECT_ROOT = BASE_DIR.parent
 
 
 def _get_app_version() -> str:
-    """Versiunea aplicatiei, citita din pyproject.toml (sursa unica de adevar).
-    In build-ul PyInstaller fisierul e inclus prin pfasimplu.spec."""
+    """Versiunea aplicatiei, citita din pyproject.toml (sursa unica de adevar)."""
     import tomllib
 
     for pyproject in (BASE_DIR / "pyproject.toml", PROJECT_ROOT / "pyproject.toml"):
@@ -35,10 +35,6 @@ def _env_bool(name: str, default: str = "0") -> bool:
     return os.environ.get(name, default).strip().lower() in ("1", "true", "yes", "on")
 
 
-# Modul multi-user (server/VPS): login cu email + parola si date izolate per
-# utilizator. Implicit 0 -> aplicatie desktop, fara login, ca pana acum.
-MULTI_USER = _env_bool("PFASIMPLU_MULTI_USER")
-
 # Permite crearea de conturi noi din pagina de inregistrare. Implicit 1;
 # seteaza PFASIMPLU_ALLOW_REGISTRATION=0 pe server pentru a bloca
 # inregistrările (utilizatorii existenti se pot autentifica in continuare).
@@ -47,13 +43,12 @@ ALLOW_REGISTRATION = _env_bool("PFASIMPLU_ALLOW_REGISTRATION", "1")
 # SECURITY WARNING: keep the secret key used in production secret!
 # Pe server se seteaza PFASIMPLU_SECRET_KEY in .env.prod.
 SECRET_KEY = os.environ.get("PFASIMPLU_SECRET_KEY") or (
-    "aplicatie-desktop-nu-conteaza-secret-trebuie-sa-fie-peste-50-de-caractere-sa-fie-considerata-sigura"
+    "doar-pentru-dezvoltare-schimba-valoarea-asta-in-productie-prin-PFASIMPLU_SECRET_KEY"
 )
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# Implicit DEBUG=1 (dezvoltare/desktop, inclusiv `runserver` cu MULTI_USER=1,
-# ca Django sa serveasca fisierele statice). Pe server se seteaza explicit
-# PFASIMPLU_DEBUG=0 in .env.prod (asa face si imaginea Docker).
+# Implicit DEBUG=1 in dezvoltare (ca Django sa serveasca fisierele statice).
+# In Docker se seteaza explicit PFASIMPLU_DEBUG=0.
 DEBUG = _env_bool("PFASIMPLU_DEBUG", "1")
 
 ALLOWED_HOSTS = [
@@ -70,6 +65,12 @@ CSRF_TRUSTED_ORIGINS = [
 # In productie (DEBUG=0), aplicatia sta in spatele unui proxy TLS (Caddy).
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+# Cookie-urile "Secure" presupun HTTPS. Varianta Docker locala ruleaza pe
+# http://localhost, deci le dezactiveaza prin PFASIMPLU_SECURE_COOKIES=0
+# (altfel sesiunea de login nu este trimisa de browser).
+SECURE_COOKIES = _env_bool("PFASIMPLU_SECURE_COOKIES", "0" if DEBUG else "1")
+if SECURE_COOKIES:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_HSTS_SECONDS = 3600
@@ -204,21 +205,11 @@ STATICFILES_DIRS = [static_files_path]
 STATIC_ROOT = os.environ.get("PFASIMPLU_STATIC_ROOT") or os.path.join(BASE_DIR, "staticfiles")
 
 def get_font_path():
-
-    development_path = os.path.join(static_files_path, "arial-font")
-    if os.path.exists(development_path):
-        return development_path
-    
-    pyinstaller_path = os.path.join(BASE_DIR, "_internal", "static", "arial-font")
-    return pyinstaller_path
+    return os.path.join(static_files_path, "arial-font")
 
 
 def get_salarii_minim_brut_local():
-
     filepath = os.path.join(static_files_path, "minim_brut_an_val.json")
-    if not os.path.exists(filepath):
-        filepath = os.path.join(BASE_DIR, "_internal", "static", "minim_brut_an_val.json")
-
     with open(filepath, "r") as f:
         data = json.load(f)
 
@@ -239,18 +230,12 @@ make_media_dir()
 
 
 def get_media_path():
-    """Folderul media al utilizatorului curent.
-    In modul multi-user fisierele sunt separate per utilizator: media/user_<id>/.
-    In modul desktop (implicit) ramane media/ ca pana acum."""
+    """Folderul media al utilizatorului curent: media/user_<id>/.
+    Fara utilizator in context (comenzi de management) ramane media/."""
     from utils.multiuser import get_user_media_prefix
 
     prefix = get_user_media_prefix()
     development_path = os.path.join(MEDIA_ROOT, prefix)
-    if not prefix and not os.path.exists(development_path):
-        # In executabilul PyInstaller baza poate fi in _internal/media.
-        pyinstaller_path = os.path.join(BASE_DIR, "_internal", "media")
-        if os.path.exists(pyinstaller_path):
-            return pyinstaller_path
     os.makedirs(development_path, exist_ok=True)
     return development_path
 
@@ -270,7 +255,7 @@ def get_extracts_path(extra_dir: str | None = None):
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
-# Autentificare (folosita doar in modul multi-user, PFASIMPLU_MULTI_USER=1).
+# Autentificare (obligatorie; toate paginile cer login).
 LOGIN_URL = "/conturi/login/"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/conturi/login/"

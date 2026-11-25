@@ -1,5 +1,5 @@
-"""Teste pentru modul multi-user (PFASIMPLU_MULTI_USER=1):
-login/inregistrare cu email + parola si izolarea datelor per utilizator.
+"""Teste pentru login/inregistrare cu email + parola si izolarea datelor
+per utilizator (autentificarea e obligatorie).
 """
 
 import datetime
@@ -11,9 +11,6 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from cheltuieli.models import CheltuialaModel
-from setari.models import SetariModel
-from utils.files import get_save_path
-from utils.multiuser import get_current_user
 
 
 MEDIA_TEST = tempfile.mkdtemp(prefix="pfasimplu_test_multiuser_media_")
@@ -36,7 +33,7 @@ def creeaza_cheltuiala(user, **kwargs):
     return CheltuialaModel.objects.create(**defaults)
 
 
-@override_settings(MULTI_USER=True, MEDIA_ROOT=MEDIA_TEST)
+@override_settings(MEDIA_ROOT=MEDIA_TEST)
 class AutentificareTests(TestCase):
 
     def test_paginile_cer_login(self):
@@ -114,7 +111,7 @@ class AutentificareTests(TestCase):
         self.assertEqual(response["Location"], "/")
 
 
-@override_settings(MULTI_USER=True, MEDIA_ROOT=MEDIA_TEST)
+@override_settings(MEDIA_ROOT=MEDIA_TEST)
 class IzolareDateTests(TestCase):
 
     def setUp(self):
@@ -198,7 +195,7 @@ class IzolareDateTests(TestCase):
         self.assertIn("/conturi/login/", response["Location"])
 
 
-@override_settings(MULTI_USER=True, ALLOW_REGISTRATION=False, MEDIA_ROOT=MEDIA_TEST)
+@override_settings(ALLOW_REGISTRATION=False, MEDIA_ROOT=MEDIA_TEST)
 class InregistrareBlocataTests(TestCase):
     """PFASIMPLU_ALLOW_REGISTRATION=0: fara conturi noi, login-ul merge."""
 
@@ -229,21 +226,3 @@ class InregistrareBlocataTests(TestCase):
         response = self.client.get("/")
         self.assertEqual(response.status_code, 200)
 
-
-class DesktopImplicitTests(TestCase):
-    """Fara PFASIMPLU_MULTI_USER aplicatia ramane fara login, ca pana acum."""
-
-    def test_pagini_fara_login(self):
-        for url in ("/", "/cheltuieli/", "/setari/"):
-            response = self.client.get(url)
-            self.assertEqual(response.status_code, 200, url)
-
-    def test_login_redirecteaza_spre_aplicatie(self):
-        response = self.client.get(reverse("login"))
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response["Location"], "/")
-
-    def test_cheltuiala_fara_utilizator(self):
-        c = creeaza_cheltuiala(None)
-        self.assertIsNone(c.user)
-        self.assertFalse(c.fisier.name.startswith("user_"))

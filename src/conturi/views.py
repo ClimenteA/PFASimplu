@@ -2,7 +2,6 @@ from django.conf import settings
 from django.contrib.auth import login, logout
 from django.http import Http404
 from django.shortcuts import redirect, render
-from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views import View
 
@@ -23,8 +22,6 @@ class LoginView(View):
     """Login cu email + parola, pe formularul de autentificare din Django."""
 
     def get(self, request):
-        if not settings.MULTI_USER:
-            return redirect("/")
         if request.user.is_authenticated:
             return redirect(_next_sigur(request))
         return render(request, "conturi/login.html", {
@@ -33,8 +30,6 @@ class LoginView(View):
         })
 
     def post(self, request):
-        if not settings.MULTI_USER:
-            return redirect("/")
         form = EmailAuthenticationForm(request, data=request.POST)
         if form.is_valid():
             login(request, form.get_user())
@@ -51,8 +46,6 @@ class InregistrareView(View):
     Se poate bloca de pe server cu PFASIMPLU_ALLOW_REGISTRATION=0."""
 
     def get(self, request):
-        if not settings.MULTI_USER:
-            return redirect("/")
         if not settings.ALLOW_REGISTRATION:
             raise Http404()
         if request.user.is_authenticated:
@@ -60,8 +53,6 @@ class InregistrareView(View):
         return render(request, "conturi/inregistrare.html", {"form": EmailUserCreationForm()})
 
     def post(self, request):
-        if not settings.MULTI_USER:
-            return redirect("/")
         if not settings.ALLOW_REGISTRATION:
             raise Http404()
         form = EmailUserCreationForm(request.POST)
@@ -76,4 +67,4 @@ class LogoutView(View):
 
     def post(self, request):
         logout(request)
-        return redirect(settings.LOGOUT_REDIRECT_URL if settings.MULTI_USER else "/")
+        return redirect(settings.LOGOUT_REDIRECT_URL)
