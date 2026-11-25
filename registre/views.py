@@ -1,8 +1,6 @@
 import itertools
 import os
-import shutil
 from copy import copy
-from zipfile import ZipFile
 
 import matplotlib
 import pandas as pd
@@ -14,16 +12,16 @@ from django.utils import timezone
 from django.views import View
 
 from cheltuieli.models import CheltuialaModel, Deductibilitate
-from core.settings import MEDIA_ROOT, get_extracts_path
+from core.settings import get_media_path, get_extracts_path
 from documente.models import DocumenteModel
 from incasari.models import IncasariModel, SursaVenit
 from setari.models import SetariModel
 from utils.calcule import calculeaza_taxe_si_impozite
-from utils.github_data import new_version_available
-from utils.mijloc_fix_pdf import create_fisa_mijloc_fix_pdf
+from utils.decimale import D, rotund2
 from utils.pretty_excel import make_excel_pretty
+from utils.tva import calculeaza_jurnal_cumparari
 from utils.valuta import ron_to_eur
-from utils.views import download_csv_or_xlsx
+from utils.views import download_csv_or_xlsx, download_dataframe
 
 # prevent thread issue with flaskwebgui
 matplotlib.use("SVG")
@@ -31,10 +29,75 @@ matplotlib.use("SVG")
 import matplotlib.pyplot as plt
 
 
+def registru_jurnal_dataframe(data):
+    """DataFrame-ul Registrului Jurnal (incasari si plati), cu antetul afisat."""
+    df = pd.DataFrame(data)
+    df = df.drop(columns=["end_of_month", "documentId"])
+    return df.rename(
+        columns={
+            "nr_crt": "Nr.Crt.",
+            "data": "Data",
+            "documentul": "Documentul (fel, numar)",
+            "felul_operatiunii": "Felul operatiunii (explicatii)",
+            "incasari_numerar": "Incasari Numerar",
+            "incasari_banca": "Incasari Banca",
+            "plati_numerar": "Plati Numerar",
+            "plati_banca": "Plati Banca",
+        }
+    )
+
+
+def registru_fiscal_dataframe(data):
+    """DataFrame-ul Registrului de evidenta fiscala, cu antetul afisat."""
+    df = pd.DataFrame(data)
+    return df.rename(
+        columns={
+            "nr_crt": "Nr.Crt.",
+            "elemente_de_calcul": "Elemente de calcul pentru stabilirea venitului net annual/pierderii nete anuale",
+            "valoare": "Valoare",
+            "anul": "Anul",
+        }
+    )
+
+
+def registru_inventar_dataframe(data):
+    """DataFrame-ul Registrului-inventar, cu antetul afisat.
+    `data` vine din get_registru_inventar(dbid=True)."""
+    df = pd.DataFrame(data)
+    df = df.drop(columns=["mijloc_fix", "db_id"])
+    return df.rename(
+        columns={
+            "nr_crt": "Nr.Crt.",
+            "nume_cheltuiala": "Denumirea elementelor inventariate",
+            "deducere_in_ron": "Valoare inventar",
+            "data_inserarii": "Data",
+            "fisier": "Document",
+        }
+    )
+
+
+def jurnal_cumparari_dataframe(jurnal):
+    """DataFrame-ul Jurnalului pentru cumparari (taxare inversa), cu antetul afisat."""
+    df = pd.DataFrame(jurnal["randuri"])
+    return df.rename(
+        columns={
+            "nr_crt": "Nr.Crt.",
+            "data_doc": "Document Data",
+            "nr_doc": "Document Numar",
+            "furnizor_denumire": "Furnizor Denumire",
+            "furnizor_cod_fiscal": "Furnizor Cod Fiscal",
+            "total_document": "Total document (inclusiv TVA)",
+            "baza": "Baza impozitare",
+            "tva": "Valoare T.V.A.",
+            "cod_referinta": "Referinta cod",
+            "fisier": "Document justificativ (fisier)",
+        }
+    )
+
+
 class RegistruJurnalDescarcaView(View):
 
     def get(self, request):
-        filetype = request.GET.get("filetype").lower()
         anul = get_year_from_request(request)
         incasari, cheltuieli = incasari_cheltuieli_dupa_anul_inserarii(anul)
         data = get_registru_jurnal_incasari_si_plati(request, incasari, cheltuieli)
@@ -42,78 +105,10 @@ class RegistruJurnalDescarcaView(View):
         if not data:
             return redirect("/registre/")
 
-        file_ids = list(
-            set([d["documentId"] for d in data if d["documentId"] is not None])
+        df = registru_jurnal_dataframe(data)
+        return download_dataframe(
+            request, df, "registru_jurnal_incasari_si_plati"
         )
-
-        query = Q()
-        for file_id in file_ids:
-            query |= Q(fisier__startswith=file_id)
-
-        incasari_fisiere = incasari.filter(query)
-        cheltuieli_fisiere = cheltuieli.filter(query)
-
-        rjip_files_path = get_extracts_path("rjip")
-
-        rjip_files = []
-        for item in incasari_fisiere:
-            fp = shutil.copy2(
-                item.fisier.path,
-                os.path.join(rjip_files_path, os.path.basename(item.fisier.path)),
-            )
-            rjip_files.append(fp)
-
-        for item in cheltuieli_fisiere:
-            fp = shutil.copy2(
-                item.fisier.path,
-                os.path.join(rjip_files_path, os.path.basename(item.fisier.path)),
-            )
-            rjip_files.append(fp)
-
-        df = pd.DataFrame(data)
-        df = df.drop(columns=["end_of_month", "documentId"])
-        df = df.rename(
-            columns={
-                "nr_crt": "Nr.Crt.",
-                "data": "Data",
-                "documentul": "Documentul (fel, numar)",
-                "felul_operatiunii": "Felul operatiunii (explicatii)",
-                "incasari_numerar": "Incasari Numerar",
-                "incasari_banca": "Incasari Banca",
-                "plati_numerar": "Plati Numerar",
-                "plati_banca": "Plati Banca",
-            }
-        )
-
-        extracts_path = get_extracts_path()
-
-        if filetype == "xlsx":
-            rjip_fp = os.path.join(
-                extracts_path, "registru_jurnal_incasari_si_plati.xlsx"
-            )
-            df.to_excel(rjip_fp, index=False)
-            make_excel_pretty(rjip_fp)
-        elif filetype == "csv":
-            rjip_fp = os.path.join(
-                extracts_path, "registru_jurnal_incasari_si_plati.csv"
-            )
-            df.to_csv(rjip_fp, index=False)
-        else:
-            return redirect("/registre/")
-
-        zip_filename = os.path.join(extracts_path, f"registru_jurnal_{anul}.zip")
-        with ZipFile(zip_filename, "w") as zipf:
-            for file in rjip_files:
-                zipf.write(file, os.path.join("documente", os.path.basename(file)))
-            zipf.write(rjip_fp, os.path.basename(rjip_fp))
-
-        response = HttpResponse(
-            open(zip_filename, "rb"), content_type="application/zip"
-        )
-        response["Content-Disposition"] = (
-            f"attachment; filename={os.path.basename(zip_filename)}"
-        )
-        return response
 
 
 class RegistruFiscalDescarcaView(View):
@@ -126,16 +121,7 @@ class RegistruFiscalDescarcaView(View):
             overview_data["total_incasari_net"],
             overview_data["total_cheltuieli"],
         )
-        df = pd.DataFrame(data)
-
-        df = df.rename(
-            columns={
-                "nr_crt": "Nr.Crt.",
-                "elemente_de_calcul": "Elemente de calcul pentru stabilirea venitului net annual/pierderii nete anuale",
-                "valoare": "Valoare",
-                "anul": "Anul",
-            }
-        )
+        df = registru_fiscal_dataframe(data)
 
         return download_csv_or_xlsx(request, df, "registrul_de_evidenta_fiscala")
 
@@ -143,64 +129,57 @@ class RegistruFiscalDescarcaView(View):
 class RegistruInventarDescarcaView(View):
 
     def get(self, request):
-        filetype = request.GET.get("filetype").lower()
         data = get_registru_inventar(dbid=True)
         if not data:
             messages.add_message(request, messages.ERROR, "Registrul-inventar este gol, nu exista nimic de exportat.", extra_tags="🟥 Eroare!")
             return redirect("/registre/")
 
-        src_filepaths = []
+        # Doar numele documentului ajunge in export; fisierele nu sunt citite
+        # sau copiate, deci documentele lipsa de pe disc nu blocheaza descarcarea.
         for item in data:
-            if item["mijloc_fix"]:
-                zip_filepath = create_fisa_mijloc_fix_pdf(item["db_id"], item["nr_crt"])
-                item["fisier"] = os.path.basename(zip_filepath)
-                src_filepaths.append(zip_filepath)
-            else:
-                src_filepaths.append(item["fisier"])
-                item["fisier"] = os.path.basename(item["fisier"])
+            item["fisier"] = os.path.basename(item["fisier"])
 
-        ri_files_path = get_extracts_path("ri")
-        ri_files = []
-        for sfp in src_filepaths:
-            fp = shutil.copy2(sfp, os.path.join(ri_files_path, os.path.basename(sfp)))
-            ri_files.append(fp)
+        df = registru_inventar_dataframe(data)
+        return download_dataframe(request, df, "registru_inventar")
 
-        df = pd.DataFrame(data)
-        df = df.drop(columns=["mijloc_fix", "db_id"])
-        df = df.rename(
-            columns={
-                "nr_crt": "Nr.Crt.",
-                "nume_cheltuiala": "Denumirea elementelor inventariate",
-                "deducere_in_ron": "Valoare inventar",
-                "data_inserarii": "Data",
-                "fisier": "Document",
-            }
-        )
 
+class RegistruJurnalCumparariDescarcaView(View):
+    """Jurnalul pentru cumparari (TVA taxare inversa): CSV sau XLSX,
+    pe luna (daca se da parametrul luna) sau pe tot anul."""
+
+    def get(self, request):
+        filetype = request.GET.get("filetype", "csv").lower()
+        anul = get_year_from_request(request)
+        luna = request.GET.get("luna")
+        luna = int(luna) if luna else None
+
+        jurnal = calculeaza_jurnal_cumparari(anul, luna)
+        if not jurnal:
+            messages.add_message(
+                request, messages.ERROR,
+                "Jurnalul de cumparari este gol: nu exista cheltuieli cu taxare inversa (UE/non-UE).",
+                extra_tags="🟥 Eroare!",
+            )
+            return redirect("/registre/")
+
+        perioada = f"{anul}_{luna:02d}" if luna else str(anul)
         extracts_path = get_extracts_path()
 
+        df = jurnal_cumparari_dataframe(jurnal)
         if filetype == "xlsx":
-            ri_fp = os.path.join(extracts_path, "registru_inventar.xlsx")
-            df.to_excel(ri_fp, index=False)
-            make_excel_pretty(ri_fp)
+            fp = os.path.join(extracts_path, f"jurnal_cumparari_{perioada}.xlsx")
+            df.to_excel(fp, index=False)
+            make_excel_pretty(fp)
+            content_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         elif filetype == "csv":
-            ri_fp = os.path.join(extracts_path, "registru_inventar.csv")
-            df.to_csv(ri_fp, index=False)
+            fp = os.path.join(extracts_path, f"jurnal_cumparari_{perioada}.csv")
+            df.to_csv(fp, index=False)
+            content_type = "text/csv"
         else:
             return redirect("/registre/")
 
-        zip_filename = os.path.join(extracts_path, "registru_inventar.zip")
-        with ZipFile(zip_filename, "w") as zipf:
-            for file in ri_files:
-                zipf.write(file, os.path.join("documente", os.path.basename(file)))
-            zipf.write(ri_fp, os.path.basename(ri_fp))
-
-        response = HttpResponse(
-            open(zip_filename, "rb"), content_type="application/zip"
-        )
-        response["Content-Disposition"] = (
-            f"attachment; filename={os.path.basename(zip_filename)}"
-        )
+        response = HttpResponse(open(fp, "rb"), content_type=content_type)
+        response["Content-Disposition"] = f"attachment; filename={os.path.basename(fp)}"
         return response
 
 
@@ -218,18 +197,17 @@ class RegistreView(View):
             request
         )
         registru_inventar = get_registru_inventar()
-
-        versiune_noua_disponibila = new_version_available()
+        jurnal_cumparari = calculeaza_jurnal_cumparari(overview_data["anul"])
 
         return render(
             request,
             "registre.html",
             context={
                 **overview_data,
-                "versiune_noua_disponibila": versiune_noua_disponibila,
                 "rjip": registru_jurnal_incasari_si_plati,
                 "ref": registru_fiscal,
                 "ri": registru_inventar,
+                "rjc": jurnal_cumparari,
             },
         )
 
@@ -274,37 +252,37 @@ def get_incasari_pe_surse(anul: int):
     incasari_activitate_principala = IncasariModel.objects.filter(
         sursa_venit=SursaVenit.ACTIVITATE_PRINCIPALA, data_inserarii__year=anul
     ).aggregate(total=Sum("suma_in_ron"))
-    incasari_activitate_principala = incasari_activitate_principala["total"] or 0
+    incasari_activitate_principala = D(incasari_activitate_principala["total"] or 0)
 
     incasari_alte_surse = IncasariModel.objects.filter(
         sursa_venit=SursaVenit.ALTE_SURSE, data_inserarii__year=anul
     ).aggregate(total=Sum("suma_in_ron"))
-    incasari_alte_surse = incasari_alte_surse["total"] or 0
+    incasari_alte_surse = D(incasari_alte_surse["total"] or 0)
 
     incasari_inchirieri = IncasariModel.objects.filter(
         sursa_venit=SursaVenit.INCHIRIERI, data_inserarii__year=anul
     ).aggregate(total=Sum("suma_in_ron"))
-    incasari_inchirieri = incasari_inchirieri["total"] or 0
+    incasari_inchirieri = D(incasari_inchirieri["total"] or 0)
 
     incasari_castig_investitii = IncasariModel.objects.filter(
         sursa_venit=SursaVenit.CASTIG_INVESTITII, data_inserarii__year=anul
     ).aggregate(total=Sum("suma_in_ron"))
-    incasari_castig_investitii = incasari_castig_investitii["total"]
+    incasari_castig_investitii = D(incasari_castig_investitii["total"] or 0)
 
     incasari_prop_intelectuala = IncasariModel.objects.filter(
         sursa_venit=SursaVenit.DREPTURI_PROP_INTELECTUALA, data_inserarii__year=anul
     ).aggregate(total=Sum("suma_in_ron"))
-    incasari_prop_intelectuala = incasari_prop_intelectuala["total"]
+    incasari_prop_intelectuala = D(incasari_prop_intelectuala["total"] or 0)
 
     incasari_agricultura = IncasariModel.objects.filter(
         sursa_venit=SursaVenit.AGRICULTURA, data_inserarii__year=anul
     ).aggregate(total=Sum("suma_in_ron"))
-    incasari_agricultura = incasari_agricultura["total"]
+    incasari_agricultura = D(incasari_agricultura["total"] or 0)
 
     incasari_dividente = IncasariModel.objects.filter(
         sursa_venit=SursaVenit.DIVIDENTE_VENIT_DISTRUBUIT, data_inserarii__year=anul
     ).aggregate(total=Sum("suma_in_ron"))
-    incasari_dividente = incasari_dividente["total"]
+    incasari_dividente = D(incasari_dividente["total"] or 0)
 
     incasari_pe_surse_de_venit = []
 
@@ -382,7 +360,7 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
         cheltuieli_pe_deductibilitate.append(
             {
                 "nume": Deductibilitate.DEDUCTIBILA_INTEGRAL.value,
-                "valoare": round(cheltuieli_d_integral, 2),
+                "valoare": rotund2(D(cheltuieli_d_integral)),
             }
         )
 
@@ -396,7 +374,7 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
         cheltuieli_pe_deductibilitate.append(
             {
                 "nume": Deductibilitate.DEDUCTIBILA_INTEGRAL_INVENTAR.value,
-                "valoare": round(cheltuieli_d_integral_inventar, 2),
+                "valoare": rotund2(D(cheltuieli_d_integral_inventar)),
             }
         )
 
@@ -410,7 +388,7 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
         cheltuieli_pe_deductibilitate.append(
             {
                 "nume": Deductibilitate.DEDUCTIBILA_INTEGRAL_SALARII.value,
-                "valoare": round(cheltuieli_d_integral_salarii, 2),
+                "valoare": rotund2(D(cheltuieli_d_integral_salarii)),
             }
         )
 
@@ -418,17 +396,17 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
         deductibila=Deductibilitate.DEDUCTIBILA_INTEGRAL_AMORTIZATA,
         mijloc_fix=True,
     )
-    cheltuieli_d_integral_amortizari = 0
+    cheltuieli_d_integral_amortizari = D(0)
     if amortizari:
         for amortizare in amortizari:
             months = amortizare.luni_amortizare_in_an(anul)
-            cheltuieli_d_integral_amortizari += months * amortizare.amortizare_lunara
+            cheltuieli_d_integral_amortizari += months * D(amortizare.amortizare_lunara)
 
     if cheltuieli_d_integral_amortizari:
         cheltuieli_pe_deductibilitate.append(
             {
                 "nume": Deductibilitate.DEDUCTIBILA_INTEGRAL_AMORTIZATA.label,
-                "valoare": round(cheltuieli_d_integral_amortizari, 2),
+                "valoare": rotund2(cheltuieli_d_integral_amortizari),
             }
         )
 
@@ -444,7 +422,7 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
         cheltuieli_pe_deductibilitate.append(
             {
                 "nume": Deductibilitate.DEDUCTIBILA_PARTIAL_AUTO_CASA_UTILITATI.value,
-                "valoare": round(cheltuieli_d_partial_auto_casa_utilizati, 2),
+                "valoare": rotund2(D(cheltuieli_d_partial_auto_casa_utilizati)),
             }
         )
 
@@ -458,7 +436,7 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
         cheltuieli_pe_deductibilitate.append(
             {
                 "nume": Deductibilitate.DEDUCTIBILA_PARTIAL_SPORT_2024.value,
-                "valoare": round(cheltuieli_d_partial_sport_2024, 2),
+                "valoare": rotund2(D(cheltuieli_d_partial_sport_2024)),
             }
         )
 
@@ -472,7 +450,7 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
         cheltuieli_pe_deductibilitate.append(
             {
                 "nume": Deductibilitate.DEDUCTIBILA_PARTIAL_PENSIE_PILON_3.value,
-                "valoare": round(cheltuieli_d_partial_pensie_p3, 2),
+                "valoare": rotund2(D(cheltuieli_d_partial_pensie_p3)),
             }
         )
 
@@ -486,7 +464,7 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
         cheltuieli_pe_deductibilitate.append(
             {
                 "nume": Deductibilitate.DEDUCTIBILA_PARTIAL_ASIG_MEDICALE_PRIVAT.value,
-                "valoare": round(cheltuieli_d_partial_asig_medicale, 2),
+                "valoare": rotund2(D(cheltuieli_d_partial_asig_medicale)),
             }
         )
 
@@ -500,7 +478,7 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
         cheltuieli_pe_deductibilitate.append(
             {
                 "nume": Deductibilitate.DEDUCTIBILA_PARTIAL_PROTOCOL.value,
-                "valoare": round(cheltuieli_d_partial_protocol, 2),
+                "valoare": rotund2(D(cheltuieli_d_partial_protocol)),
             }
         )
 
@@ -514,7 +492,7 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
         cheltuieli_pe_deductibilitate.append(
             {
                 "nume": Deductibilitate.DEDUCTIBILA_PARTIAL_SOCIALE.value,
-                "valoare": round(cheltuieli_d_partial_sociale, 2),
+                "valoare": rotund2(D(cheltuieli_d_partial_sociale)),
             }
         )
 
@@ -530,7 +508,7 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
         cheltuieli_pe_deductibilitate.append(
             {
                 "nume": Deductibilitate.DEDUCTIBILA_PARTIAL_CONTRIBUTII_OBLIGATORII_ASOC_ORG.value,
-                "valoare": round(cheltuieli_d_partial_contrib_obligatorii, 2),
+                "valoare": rotund2(D(cheltuieli_d_partial_contrib_obligatorii)),
             }
         )
 
@@ -546,7 +524,7 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
         cheltuieli_pe_deductibilitate.append(
             {
                 "nume": Deductibilitate.DEDUCTIBILA_PARTIAL_COTIZATII_VOLUNTARE_ASOC_ORG.value,
-                "valoare": round(cheltuieli_d_partial_cotizatii_voluntare, 2),
+                "valoare": rotund2(D(cheltuieli_d_partial_cotizatii_voluntare)),
             }
         )
 
@@ -554,10 +532,13 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
 
 
 def get_registru_de_evidenta_fiscala(
-    request, total_incasari_brut, total_incasari_net, total_cheltuieli
+    request, total_incasari_brut, total_incasari_net, total_cheltuieli, anul=None
 ):
-    anul = request.GET.get("anul")
-    anul = int(anul) if anul else timezone.now().year
+    # `anul` poate fi dat explicit (ex. exportul pe an din Setari);
+    # altfel se ia din query params, cu fallback pe anul curent.
+    if anul is None:
+        anul = request.GET.get("anul")
+        anul = int(anul) if anul else timezone.now().year
 
     incasari_pe_surse_de_venit = get_incasari_pe_surse(anul)
     cheltuieli_pe_deductibilitate = get_cheltuieli_pe_deductibilitate(anul)
@@ -648,8 +629,10 @@ def incasari_cheltuieli_dupa_anul_inserarii(anul: int):
     return incasari, cheltuieli
 
 
-def get_registru_jurnal_incasari_si_plati(request, incasari=None, cheltuieli=None):
-    anul = get_year_from_request(request)
+def get_registru_jurnal_incasari_si_plati(request, incasari=None, cheltuieli=None, anul=None):
+    # `anul` poate fi dat explicit (ex. exportul pe an din Setari).
+    if anul is None:
+        anul = get_year_from_request(request)
 
     if incasari is None and cheltuieli is None:
         incasari, cheltuieli = incasari_cheltuieli_dupa_anul_inserarii(anul)
@@ -659,10 +642,10 @@ def get_registru_jurnal_incasari_si_plati(request, incasari=None, cheltuieli=Non
     )
 
     result = []
-    total_incasari_numerar = 0
-    total_incasari_bancar = 0
-    total_cheltuieli_numerar = 0
-    total_cheltuieli_bancar = 0
+    total_incasari_numerar = D(0)
+    total_incasari_bancar = D(0)
+    total_cheltuieli_numerar = D(0)
+    total_cheltuieli_bancar = D(0)
     prev_month = None
     for idx, entry in enumerate(combined_data, start=1):
         current_month = entry.data_inserarii.month
@@ -675,23 +658,23 @@ def get_registru_jurnal_incasari_si_plati(request, incasari=None, cheltuieli=Non
                     "documentul": "-",
                     "documentId": None,
                     "felul_operatiunii": f"Calcul total luna {LUNI_RO[prev_month]}",
-                    "incasari_numerar": round(total_incasari_numerar, 2),
-                    "incasari_banca": round(total_incasari_bancar, 2),
-                    "plati_numerar": round(total_cheltuieli_numerar, 2),
-                    "plati_banca": round(total_cheltuieli_bancar, 2),
+                    "incasari_numerar": rotund2(total_incasari_numerar),
+                    "incasari_banca": rotund2(total_incasari_bancar),
+                    "plati_numerar": rotund2(total_cheltuieli_numerar),
+                    "plati_banca": rotund2(total_cheltuieli_bancar),
                     "end_of_month": True,
                 }
             )
-            total_incasari_numerar = 0
-            total_incasari_bancar = 0
-            total_cheltuieli_numerar = 0
-            total_cheltuieli_bancar = 0
+            total_incasari_numerar = D(0)
+            total_incasari_bancar = D(0)
+            total_cheltuieli_numerar = D(0)
+            total_cheltuieli_bancar = D(0)
 
         prev_month = current_month
 
         if isinstance(entry, IncasariModel):
-            incasari_numerar = entry.suma_in_ron if entry.tip_tranzactie == "NUMERAR" else 0
-            incasari_bancar = entry.suma_in_ron if entry.tip_tranzactie == "BANCAR" else 0
+            incasari_numerar = D(entry.suma_in_ron) if entry.tip_tranzactie == "NUMERAR" else D(0)
+            incasari_bancar = D(entry.suma_in_ron) if entry.tip_tranzactie == "BANCAR" else D(0)
 
             total_incasari_numerar += incasari_numerar
             total_incasari_bancar += incasari_bancar
@@ -705,15 +688,15 @@ def get_registru_jurnal_incasari_si_plati(request, incasari=None, cheltuieli=Non
                     "felul_operatiunii": "Incasare" + (f" ({entry.suma} {entry.valuta})" if entry.valuta != "RON" else ""),
                     "incasari_numerar": incasari_numerar,
                     "incasari_banca": incasari_bancar,
-                    "plati_numerar": 0,
-                    "plati_banca": 0,
+                    "plati_numerar": D(0),
+                    "plati_banca": D(0),
                     "end_of_month": False,
                 }
             )
 
         else:
-            cheltuieli_numerar = entry.suma_in_ron if entry.tip_tranzactie == "NUMERAR" else 0
-            cheltuieli_bancar = entry.suma_in_ron if entry.tip_tranzactie == "BANCAR" else 0
+            cheltuieli_numerar = D(entry.suma_in_ron) if entry.tip_tranzactie == "NUMERAR" else D(0)
+            cheltuieli_bancar = D(entry.suma_in_ron) if entry.tip_tranzactie == "BANCAR" else D(0)
 
             total_cheltuieli_numerar += cheltuieli_numerar
             total_cheltuieli_bancar += cheltuieli_bancar
@@ -725,8 +708,8 @@ def get_registru_jurnal_incasari_si_plati(request, incasari=None, cheltuieli=Non
                     "documentul": entry.fisier,
                     "documentId": str(entry.fisier).split("_")[0],
                     "felul_operatiunii": f"Cheltuiala {entry.nume_cheltuiala}" + (f" ({entry.suma} {entry.valuta})" if entry.valuta != "RON" else ""),
-                    "incasari_numerar": 0,
-                    "incasari_banca": 0,
+                    "incasari_numerar": D(0),
+                    "incasari_banca": D(0),
                     "plati_numerar": cheltuieli_numerar,
                     "plati_banca": cheltuieli_bancar,
                     "end_of_month": False,
@@ -741,10 +724,10 @@ def get_registru_jurnal_incasari_si_plati(request, incasari=None, cheltuieli=Non
                 "documentul": "-",
                 "documentId": None,
                 "felul_operatiunii": f"Calcul total luna {LUNI_RO[prev_month]}",
-                "incasari_numerar": round(total_incasari_numerar, 2),
-                "incasari_banca": round(total_incasari_bancar, 2),
-                "plati_numerar": round(total_cheltuieli_numerar, 2),
-                "plati_banca": round(total_cheltuieli_bancar, 2),
+                "incasari_numerar": rotund2(total_incasari_numerar),
+                "incasari_banca": rotund2(total_incasari_bancar),
+                "plati_numerar": rotund2(total_cheltuieli_numerar),
+                "plati_banca": rotund2(total_cheltuieli_bancar),
                 "end_of_month": True,
             }
         )
@@ -774,7 +757,7 @@ def get_cards_and_charts_data(request):
 
         # Venitul net poate fi negativ (pierdere fiscala); se afiseaza ca atare in registrul
         # fiscal, iar taxele se calculeaza pe baza pozitiva.
-        total_incasari_net = round((total_incasari_brut - total_cheltuieli), 2)
+        total_incasari_net = rotund2(D(total_incasari_brut) - D(total_cheltuieli))
 
         cheltuieli = CheltuialaModel.objects.all()
         if cheltuieli:
@@ -845,16 +828,16 @@ def get_cards_and_charts_data(request):
     total_platite_la_stat_pe_toti_anii = DocumenteModel.total_plati_la_stat()
 
     years = copy(ani_inregistrati)
-    total_incasari_net_pe_toti_anii = 0
-    total_incasari_brut_pe_toti_anii = 0
-    total_cheltuieli_pe_toti_anii = 0
-    total_de_platit_la_stat_pe_toti_anii = 0
+    total_incasari_net_pe_toti_anii = D(0)
+    total_incasari_brut_pe_toti_anii = D(0)
+    total_cheltuieli_pe_toti_anii = D(0)
+    total_de_platit_la_stat_pe_toti_anii = D(0)
     for yr in years:
         tib = IncasariModel.get_total_incasari(yr)
         tc = CheltuialaModel.get_total_cheltuieli(yr)
-        total_cheltuieli_pe_toti_anii += tc
-        total_incasari_brut_pe_toti_anii += tib
-        incasari_net = round((tib - tc), 2)
+        total_cheltuieli_pe_toti_anii += D(tc)
+        total_incasari_brut_pe_toti_anii += D(tib)
+        incasari_net = rotund2(D(tib) - D(tc))
         
         if furnizor:
             tiy = calculeaza_taxe_si_impozite(
@@ -870,7 +853,7 @@ def get_cards_and_charts_data(request):
                 yr,
             )["total_taxe_impozite"]
 
-        total_de_platit_la_stat_pe_toti_anii += tiy
+        total_de_platit_la_stat_pe_toti_anii += D(tiy)
 
     total_incasari_net_pe_toti_anii = (
         total_incasari_brut_pe_toti_anii
@@ -881,12 +864,11 @@ def get_cards_and_charts_data(request):
     if total_incasari_net_pe_toti_anii <= 0:
         total_incasari_net_pe_toti_anii = 0
 
-    total_incasari_net_pe_toti_anii = round(total_incasari_net_pe_toti_anii, 2)
+    total_incasari_net_pe_toti_anii = rotund2(total_incasari_net_pe_toti_anii)
 
     # Pozitiv = mai e de platit; negativ = platit in plus fata de estimare.
-    rest_de_plata_catre_stat = round(
-        total_de_platit_la_stat_pe_toti_anii - total_platite_la_stat_pe_toti_anii,
-        2,
+    rest_de_plata_catre_stat = rotund2(
+        D(total_de_platit_la_stat_pe_toti_anii) - D(total_platite_la_stat_pe_toti_anii)
     )
 
     return {
@@ -955,6 +937,10 @@ def create_bar_plot(
         incasari_pe_luni = [ron_to_eur(i, anul) for i in incasari_pe_luni]
         cheltuieli_pe_luni = [ron_to_eur(c, anul) for c in cheltuieli_pe_luni]
 
+    # matplotlib are nevoie de float, nu de Decimal.
+    incasari_pe_luni = [float(D(i)) for i in incasari_pe_luni]
+    cheltuieli_pe_luni = [float(D(c)) for c in cheltuieli_pe_luni]
+
     index_col = f"Anul {anul}"
 
     data = {
@@ -1017,8 +1003,10 @@ def create_bar_plot(
 
     # Save the plot as an SVG file
     svgname = f"incasari_vs_cheltuieli_bar_chart_{currency}.svg"
-    svgfp = os.path.join(MEDIA_ROOT, svgname)
+    svgfp = os.path.join(get_media_path(), svgname)
     plt.savefig(svgfp, format="svg")
     plt.close(fig)
 
-    return "/media/" + svgname
+    from utils.multiuser import get_user_media_prefix
+
+    return "/media/" + get_user_media_prefix() + svgname

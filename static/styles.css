@@ -2,6 +2,32 @@
   display: none !important;
 }
 
+/* Butonul de logout din nav, aratat ca link-urile celelalte (POST pentru CSRF). */
+nav .logout-link {
+  display: inline-block;
+  width: auto;
+  margin: calc(var(--pico-nav-link-spacing-vertical) * -1) calc(var(--pico-nav-link-spacing-horizontal) * -1);
+  padding: var(--pico-nav-link-spacing-vertical) var(--pico-nav-link-spacing-horizontal);
+  border: none;
+  border-radius: var(--pico-border-radius);
+  background: none;
+  box-shadow: none;
+  color: var(--pico-primary);
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: var(--pico-line-height);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+nav .logout-link:is(:hover, :active, :focus) {
+  background: none;
+  box-shadow: none;
+  color: var(--pico-primary-hover);
+  text-decoration: underline;
+  text-underline-offset: 0.125em;
+}
+
 .typeahead-standalone {
   margin-top: 5px;
   width: 100%;

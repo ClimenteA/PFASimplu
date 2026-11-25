@@ -4,6 +4,7 @@ from django.db.models import Sum
 from django.utils.translation import gettext_lazy as _
 from utils.models import CommonIncasariCheltuieliModel
 from django.db.models.functions import TruncMonth
+from utils.decimale import D, rotund2
 
 
 class SursaVenit(models.TextChoices):
@@ -35,6 +36,13 @@ class IncasariModel(CommonIncasariCheltuieliModel):
     sursa_venit = models.CharField(
         max_length=300, choices=SursaVenit, default=SursaVenit.ACTIVITATE_PRINCIPALA
     )
+    factura = models.OneToOneField(
+        "facturi.FacturaModel",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="incasare",
+    )
 
     @staticmethod
     def get_total_incasari_pe_luni(year: int):
@@ -52,7 +60,7 @@ class IncasariModel(CommonIncasariCheltuieliModel):
         sume_incasari_pe_luni = []
         for month in range(1, 13):
             month_date = datetime.date(year, month, 1)
-            val = data_dict.get(month_date, 0)
+            val = D(data_dict.get(month_date, 0))
             sume_incasari_pe_luni.append(val)
 
         return sume_incasari_pe_luni
@@ -63,8 +71,9 @@ class IncasariModel(CommonIncasariCheltuieliModel):
             data_inserarii__isnull=True,
             actualizat_la__year=year
         ).aggregate(tni=Sum("suma_in_ron"))
-        total_neincasate = total_neincasate["tni"] or 0
-        return total_neincasate
+        total_neincasate = D(total_neincasate["tni"] or 0)
+        # Suma finala afisata: 2 zecimale, rotunjire .5 in sus.
+        return rotund2(total_neincasate)
 
     @staticmethod
     def get_total_incasari(year: int):
@@ -74,11 +83,12 @@ class IncasariModel(CommonIncasariCheltuieliModel):
         ).aggregate(totali=Sum('suma_in_ron'))
 
         if total_incasari_result["totali"] is None:
-            total_incasari = 0
+            total_incasari = D(0)
         else:
-            total_incasari = total_incasari_result["totali"]
+            total_incasari = D(total_incasari_result["totali"])
 
-        return total_incasari
+        # Suma finala afisata: 2 zecimale, rotunjire .5 in sus.
+        return rotund2(total_incasari)
 
 
     class Meta:

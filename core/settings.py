@@ -8,31 +8,73 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+def _get_app_version() -> str:
+    """Versiunea aplicatiei, citita din pyproject.toml (sursa unica de adevar).
+    In build-ul PyInstaller fisierul e inclus prin pfasimplu.spec."""
+    import tomllib
+
+    try:
+        with open(BASE_DIR / "pyproject.toml", "rb") as f:
+            return tomllib.load(f)["project"]["version"]
+    except (OSError, KeyError, tomllib.TOMLDecodeError):
+        return ""
+
+
+APP_VERSION = _get_app_version()
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
+def _env_bool(name: str, default: str = "0") -> bool:
+    return os.environ.get(name, default).strip().lower() in ("1", "true", "yes", "on")
 
-SECRET_KEY = "aplicatie-desktop-nu-conteaza-secret-trebuie-sa-fie-peste-50-de-caractere-sa-fie-considerata-sigura"
+
+# Modul multi-user (server/VPS): login cu email + parola si date izolate per
+# utilizator. Implicit 0 -> aplicatie desktop, fara login, ca pana acum.
+MULTI_USER = _env_bool("PFASIMPLU_MULTI_USER")
+
+# Permite crearea de conturi noi din pagina de inregistrare. Implicit 1;
+# seteaza PFASIMPLU_ALLOW_REGISTRATION=0 pe server pentru a bloca
+# inregistrările (utilizatorii existenti se pot autentifica in continuare).
+ALLOW_REGISTRATION = _env_bool("PFASIMPLU_ALLOW_REGISTRATION", "1")
+
+# SECURITY WARNING: keep the secret key used in production secret!
+# Pe server se seteaza PFASIMPLU_SECRET_KEY in .env.prod.
+SECRET_KEY = os.environ.get("PFASIMPLU_SECRET_KEY") or (
+    "aplicatie-desktop-nu-conteaza-secret-trebuie-sa-fie-peste-50-de-caractere-sa-fie-considerata-sigura"
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Implicit DEBUG=1 (dezvoltare/desktop, inclusiv `runserver` cu MULTI_USER=1,
+# ca Django sa serveasca fisierele statice). Pe server se seteaza explicit
+# PFASIMPLU_DEBUG=0 in .env.prod (asa face si imaginea Docker).
+DEBUG = _env_bool("PFASIMPLU_DEBUG", "1")
 
+ALLOWED_HOSTS = [
+    h.strip() for h in os.environ.get("PFASIMPLU_ALLOWED_HOSTS", "*").split(",") if h.strip()
+]
 
-ALLOWED_HOSTS = ["*"]
+# Ex. PFASIMPLU_CSRF_TRUSTED_ORIGINS=https://pfa.exemplu.ro
+CSRF_TRUSTED_ORIGINS = [
+    o.strip()
+    for o in os.environ.get("PFASIMPLU_CSRF_TRUSTED_ORIGINS", "").split(",")
+    if o.strip()
+]
 
-# Desktop app doesn't need SSL
-# CSRF_COOKIE_SECURE = False
-# SESSION_COOKIE_SECURE = False
-# SECURE_HSTS_SECONDS = 3600
-# SECURE_HSTS_PRELOAD = False
-# SECURE_SSL_REDIRECT = False
-# SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+# In productie (DEBUG=0), aplicatia sta in spatele unui proxy TLS (Caddy).
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 3600
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    "conturi",
     "cheltuieli",
     "documente",
     "facturi",
@@ -57,6 +99,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "utils.multiuser.MultiUserMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_browser_reload.middleware.BrowserReloadMiddleware",
@@ -80,6 +123,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "utils.multiuser.multiuser_context",
             ],
         },
     },
@@ -91,7 +135,7 @@ WSGI_APPLICATION = "core.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DB_DIR = os.path.join(BASE_DIR, "dbsqlite")
+DB_DIR = os.environ.get("PFASIMPLU_DB_DIR") or os.path.join(BASE_DIR, "dbsqlite")
 
 if not os.path.exists(DB_DIR):
     os.makedirs(DB_DIR)
@@ -99,7 +143,9 @@ if not os.path.exists(DB_DIR):
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": os.path.join(DB_DIR, "stocare.db"),
+        # Testele end-to-end (folderul tests/) pot redirectiona baza de date
+        # printr-o variabila de mediu, ca sa nu atinga datele reale.
+        "NAME": os.environ.get("PFASIMPLU_DB_PATH") or os.path.join(DB_DIR, "stocare.db"),
     },
     "OPTIONS": {
         "timeout": 20,
@@ -159,18 +205,6 @@ def get_font_path():
     return pyinstaller_path
 
 
-def get_current_version():
-
-    versiune_path = os.path.join(static_files_path, "versiune.txt")
-    if not os.path.exists(versiune_path):
-        versiune_path = os.path.join(BASE_DIR, "_internal", "static", "versiune.txt")
-
-    with open(versiune_path, "r") as f:
-        ver = f.read().strip()
-
-    return ver
-
-
 def get_salarii_minim_brut_local():
 
     filepath = os.path.join(static_files_path, "minim_brut_an_val.json")
@@ -187,7 +221,7 @@ def get_salarii_minim_brut_local():
 
 
 MEDIA_URL = "/media/"
-MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+MEDIA_ROOT = os.environ.get("PFASIMPLU_MEDIA_ROOT") or os.path.join(BASE_DIR, "media")
 
 def make_media_dir():
     if not os.path.exists(MEDIA_ROOT):
@@ -197,13 +231,20 @@ make_media_dir()
 
 
 def get_media_path():
+    """Folderul media al utilizatorului curent.
+    In modul multi-user fisierele sunt separate per utilizator: media/user_<id>/.
+    In modul desktop (implicit) ramane media/ ca pana acum."""
+    from utils.multiuser import get_user_media_prefix
 
-    development_path = os.path.join(MEDIA_ROOT)
-    if os.path.exists(development_path):
-        return development_path
-    
-    pyinstaller_path = os.path.join(BASE_DIR, "_internal", "media")
-    return pyinstaller_path
+    prefix = get_user_media_prefix()
+    development_path = os.path.join(MEDIA_ROOT, prefix)
+    if not prefix and not os.path.exists(development_path):
+        # In executabilul PyInstaller baza poate fi in _internal/media.
+        pyinstaller_path = os.path.join(BASE_DIR, "_internal", "media")
+        if os.path.exists(pyinstaller_path):
+            return pyinstaller_path
+    os.makedirs(development_path, exist_ok=True)
+    return development_path
 
 
 def get_extracts_path(extra_dir: str | None = None):
@@ -219,3 +260,23 @@ def get_extracts_path(extra_dir: str | None = None):
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+# Autentificare (folosita doar in modul multi-user, PFASIMPLU_MULTI_USER=1).
+LOGIN_URL = "/conturi/login/"
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/conturi/login/"
+
+# Static files: whitenoise comprimat in modul server (DEBUG=0).
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": (
+            "whitenoise.storage.CompressedStaticFilesStorage"
+            if not DEBUG
+            else "django.contrib.staticfiles.storage.StaticFilesStorage"
+        ),
+    },
+}

@@ -1,6 +1,7 @@
 import os
 import re
 from unidecode import unidecode
+from django.conf import settings
 from django.db import models
 from django.utils import timezone
 from django.core.files.base import ContentFile
@@ -9,9 +10,11 @@ from django.utils.translation import gettext_lazy as _
 from utils.views import one_month_from_now
 from utils.localitati import Localitati
 from utils.files import get_save_path
+from utils.models import UserOwnedModel, UserScopedManager
 from utils.valuta import Valuta
+from utils.decimale import rotund2
 from setari.models import SetariModel
-from core.settings import MEDIA_ROOT, get_font_path
+from core.settings import get_media_path, get_font_path
 from fpdf_table import PDFTable, Align
 
 
@@ -285,7 +288,7 @@ def creeaza_factura_pdf(data: dict, pdf_output_path: str):
     return pdf_output_path
 
 
-class FacturaModel(models.Model):
+class FacturaModel(UserOwnedModel):
     serie = models.CharField(max_length=20)
     numar = models.IntegerField()
     data_emitere = models.DateTimeField(default=timezone.now)
@@ -313,7 +316,7 @@ class FacturaModel(models.Model):
     tip_tranzactie = models.CharField(
         max_length=250, choices=ModalitatePlata, default=ModalitatePlata.BANCAR
     )
-    total_de_plata = models.FloatField()
+    total_de_plata = models.DecimalField(max_digits=14, decimal_places=4)
     valuta = models.CharField(max_length=3, choices=Valuta, default=Valuta.RON)
     # Produse sau servicii
     # id, numar_unitati, total_de_plata, nume_produs_sau_serviciu, cod_unitate, pret_pe_unitate, subtotal
@@ -329,11 +332,22 @@ class FacturaModel(models.Model):
         max_length=100_000, upload_to=get_save_path, null=True, blank=True
     )
 
+    objects = UserScopedManager()
+
     class Meta:
         constraints = [
+            # Desktop (user null): serie+numar unice global, ca pana acum.
             models.UniqueConstraint(
-                fields=["serie", "numar"], name="unique_serie_numar"
-            )
+                fields=["serie", "numar"],
+                name="unique_serie_numar",
+                condition=models.Q(user__isnull=True),
+            ),
+            # Multi-user: seria si numarul sunt unice per utilizator.
+            models.UniqueConstraint(
+                fields=["user", "serie", "numar"],
+                name="unique_serie_numar_per_user",
+                condition=models.Q(user__isnull=False),
+            ),
         ]
 
     @staticmethod
@@ -417,7 +431,7 @@ class FacturaModel(models.Model):
             "nume_furnizor": furnizor.nume,
             "email_furnizor": furnizor.email,
             "telefon_furnizor": furnizor.telefon,
-            "iban_furnizor": furnizor.iban,
+            "iban_furnizor": furnizor.get_iban_pentru_valuta(self.valuta),
             "iban_client": "",
             "adresa_client": self.adresa,
             "localitate_client": self.get_localitate(self.localitate),
@@ -428,7 +442,7 @@ class FacturaModel(models.Model):
             "email_client": self.email,
             "telefon_client": self.telefon,
             "cod_modalitate_plata": self.tip_tranzactie,
-            "total_de_plata": str(self.total_de_plata),
+            "total_de_plata": str(rotund2(self.total_de_plata)),
             "produse_sau_servicii": [
                 {
                 **i, 
@@ -446,7 +460,7 @@ class FacturaModel(models.Model):
                 "efactura.xml", ContentFile(xml_content), save=False
             )
 
-        save_pdf_path = os.path.join(MEDIA_ROOT, "factura_invoice.pdf")
+        save_pdf_path = os.path.join(get_media_path(), "factura_invoice.pdf")
         save_pdf_path = creeaza_factura_pdf(context, save_pdf_path)
         with open(save_pdf_path, "rb") as pdf:
             self.fisier_factura_pdf.save(

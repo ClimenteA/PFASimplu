@@ -13,3 +13,9 @@ dbsqlite/*
 Untitled.ipynb
 *.pdf
 staticfiles
+wdump.md
+tests/.runtime/
+.pytest_cache/
+test-results/
+.env.prod
+data/

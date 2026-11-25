@@ -5,7 +5,7 @@ from django.shortcuts import render, redirect
 from django.db.models import OuterRef, Subquery
 from utils.views import (
     get_page_items,
-    download_zip,
+    download_model_csv_or_xlsx,
     handle_delete_id_query_param,
 )
 
@@ -38,7 +38,7 @@ class FacturiSearchClientName(View):
 class FacturiDescarcareView(View):
 
     def get(self, request):
-        return download_zip(request, FacturaModel)
+        return download_model_csv_or_xlsx(request, FacturaModel, "facturi")
 
 
 class FacturiView(View):

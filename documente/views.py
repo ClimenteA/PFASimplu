@@ -12,10 +12,11 @@ class DocumenteView(View):
         redirect_from_delete = handle_delete_id_query_param(request, DocumenteModel)
         if redirect_from_delete:
             return redirect_from_delete
-        
+
         form, page_items = get_page_items(
             request, DocumenteForm, DocumenteModel, order_by="-document_pentru_anul"
         )
+
         return render(
             request,
             template_name="documente.html",

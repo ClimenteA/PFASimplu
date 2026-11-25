@@ -1,5 +1,6 @@
 import re
 from datetime import datetime
+from decimal import InvalidOperation
 
 import xmltodict
 from django.core.exceptions import ValidationError
@@ -7,7 +8,9 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from pypdf import PdfReader  # https://pypdf.readthedocs.io/en/stable/index.html
 
+from utils.decimale import D, rotund2
 from utils.files import get_save_path
+from utils.models import UserOwnedModel, UserScopedManager
 
 
 # Plafonul TVA de 395000 RON pe an
@@ -47,6 +50,24 @@ class TipDocument(models.TextChoices):
         _("Declaratie decont TVA 300 dovada incarcare"),
     )
 
+    # Pentru PFA-uri cu cod special de TVA intracomunitar (art. 317):
+    # D301 - decont special de TVA (achizitii servicii UE/non-UE, taxare inversa)
+    # D390 VIES - declaratie recapitulativa (doar operatiuni intracomunitare UE)
+    DECLARATIE_TVA_DECONT_SPECIAL_301 = "Declaratie decont special TVA 301", _(
+        "Declaratie decont special TVA 301"
+    )
+    DECLARATIE_TVA_DECONT_SPECIAL_301_RECIPISA = (
+        "Declaratie decont special TVA 301 recipisa",
+        _("Declaratie decont special TVA 301 recipisa"),
+    )
+    DECLARATIE_TVA_RECAPITULATIVA_390 = "Declaratie recapitulativa TVA 390", _(
+        "Declaratie recapitulativa TVA 390"
+    )
+    DECLARATIE_TVA_RECAPITULATIVA_390_RECIPISA = (
+        "Declaratie recapitulativa TVA 390 recipisa",
+        _("Declaratie recapitulativa TVA 390 recipisa"),
+    )
+
     # Declarațiile 392B și 392A – Declarații informative privind livrările de bunuri, prestări de servicii și achizițiil efectuate în anul precedent
     DECLARATIE_TVA_ACTIVITATE_FINANCIARA_392A = (
         "Declaratie activitate financiara 392A",
@@ -82,7 +103,7 @@ def validate_year(value):
         raise ValidationError(f"{value} nu este un an valid.")
 
 
-class DocumenteModel(models.Model):
+class DocumenteModel(UserOwnedModel):
     tip_document = models.CharField(
         max_length=300, choices=TipDocument, default=TipDocument.DOCUMENT_UTIL
     )
@@ -100,27 +121,50 @@ class DocumenteModel(models.Model):
             tip_document=TipDocument.DOVADA_PLATA_TAXE_SI_IMPOZITE,
         )
 
-        platite = 0
+        platite = D(0)
         for r in results:
             plata_match = re.search(r"Plata spv ([\d.,]+) RON", r.mentiuni or "")
             if plata_match:
                 try:
-                    platite += float(plata_match.group(1).replace(",", "."))
-                except ValueError:
+                    platite += D(plata_match.group(1).replace(",", "."))
+                except (ValueError, InvalidOperation):
                     pass
 
-        return round(platite, 2)
+        return rotund2(platite)
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
 
         if self.parse_tip_document:
+            if self.fisier.path.endswith(".pdf"):
+                # Recipisele D301/D390 se detecteaza automat din text
+                # (tip declaratie, perioada, CIF, index incarcare).
+                # Parsarea e best-effort: unele PDF-uri (scanate, generate
+                # minimal etc.) nu pot fi citite - documentul se salveaza oricum.
+                try:
+                    recipisa = recipisa_parser(self.fisier.path)
+                except Exception:
+                    recipisa = None
+                if recipisa:
+                    self.tip_document = recipisa["tip_document"]
+                    if not self.document_pentru_anul:
+                        self.document_pentru_anul = recipisa["anul"]
+                    if not self.mentiuni:
+                        self.mentiuni = recipisa["mentiuni"]
+                    super().save(
+                        update_fields=["tip_document", "document_pentru_anul", "mentiuni"]
+                    )
+                    return
+
             if self.fisier.path.endswith(".pdf") and self.tip_document in [
                 TipDocument.DECLARATIE_UNICA_212.value,
                 TipDocument.DECLARATIE_UNICA_212_DOVADA_INCARCARE.value,
                 TipDocument.DOVADA_PLATA_TAXE_SI_IMPOZITE.value,
             ]:
-                data = pdf_parser(self.fisier.path)
+                try:
+                    data = pdf_parser(self.fisier.path)
+                except Exception:
+                    data = None
                 if data:
                     if not self.tip_document:
                         self.tip_document = data["tip_document"]
@@ -133,12 +177,59 @@ class DocumenteModel(models.Model):
                     update_fields=["document_pentru_anul", "tip_document", "mentiuni"]
                 )
 
+    objects = UserScopedManager()
+
     class Meta:
         app_label = "documente"
         verbose_name_plural = "Documente"
 
     def __str__(self):
         return f"{self.tip_document} {self.mentiuni} {self.actualizat_la.isoformat()}"
+
+
+def recipisa_parser(pdf_path: str):
+    """Parseaza recipisa ANAF pentru D301/D390.
+    Text de referinta: 'Index încărcare: 1296415962 din 10.11.2026 ...
+    Aţi depus o declaraţie tip D301 cu numărul de înregistrare INTERNT-...
+    pentru perioada de raportare 10 2026 pentru CIF: 52937756'."""
+    reader = PdfReader(pdf_path)
+    pdf_text = reader.pages[0].extract_text() or ""
+
+    tip_match = re.search(r"declara[ţt]ie\s+tip\s+(D301|D390)", pdf_text, re.IGNORECASE)
+    if not tip_match:
+        return None
+
+    tip = tip_match.group(1).upper()
+    perioada_match = re.search(r"perioada de raportare\s+(\d{1,2})\s+(\d{4})", pdf_text)
+    cif_match = re.search(r"CIF:\s*(\d+)", pdf_text)
+    index_match = re.search(r"Index\s+[îi]nc[ăa]rcare:\s*(\d+)\s+din\s+(\d\d\.\d\d\.\d\d\d\d)", pdf_text)
+
+    anul = int(perioada_match.group(2)) if perioada_match else None
+    luna = int(perioada_match.group(1)) if perioada_match else None
+    cif = cif_match.group(1) if cif_match else None
+
+    mentiuni = f"Recipisa {tip}"
+    if luna and anul:
+        mentiuni += f" perioada {luna:02d}/{anul}"
+    if cif:
+        mentiuni += f" CIF {cif}"
+    if index_match:
+        mentiuni += f" index incarcare {index_match.group(1)} din {index_match.group(2)}"
+    if "Nu există erori de validare" in pdf_text or "Nu exista erori de validare" in pdf_text:
+        mentiuni += " - fara erori de validare"
+
+    return {
+        "tip_document": (
+            TipDocument.DECLARATIE_TVA_DECONT_SPECIAL_301_RECIPISA.value
+            if tip == "D301"
+            else TipDocument.DECLARATIE_TVA_RECAPITULATIVA_390_RECIPISA.value
+        ),
+        "tip_declaratie": tip,
+        "anul": anul,
+        "luna": luna,
+        "cif": cif,
+        "mentiuni": mentiuni,
+    }
 
 
 def pdf_parser(pdf_path: str):
@@ -181,7 +272,7 @@ def pdf_parser(pdf_path: str):
         ).group(
             1
         )  # 19.03.2024
-        suma = float(
+        suma = D(
             suma_ghiseul_match.group(1).replace(".", "").replace(",", ".")
         )  # 18.00,89
         return {
@@ -189,3 +280,6 @@ def pdf_parser(pdf_path: str):
             "document_pentru_anul": datetime.strptime(data, "%d.%m.%Y").year,
             "suma_plata_anaf": suma,
         }
+
+
+

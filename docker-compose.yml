@@ -1,0 +1,60 @@
+# Aplicatia PFASimplu (mod multi-user) + proxy-ul TLS (Caddy) pentru VPS.
+#
+#   cp .env.prod.example .env.prod     # si completeaza valorile
+#   docker compose up -d --build
+#
+# Caddyfile-ul se monteaza din folderul curent; domeniul se seteaza
+# in .env.prod (PFASIMPLU_DOMAIN) sau direct in Caddyfile.
+
+services:
+  pfasimplu-app:
+    container_name: pfasimplu-app
+    build: .
+    restart: unless-stopped
+    expose:
+      - "8000"
+    env_file:
+      - .env.prod
+    volumes:
+      - ./data/dbsqlite:/data/dbsqlite
+      - ./data/media:/data/media
+      - ./staticfiles:/app/staticfiles
+
+  pfasimplu-mcp:
+    container_name: pfasimplu-mcp
+    build: .
+    restart: unless-stopped
+    depends_on:
+      - pfasimplu-app
+    # Migrarile/staticle le face containerul aplicatiei, nu si asta.
+    entrypoint: []
+    expose:
+      - "8001"
+    env_file:
+      - .env.prod
+    volumes:
+      - ./data/dbsqlite:/data/dbsqlite
+      - ./data/media:/data/media
+    # Serverul MCP e un proces ASGI separat de waitress (Django e WSGI).
+    # Autorizarea se face cu cheia generata in /setari (Bearer).
+    command: ["python", "-m", "uvicorn", "mcp_server.http_app:app", "--host", "0.0.0.0", "--port", "8001"]
+
+  external-caddy-proxy:
+    container_name: external-caddy-proxy
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    # Ca sa foloseasca PFASIMPLU_DOMAIN din Caddyfile.
+    env_file:
+      - .env.prod
+    volumes:
+      - ./staticfiles:/webapp/staticfiles:ro
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  caddy_data:
+  caddy_config:

@@ -65,6 +65,14 @@
                     Setari
                 </a>
             </li>
+            {% if multi_user and user.is_authenticated %}
+            <li>
+                <form method="post" action="{% url 'logout' %}" style="margin: 0; display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-link" title="{{ user.email }}">Logout</button>
+                </form>
+            </li>
+            {% endif %}
         </ul>
     </nav>
 
@@ -95,6 +103,25 @@
         </dialog>
     </div>
     {% endif %}
+
+    <div x-data="{ confirmOpen: false, confirmUrl: '', confirmMessage: '' }"
+        @open-confirm.window="confirmMessage = $event.detail.message; confirmUrl = $event.detail.url; confirmOpen = true"
+        @keydown.escape.window="confirmOpen = false">
+        <dialog x-cloak :open="confirmOpen">
+            <article @click.outside="confirmOpen = false">
+                <header>
+                    <button @click="confirmOpen = false" aria-label="Close" rel="prev"></button>
+                    <p><strong>Confirmare</strong></p>
+                </header>
+                <p x-text="confirmMessage"></p>
+                <footer>
+                    <button class="secondary" @click="confirmOpen = false">Renunta</button>
+                    <button class="pico-background-red-450" style="border-color: var(--pico-color-red-450);"
+                        @click="window.location.href = confirmUrl">Sterge</button>
+                </footer>
+            </article>
+        </dialog>
+    </div>
 
     {% django_browser_reload_script %}
 </body>

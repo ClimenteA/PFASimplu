@@ -46,6 +46,13 @@ IF "%1"=="run" (
     pyinstaller --noconfirm --name pfasimplu --icon icon.png --add-data "dbsqlite;dbsqlite" --add-data "templates;templates" --add-data "static;static" --collect-all django_cleanup --collect-all whitenoise --collect-all matplotlib --collect-all django_browser_reload --collect-all cattr gui.py
     mkdir .\dist\pfasimplu\_internal\media
 
+) ELSE IF "%1"=="mcp-local" (
+    python -m mcp_server.local
+) ELSE IF "%1"=="mcp-http" (
+    python -m uvicorn mcp_server.http_app:app --host 127.0.0.1 --port 8001
+) ELSE IF "%1"=="package-mcp" (
+    pyinstaller --noconfirm --name pfasimplu-mcp --icon icon.png --console --add-data "dbsqlite;dbsqlite" --add-data "templates;templates" --add-data "static;static" --collect-all django_cleanup --collect-all whitenoise --collect-all matplotlib --collect-all django_browser_reload --collect-all cattr --collect-all fastmcp mcp_stdio_main.py
+    mkdir .\dist\pfasimplu-mcp\_internal\media
 ) ELSE (
-    echo Invalid command. Available commands: run, migrate-all, purge-migration-dirs, purge-db, package
+    echo Invalid command. Available commands: run, migrate-all, purge-migration-dirs, purge-db, package, mcp-local, mcp-http
 )

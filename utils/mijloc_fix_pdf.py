@@ -1,18 +1,29 @@
 import os
+import re
 from zipfile import ZipFile
 from cheltuieli.models import CheltuialaModel
 from fpdf_table import PDFTable, Align
-from core.settings import MEDIA_ROOT, get_extracts_path, get_font_path
+from core.settings import get_media_path, get_extracts_path, get_font_path
 
 
 
-def create_fisa_mijloc_fix_pdf(db_id: int, nr_inventar: int):
+def create_fisa_mijloc_fix_pdf(db_id: int, nr_inventar: int, doar_pdf: bool = False):
+    """Genereaza fisa mijlocului fix. Implicit intoarce un zip cu fisa PDF +
+    documentul justificativ (folosit la download-ul Registrului-inventar).
+    Cu `doar_pdf=True` intoarce doar fisa PDF (folosit la exportul pe an)."""
 
     inv = CheltuialaModel.objects.filter(id=db_id).first()
 
     fileid = os.path.basename(inv.fisier.path).split("_")[0]
 
     fel_document = f"{fileid} {inv.nume_cheltuiala}"
+
+    # Nume de fisier sigur pentru sistemul de fisiere (fara spatii/caractere
+    # speciale din numele cheltuielii), unic per mijloc fix. Folosit si pentru
+    # zip: numele cheltuielii poate contine "/" (ex. "Laptop / birou"), care
+    # altfel ar fi interpretat ca separator de directoare la scrierea zip-ului.
+    nume_sigur = re.sub(r"[^\w\-.]+", "_", inv.nume_cheltuiala).strip("_")[:80]
+    nume_fisa = f"fisa_mijloc_fix_{fileid}_{nume_sigur}.pdf"
 
     pdf = PDFTable()
 
@@ -64,16 +75,22 @@ def create_fisa_mijloc_fix_pdf(db_id: int, nr_inventar: int):
     for _ in range(20): 
         pdf.table_row(empty_rows, width_cols)
 
-    save_pdf_path = os.path.join(MEDIA_ROOT, "fisa_mijloc_fix.pdf")
+    save_pdf_path = os.path.join(get_media_path(), nume_fisa)
     pdf.output(save_pdf_path)
+
+    if doar_pdf:
+        return save_pdf_path
 
     extracts_folder = get_extracts_path()
 
+    # Documentul justificativ poate lipsi de pe disc (sters/mutat manual):
+    # in acel caz zip-ul contine doar fisa generata, in loc sa crape exportul.
     files = [save_pdf_path, inv.fisier.path]
-    zip_filepath = os.path.join(extracts_folder, f"{fel_document}.zip")
+    zip_filepath = os.path.join(extracts_folder, f"{fileid}_{nume_sigur}.zip")
     with ZipFile(zip_filepath, "w") as zipf:
         for file in files:
-            zipf.write(file, os.path.basename(file))
+            if os.path.exists(file):
+                zipf.write(file, os.path.basename(file))
 
     return zip_filepath
 

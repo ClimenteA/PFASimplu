@@ -36,17 +36,13 @@
 
 
     <article class="article-form mt-4 container" x-data="formHandler" x-init="$watch('collection', (currentCol) => {
-        let currentColList = JSON.parse(JSON.stringify(currentCol));
-        let total = 0
+        // Sumele se aduna in centrii intregi, ca sa nu se acumuleze eroarea
+        // numerelor cu virgula mobila; conversia finala in lei se face o singura data.
+        let totalCenti = 0;
         for (let i of currentCol) {
-            if (i.numar_unitati && i.pret_pe_unitate) {
-                let unitati = parseInt(i.numar_unitati);
-                let pret_unitate = parseFloat(i.pret_pe_unitate);
-                let subtotal = unitati * pret_unitate; 
-                total += subtotal;
-            }
+            totalCenti += subtotalCenti(i);
         }
-        $refs.total_de_plata_el.value = total.toFixed(2);
+        $refs.total_de_plata_el.value = (totalCenti / 100).toFixed(2);
     })">
 
         <form @submit.prevent="handleSubmit" id="factura-form" x-ref="factura_form_el" action="{% url 'facturi' %}"
@@ -242,7 +238,7 @@
                                 <label>
                                     Subtotal:
                                     <input readonly step="any" type="number"
-                                        :value="(item.pret_pe_unitate * item.numar_unitati).toFixed(2)"
+                                        :value="(subtotalCenti(item) / 100).toFixed(2)"
                                         x-model="item.subtotal">
                                 </label>
                             </div>
@@ -318,6 +314,7 @@
                     <th>Email</th>
                     <th>Telefon</th>
                     <th>Scadenta</th>
+                    <th>Incasata</th>
                     <th>Del.</th>
                 </tr>
             </thead>
@@ -360,7 +357,21 @@
                     <td>{{ item.telefon }}</td>
                     <td>{{ item.data_scadenta|date:"Y-m-d" }}</td>
                     <td>
-                        <a href="?delete_id={{item.id}}" class="pico-color-red-500 px-1" onclick="return confirm('Stergi definitiv aceasta inregistrare si fisierul atasat?')">
+                        {% if item.incasare %}
+                        <a class="pico-color-slate-700 px-1" role="link" aria-disabled="true"
+                            data-tooltip="Factura are deja o incasare. Sterge incasarea pentru a o putea adauga din nou.">
+                            <i class="bi bi-cash-coin"></i>
+                        </a>
+                        {% else %}
+                        <a href="{% url 'incasari' %}?factura_id={{ item.id }}#formular-incasari"
+                            class="pico-color-green-500 px-1" data-tooltip="Adauga incasarea pentru aceasta factura">
+                            <i class="bi bi-cash-coin"></i>
+                        </a>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="?delete_id={{item.id}}" class="pico-color-red-500 px-1"
+                            @click.prevent="$dispatch('open-confirm', { message: 'Stergi definitiv aceasta inregistrare si fisierul atasat?', url: $el.href })">
                             <i class="bi bi-trash"></i>
                         </a>
                     </td>
@@ -488,6 +499,16 @@
                 this.$refs.prod_servicii_el.value = JSON.stringify(this.collection, null, 2);
                 console.log(this.$refs.prod_servicii_el.value);
             },
+            // Subtotalul unui rand, in centrii intregi (pretul se rotunjeste
+            // la cent inainte de inmultire, ca in calculul cu Decimal de pe server).
+            subtotalCenti: function(item) {
+                if (!(item.numar_unitati && item.pret_pe_unitate)) {
+                    return 0;
+                }
+                let unitati = parseInt(item.numar_unitati) || 0;
+                let pretCenti = Math.round(parseFloat(item.pret_pe_unitate) * 100) || 0;
+                return pretCenti * unitati;
+            },
             removeItem: function(id) {
                 if (this.collection.length > 1) {
                     this.collection = this.collection.filter(item => item.id != id);
@@ -501,7 +522,7 @@
             addItem: function() {
                 let items = JSON.parse(JSON.stringify(this.collection));
                 
-                let total_de_plata = 0;
+                let totalCenti = 0;
                 let newCollection = [];
                 for (let i of items) {
                     if (!(i.numar_unitati && i.pret_pe_unitate)) {
@@ -509,16 +530,16 @@
                     } 
                     let unitati = parseInt(i.numar_unitati);
                     let pret_unitate = parseFloat(i.pret_pe_unitate);
-                    let subtotal = unitati * pret_unitate; 
-                    total_de_plata += subtotal;
+                    let centiRand = this.subtotalCenti(i);
+                    totalCenti += centiRand;
                     let item = {
                         id: i.id,
-                        subtotal: subtotal.toFixed(2),
+                        subtotal: (centiRand / 100).toFixed(2),
                         nume_produs_sau_serviciu: i.nume_produs_sau_serviciu, 
                         cod_unitate: i.cod_unitate,
                         numar_unitati: unitati.toFixed(2), 
                         pret_pe_unitate: pret_unitate.toFixed(2),
-                        total_de_plata: total_de_plata.toFixed(2),
+                        total_de_plata: (totalCenti / 100).toFixed(2),
                     } 
                     newCollection.push(item);
                 }
