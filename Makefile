@@ -1,4 +1,4 @@
-.PHONY: dev build-local start-local stop-local logs-local build start stop logs
+.PHONY: dev build-local start-local stop-local logs-local build start stop logs mcp-local mcp-http package-mcp
 
 
 dev:
@@ -72,3 +72,22 @@ stop:
 
 logs:
 	docker compose logs -f --tail=100
+
+# Server MCP stdio pentru aplicatia locala (cheia se pune in mediu):
+#   PFASIMPLU_MCP_TOKEN=<cheia din /setari> make mcp-local
+mcp-local:
+	uv run python -m mcp_server.local
+
+# Server MCP HTTP local, fara Docker (http://localhost:8001/mcp).
+mcp-http:
+	uv run python -m uvicorn mcp_server.http_app:app --host 127.0.0.1 --port 8001
+
+# Executabil separat pentru serverul MCP stdio (alternativa la sursa).
+package-mcp:
+	rm -rf build dist
+	uv run pyinstaller --noconfirm --name pfasimplu-mcp --icon icon.png --console \
+		--add-data "dbsqlite:dbsqlite" --add-data "templates:templates" --add-data "static:static" \
+		--collect-all django_cleanup --collect-all whitenoise --collect-all matplotlib \
+		--collect-all django_browser_reload --collect-all cattr --collect-all fastmcp \
+		mcp_stdio_main.py
+	mkdir -p ./dist/pfasimplu-mcp/_internal/media

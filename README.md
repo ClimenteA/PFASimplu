@@ -13,6 +13,7 @@ Aplicatie pentru simplificarea gestiunii contabilitatii facuta in partida simpla
 - [Instalare pt. utilizatori](#instalare-pt-utilizatori)
 - [Instalare pt. developeri](#instalare-pt-developeri)
 - [Instalare pe VPS (Docker, mod multi-user)](#instalare-pe-vps-docker-mod-multi-user)
+- [Utilizare din agenti AI (MCP / OpenCode)](#utilizare-din-agenti-ai-mcp--opencode)
 - [Ghid de utilizare: de la instalare la rutina zilnica](#ghid-de-utilizare-de-la-instalare-la-rutina-zilnica)
 - [Setari](#setari)
 - [Facturi](#facturi)
@@ -147,6 +148,107 @@ Pentru a rula modul multi-user si fara Docker (ex. pentru teste):
 ```bash
 PFASIMPLU_MULTI_USER=1 uv run manage.py runserver
 ```
+
+
+## Utilizare din agenti AI (MCP / OpenCode)
+
+Aplicatia poate fi conectata la OpenCode (sau alt agent AI) prin
+[Model Context Protocol](https://modelcontextprotocol.io/), folosind
+`fastmcp`. Ruleaza in ambele moduri: **stdio** (aplicatia locala) si **HTTP**
+(varianta dockerizata, locala sau pe VPS).
+
+### 1. Genereaza cheia de autorizare
+
+Intra in `Setari` si foloseste formularul mic **„Cheie de acces MCP”** de sub
+formularul principal:
+
+- apasa **Genereaza cheie MCP** (optional cu un nume, ex. „OpenCode laptop”);
+- **copiaza cheia imediat** - e afisata o singura data;
+- in baza de date se salveaza doar un hash (salt + SHA-256), niciodata cheia
+  in clar; la fiecare request MCP hash-ul primit e comparat cu cel salvat;
+- cheia e **legata de contul care a generat-o**: in modul multi-user fiecare
+  utilizator are cheia lui, iar agentul vede si modifica doar datele acelui
+  cont (inclusiv fisierele lui); in modul desktop cheia nu are user, fiind o
+  singura baza de date locala;
+- generarea unei chei noi **revoca automat** doar cheia contului curent, iar
+  butonul **Revoca** o sterge definitiv - efectul e imediat, fara restart;
+- pastreaz-o secret si nu o pune in git / `.env`.
+
+### 2. Varianta locala, prin stdio
+
+Pentru instalarea din sursa (sau `make dev`), agentul porneste el insusi
+serverul MCP. Cheia i se trimite prin variabila de mediu
+`PFASIMPLU_MCP_TOKEN` (e verificata la pornire si la fiecare tool call):
+
+```bash
+opencode mcp add pfasimplu \
+  --env PFASIMPLU_MCP_TOKEN=<CHEIA_TA> \
+  -- uv run --directory /cale/catre/PFASimplu python -m mcp_server.local
+```
+
+Echivalent cu make (in folderul proiectului):
+
+```bash
+PFASIMPLU_MCP_TOKEN=<CHEIA_TA> make mcp-local
+```
+
+Daca vrei executabil, nu sursa: `make package-mcp` (pe Windows
+`.\makefile.bat package-mcp`) construieste `dist/pfasimplu-mcp/pfasimplu-mcp.exe`;
+il folosesti in comanda OpenCode de mai sus, dupa `--`, in loc de `uv run ...`.
+Executabilul foloseste aceeasi baza de date si acelasi folder media ca
+aplicatia desktop.
+
+### 3. Varianta dockerizata locala, prin HTTP
+
+Serviciul MCP porneste odata cu `docker-compose-local.yml` si e expus pe
+portul `8997` (`PFASIMPLU_MCP_PORT`):
+
+```bash
+docker compose -f docker-compose-local.yml up -d --build
+
+opencode mcp add pfasimplu-local \
+  --url http://localhost:8997/mcp \
+  --header 'Authorization=Bearer <CHEIA_TA>'
+```
+
+Fara Docker, pentru dezvoltare: `make mcp-http` (la `http://127.0.0.1:8001/mcp`).
+
+### 4. Varianta de pe VPS, prin HTTPS
+
+Caddy expune serverul MCP pe subdomeniul `mcp.<PFASIMPLU_DOMAIN>`.
+Seteaza `PFASIMPLU_DOMAIN` in `.env.prod`, apoi:
+
+```bash
+docker compose up -d --build
+
+# Exemplu de conectare (foloseste propriul domeniu si cheia generata in /setari):
+opencode mcp add chatcodfiscal \
+  --url https://mcp.pfa.exemplu.ro/mcp \
+  --header 'Authorization=Bearer <CHEIA_TA>'
+```
+
+Endpoint-ul e `https://mcp.<domeniu>/mcp`; `https://mcp.<domeniu>/health` e
+public (pentru monitoring). Daca testezi local fara domeniu/TLS, comenteaza
+blocul `mcp....` din Caddyfile.
+
+### Tooluri expuse
+
+| Tool | Ce face |
+|---|---|
+| `ping` | verifica conexiunea si versiunea aplicatiei |
+| `get_setari` | datele PFA-ului din pagina Setari |
+| `list_incasari` / `list_cheltuieli` / `list_facturi` / `list_documente` | listare cu filtru optional pe an si limita |
+| `sumar_an` | totaluri, venit net, taxe estimate, TVA autolichidata (D301) |
+| `add_incasare` / `add_cheltuiala` | adauga inregistrare, cu document justificativ optional (base64) |
+
+**Nu exista tool-uri de stergere** (drop-data, delete etc.) - operatiile
+distructive raman doar in interfata web.
+
+In modul multi-user nu trebuie sa trimiti niciun ID de utilizator: identitatea
+vine din cheia generata in `/setari`. Serverul seteaza contextul contului
+respectiv pentru fiecare tool call, deci agentul nu poate citi sau modifica
+datele altui cont. O cheie fara user (generata inainte de aceasta schimbare)
+este refuzata in modul multi-user - genereaza una noua.
 
 
 ## Ghid de utilizare: de la instalare la rutina zilnica
@@ -402,6 +504,9 @@ Alte variabile de mediu utile (toate in `core/settings.py`):
 | `PFASIMPLU_DEBUG` | `0` = mod productie (fara trace-uri in browser) | `1` |
 | `PFASIMPLU_ALLOW_REGISTRATION` | `0` = blocheaza crearea de conturi (mod multi-user) | `1` |
 | `PFASIMPLU_SECRET_KEY`, `PFASIMPLU_ALLOWED_HOSTS`, `PFASIMPLU_CSRF_TRUSTED_ORIGINS` | necesare pe server (vezi `.env.prod.example`) | - |
+| `PFASIMPLU_DOMAIN` | domeniul folosit de Caddy (inclusiv `mcp.<domeniu>`) | `pfa.exemplu.ro` |
+| `PFASIMPLU_MCP_PORT` | portul serverului MCP in container | `8001` |
+| `PFASIMPLU_MCP_TOKEN` | cheia MCP pentru transportul stdio (local) | - |
 
 Modul multi-user local (pentru a testa login-ul si izolarea datelor):
 
@@ -415,7 +520,8 @@ uv run manage.py createsuperuser   # apoi /admin/
 
 | App / folder | Rol |
 |---|---|
-| `setari/` | datele PFA-ului, IBAN-uri, cod TVA intracomunitar, export/stergere date |
+| `setari/` | datele PFA-ului, IBAN-uri, cod TVA intracomunitar, export/stergere date, cheia MCP |
+| `mcp_server/` | server FastMCP: tool-uri, autorizare Bearer, transport stdio (`local.py`) si HTTP (`http_app.py`) |
 | `facturi/` | emitere facturi: PDF multi-limba + XML e-factura (UBL) |
 | `incasari/` | incasari + documente justificative, conversie BNR |
 | `cheltuieli/` | cheltuieli, deductibilitate, amortizare, taxare inversa TVA |

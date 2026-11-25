@@ -1,3 +1,8 @@
+import hashlib
+import hmac
+import secrets
+
+from django.conf import settings
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
@@ -100,3 +105,90 @@ class SetariModel(UserOwnedModel):
                 return cont["iban"]
 
         return self.iban
+
+
+class McpApiKey(models.Model):
+    """Cheia API folosita de serverul MCP, legata de contul care a generat-o.
+
+    In modul multi-user fiecare utilizator are propria cheie, iar tool-urile
+    MCP ruleaza in contextul acelui utilizator (deci vede/modifica doar
+    datele lui). In modul desktop (fara login) cheia are user=None.
+
+    Cheia in clar se afiseaza o singura data, la generare. In baza de date
+    se salveaza doar un hash (cu salt), iar la fiecare request MCP se
+    compara hash-ul cheii primite cu cel salvat, in timp constant.
+    """
+
+    KEY_PREFIX = "ccf_"
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="mcp_api_keys",
+    )
+    nume = models.CharField(max_length=50, default="Cheia mea MCP")
+    prefix = models.CharField(max_length=16)
+    key_hash = models.CharField(max_length=96, unique=True)
+    created_at = models.DateTimeField(default=timezone.now)
+    last_used_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = "Cheie MCP"
+        verbose_name_plural = "Chei MCP"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user"],
+                condition=models.Q(user__isnull=False),
+                name="o_cheie_mcp_per_utilizator",
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.nume} ({self.prefix}...)"
+
+    @staticmethod
+    def _hash_key(key: str, salt: str) -> str:
+        return hashlib.sha256(f"{salt}:{key}".encode("utf-8")).hexdigest()
+
+    @classmethod
+    def generate(cls, user=None, nume: str = "Cheia mea MCP") -> tuple["McpApiKey", str]:
+        """Genereaza o cheie noua pt. utilizator, invalidand-o pe a lui cea veche.
+        Returneaza (obiectul, cheia in clar - singura data cand e disponibila)."""
+        key = cls.KEY_PREFIX + secrets.token_urlsafe(32)
+        salt = secrets.token_hex(16)
+        cls.objects.filter(user=user).delete()
+        return cls.objects.create(
+            user=user,
+            nume=(nume or "Cheia mea MCP").strip()[:50],
+            prefix=key[:12],
+            key_hash=f"{salt}${cls._hash_key(key, salt)}",
+        ), key
+
+    @classmethod
+    def verify(cls, key: str) -> "McpApiKey | None":
+        """Verifica o cheie si actualizeaza data ultimei utilizari."""
+        if not key or not isinstance(key, str):
+            return None
+        for obj in cls.objects.all():
+            salt, _, digest = obj.key_hash.partition("$")
+            if not salt or not digest:
+                continue
+            if hmac.compare_digest(cls._hash_key(key, salt), digest):
+                # Actualizam "ultima folosire" cel mult o data pe minut, ca sa nu
+                # generam un write SQLite la fiecare request din sesiunea MCP.
+                acum = timezone.now()
+                if (
+                    obj.last_used_at is None
+                    or (acum - obj.last_used_at).total_seconds() > 60
+                ):
+                    obj.last_used_at = acum
+                    obj.save(update_fields=["last_used_at"])
+                return obj
+        return None
+
+    @classmethod
+    def revoke(cls, user=None) -> None:
+        """Revoca doar cheia utilizatorului dat (in desktop: cheia locala)."""
+        cls.objects.filter(user=user).delete()

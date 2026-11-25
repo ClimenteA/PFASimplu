@@ -45,10 +45,11 @@ from utils.trezorerie import (
     ANAF_CODURI_IBAN,
 )
 from .forms import SetariForm
-from .models import SetariModel
+from .models import McpApiKey, SetariModel
 from core.settings import (
     APP_VERSION,
     MEDIA_ROOT,
+    MULTI_USER,
     make_media_dir,
     get_extracts_path,
     get_media_path,
@@ -69,11 +70,11 @@ def _este_versiune_mai_noua(remote: str, local: str) -> bool:
         return False
 
 
-def get_setari_context(form):
+def get_setari_context(form, request=None):
     result = SetariModel.objects.first()
     localitate = form.initial.get("localitate") or (result.localitate if result else "")
     latest_app_version = get_latest_app_version()
-    return {
+    context = {
         "setari_form": form,
         "lista_localitati": lista_localitati,
         "lista_valute": lista_valute,
@@ -84,7 +85,18 @@ def get_setari_context(form):
         "app_version": APP_VERSION,
         "latest_app_version": latest_app_version,
         "update_available": _este_versiune_mai_noua(latest_app_version, APP_VERSION),
+        "mcp_key": (
+            McpApiKey.objects.filter(user=request.user).first()
+            if request is not None and MULTI_USER and request.user.is_authenticated
+            else McpApiKey.objects.first()
+        ),
+        "mcp_key_once": None,
     }
+    # Cheia in clar e afisata o singura data, imediat dupa generare, si apoi
+    # stearsa din sesiune (nu ramane in istoric/URL/logs).
+    if request is not None:
+        context["mcp_key_once"] = request.session.pop("mcp_key_once", None)
+    return context
 
 
 def get_ani_export():
@@ -134,7 +146,7 @@ class SetariView(View):
         return render(
             request,
             template_name="setari.html",
-            context=get_setari_context(form),
+            context=get_setari_context(form, request),
         )
 
     def post(self, request, *args, **kwargs):
@@ -144,7 +156,7 @@ class SetariView(View):
             return render(
                 request,
                 "setari.html",
-                context=get_setari_context(form),
+                context=get_setari_context(form, request),
             )
 
         setari = form.save(commit=False)
@@ -179,6 +191,30 @@ class SetariView(View):
         )
         return redirect("/setari/")
 
+
+class SetariMcpKeyGenerateView(View):
+    """Genereaza (sau roteste) cheia folosita de serverul MCP.
+    Cheia in clar ajunge doar in sesiune, ca sa fie afisata o singura data."""
+
+    def post(self, request):
+        user = request.user if MULTI_USER and request.user.is_authenticated else None
+        _, key = McpApiKey.generate(user)
+        # Cheia e afisata direct in campul password de pe pagina Setari;
+        # un mesaj-modal ar acoperi butonul de copiat chiar cand e nevoie de el.
+        request.session["mcp_key_once"] = key
+        # Anchorul face pagina sa se deschida direct la sectiunea MCP.
+        return redirect("/setari/#cheie-mcp")
+
+
+class SetariMcpKeyRevokeView(View):
+    """Revoca definitiv cheia MCP curenta."""
+
+    def post(self, request):
+        user = request.user if MULTI_USER and request.user.is_authenticated else None
+        McpApiKey.revoke(user)
+        request.session.pop("mcp_key_once", None)
+        # Fara mesaj-modal: vrem ca sectiunea MCP sa fie vizibila dupa scroll.
+        return redirect("/setari/#cheie-mcp")
 
 
 class SetariViewDownloadData(View):

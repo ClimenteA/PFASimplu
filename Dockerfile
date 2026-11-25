@@ -22,9 +22,11 @@ RUN mkdir -p /data/dbsqlite /data/media /app/staticfiles
 ENV PFASIMPLU_DB_DIR=/data/dbsqlite \
     PFASIMPLU_MEDIA_ROOT=/data/media \
     PFASIMPLU_MULTI_USER=1 \
-    PFASIMPLU_DEBUG=0
+    PFASIMPLU_DEBUG=0 \
+    PFASIMPLU_MCP_PORT=8001
 
-EXPOSE 8000
+# 8000 = aplicatia web (waitress), 8001 = serverul MCP (uvicorn/FastMCP).
+EXPOSE 8000 8001
 
 ENTRYPOINT ["./docker-entrypoint.sh"]
 CMD ["python", "-m", "waitress", "--threads=6", "--listen=*:8000", "core.wsgi:application"]
