@@ -1,7 +1,7 @@
 import os
 from django.shortcuts import render
+from cheltuieli.calcul import q_inventar
 from cheltuieli.models import CheltuialaModel
-from django.db.models import Q
 from django.core.paginator import Paginator
 from django.views import View
 from django.contrib import messages
@@ -50,9 +50,7 @@ class InventarView(View):
         if not page_number:
             page_number = 1
 
-        results = CheltuialaModel.objects.filter(
-            Q(obiect_de_inventar=True) | Q(mijloc_fix=True)
-        ).order_by("-data_inserarii")
+        results = CheltuialaModel.objects.filter(q_inventar()).order_by("-data_inserarii")
 
         paginator = Paginator(results, 100)
         page_items = paginator.get_page(page_number)

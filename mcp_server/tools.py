@@ -119,9 +119,11 @@ def register_tools(mcp) -> None:
                 "adresa": s.adresa,
                 "email": s.email,
                 "telefon": s.telefon,
-                "iban": s.iban,
-                "conturi_iban": s.conturi_iban or [],
+                "conturi_iban": [
+                    {"valuta": c.valuta, "iban": c.iban} for c in s.conturi.all()
+                ],
                 "caen_principal": s.caen_principal,
+                "caen_secondare": s.caen_secondare or [],
                 "cod_tva_intracomunitar": s.cod_tva_intracomunitar,
                 "cont_iban_trezoreria": s.cont_iban_trezoreria,
                 "scutit_cas": bool(s.scutit_cas),
@@ -193,7 +195,7 @@ def register_tools(mcp) -> None:
                 {
                     "id": f.id,
                     "serie_numar": f"{f.serie}-{f.numar}",
-                    "data_emitere": f.data_emitere.date().isoformat() if f.data_emitere else None,
+                    "data_emitere": f.data_emitere.isoformat() if f.data_emitere else None,
                     "client": f.nume,
                     "cif": f.cif,
                     "total_de_plata": _ban(f.total_de_plata),
@@ -212,7 +214,7 @@ def register_tools(mcp) -> None:
         with user_context():
             qs = DocumenteModel.objects.all().order_by("-actualizat_la", "-id")
             if an:
-                qs = qs.filter(document_pentru_anul=an)
+                qs = qs.filter(data_document__year=an)
             return [
                 {
                     "id": d.id,

@@ -1,4 +1,4 @@
-.PHONY: dev build-local start-local stop-local logs-local build start stop logs mcp-local mcp-http package-mcp
+.PHONY: dev devdb test-e2e migrate-all purge-migration-dirs purge-db package build-local start-local stop-local logs-local build start stop logs mcp-local mcp-http package-mcp lint format ruff check
 
 
 dev:
@@ -11,7 +11,23 @@ test-e2e:
 	uv run playwright install chromium
 	uv run pytest tests/ -v
 
+# Ruff: formatare si lint (reguli implicite Ruff).
+format:
+	uv run ruff format .
+
+lint:
+	uv run ruff check . --fix
+
+# Ruleaza formatarea si corectarile lint intr-o singura comanda.
+ruff: format lint
+
+# Verificare fara modificari (utila in CI).
+check:
+	uv run ruff format --check .
+	uv run ruff check .
+
 migrate-all:
+	uv run manage.py makemigrations utils
 	uv run manage.py makemigrations
 	uv run manage.py migrate
 	uv run manage.py makemigrations cheltuieli 
@@ -26,6 +42,7 @@ migrate-all:
 	uv run manage.py migrate setari
 
 purge-migration-dirs:
+	rm -rf utils/migrations
 	rm -rf cheltuieli/migrations
 	rm -rf documente/migrations
 	rm -rf facturi/migrations

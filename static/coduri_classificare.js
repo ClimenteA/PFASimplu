@@ -547,9 +547,12 @@ function filtreazaCodClasificare(event) {
 }
 
 function hideShowExtraFieldsForMijlocFix() {
-  // Optiunea de mijloc fix se recunoaste dupa "cu amortizare", ca sa nu depinda de
-  // pragul din eticheta (2500 RON pana in 2025, 5000 RON din 2026).
-  if (select_deductibila_el.value.includes("cu amortizare")) {
+  // Codul stocat e "MIJLOC_FIX"; eticheta afisata contine "cu amortizare".
+  const optiune = select_deductibila_el.options[select_deductibila_el.selectedIndex];
+  if (
+    select_deductibila_el.value === "MIJLOC_FIX" ||
+    (optiune && optiune.text.includes("cu amortizare"))
+  ) {
     amortizare_el.style.display = "grid";
     display_coduri_clasif_el.style.display = "block";
     cod_cheltuiala_el.addEventListener("input", filtreazaCodClasificare);

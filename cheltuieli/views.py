@@ -19,8 +19,9 @@ from utils.views import (
     download_model_csv_or_xlsx,
     handle_delete_id_query_param,
 )
+from .calcul import q_taxare_inversa
 from .forms import CheltuieliForm
-from .models import CheltuialaModel, TipAchizitie
+from .models import CheltuialaModel
 
 
 class CheltuieliDescarcareView(View):
@@ -79,8 +80,7 @@ class CheltuieliSearchFurnizor(View):
         results = (
             CheltuialaModel.objects.filter(
                 furnizor_denumire__icontains=nume_furnizor,
-                tip_achizitie__in=[TipAchizitie.SERVICII_UE, TipAchizitie.SERVICII_NON_UE],
-            )
+            ).filter(q_taxare_inversa())
             .order_by("-data_inserarii")
             .values("furnizor_denumire", "furnizor_cod_fiscal", "furnizor_tara")
         )
@@ -113,9 +113,7 @@ class CheltuieliView(View):
         ani_externi = sorted(
             {
                 (c.data_facturii or c.data_inserarii).year
-                for c in CheltuialaModel.objects.filter(
-                    tip_achizitie__in=[TipAchizitie.SERVICII_UE, TipAchizitie.SERVICII_NON_UE],
-                )
+                for c in CheltuialaModel.objects.filter(q_taxare_inversa())
                 if (c.data_facturii or c.data_inserarii)
             } | {timezone.now().year},
             reverse=True,

@@ -1,20 +1,21 @@
+from django import forms
 from django.forms import ModelForm, DateInput, TextInput
-from .models import CheltuialaModel
+
+from .models import CheltuialaModel, TipAchizitie
 
 
 class CheltuieliForm(ModelForm):
+    # Camp informativ: originea se deduce din tara furnizorului in model.
+    tip_achizitie = forms.ChoiceField(
+        choices=TipAchizitie.choices,
+        required=False,
+        label="Origine furnizor",
+    )
+
     class Meta:
         model = CheltuialaModel
         fields = "__all__"
-        exclude = [
-            "actualizat_la",
-            "suma_in_ron",
-            "deducere_in_ron",
-            "baza_in_lei",
-            "tva_autolichidata",
-            "curs_bnr_aplicat",  # completat automat din cursvalutarbnr
-            "user",
-        ]
+        exclude = ["actualizat_la", "user"]
         widgets = {
             "cod_de_clasificare": TextInput(attrs={"placeholder": "2.2.9."}),
             "nume_cheltuiala": TextInput(attrs={"autocomplete": "off"}),
@@ -26,7 +27,6 @@ class CheltuieliForm(ModelForm):
             "numar_factura": TextInput(attrs={"autocomplete": "off", "placeholder": "ex. PBW-2026-003576"}),
         }
         labels = {
-            "tip_achizitie": "Origine furnizor",
             "furnizor_denumire": "Denumire furnizor",
             "furnizor_cod_fiscal": "Cod TVA / cod fiscal furnizor",
             "furnizor_tara": "Tara furnizor",

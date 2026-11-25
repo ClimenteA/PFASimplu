@@ -1,6 +1,5 @@
 from django.conf import settings
 from django.db import models
-from django.utils.translation import gettext_lazy as _
 from .files import get_save_path
 from .multiuser import get_current_user
 from .valuta import Valuta, TipTranzactie, to_ron
@@ -53,9 +52,12 @@ class UserOwnedModel(models.Model):
 
 
 class CommonIncasariCheltuieliModel(UserOwnedModel):
-    # Sumele se pastreaza cu 4 zecimale; sumele finale se rotunjesc separat
-    # la 2 zecimale cu ROUND_HALF_UP (vezi utils.decimale).
-    suma_in_ron = models.DecimalField(max_digits=14, decimal_places=4, null=True, blank=True)
+    """Faptele introduse de utilizator pentru o incasare sau cheltuiala.
+
+    Valorile in RON NU mai sunt coloane: se calculeaza din `suma`, `valuta` si
+    data, folosind cursul BNR pastrat in `utils.CursBnr` (o singura sursa).
+    """
+
     suma = models.DecimalField(max_digits=14, decimal_places=4)
     valuta = models.CharField(max_length=3, choices=Valuta, default=Valuta.RON)
     tip_tranzactie = models.CharField(
@@ -67,18 +69,13 @@ class CommonIncasariCheltuieliModel(UserOwnedModel):
     fisier = models.FileField(max_length=100_000, upload_to=get_save_path)
     actualizat_la = models.DateTimeField(default=timezone.now)
 
-    def save(self, *args, **kwargs):
-        if self.data_inserarii and self.valuta != "RON":
-            self.suma_in_ron = to_ron(self.suma, self.valuta, self.data_inserarii)
-        elif not self.data_inserarii and self.valuta != "RON":
-            self.suma_in_ron = to_ron(self.suma, self.valuta, timezone.now().date())
-        elif self.valuta == "RON":
-            self.suma_in_ron = self.suma
-
-        if hasattr(self, "deducere_in_ron"):
-            self.deducere_in_ron = self.calculeaza_deducere_in_ron()
-
-        super().save(*args, **kwargs)
+    @property
+    def suma_in_ron(self):
+        return to_ron(self.suma, self.valuta, self.data_inserarii)
 
     class Meta:
         abstract = True
+
+
+# Nume sugerat in designul de schema; pastram si vechiul nume pentru importuri.
+TranzactieModel = CommonIncasariCheltuieliModel

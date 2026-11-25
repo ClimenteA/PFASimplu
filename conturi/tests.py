@@ -149,7 +149,7 @@ class IzolareDateTests(TestCase):
         self.client.login(username="unu@test.ro", password="parola-sigura-123")
         response = self.client.post(reverse("cheltuieli"), {
             "nume_cheltuiala": "Noua",
-            "deductibila": "Deductibila integral",
+            "deductibila": "INTEGRAL",
             "suma": "50.00",
             "valuta": "RON",
             "tip_tranzactie": "BANCAR",
@@ -168,7 +168,7 @@ class IzolareDateTests(TestCase):
         self.client.login(username="unu@test.ro", password="parola-sigura-123")
         self.client.post(reverse("cheltuieli"), {
             "nume_cheltuiala": "Cu fisier",
-            "deductibila": "Deductibila integral",
+            "deductibila": "INTEGRAL",
             "suma": "50.00",
             "valuta": "RON",
             "tip_tranzactie": "BANCAR",

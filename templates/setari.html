@@ -207,11 +207,7 @@
                     const lista = JSON.parse($el.dataset.conturi || '[]');
                     if (lista.length) return lista;
                 } catch (e) {}
-                {% if setari_form.iban.value %}
-                return [{ valuta: 'RON', iban: '{{ setari_form.iban.value|escapejs }}' }];
-                {% else %}
                 return [{ valuta: 'RON', iban: '' }];
-                {% endif %}
             })(),
             valute: {{ lista_valute }},
             adaugaCont() {

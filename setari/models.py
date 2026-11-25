@@ -8,18 +8,17 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from utils.localitati import Localitati
-from utils.models import UserOwnedModel, UserScopedManager
+from utils.models import UserOwnedModel
 from utils.valuta import Valuta
 
 
 def validate_iban_length(value):
-    if len(value) < 24:
+    if len(value or "") < 24:
         raise ValidationError(_("IBAN trebuie sa aiba minim 24 de caractere."))
 
 
 def validate_iban_trezoreria(value):
-    """IBAN-ul trezoreriei are exact 24 de caractere si cifra de control valida
-    (contine litere in BBAN, ex. RO41TREZ40620A100101XTVA)."""
+    """IBAN-ul trezoreriei are exact 24 de caractere si cifra de control valida."""
     iban = (value or "").replace(" ", "").upper()
     if len(iban) != 24:
         raise ValidationError(_("IBAN-ul trezoreriei trebuie sa aiba exact 24 de caractere."))
@@ -31,7 +30,9 @@ def validate_iban_trezoreria(value):
     except ValueError:
         raise ValidationError(_("IBAN-ul trezoreriei contine caractere invalide."))
     if int(numeric) % 97 != 1:
-        raise ValidationError(_("IBAN-ul trezoreriei nu este valid (cifra de control gresita). Verifica-l in lista ANAF."))
+        raise ValidationError(
+            _("IBAN-ul trezoreriei nu este valid (cifra de control gresita). Verifica-l in lista ANAF.")
+        )
 
 
 class SetariModel(UserOwnedModel):
@@ -42,33 +43,18 @@ class SetariModel(UserOwnedModel):
     cif = models.CharField(max_length=20)
     email = models.EmailField()
     telefon = models.CharField(max_length=50, blank=True, null=True)
-    iban = models.CharField(
-        max_length=50, blank=True, null=True, validators=[validate_iban_length]
-    )
     caen_principal = models.CharField(max_length=4)
-    caen_secondar_1 = models.CharField(max_length=4, blank=True, null=True)
-    caen_secondar_2 = models.CharField(max_length=4, blank=True, null=True)
-    caen_secondar_3 = models.CharField(max_length=4, blank=True, null=True)
-    caen_secondar_4 = models.CharField(max_length=4, blank=True, null=True)
-    caen_secondar_5 = models.CharField(max_length=4, blank=True, null=True)
-    scutit_cas = models.BooleanField(blank=True, null=True, default=False)
-    scutit_cass = models.BooleanField(blank=True, null=True, default=False)
-    scutit_impozit = models.BooleanField(blank=True, null=True, default=False)
+    caen_secondare = models.JSONField(default=list, blank=True)
+    scutit_cas = models.BooleanField(default=False)
+    scutit_cass = models.BooleanField(default=False)
+    scutit_impozit = models.BooleanField(default=False)
     actualizat_la = models.DateTimeField(default=timezone.now)
 
-    conturi_iban = models.JSONField(default=list, blank=True)
-
-    # Codul special de TVA intracomunitar (art. 317 Cod fiscal), diferit de CIF-ul normal.
-    # Se foloseste pentru achizitiile de servicii din UE si in declaratiile D301/D390.
+    # Codul special de TVA intracomunitar (art. 317 Cod fiscal).
     cod_tva_intracomunitar = models.CharField(max_length=20, blank=True, null=True)
-
-    # IBAN-ul trezoreriei pentru plata TVA din D301 (cod bugetar 20A100101).
-    # Utilizatorul il ia din lista ANAF pentru judetul/localitatea lui (link in Setari).
     cont_iban_trezoreria = models.CharField(
         max_length=34, blank=True, null=True, validators=[validate_iban_trezoreria]
     )
-
-    objects = UserScopedManager()
 
     class Meta:
         verbose_name_plural = "Setari"
@@ -77,47 +63,48 @@ class SetariModel(UserOwnedModel):
         return self.nume
 
     def get_cif_pentru_achizitie(self, este_ue: bool) -> str:
-        """CIF-ul folosit in D301/D390 si la plata TVA:
-        - achizitii din UE: codul special de TVA intracomunitar (art. 317), daca exista;
-        - achizitii non-UE: codul normal de PFA (CIF)."""
         if este_ue and self.cod_tva_intracomunitar:
             return self.cod_tva_intracomunitar.strip().upper().removeprefix("RO")
         return (self.cif or "").strip().upper().removeprefix("RO")
 
     def get_iban_pentru_valuta(self, valuta: str | None = None):
-        """Returneaza IBAN-ul contului pentru moneda ceruta.
-        Daca nu exista un cont in moneda ceruta se foloseste contul de RON,
-        iar daca nici acesta nu exista, primul cont disponibil."""
-
-        conturi = self.conturi_iban or []
-
+        """IBAN-ul contului pentru moneda ceruta: valuta -> RON -> primul cont."""
+        conturi = list(self.conturi.all())
         if valuta:
             for cont in conturi:
-                if cont.get("valuta") == valuta and cont.get("iban"):
-                    return cont["iban"]
-
+                if cont.valuta == valuta and cont.iban:
+                    return cont.iban
         for cont in conturi:
-            if cont.get("valuta") == Valuta.RON.value and cont.get("iban"):
-                return cont["iban"]
-
+            if cont.valuta == Valuta.RON.value and cont.iban:
+                return cont.iban
         for cont in conturi:
-            if cont.get("iban"):
-                return cont["iban"]
+            if cont.iban:
+                return cont.iban
+        return None
 
-        return self.iban
+
+class ContBancar(models.Model):
+    """Cont bancar al PFA-ului, cu IBAN validat si unic per valuta."""
+
+    setari = models.ForeignKey(
+        SetariModel, related_name="conturi", on_delete=models.CASCADE
+    )
+    valuta = models.CharField(max_length=3, choices=Valuta)
+    iban = models.CharField(max_length=50)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["setari", "valuta"], name="unic_cont_bancar_per_valuta"
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.valuta}: {self.iban}"
 
 
 class McpApiKey(models.Model):
-    """Cheia API folosita de serverul MCP, legata de contul care a generat-o.
-
-    In modul multi-user fiecare utilizator are propria cheie, iar tool-urile
-    MCP ruleaza in contextul acelui utilizator (deci vede/modifica doar
-    datele lui). In modul desktop (fara login) cheia are user=None.
-
-    Cheia in clar se afiseaza o singura data, la generare. In baza de date
-    se salveaza doar un hash (cu salt), iar la fiecare request MCP se
-    compara hash-ul cheii primite cu cel salvat, in timp constant.
-    """
+    """Cheia API folosita de serverul MCP, legata de contul care a generat-o."""
 
     KEY_PREFIX = "ccf_"
 
@@ -154,8 +141,6 @@ class McpApiKey(models.Model):
 
     @classmethod
     def generate(cls, user=None, nume: str = "Cheia mea MCP") -> tuple["McpApiKey", str]:
-        """Genereaza o cheie noua pt. utilizator, invalidand-o pe a lui cea veche.
-        Returneaza (obiectul, cheia in clar - singura data cand e disponibila)."""
         key = cls.KEY_PREFIX + secrets.token_urlsafe(32)
         salt = secrets.token_hex(16)
         cls.objects.filter(user=user).delete()
@@ -168,7 +153,6 @@ class McpApiKey(models.Model):
 
     @classmethod
     def verify(cls, key: str) -> "McpApiKey | None":
-        """Verifica o cheie si actualizeaza data ultimei utilizari."""
         if not key or not isinstance(key, str):
             return None
         for obj in cls.objects.all():
@@ -176,8 +160,6 @@ class McpApiKey(models.Model):
             if not salt or not digest:
                 continue
             if hmac.compare_digest(cls._hash_key(key, salt), digest):
-                # Actualizam "ultima folosire" cel mult o data pe minut, ca sa nu
-                # generam un write SQLite la fiecare request din sesiunea MCP.
                 acum = timezone.now()
                 if (
                     obj.last_used_at is None
@@ -190,5 +172,4 @@ class McpApiKey(models.Model):
 
     @classmethod
     def revoke(cls, user=None) -> None:
-        """Revoca doar cheia utilizatorului dat (in desktop: cheia locala)."""
         cls.objects.filter(user=user).delete()

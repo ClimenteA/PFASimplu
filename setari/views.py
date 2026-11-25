@@ -1,9 +1,7 @@
 import datetime
 import os
-import re
 import shutil
 import zipfile
-from decimal import InvalidOperation
 
 from django.shortcuts import render, redirect, HttpResponse
 from django.http import JsonResponse
@@ -12,9 +10,10 @@ from django.db.models import Q
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django.views import View
+from cheltuieli.calcul import q_mijloc_fix, q_scos_din_uz
 from cheltuieli.models import CheltuialaModel
 from incasari.models import IncasariModel
-from documente.models import DocumenteModel
+from documente.models import DocumenteModel, TipDocument
 from facturi.models import FacturaModel
 from registre.views import (
     LUNI_RO,
@@ -48,7 +47,6 @@ from .forms import SetariForm
 from .models import McpApiKey, SetariModel
 from core.settings import (
     APP_VERSION,
-    MEDIA_ROOT,
     MULTI_USER,
     make_media_dir,
     get_extracts_path,
@@ -113,7 +111,7 @@ def get_ani_export():
         ani.update(d.year for d in dates if d)
 
     ani.update(
-        an for an in DocumenteModel.objects.values_list("document_pentru_anul", flat=True) if an
+        d.year for d in DocumenteModel.objects.values_list("data_document", flat=True) if d
     )
     ani.update(
         d.year for d in DocumenteModel.objects.values_list("actualizat_la", flat=True) if d
@@ -150,7 +148,9 @@ class SetariView(View):
         )
 
     def post(self, request, *args, **kwargs):
-        form = SetariForm(request.POST)
+        # Exista un singur set de setari per utilizator; il actualizam, nu il
+        # stergem si resalvam (vecheaImplementare pierdea ID-ul si fisierele).
+        form = SetariForm(request.POST, instance=SetariModel.objects.first())
 
         if not form.is_valid():
             return render(
@@ -159,7 +159,7 @@ class SetariView(View):
                 context=get_setari_context(form, request),
             )
 
-        setari = form.save(commit=False)
+        setari = form.instance
 
         # Daca IBAN-ul trezoreriei nu a fost completat (utilizatorul a salvat
         # fara sa selecteze din nou localitatea), il deducem automat din
@@ -180,9 +180,7 @@ class SetariView(View):
             if potrivire:
                 setari.cont_iban_trezoreria = potrivire["iban"]
 
-        SetariModel.objects.all().delete()
-
-        setari.save()
+        form.save()
         messages.add_message(
             request,
             messages.SUCCESS,
@@ -251,8 +249,8 @@ class SetariViewDownloadData(View):
         # (document_pentru_anul, cu fallback pe anul urcarii).
         documente = list(
             DocumenteModel.objects.filter(
-                Q(document_pentru_anul=anul)
-                | Q(document_pentru_anul__isnull=True, actualizat_la__year=anul)
+                Q(data_document__year=anul)
+                | Q(data_document__isnull=True, actualizat_la__year=anul)
             ).order_by("id")
         )
 
@@ -405,7 +403,7 @@ class SetariViewDownloadData(View):
                 "serie": factura.serie,
                 "numar": factura.numar,
                 "serie_numar": f"{factura.serie}-{factura.numar}",
-                "data_emitere": timezone.localdate(factura.data_emitere).isoformat(),
+                "data_emitere": factura.data_emitere.isoformat(),
                 "total_de_plata": fmt(factura.total_de_plata),
             }
 
@@ -431,16 +429,13 @@ class SetariViewDownloadData(View):
 
         # Plati la stat deja facute in anul selectat (dovezi de plata urcate
         # in pagina Documente, cu suma extrasa automat din PDF).
-        plati_la_stat_an = D(0)
-        for doc in documente:
-            if doc.tip_document == "Dovada plata taxe si impozite" and doc.mentiuni:
-                match = re.search(r"Plata spv ([\d.,]+) RON", doc.mentiuni)
-                if match:
-                    try:
-                        plati_la_stat_an += D(match.group(1).replace(",", "."))
-                    except (ValueError, InvalidOperation):
-                        pass
-        plati_la_stat_an = rotund2(plati_la_stat_an)
+        plati_la_stat_an = rotund2(
+            sum(
+                (D(doc.suma_plata) for doc in documente
+                 if doc.tip_document == TipDocument.DOVADA_PLATA_TAXE_SI_IMPOZITE.value),
+                D(0),
+            )
+        )
         rest_de_plata = rotund2(D(la_stat["total_taxe_impozite"]) - plati_la_stat_an)
 
         taxe = [
@@ -526,12 +521,12 @@ class SetariViewDownloadData(View):
         inceputul amortizarii pana la amortizarea completa - cat se poate deduce
         in fiecare luna. Lunile viitoare sunt estimate."""
         mijloace_fixe = [
-            mf for mf in CheltuialaModel.objects.filter(mijloc_fix=True, scos_din_uz=False)
-            .order_by("data_inceperii_amortizarii", "id")
+            mf for mf in CheltuialaModel.objects.filter(q_mijloc_fix()).exclude(q_scos_din_uz())
             if mf.data_inceperii_amortizarii and mf.data_amortizarii_complete
             and mf.amortizare_lunara
             and mf.data_amortizarii_complete.year >= anul
         ]
+        mijloace_fixe.sort(key=lambda mf: (mf.data_inceperii_amortizarii, mf.id))
 
         today = timezone.now().date()
         tabele = []

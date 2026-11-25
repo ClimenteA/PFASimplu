@@ -30,6 +30,14 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 RUNTIME_DIR = Path(__file__).resolve().parent / ".runtime"
 FILES_DIR = RUNTIME_DIR / "files"
 
+# Testele folosesc si ORM-ul Django (pentru valorile calculate ca proprietati),
+# deci procesul de pytest trebuie sa vada aceeasi baza ca serverul de test.
+os.environ.setdefault("PFASIMPLU_DB_PATH", str(RUNTIME_DIR / "test.db"))
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings")
+# pytest-playwright ruleaza testele intr-un context cu event loop, iar ORM-ul
+# e folosit doar pentru verificari sincrone pe baza de date de test.
+os.environ.setdefault("DJANGO_ALLOW_ASYNC_UNSAFE", "1")
+
 # Anul acoperit de teste: anul curent. Aplicatia nu accepta date din viitor
 # (validate_not_future_date), deci lunile viitoare sunt sarite automat.
 TEST_YEAR = datetime.date.today().year
@@ -66,7 +74,7 @@ def django_server():
     # migrations/, de aceea le enumeram explicit (ca in Makefile).
     apps_fara_migratii = [
         app
-        for app in ("cheltuieli", "documente", "facturi", "incasari", "setari")
+        for app in ("utils", "cheltuieli", "documente", "facturi", "incasari", "setari")
         if not (REPO_ROOT / app / "migrations").exists()
     ]
     cmds = []

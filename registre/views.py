@@ -5,12 +5,17 @@ from copy import copy
 import matplotlib
 import pandas as pd
 from django.contrib import messages
-from django.db.models import Q, Sum
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.views import View
 
+from cheltuieli.calcul import (
+    calculeaza_deduceri_anului,
+    q_inventar,
+    q_mijloc_fix,
+    q_scos_din_uz,
+)
 from cheltuieli.models import CheltuialaModel, Deductibilitate
 from core.settings import get_media_path, get_extracts_path
 from documente.models import DocumenteModel
@@ -213,8 +218,11 @@ class RegistreView(View):
 
 
 def get_obiecte_inventar():
+    # Campurile derivate nu mai sunt coloane: folosim Q-urile din calcul.py.
+    # `q_scos_din_uz()` selecteaza exact obiectele care AU data iesirii din uz,
+    # deci negarea lor corespunde vechiului `scos_din_uz=False`.
     results = CheltuialaModel.objects.filter(
-        (Q(obiect_de_inventar=True) | Q(mijloc_fix=True)) & Q(scos_din_uz=False)
+        q_inventar() & ~q_scos_din_uz()
     ).order_by("data_inserarii")
 
     return results
@@ -248,99 +256,23 @@ def get_registru_inventar(dbid: bool = True, obiecte_inventar=None):
 
 
 def get_incasari_pe_surse(anul: int):
-
-    incasari_activitate_principala = IncasariModel.objects.filter(
-        sursa_venit=SursaVenit.ACTIVITATE_PRINCIPALA, data_inserarii__year=anul
-    ).aggregate(total=Sum("suma_in_ron"))
-    incasari_activitate_principala = D(incasari_activitate_principala["total"] or 0)
-
-    incasari_alte_surse = IncasariModel.objects.filter(
-        sursa_venit=SursaVenit.ALTE_SURSE, data_inserarii__year=anul
-    ).aggregate(total=Sum("suma_in_ron"))
-    incasari_alte_surse = D(incasari_alte_surse["total"] or 0)
-
-    incasari_inchirieri = IncasariModel.objects.filter(
-        sursa_venit=SursaVenit.INCHIRIERI, data_inserarii__year=anul
-    ).aggregate(total=Sum("suma_in_ron"))
-    incasari_inchirieri = D(incasari_inchirieri["total"] or 0)
-
-    incasari_castig_investitii = IncasariModel.objects.filter(
-        sursa_venit=SursaVenit.CASTIG_INVESTITII, data_inserarii__year=anul
-    ).aggregate(total=Sum("suma_in_ron"))
-    incasari_castig_investitii = D(incasari_castig_investitii["total"] or 0)
-
-    incasari_prop_intelectuala = IncasariModel.objects.filter(
-        sursa_venit=SursaVenit.DREPTURI_PROP_INTELECTUALA, data_inserarii__year=anul
-    ).aggregate(total=Sum("suma_in_ron"))
-    incasari_prop_intelectuala = D(incasari_prop_intelectuala["total"] or 0)
-
-    incasari_agricultura = IncasariModel.objects.filter(
-        sursa_venit=SursaVenit.AGRICULTURA, data_inserarii__year=anul
-    ).aggregate(total=Sum("suma_in_ron"))
-    incasari_agricultura = D(incasari_agricultura["total"] or 0)
-
-    incasari_dividente = IncasariModel.objects.filter(
-        sursa_venit=SursaVenit.DIVIDENTE_VENIT_DISTRUBUIT, data_inserarii__year=anul
-    ).aggregate(total=Sum("suma_in_ron"))
-    incasari_dividente = D(incasari_dividente["total"] or 0)
+    # `suma_in_ron` nu mai e stocata: se calculeaza din suma/valuta/data.
+    # Luam in calcul doar incasarile efectiv incasate in anul cerut, pentru ca
+    # breakdown-ul pe surse sa se adune la `IncasariModel.get_total_incasari(anul)`.
+    totaluri = {sursa.value: D(0) for sursa in SursaVenit}
+    for incasare in IncasariModel.objects.filter(
+        data_incasarii__year=anul, data_incasarii__isnull=False
+    ):
+        if incasare.sursa_venit in totaluri:
+            totaluri[incasare.sursa_venit] += D(incasare.suma_in_ron)
 
     incasari_pe_surse_de_venit = []
-
-    if incasari_activitate_principala:
-        incasari_pe_surse_de_venit.append(
-            {
-                "nume": SursaVenit.ACTIVITATE_PRINCIPALA.value,
-                "valoare": incasari_activitate_principala,
-            }
-        )
-
-    if incasari_alte_surse:
-        incasari_pe_surse_de_venit.append(
-            {
-                "nume": SursaVenit.ALTE_SURSE.value,
-                "valoare": incasari_alte_surse,
-            }
-        )
-
-    if incasari_inchirieri:
-        incasari_pe_surse_de_venit.append(
-            {
-                "nume": SursaVenit.INCHIRIERI.value,
-                "valoare": incasari_inchirieri,
-            }
-        )
-
-    if incasari_castig_investitii:
-        incasari_pe_surse_de_venit.append(
-            {
-                "nume": SursaVenit.CASTIG_INVESTITII.value,
-                "valoare": incasari_castig_investitii,
-            }
-        )
-
-    if incasari_prop_intelectuala:
-        incasari_pe_surse_de_venit.append(
-            {
-                "nume": SursaVenit.DREPTURI_PROP_INTELECTUALA.value,
-                "valoare": incasari_prop_intelectuala,
-            }
-        )
-
-    if incasari_agricultura:
-        incasari_pe_surse_de_venit.append(
-            {
-                "nume": SursaVenit.AGRICULTURA.value,
-                "valoare": incasari_agricultura,
-            }
-        )
-
-    if incasari_dividente:
-        incasari_pe_surse_de_venit.append(
-            {
-                "nume": SursaVenit.DIVIDENTE_VENIT_DISTRUBUIT.value,
-                "valoare": incasari_dividente,
-            }
-        )
+    for sursa in SursaVenit:
+        valoare = totaluri[sursa.value]
+        if valoare:
+            incasari_pe_surse_de_venit.append(
+                {"nume": str(sursa.label), "valoare": valoare}
+            )
 
     return incasari_pe_surse_de_venit
 
@@ -348,185 +280,57 @@ def get_incasari_pe_surse(anul: int):
 def get_cheltuieli_pe_deductibilitate(anul: int):
     # Registrul fiscal arata sumele DEDUSE (deducere_in_ron), nu sumele platite, ca liniile
     # sa se adune la "Total cheltuieli" (care e calculat tot pe deducere_in_ron).
+    # Deducerile (cu plafonarile anuale) se calculeaza o singura data pe an.
+    deduceri = calculeaza_deduceri_anului(anul)
+
+    # Ordinea de afisare ramane aceeasi; `None` marcheaza pozitia amortizarilor,
+    # care se calculeaza lunar, pe toate mijloacele fixe active in an.
+    categorii = [
+        Deductibilitate.DEDUCTIBILA_INTEGRAL,
+        Deductibilitate.DEDUCTIBILA_INTEGRAL_INVENTAR,
+        Deductibilitate.DEDUCTIBILA_INTEGRAL_SALARII,
+        None,
+        Deductibilitate.DEDUCTIBILA_PARTIAL_AUTO_CASA_UTILITATI,
+        Deductibilitate.DEDUCTIBILA_PARTIAL_SPORT_2024,
+        Deductibilitate.DEDUCTIBILA_PARTIAL_PENSIE_PILON_3,
+        Deductibilitate.DEDUCTIBILA_PARTIAL_ASIG_MEDICALE_PRIVAT,
+        Deductibilitate.DEDUCTIBILA_PARTIAL_PROTOCOL,
+        Deductibilitate.DEDUCTIBILA_PARTIAL_SOCIALE,
+        Deductibilitate.DEDUCTIBILA_PARTIAL_CONTRIBUTII_OBLIGATORII_ASOC_ORG,
+        Deductibilitate.DEDUCTIBILA_PARTIAL_COTIZATII_VOLUNTARE_ASOC_ORG,
+    ]
+    totaluri = {cod.value: D(0) for cod in categorii if cod is not None}
+
+    for cheltuiala in CheltuialaModel.objects.filter(data_inserarii__year=anul):
+        if cheltuiala.deductibila in totaluri:
+            totaluri[cheltuiala.deductibila] += D(deduceri.get(cheltuiala.pk) or 0)
+
+    cheltuieli_d_integral_amortizari = D(0)
+    for amortizare in CheltuialaModel.objects.filter(q_mijloc_fix()):
+        luni = amortizare.luni_amortizare_in_an(anul)
+        lunar = amortizare.amortizare_lunara
+        if luni and lunar is not None:
+            cheltuieli_d_integral_amortizari += D(luni) * D(lunar)
 
     cheltuieli_pe_deductibilitate = []
+    for cod in categorii:
+        if cod is None:
+            if cheltuieli_d_integral_amortizari:
+                cheltuieli_pe_deductibilitate.append(
+                    {
+                        "nume": str(
+                            Deductibilitate.DEDUCTIBILA_INTEGRAL_AMORTIZATA.label
+                        ),
+                        "valoare": rotund2(cheltuieli_d_integral_amortizari),
+                    }
+                )
+            continue
 
-    cheltuieli_d_integral = CheltuialaModel.objects.filter(
-        deductibila=Deductibilitate.DEDUCTIBILA_INTEGRAL, data_inserarii__year=anul
-    )
-    cheltuieli_d_integral = cheltuieli_d_integral.aggregate(total=Sum("deducere_in_ron"))["total"]
-
-    if cheltuieli_d_integral:
-        cheltuieli_pe_deductibilitate.append(
-            {
-                "nume": Deductibilitate.DEDUCTIBILA_INTEGRAL.value,
-                "valoare": rotund2(D(cheltuieli_d_integral)),
-            }
-        )
-
-    cheltuieli_d_integral_inventar = CheltuialaModel.objects.filter(
-        deductibila=Deductibilitate.DEDUCTIBILA_INTEGRAL_INVENTAR,
-        data_inserarii__year=anul,
-    ).aggregate(total=Sum("deducere_in_ron"))
-    cheltuieli_d_integral_inventar = cheltuieli_d_integral_inventar["total"]
-
-    if cheltuieli_d_integral_inventar:
-        cheltuieli_pe_deductibilitate.append(
-            {
-                "nume": Deductibilitate.DEDUCTIBILA_INTEGRAL_INVENTAR.value,
-                "valoare": rotund2(D(cheltuieli_d_integral_inventar)),
-            }
-        )
-
-    cheltuieli_d_integral_salarii = CheltuialaModel.objects.filter(
-        deductibila=Deductibilitate.DEDUCTIBILA_INTEGRAL_SALARII,
-        data_inserarii__year=anul,
-    ).aggregate(total=Sum("deducere_in_ron"))
-    cheltuieli_d_integral_salarii = cheltuieli_d_integral_salarii["total"]
-
-    if cheltuieli_d_integral_salarii:
-        cheltuieli_pe_deductibilitate.append(
-            {
-                "nume": Deductibilitate.DEDUCTIBILA_INTEGRAL_SALARII.value,
-                "valoare": rotund2(D(cheltuieli_d_integral_salarii)),
-            }
-        )
-
-    amortizari = CheltuialaModel.objects.filter(
-        deductibila=Deductibilitate.DEDUCTIBILA_INTEGRAL_AMORTIZATA,
-        mijloc_fix=True,
-    )
-    cheltuieli_d_integral_amortizari = D(0)
-    if amortizari:
-        for amortizare in amortizari:
-            months = amortizare.luni_amortizare_in_an(anul)
-            cheltuieli_d_integral_amortizari += months * D(amortizare.amortizare_lunara)
-
-    if cheltuieli_d_integral_amortizari:
-        cheltuieli_pe_deductibilitate.append(
-            {
-                "nume": Deductibilitate.DEDUCTIBILA_INTEGRAL_AMORTIZATA.label,
-                "valoare": rotund2(cheltuieli_d_integral_amortizari),
-            }
-        )
-
-    cheltuieli_d_partial_auto_casa_utilizati = CheltuialaModel.objects.filter(
-        deductibila=Deductibilitate.DEDUCTIBILA_PARTIAL_AUTO_CASA_UTILITATI,
-        data_inserarii__year=anul,
-    ).aggregate(total=Sum("deducere_in_ron"))
-    cheltuieli_d_partial_auto_casa_utilizati = cheltuieli_d_partial_auto_casa_utilizati[
-        "total"
-    ]
-
-    if cheltuieli_d_partial_auto_casa_utilizati:
-        cheltuieli_pe_deductibilitate.append(
-            {
-                "nume": Deductibilitate.DEDUCTIBILA_PARTIAL_AUTO_CASA_UTILITATI.value,
-                "valoare": rotund2(D(cheltuieli_d_partial_auto_casa_utilizati)),
-            }
-        )
-
-    cheltuieli_d_partial_sport_2024 = CheltuialaModel.objects.filter(
-        deductibila=Deductibilitate.DEDUCTIBILA_PARTIAL_SPORT_2024,
-        data_inserarii__year=anul,
-    ).aggregate(total=Sum("deducere_in_ron"))
-    cheltuieli_d_partial_sport_2024 = cheltuieli_d_partial_sport_2024["total"]
-
-    if cheltuieli_d_partial_sport_2024:
-        cheltuieli_pe_deductibilitate.append(
-            {
-                "nume": Deductibilitate.DEDUCTIBILA_PARTIAL_SPORT_2024.value,
-                "valoare": rotund2(D(cheltuieli_d_partial_sport_2024)),
-            }
-        )
-
-    cheltuieli_d_partial_pensie_p3 = CheltuialaModel.objects.filter(
-        deductibila=Deductibilitate.DEDUCTIBILA_PARTIAL_PENSIE_PILON_3,
-        data_inserarii__year=anul,
-    ).aggregate(total=Sum("deducere_in_ron"))
-    cheltuieli_d_partial_pensie_p3 = cheltuieli_d_partial_pensie_p3["total"]
-
-    if cheltuieli_d_partial_pensie_p3:
-        cheltuieli_pe_deductibilitate.append(
-            {
-                "nume": Deductibilitate.DEDUCTIBILA_PARTIAL_PENSIE_PILON_3.value,
-                "valoare": rotund2(D(cheltuieli_d_partial_pensie_p3)),
-            }
-        )
-
-    cheltuieli_d_partial_asig_medicale = CheltuialaModel.objects.filter(
-        deductibila=Deductibilitate.DEDUCTIBILA_PARTIAL_ASIG_MEDICALE_PRIVAT,
-        data_inserarii__year=anul,
-    ).aggregate(total=Sum("deducere_in_ron"))
-    cheltuieli_d_partial_asig_medicale = cheltuieli_d_partial_asig_medicale["total"]
-
-    if cheltuieli_d_partial_asig_medicale:
-        cheltuieli_pe_deductibilitate.append(
-            {
-                "nume": Deductibilitate.DEDUCTIBILA_PARTIAL_ASIG_MEDICALE_PRIVAT.value,
-                "valoare": rotund2(D(cheltuieli_d_partial_asig_medicale)),
-            }
-        )
-
-    cheltuieli_d_partial_protocol = CheltuialaModel.objects.filter(
-        deductibila=Deductibilitate.DEDUCTIBILA_PARTIAL_PROTOCOL,
-        data_inserarii__year=anul,
-    ).aggregate(total=Sum("deducere_in_ron"))
-    cheltuieli_d_partial_protocol = cheltuieli_d_partial_protocol["total"]
-
-    if cheltuieli_d_partial_protocol:
-        cheltuieli_pe_deductibilitate.append(
-            {
-                "nume": Deductibilitate.DEDUCTIBILA_PARTIAL_PROTOCOL.value,
-                "valoare": rotund2(D(cheltuieli_d_partial_protocol)),
-            }
-        )
-
-    cheltuieli_d_partial_sociale = CheltuialaModel.objects.filter(
-        deductibila=Deductibilitate.DEDUCTIBILA_PARTIAL_SOCIALE,
-        data_inserarii__year=anul,
-    ).aggregate(total=Sum("deducere_in_ron"))
-    cheltuieli_d_partial_sociale = cheltuieli_d_partial_sociale["total"]
-
-    if cheltuieli_d_partial_sociale:
-        cheltuieli_pe_deductibilitate.append(
-            {
-                "nume": Deductibilitate.DEDUCTIBILA_PARTIAL_SOCIALE.value,
-                "valoare": rotund2(D(cheltuieli_d_partial_sociale)),
-            }
-        )
-
-    cheltuieli_d_partial_contrib_obligatorii = CheltuialaModel.objects.filter(
-        deductibila=Deductibilitate.DEDUCTIBILA_PARTIAL_CONTRIBUTII_OBLIGATORII_ASOC_ORG,
-        data_inserarii__year=anul,
-    ).aggregate(total=Sum("deducere_in_ron"))
-    cheltuieli_d_partial_contrib_obligatorii = cheltuieli_d_partial_contrib_obligatorii[
-        "total"
-    ]
-
-    if cheltuieli_d_partial_contrib_obligatorii:
-        cheltuieli_pe_deductibilitate.append(
-            {
-                "nume": Deductibilitate.DEDUCTIBILA_PARTIAL_CONTRIBUTII_OBLIGATORII_ASOC_ORG.value,
-                "valoare": rotund2(D(cheltuieli_d_partial_contrib_obligatorii)),
-            }
-        )
-
-    cheltuieli_d_partial_cotizatii_voluntare = CheltuialaModel.objects.filter(
-        deductibila=Deductibilitate.DEDUCTIBILA_PARTIAL_COTIZATII_VOLUNTARE_ASOC_ORG,
-        data_inserarii__year=anul,
-    ).aggregate(total=Sum("deducere_in_ron"))
-    cheltuieli_d_partial_cotizatii_voluntare = cheltuieli_d_partial_cotizatii_voluntare[
-        "total"
-    ]
-
-    if cheltuieli_d_partial_cotizatii_voluntare:
-        cheltuieli_pe_deductibilitate.append(
-            {
-                "nume": Deductibilitate.DEDUCTIBILA_PARTIAL_COTIZATII_VOLUNTARE_ASOC_ORG.value,
-                "valoare": rotund2(D(cheltuieli_d_partial_cotizatii_voluntare)),
-            }
-        )
+        valoare = totaluri[cod.value]
+        if valoare:
+            cheltuieli_pe_deductibilitate.append(
+                {"nume": str(cod.label), "valoare": rotund2(valoare)}
+            )
 
     return cheltuieli_pe_deductibilitate
 
@@ -624,7 +428,11 @@ def get_year_from_request(request):
 
 
 def incasari_cheltuieli_dupa_anul_inserarii(anul: int):
-    incasari = IncasariModel.objects.filter(data_inserarii__year=anul)
+    # O incasare conteaza la anul in care banii au intrat in cont;
+    # cheltuiala ramane la anul inserarii.
+    incasari = IncasariModel.objects.filter(
+        data_incasarii__year=anul, data_incasarii__isnull=False
+    )
     cheltuieli = CheltuialaModel.objects.filter(data_inserarii__year=anul)
     return incasari, cheltuieli
 

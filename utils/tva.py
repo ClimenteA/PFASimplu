@@ -16,7 +16,8 @@ from decimal import Decimal
 
 from django.db.models import Q
 
-from cheltuieli.models import CheltuialaModel, TipAchizitie
+from cheltuieli.calcul import q_taxare_inversa
+from cheltuieli.models import CheltuialaModel
 from setari.models import SetariModel
 from utils.decimale import D, rotund2, rotund_intreg, suma
 from utils.tari import denumire_tara
@@ -48,7 +49,7 @@ def termen_depunere(anul: int, luna: int) -> datetime.date:
 def get_cheltuieli_taxare_inversa(anul: int, luna: int | None = None):
     """Cheltuielile cu taxare inversa din luna (sau anul) de raportare.
     Luna de raportare este data facturii (exigibilitatea), cu fallback pe data cheltuielii."""
-    query = Q(tip_achizitie__in=[TipAchizitie.SERVICII_UE, TipAchizitie.SERVICII_NON_UE])
+    query = q_taxare_inversa()
 
     if luna is not None:
         query &= (

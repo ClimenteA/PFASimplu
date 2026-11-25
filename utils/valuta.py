@@ -1,62 +1,19 @@
 import datetime
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-import cursvalutarbnr
+import cursvalutarbnr  # noqa: F401  (patch-uit in teste: utils.valuta.cursvalutarbnr)
 from cursvalutarbnr import ron_exchange_rate
 from functools import lru_cache
 
-from .decimale import D, rotund2, rotund4
-
-
-def curs_bnr_ziua_bancara_anterioara(currency: str, dateValue: datetime.date):
-    """Cursul BNR cerut de OMFP 170/2015 pct. 18 pentru o operatiune din ziua dateValue:
-    "cursul de schimb al pietei valutare, comunicat de BNR, din ultima zi bancara
-    anterioara operatiunii, disponibil ca informatie la momentul efectuarii operatiunii".
-    Se ia ultimul curs publicat de BNR STRICT inainte de data operatiunii (pentru luni
-    cursul de vineri, pentru o zi de dupa o sarbatoare cursul din ultima zi lucratoare)."""
-    if currency == "RON":
-        return D("1")
-    rates = cursvalutarbnr.get_bnr_rates(dateValue)
-    zile_anterioare = [
-        datetime.date.fromisoformat(d) for d in rates.keys()
-        if datetime.date.fromisoformat(d) < dateValue
-    ]
-    if not zile_anterioare:
-        raise ValueError(f"Nu exista curs BNR publicat inainte de {dateValue.isoformat()}")
-    ultima_zi = max(zile_anterioare)
-    # Cursul BNR se pastreaza cu 4 zecimale, ca si restul calculelor.
-    return rotund4(D(rates[ultima_zi.isoformat()][currency]))
-
-
-def curs_bnr_data_exigibilitatii(currency: str, dateValue: datetime.date):
-    """Cursul BNR pentru taxarea inversa (D301/D390), conform art. 290 alin. (2) Cod fiscal:
-    ultimul curs comunicat de BNR valabil la data exigibilitatii taxei (de regula data
-    facturii). Daca in ziua respectiva nu s-a publicat curs (weekend/sarbatoare), se ia
-    ultimul curs publicat inainte de acea data."""
-    if currency == "RON":
-        return D("1")
-    if isinstance(dateValue, str):
-        dateValue = datetime.datetime.strptime(dateValue, "%Y-%m-%d").date()
-    rates = cursvalutarbnr.get_bnr_rates(dateValue)
-    zile_disponibile = [
-        datetime.date.fromisoformat(d) for d in rates.keys()
-        if datetime.date.fromisoformat(d) <= dateValue
-    ]
-    if not zile_disponibile:
-        raise ValueError(f"Nu exista curs BNR publicat pana la {dateValue.isoformat()}")
-    ultima_zi = max(zile_disponibile)
-    return rotund4(D(rates[ultima_zi.isoformat()][currency]))
-
-
-@lru_cache(maxsize=None)
-def to_ron(amount, currency: str, dateValue: datetime.date):
-    if isinstance(dateValue, str):
-        dateValue = datetime.datetime.strptime(dateValue, "%Y-%m-%d").date()
-    if not dateValue:
-        dateValue = datetime.date.today()
-    rate = curs_bnr_ziua_bancara_anterioara(currency, dateValue)
-    # 4 zecimale in calcul; valoarea ramane Decimal pana la afisare.
-    return rotund4(D(amount) * D(rate))
+from .decimale import D, rotund2
+# Cursurile sunt pastrate in tabelul CursBnr si incarcate o singura data;
+# functiile isi pastreaza numele si semnatura din versiunea anterioara.
+from .cursuri import (  # noqa: F401
+    CursBnr,
+    curs_bnr_ziua_bancara_anterioara,
+    curs_bnr_data_exigibilitatii,
+    to_ron,
+)
 
 
 @lru_cache(maxsize=None)

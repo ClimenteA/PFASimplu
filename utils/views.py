@@ -75,8 +75,8 @@ def get_page_items(request, theForm: ModelForm, theModel: Model, order_by: str =
             form = theForm()
 
     if theModel.__qualname__ == "IncasariModel":
-        neincasate = theModel.objects.filter(data_inserarii__isnull=True).order_by("-actualizat_la")
-        incasate = theModel.objects.filter(data_inserarii__isnull=False).order_by(order_by)
+        neincasate = theModel.objects.filter(data_incasarii__isnull=True).order_by("-actualizat_la")
+        incasate = theModel.objects.filter(data_incasarii__isnull=False).order_by(order_by)
         results = list(itertools.chain(neincasate, incasate))
     else:
         results = theModel.objects.all().order_by(order_by)

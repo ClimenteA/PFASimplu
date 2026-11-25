@@ -1,20 +1,16 @@
-import os
+import datetime
 import re
 from unidecode import unidecode
-from django.conf import settings
 from django.db import models
 from django.utils import timezone
-from django.core.files.base import ContentFile
-from django.template.loader import render_to_string
 from django.utils.translation import gettext_lazy as _
 from utils.views import one_month_from_now
 from utils.localitati import Localitati
 from utils.files import get_save_path
 from utils.models import UserOwnedModel, UserScopedManager
-from utils.valuta import Valuta
-from utils.decimale import rotund2
-from setari.models import SetariModel
-from core.settings import get_media_path, get_font_path
+from utils.valuta import Valuta, TipTranzactie
+from utils.decimale import D, rotund2, suma
+from core.settings import get_font_path
 from fpdf_table import PDFTable, Align
 
 
@@ -288,13 +284,39 @@ def creeaza_factura_pdf(data: dict, pdf_output_path: str):
     return pdf_output_path
 
 
+def _data_scadenta_default():
+    return one_month_from_now().date()
+
+
+class LinieFactura(models.Model):
+    """O linie dintr-o factura (inlocuieste JSON-ul produse_sau_servicii)."""
+
+    factura = models.ForeignKey(
+        "FacturaModel", related_name="linii", on_delete=models.CASCADE
+    )
+    nume = models.CharField(max_length=300)
+    cod_unitate = models.CharField(max_length=10, default="HUR")
+    cantitate = models.DecimalField(max_digits=14, decimal_places=4, default=1)
+    pret_unitar = models.DecimalField(max_digits=14, decimal_places=4, default=0)
+
+    class Meta:
+        ordering = ["id"]
+
+    @property
+    def subtotal(self):
+        return rotund2(D(self.cantitate) * D(self.pret_unitar))
+
+    def __str__(self):
+        return f"{self.nume} ({self.cantitate} x {self.pret_unitar})"
+
+
 class FacturaModel(UserOwnedModel):
     serie = models.CharField(max_length=20)
     numar = models.IntegerField()
-    data_emitere = models.DateTimeField(default=timezone.now)
-    data_scadenta = models.DateTimeField(default=one_month_from_now)
+    data_emitere = models.DateField(default=datetime.date.today)
+    data_scadenta = models.DateField(default=_data_scadenta_default)
     tip_factura = models.CharField(
-        max_length=300,
+        max_length=30,
         choices=TipFactura,
         default=TipFactura.E_FACTURA,
     )
@@ -312,19 +334,15 @@ class FacturaModel(UserOwnedModel):
     adresa = models.CharField(max_length=1000)
     email = models.EmailField(max_length=250, null=True, blank=True)
     telefon = models.CharField(max_length=250, null=True, blank=True)
-    # Plata
+    # Plata: aceeasi enumerare cu incasarile (nu mai avem codurile 42/10).
     tip_tranzactie = models.CharField(
-        max_length=250, choices=ModalitatePlata, default=ModalitatePlata.BANCAR
+        max_length=10, choices=TipTranzactie, default=TipTranzactie.BANCAR
     )
-    total_de_plata = models.DecimalField(max_digits=14, decimal_places=4)
     valuta = models.CharField(max_length=3, choices=Valuta, default=Valuta.RON)
-    # Produse sau servicii
-    # id, numar_unitati, total_de_plata, nume_produs_sau_serviciu, cod_unitate, pret_pe_unitate, subtotal
-    produse_sau_servicii = models.JSONField(default=list)
     nota = models.TextField(max_length=5000, null=True, blank=True)
     data_inserarii = models.DateTimeField(default=timezone.now, null=True, blank=True)
 
-    # Fisiere
+    # Fisierele se genereaza la creare, in serviciul `facturi.generare`.
     fisier_efactura_xml = models.FileField(
         max_length=100_000, upload_to=get_save_path, null=True, blank=True
     )
@@ -336,18 +354,35 @@ class FacturaModel(UserOwnedModel):
 
     class Meta:
         constraints = [
-            # Desktop (user null): serie+numar unice global, ca pana acum.
             models.UniqueConstraint(
                 fields=["serie", "numar"],
                 name="unique_serie_numar",
                 condition=models.Q(user__isnull=True),
             ),
-            # Multi-user: seria si numarul sunt unice per utilizator.
             models.UniqueConstraint(
                 fields=["user", "serie", "numar"],
                 name="unique_serie_numar_per_user",
                 condition=models.Q(user__isnull=False),
             ),
+        ]
+
+    @property
+    def total_de_plata(self):
+        return rotund2(suma(l.subtotal for l in self.linii.all()))
+
+    @property
+    def produse_sau_servicii(self):
+        """Compatibil cu efactura.xml si cu `creeaza_factura_pdf`."""
+        return [
+            {
+                "id": str(l.id),
+                "nume_produs_sau_serviciu": l.nume,
+                "cod_unitate": l.cod_unitate,
+                "numar_unitati": str(l.cantitate),
+                "pret_pe_unitate": str(l.pret_unitar),
+                "subtotal": str(l.subtotal),
+            }
+            for l in self.linii.all()
         ]
 
     @staticmethod
@@ -401,8 +436,6 @@ class FacturaModel(UserOwnedModel):
         return entry.upper().strip()
 
     def save(self, *args, **kwargs):
-        furnizor = SetariModel.objects.first()
-
         self.serie = self.serie.strip().upper()
         self.adresa = self.clean_entry(self.adresa)
         self.nume = self.clean_entry(self.nume)
@@ -410,61 +443,7 @@ class FacturaModel(UserOwnedModel):
         self.nr_reg_com = self.clean_entry(self.nr_reg_com)
         self.email = self.clean_entry(self.email).lower()
         self.telefon = self.clean_entry(self.telefon)
-
-        show_iban_furnizor = self.tip_tranzactie == ModalitatePlata.BANCAR.value
-
-        context = {
-            "tip_factura": self.tip_factura,
-            "valuta": self.valuta,
-            "show_iban_furnizor": show_iban_furnizor,
-            "serie": self.serie,
-            "numar": str(self.numar),
-            "serie_numar": f"{self.serie}-{self.numar}",
-            "data_emitere": self.data_emitere.date().isoformat(),
-            "data_scadenta": self.data_scadenta.date().isoformat(),
-            "nota": self.nota,
-            "adresa_furnizor": furnizor.adresa,
-            "localitate_furnizor": self.get_localitate(furnizor.localitate),
-            "cod_judet_furnizor": self.get_cod_judet(furnizor.localitate),
-            "cif_furnizor": furnizor.cif,
-            "nr_reg_com_furnizor": furnizor.nr_reg_com,
-            "nume_furnizor": furnizor.nume,
-            "email_furnizor": furnizor.email,
-            "telefon_furnizor": furnizor.telefon,
-            "iban_furnizor": furnizor.get_iban_pentru_valuta(self.valuta),
-            "iban_client": "",
-            "adresa_client": self.adresa,
-            "localitate_client": self.get_localitate(self.localitate),
-            "cod_judet_client": self.get_cod_judet(self.localitate),
-            "nume_client": self.nume,
-            "cif_client": str(self.cif),
-            "nr_reg_com_client": self.nr_reg_com,
-            "email_client": self.email,
-            "telefon_client": self.telefon,
-            "cod_modalitate_plata": self.tip_tranzactie,
-            "total_de_plata": str(rotund2(self.total_de_plata)),
-            "produse_sau_servicii": [
-                {
-                **i, 
-                'id': str(i['id']), 
-                'numar_unitati': str(i['numar_unitati']), 
-                'pret_pe_unitate': str(i['pret_pe_unitate']),
-                'subtotal': str(i['subtotal']),
-                } for i in self.produse_sau_servicii
-            ],
-        }
-
-        if self.tip_factura == TipFactura.E_FACTURA.value:
-            xml_content = render_to_string("efactura.xml", context)
-            self.fisier_efactura_xml.save(
-                "efactura.xml", ContentFile(xml_content), save=False
-            )
-
-        save_pdf_path = os.path.join(get_media_path(), "factura_invoice.pdf")
-        save_pdf_path = creeaza_factura_pdf(context, save_pdf_path)
-        with open(save_pdf_path, "rb") as pdf:
-            self.fisier_factura_pdf.save(
-                "factura_invoice.pdf", ContentFile(pdf.read()), save=False
-            )
-
         super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.serie}-{self.numar} {self.nume} {self.total_de_plata}"

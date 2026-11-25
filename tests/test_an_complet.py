@@ -46,6 +46,21 @@ from helpers import (
 
 pytestmark = pytest.mark.e2e
 
+# Valorile calculate (suma in RON, deducere, TVA, amortizare) sunt
+# proprietati pe modele, nu coloane; le verificam prin ORM, pe aceeasi baza
+# de date cu serverul de test ( PFASIMPLU_DB_PATH setat in conftest ).
+import django  # noqa: E402
+
+django.setup()
+
+from cheltuieli.calcul import q_inventar, q_mijloc_fix, q_scos_din_uz  # noqa: E402
+from cheltuieli.models import CheltuialaModel  # noqa: E402
+from incasari.models import IncasariModel  # noqa: E402
+from utils.tari import TARI_NON_UE_CHOICES, TARI_UE_CHOICES  # noqa: E402
+
+UE_CODES = [cod for cod, _ in TARI_UE_CHOICES]
+NON_UE_CODES = [cod for cod, _ in TARI_NON_UE_CHOICES]
+
 # ---------------------------------------------------------------------------
 # Constante scenariu
 # ---------------------------------------------------------------------------
@@ -228,13 +243,12 @@ def test_02_facturi_si_incasari(page, db, luna, date_pfa):
     incasare_din_factura(page, "PFT", numar_eu, zi_incasare_eu)
 
     # --- Incasari 3-5: separat, din formularul paginii Incasari ------------
-    total_luna_ron = (
-        db.execute(
-            "SELECT COALESCE(SUM(suma_in_ron), 0) FROM incasari_incasarimodel "
-            "WHERE data_inserarii LIKE ?",
-            (f"{TEST_YEAR}-{luna:02d}%",),
-        ).fetchone()[0]
-    )
+    total_luna_ron = float(sum(
+        (i.suma_in_ron for i in IncasariModel.objects.filter(
+            data_incasarii__year=TEST_YEAR, data_incasarii__month=luna
+        )),
+        0,
+    ))
     ramas = buget_luna - total_luna_ron
     nr_separate = fake.random_int(1, 3)  # total max. 5 incasari/luna
     for i in range(nr_separate):
@@ -379,37 +393,22 @@ def test_03_cheltuieli(page, db, luna):
 
     # Taxarea inversa: baza in lei si TVA autolichidata (21%) calculate.
     for nume, tip in ((nume_ue, TIP_ACHIZITIE_UE), (nume_non, TIP_ACHIZITIE_NON_UE)):
-        row = db.execute(
-            "SELECT * FROM cheltuieli_cheltuialamodel WHERE nume_cheltuiala = ?",
-            (nume,),
-        ).fetchone()
-        assert row is not None, f"Cheltuiala {nume!r} nu a fost salvata"
-        assert row["tip_achizitie"] == tip
-        assert row["curs_bnr_aplicat"] and row["curs_bnr_aplicat"] > 1
-        assert row["baza_in_lei"] == pytest.approx(
-            row["suma"] * row["curs_bnr_aplicat"], abs=0.02
-        )
-        assert row["tva_autolichidata"] == pytest.approx(
-            row["baza_in_lei"] * COTA_TVA, abs=0.02
+        c = CheltuialaModel.objects.get(nume_cheltuiala=nume)
+        assert c.tip_achizitie == tip
+        assert c.curs_bnr_aplicat and c.curs_bnr_aplicat > 1
+        assert float(c.baza_in_lei) == pytest.approx(float(c.suma) * float(c.curs_bnr_aplicat), abs=0.02)
+        assert float(c.tva_autolichidata) == pytest.approx(
+            float(c.baza_in_lei) * COTA_TVA, abs=0.02
         )
         # TVA-ul autolichidat se adauga la cheltuiala deductibila.
-        assert row["deducere_in_ron"] == pytest.approx(
-            row["suma_in_ron"] + row["tva_autolichidata"], abs=0.02
+        assert float(c.deducere_in_ron) == pytest.approx(
+            float(c.suma_in_ron) + float(c.tva_autolichidata), abs=0.02
         )
 
     # Obiectul de inventar e marcat ca atare; auto/utilitati dedus 50%.
-    inventar = db.execute(
-        "SELECT obiect_de_inventar FROM cheltuieli_cheltuialamodel "
-        "WHERE nume_cheltuiala = ?",
-        (nume_inventar,),
-    ).fetchone()
-    assert inventar["obiect_de_inventar"] == 1
-    auto = db.execute(
-        "SELECT suma_in_ron, deducere_in_ron FROM cheltuieli_cheltuialamodel "
-        "WHERE nume_cheltuiala = ?",
-        (f"Combustibil auto {luna:02d}",),
-    ).fetchone()
-    assert auto["deducere_in_ron"] == pytest.approx(auto["suma_in_ron"] / 2, abs=0.02)
+    assert CheltuialaModel.objects.get(nume_cheltuiala=nume_inventar).obiect_de_inventar
+    auto = CheltuialaModel.objects.get(nume_cheltuiala=f"Combustibil auto {luna:02d}")
+    assert float(auto.deducere_in_ron) == pytest.approx(float(auto.suma_in_ron) / 2, abs=0.02)
 
 
 # ---------------------------------------------------------------------------
@@ -418,11 +417,7 @@ def test_03_cheltuieli(page, db, luna):
 
 
 def test_04_venit_total_sub_plafon(page, db):
-    total = db.execute(
-        "SELECT COALESCE(SUM(suma_in_ron), 0) FROM incasari_incasarimodel "
-        "WHERE data_inserarii LIKE ?",
-        (f"{TEST_YEAR}%",),
-    ).fetchone()[0]
+    total = IncasariModel.get_total_incasari(TEST_YEAR)
     assert total > 0, "Nu exista incasari inregistrate"
     assert total < VENIT_MAX_RON, (
         f"Venitul total {total:.2f} RON depaseste plafonul de {VENIT_MAX_RON} RON"
@@ -444,60 +439,46 @@ def test_04_venit_total_sub_plafon(page, db):
 
 def test_05_mijloace_fixe_si_tva_anual(page, db):
     # 2-3 mijloace fixe pe an, cu amortizare calculata.
-    mijloace = db.execute(
-        "SELECT * FROM cheltuieli_cheltuialamodel WHERE mijloc_fix = 1"
-    ).fetchall()
+    mijloace = list(CheltuialaModel.objects.filter(q_mijloc_fix()))
     assert 2 <= len(mijloace) <= 3
     for mf in mijloace:
-        assert mf["amortizare_lunara"] == pytest.approx(
-            mf["suma_in_ron"] / (mf["ani_amortizare"] * 12), abs=0.02
+        assert float(mf.amortizare_lunara) == pytest.approx(
+            float(mf.suma_in_ron) / (mf.ani_amortizare * 12), abs=0.02
         )
-        assert mf["data_inceperii_amortizarii"]
-        assert mf["data_amortizarii_complete"]
-        assert mf["cod_de_clasificare"].endswith(".")
+        assert mf.data_inceperii_amortizarii
+        assert mf.data_amortizarii_complete
+        assert mf.cod_de_clasificare.endswith(".")
 
     # Ambele tipuri de taxare inversa sunt prezente (UE si non-UE).
-    ue = db.execute(
-        "SELECT COUNT(*), SUM(tva_autolichidata) FROM cheltuieli_cheltuialamodel "
-        "WHERE tip_achizitie = ?",
-        (TIP_ACHIZITIE_UE,),
-    ).fetchone()
-    non_ue = db.execute(
-        "SELECT COUNT(*), SUM(tva_autolichidata) FROM cheltuieli_cheltuialamodel "
-        "WHERE tip_achizitie = ?",
-        (TIP_ACHIZITIE_NON_UE,),
-    ).fetchone()
-    assert ue[0] == LAST_MONTH and ue[1] > 0
-    assert non_ue[0] == LAST_MONTH and non_ue[1] > 0
+    ue = list(CheltuialaModel.objects.filter(furnizor_tara__in=UE_CODES))
+    non_ue = list(CheltuialaModel.objects.filter(furnizor_tara__in=NON_UE_CODES))
+    tva_ue = sum((c.tva_autolichidata for c in ue), 0)
+    tva_non_ue = sum((c.tva_autolichidata for c in non_ue), 0)
+    assert len(ue) == LAST_MONTH and tva_ue > 0
+    assert len(non_ue) == LAST_MONTH and tva_non_ue > 0
 
     # TVA-ul total de plata prin D301 pe an.
-    tva_total = db.execute(
-        "SELECT SUM(tva_autolichidata) FROM cheltuieli_cheltuialamodel "
-        "WHERE data_inserarii LIKE ?",
-        (f"{TEST_YEAR}%",),
-    ).fetchone()[0]
-    assert tva_total == pytest.approx(ue[1] + non_ue[1], abs=0.05)
+    tva_total = sum(
+        (c.tva_autolichidata for c in CheltuialaModel.objects.filter(
+            data_inserarii__year=TEST_YEAR
+        ) if c.tva_autolichidata),
+        0,
+    )
+    assert float(tva_total) == pytest.approx(float(tva_ue) + float(tva_non_ue), abs=0.05)
 
 
 def test_06_verificari_ui(page, db):
     """Cateva verificari directe in interfata (tabele, TVA D301, amortizare)."""
     # Un mijloc fix apare in tabel cu suma dedusa integral.
-    mf = db.execute(
-        "SELECT nume_cheltuiala, suma_in_ron FROM cheltuieli_cheltuialamodel "
-        "WHERE mijloc_fix = 1 LIMIT 1"
-    ).fetchone()
-    row = rand_cheltuiala(page, mf["nume_cheltuiala"])
+    mf = CheltuialaModel.objects.filter(q_mijloc_fix()).first()
+    row = rand_cheltuiala(page, mf.nume_cheltuiala)
     expect(row).to_be_visible()
-    assert cell_float(row, 5) == pytest.approx(mf["suma_in_ron"], abs=0.02)
+    assert cell_float(row, 5) == pytest.approx(float(mf.suma_in_ron), abs=0.02)
 
     # O cheltuiala cu taxare inversa afiseaza TVA-ul in coloana "TVA D301".
-    tva_row = db.execute(
-        "SELECT nume_cheltuiala, tva_autolichidata FROM cheltuieli_cheltuialamodel "
-        "WHERE tip_achizitie = ? LIMIT 1",
-        (TIP_ACHIZITIE_UE,),
-    ).fetchone()
-    row = rand_cheltuiala(page, tva_row["nume_cheltuiala"])
-    assert cell_float(row, 6) == pytest.approx(tva_row["tva_autolichidata"], abs=0.02)
+    tva_row = CheltuialaModel.objects.filter(furnizor_tara__in=UE_CODES).first()
+    row = rand_cheltuiala(page, tva_row.nume_cheltuiala)
+    assert cell_float(row, 6) == pytest.approx(float(tva_row.tva_autolichidata), abs=0.02)
     expect(row.locator("td").nth(6)).to_contain_text("🇪🇺")
 
     # Facturile emise au PDF generat si descarcat din tabel.
@@ -560,10 +541,9 @@ def test_07_declaratii_tva_din_cheltuieli(page, db):
         assert not any(n.endswith(".xml") for n in names)
 
     # Jurnalul de cumparari din Registre contine facturile cu taxare inversa.
-    nr_taxare = db.execute(
-        "SELECT COUNT(*) FROM cheltuieli_cheltuialamodel WHERE tip_achizitie IN (?, ?)",
-        (TIP_ACHIZITIE_UE, TIP_ACHIZITIE_NON_UE),
-    ).fetchone()[0]
+    nr_taxare = CheltuialaModel.objects.filter(
+        furnizor_tara__in=UE_CODES + NON_UE_CODES
+    ).count()
     page.goto(f"/registre/?anul={TEST_YEAR}")
     page.get_by_role("button", name="Jurnal Cumparaturi").click()
     jurnal_randuri = page.locator("div[x-show=\"active == 'jurnale'\"] tbody tr")
@@ -582,7 +562,7 @@ def test_08_export_date_pe_an(page, db):
 
     # Un document urcat in pagina Documente pentru anul testat.
     page.goto("/documente/")
-    page.select_option("#id_tip_document", "Document util")
+    page.select_option("#id_tip_document", "UTIL")
     page.fill("#id_document_pentru_anul", f"{TEST_YEAR}-06-15")
     page.fill("#id_mentiuni", "Document pentru testul de export")
     page.set_input_files("#id_fisier", pdf_justificativ("document_export"))
@@ -597,9 +577,9 @@ def test_08_export_date_pe_an(page, db):
         "SELECT COUNT(*) FROM cheltuieli_cheltuialamodel WHERE data_inserarii LIKE ?",
         (f"{TEST_YEAR}%",),
     ).fetchone()[0]
-    nr_mijloace_fixe = db.execute(
-        "SELECT COUNT(*) FROM cheltuieli_cheltuialamodel WHERE mijloc_fix = 1 AND scos_din_uz = 0"
-    ).fetchone()[0]
+    nr_mijloace_fixe = CheltuialaModel.objects.filter(q_mijloc_fix()).exclude(
+        q_scos_din_uz()
+    ).count()
 
     page.goto("/setari/")
     expect(page.locator("#anul-export")).to_have_value(str(TEST_YEAR))
@@ -629,10 +609,9 @@ def test_08_export_date_pe_an(page, db):
         assert "Plati Banca" in df_jurnal.columns
 
         df_cumparari = pd.read_excel(io.BytesIO(zf.read(f"Jurnal_Cumparaturi_{TEST_YEAR}.xlsx")))
-        nr_taxare = db.execute(
-            "SELECT COUNT(*) FROM cheltuieli_cheltuialamodel WHERE tip_achizitie IN (?, ?)",
-            (TIP_ACHIZITIE_UE, TIP_ACHIZITIE_NON_UE),
-        ).fetchone()[0]
+        nr_taxare = CheltuialaModel.objects.filter(
+            furnizor_tara__in=UE_CODES + NON_UE_CODES
+        ).count()
         assert len(df_cumparari) == nr_taxare
 
         # Coloana cu numele fisierului justificativ, per rand; fisierele
@@ -675,9 +654,9 @@ def test_08_export_date_pe_an(page, db):
         assert "Amortizari mijloace fixe" in sumar
         assert "Tabel Amortizare" in sumar
         assert "Suma (RON)" in sumar
-        nr_mf_active = db.execute(
-            "SELECT COUNT(*) FROM cheltuieli_cheltuialamodel WHERE mijloc_fix = 1 AND scos_din_uz = 0"
-        ).fetchone()[0]
+        nr_mf_active = CheltuialaModel.objects.filter(q_mijloc_fix()).exclude(
+            q_scos_din_uz()
+        ).count()
         assert sumar.count("Tabel Amortizare") == nr_mf_active
 
 
@@ -757,10 +736,9 @@ def test_10_descarcare_registru_inventar(page, db):
     singur fisier cu registrul, fara documente sau fisele mijloacelor fixe."""
     import pandas as pd
 
-    nr_inventar = db.execute(
-        "SELECT COUNT(*) FROM cheltuieli_cheltuialamodel "
-        "WHERE (obiect_de_inventar = 1 OR mijloc_fix = 1) AND scos_din_uz = 0"
-    ).fetchone()[0]
+    nr_inventar = CheltuialaModel.objects.filter(q_inventar()).exclude(
+        q_scos_din_uz()
+    ).count()
     assert nr_inventar > 0
 
     page.goto(f"/registre/?anul={TEST_YEAR}")
@@ -805,10 +783,8 @@ def test_11_export_fara_document_justificativ(page, db):
         "WHERE data_inserarii LIKE ? LIMIT 1",
         (f"{TEST_YEAR}%",),
     ).fetchone()
-    mijloc_fix = db.execute(
-        "SELECT id, fisier FROM cheltuieli_cheltuialamodel "
-        "WHERE mijloc_fix = 1 LIMIT 1"
-    ).fetchone()
+    mf_obj = CheltuialaModel.objects.filter(q_mijloc_fix()).first()
+    mijloc_fix = {"id": mf_obj.id, "fisier": mf_obj.fisier.name} if mf_obj else None
     assert incasare and mijloc_fix
 
     fisier_lipsa = f"{uuid.uuid4().hex[:8]}_document_lipsa.pdf"

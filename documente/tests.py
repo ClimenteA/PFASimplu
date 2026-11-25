@@ -68,7 +68,7 @@ def creeaza_setari(**kwargs):
         nr_reg_com="F22/123/2020",
         cif="43000098",
         email="test@example.com",
-        iban="RO04INGB0000999911194833",
+
         caen_principal="6201",
         cod_tva_intracomunitar="52937756",
         cont_iban_trezoreria="RO41TREZ40620A100101XTVA",
@@ -171,13 +171,14 @@ class TaxareInversaCheltuialaTests(TestCase):
         with self.assertRaises(ValidationError):
             creeaza_cheltuiala_ue(numar_factura="")
 
-    def test_curs_bnr_automat_la_editare(self, _mock):
-        # Cursul nu mai poate fi suprascris manual: se ia automat din cursvalutarbnr.
+    def test_curs_bnr_recalculat_la_editare(self, _mock):
+        # Cursul este o valoare derivata: se recalculeaza din suma si data,
+        # nu poate fi suprascris manual (e @property, fara setter).
         c = creeaza_cheltuiala_ue()
-        c.curs_bnr_aplicat = D("5.5")
+        c.suma = 42.0
         c.save()
         self.assertEqual(c.curs_bnr_aplicat, D("5.3447"))
-        self.assertEqual(c.baza_in_lei, D("112.2387"))
+        self.assertEqual(c.baza_in_lei, rotund4(D("42.0") * D("5.3447")))
 
     def test_data_facturii_fallback_pe_data_cheltuielii(self, _mock):
         c = creeaza_cheltuiala_ue(data_facturii=None)

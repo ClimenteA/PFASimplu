@@ -4,6 +4,7 @@ from django.shortcuts import render, HttpResponseRedirect, get_object_or_404
 from utils.views import get_page_items, handle_delete_id_query_param
 from .forms import DocumenteForm
 from .models import DocumenteModel
+from .services import parseaza_document
 
 
 class DocumenteView(View):
@@ -14,7 +15,7 @@ class DocumenteView(View):
             return redirect_from_delete
 
         form, page_items = get_page_items(
-            request, DocumenteForm, DocumenteModel, order_by="-document_pentru_anul"
+            request, DocumenteForm, DocumenteModel, order_by="-data_document"
         )
 
         return render(
@@ -60,7 +61,24 @@ class DocumenteView(View):
 
         # Save
         try:
-            form.save()
+            document = form.save()
+            # Parsarea PDF-ului e un serviciu apelat la upload, nu un efect in
+            # model.save(). Campurile gasite sunt structurate, nu text in mentiuni.
+            if form.cleaned_data.get("parse_tip_document") and document.fisier:
+                date = parseaza_document(document.fisier.path)
+                if date:
+                    actualizari = []
+                    for camp in ("tip_document", "data_document", "suma_plata", "mentiuni"):
+                        if camp not in date:
+                            continue
+                        # Tipul detectat din PDF are prioritate fata de
+                        # valoarea implicita "Document util".
+                        gol = getattr(document, camp) in (None, "")
+                        if camp == "tip_document" or gol:
+                            setattr(document, camp, date[camp])
+                            actualizari.append(camp)
+                    if actualizari:
+                        document.save(update_fields=actualizari)
             messages.add_message(
                 request,
                 messages.SUCCESS,

@@ -74,6 +74,7 @@ if not DEBUG:
 # Application definition
 
 INSTALLED_APPS = [
+    "utils",
     "conturi",
     "cheltuieli",
     "documente",

@@ -19,18 +19,18 @@ from utils.decimale import D, rotund2, suma
 # Cota standard de TVA folosita de aplicatie la taxarea inversa (art. 291).
 COTA_TVA = 0.21
 
-# Valoarea salvata in DB pentru optiunea de mijloc fix (eticheta afisata e
-# "Mijloc fix peste 5000 RON", dar valoarea ramane cea veche cu "2500").
-MIJLOC_FIX = "Mijloc fix peste 2500 RON (ded. integral cu amortizare)"
-DEDUCTIBIL_INTEGRAL = "Deductibila integral"
-OBIECT_INVENTAR = "Obiect de inventar (deductibil integral)"
-AUTO_UTILITATI_50 = "Auto, chirii, utilitati 50% din valoarea lor"
+# Codurile scurte stocate in DB pentru deductibilitate (etichetele afisate
+# sunt textul descriptiv din models.py).
+MIJLOC_FIX = "MIJLOC_FIX"
+DEDUCTIBIL_INTEGRAL = "INTEGRAL"
+OBIECT_INVENTAR = "INVENTAR"
+AUTO_UTILITATI_50 = "AUTO_50"
 
 TIP_ACHIZITIE_UE = "Servicii UE"
 TIP_ACHIZITIE_NON_UE = "Servicii non-UE"
 
-SURSA_ACTIVITATE = "Venit din activitati independente"
-SURSA_ALTELE = "Venit din alte surse"
+SURSA_ACTIVITATE = "ACTIVITATE"
+SURSA_ALTELE = "ALTE"
 
 
 def assert_saved(page: Page):
@@ -117,7 +117,7 @@ def emite_factura(
     produse: list[dict],
     tip_factura: str = "factura-engleza",
     valuta: str = "EUR",
-    tip_tranzactie: str = "42",
+    tip_tranzactie: str = "BANCAR",
     serie: str = "PFT",
     adresa: str = "STR. TESTULUI NR. 1, BUCURESTI",
     localitate: str = "",

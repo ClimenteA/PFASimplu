@@ -10,6 +10,7 @@ from utils.views import (
 )
 
 from utils.localitati import lista_localitati
+from .generare import genereaza_documente
 from .models import FacturaModel
 from .forms import FacturaForm
 from setari.models import SetariModel
@@ -94,7 +95,14 @@ class FacturiView(View):
                 },
             )
 
-        form.save()
+        factura = form.save()
+        try:
+            genereaza_documente(factura)
+        except Exception as err:
+            messages.add_message(
+                request, messages.ERROR, str(err), extra_tags="🟥 Eroare!"
+            )
+            return redirect("/facturi/")
         messages.add_message(
             request,
             messages.SUCCESS,
