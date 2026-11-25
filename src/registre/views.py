@@ -5,7 +5,6 @@ from copy import copy
 import matplotlib
 import pandas as pd
 from django.contrib import messages
-from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.views import View
@@ -17,13 +16,12 @@ from cheltuieli.calcul import (
     q_scos_din_uz,
 )
 from cheltuieli.models import CheltuialaModel, Deductibilitate
-from core.settings import get_extracts_path, get_media_path
+from core.settings import get_media_path
 from documente.models import DocumenteModel
 from incasari.models import IncasariModel, SursaVenit
 from setari.models import SetariModel
 from utils.calcule import calculeaza_taxe_si_impozite
-from utils.decimale import D, rotund2
-from utils.pretty_excel import make_excel_pretty
+from utils.decimale import D, format_suma, rotund2
 from utils.tva import calculeaza_jurnal_cumparari
 from utils.valuta import ron_to_eur
 from utils.views import download_csv_or_xlsx, download_dataframe
@@ -32,6 +30,18 @@ from utils.views import download_csv_or_xlsx, download_dataframe
 matplotlib.use("SVG")
 
 import matplotlib.pyplot as plt
+
+
+def in_valuta_afisare(value, valuta: str, anul: int):
+    """Valoarea afisata/exportata in moneda selectata, cu 2 zecimale."""
+    valoare = D(value)
+    if valuta == "EUR":
+        return ron_to_eur(valoare, anul)
+    return rotund2(valoare)
+
+
+def get_valuta_from_request(request) -> str:
+    return request.GET.get("valuta") or "RON"
 
 
 def registru_jurnal_dataframe(data):
@@ -104,7 +114,12 @@ class RegistruJurnalDescarcaView(View):
     def get(self, request):
         anul = get_year_from_request(request)
         incasari, cheltuieli = incasari_cheltuieli_dupa_anul_inserarii(anul)
-        data = get_registru_jurnal_incasari_si_plati(request, incasari, cheltuieli)
+        data = get_registru_jurnal_incasari_si_plati(
+            request,
+            incasari,
+            cheltuieli,
+            valuta=get_valuta_from_request(request),
+        )
 
         if not data:
             return redirect("/registre/")
@@ -121,6 +136,7 @@ class RegistruFiscalDescarcaView(View):
             overview_data["total_incasari_brut"],
             overview_data["total_incasari_net"],
             overview_data["total_cheltuieli"],
+            valuta=overview_data["valuta"],
         )
         df = registru_fiscal_dataframe(data)
 
@@ -129,7 +145,11 @@ class RegistruFiscalDescarcaView(View):
 
 class RegistruInventarDescarcaView(View):
     def get(self, request):
-        data = get_registru_inventar(dbid=True)
+        data = get_registru_inventar(
+            dbid=True,
+            valuta=get_valuta_from_request(request),
+            anul=get_year_from_request(request),
+        )
         if not data:
             messages.add_message(
                 request,
@@ -153,10 +173,10 @@ class RegistruJurnalCumparariDescarcaView(View):
     pe luna (daca se da parametrul luna) sau pe tot anul."""
 
     def get(self, request):
-        filetype = request.GET.get("filetype", "csv").lower()
         anul = get_year_from_request(request)
         luna = request.GET.get("luna")
         luna = int(luna) if luna else None
+        valuta = get_valuta_from_request(request)
 
         jurnal = calculeaza_jurnal_cumparari(anul, luna)
         if not jurnal:
@@ -169,42 +189,36 @@ class RegistruJurnalCumparariDescarcaView(View):
             return redirect("/registre/")
 
         perioada = f"{anul}_{luna:02d}" if luna else str(anul)
-        extracts_path = get_extracts_path()
+        if valuta == "EUR":
+            for rand in jurnal["randuri"]:
+                for camp in ("total_document", "baza", "tva"):
+                    rand[camp] = in_valuta_afisare(rand[camp], valuta, anul)
 
         df = jurnal_cumparari_dataframe(jurnal)
-        if filetype == "xlsx":
-            fp = os.path.join(extracts_path, f"jurnal_cumparari_{perioada}.xlsx")
-            df.to_excel(fp, index=False)
-            make_excel_pretty(fp)
-            content_type = (
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            )
-        elif filetype == "csv":
-            fp = os.path.join(extracts_path, f"jurnal_cumparari_{perioada}.csv")
-            df.to_csv(fp, index=False)
-            content_type = "text/csv"
-        else:
-            return redirect("/registre/")
-
-        response = HttpResponse(open(fp, "rb"), content_type=content_type)
-        response["Content-Disposition"] = f"attachment; filename={os.path.basename(fp)}"
-        return response
+        return download_dataframe(request, df, f"jurnal_cumparari_{perioada}")
 
 
 class RegistreView(View):
     def get(self, request):
         overview_data = get_cards_and_charts_data(request)
+        valuta = overview_data["valuta"]
+        anul = overview_data["anul"]
         registru_fiscal = get_registru_de_evidenta_fiscala(
             request,
             overview_data["total_incasari_brut"],
             overview_data["total_incasari_net"],
             overview_data["total_cheltuieli"],
+            valuta=valuta,
         )
         registru_jurnal_incasari_si_plati = get_registru_jurnal_incasari_si_plati(
-            request
+            request, valuta=valuta, anul=anul
         )
-        registru_inventar = get_registru_inventar()
-        jurnal_cumparari = calculeaza_jurnal_cumparari(overview_data["anul"])
+        registru_inventar = get_registru_inventar(valuta=valuta, anul=anul)
+        jurnal_cumparari = calculeaza_jurnal_cumparari(anul)
+        if jurnal_cumparari and valuta == "EUR":
+            for rand in jurnal_cumparari["randuri"]:
+                for camp in ("total_document", "baza", "tva"):
+                    rand[camp] = in_valuta_afisare(rand[camp], valuta, anul)
 
         return render(
             request,
@@ -230,18 +244,23 @@ def get_obiecte_inventar():
     return results
 
 
-def get_registru_inventar(dbid: bool = True, obiecte_inventar=None):
+def get_registru_inventar(
+    dbid: bool = True, obiecte_inventar=None, valuta: str = "RON", anul: int | None = None
+):
 
     if obiecte_inventar is None:
         obiecte_inventar = get_obiecte_inventar()
 
+    anul = anul or timezone.now().year
     idx = 1
     rows = []
     for item in obiecte_inventar:
         data = {
             "nr_crt": idx,
             "nume_cheltuiala": item.nume_cheltuiala,
-            "deducere_in_ron": item.deducere_in_ron,
+            "deducere_in_ron": in_valuta_afisare(
+                item.deducere_in_ron, valuta, anul
+            ),
             "data_inserarii": item.data_inserarii.isoformat(),
             "fisier": item.fisier.path,
             "mijloc_fix": item.mijloc_fix,
@@ -256,7 +275,7 @@ def get_registru_inventar(dbid: bool = True, obiecte_inventar=None):
     return rows
 
 
-def get_incasari_pe_surse(anul: int):
+def get_incasari_pe_surse(anul: int, valuta: str = "RON"):
     # `suma_in_ron` nu mai e stocata: se calculeaza din suma/valuta/data.
     # Luam in calcul doar incasarile efectiv incasate in anul cerut, pentru ca
     # breakdown-ul pe surse sa se adune la `IncasariModel.get_total_incasari(anul)`.
@@ -272,13 +291,16 @@ def get_incasari_pe_surse(anul: int):
         valoare = totaluri[sursa.value]
         if valoare:
             incasari_pe_surse_de_venit.append(
-                {"nume": str(sursa.label), "valoare": valoare}
+                {
+                    "nume": str(sursa.label),
+                    "valoare": in_valuta_afisare(valoare, valuta, anul),
+                }
             )
 
     return incasari_pe_surse_de_venit
 
 
-def get_cheltuieli_pe_deductibilitate(anul: int):
+def get_cheltuieli_pe_deductibilitate(anul: int, valuta: str = "RON"):
     # Registrul fiscal arata sumele DEDUSE (deducere_in_ron), nu sumele platite, ca liniile
     # sa se adune la "Total cheltuieli" (care e calculat tot pe deducere_in_ron).
     # Deducerile (cu plafonarile anuale) se calculeaza o singura data pe an.
@@ -322,7 +344,9 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
                         "nume": str(
                             Deductibilitate.DEDUCTIBILA_INTEGRAL_AMORTIZATA.label
                         ),
-                        "valoare": rotund2(cheltuieli_d_integral_amortizari),
+                        "valoare": in_valuta_afisare(
+                            cheltuieli_d_integral_amortizari, valuta, anul
+                        ),
                     }
                 )
             continue
@@ -330,23 +354,33 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
         valoare = totaluri[cod.value]
         if valoare:
             cheltuieli_pe_deductibilitate.append(
-                {"nume": str(cod.label), "valoare": rotund2(valoare)}
+                {
+                    "nume": str(cod.label),
+                    "valoare": in_valuta_afisare(valoare, valuta, anul),
+                }
             )
 
     return cheltuieli_pe_deductibilitate
 
 
 def get_registru_de_evidenta_fiscala(
-    request, total_incasari_brut, total_incasari_net, total_cheltuieli, anul=None
+    request,
+    total_incasari_brut,
+    total_incasari_net,
+    total_cheltuieli,
+    anul=None,
+    valuta=None,
 ):
     # `anul` poate fi dat explicit (ex. exportul pe an din Setari);
     # altfel se ia din query params, cu fallback pe anul curent.
     if anul is None:
         anul = request.GET.get("anul")
         anul = int(anul) if anul else timezone.now().year
+    if valuta is None:
+        valuta = get_valuta_from_request(request)
 
-    incasari_pe_surse_de_venit = get_incasari_pe_surse(anul)
-    cheltuieli_pe_deductibilitate = get_cheltuieli_pe_deductibilitate(anul)
+    incasari_pe_surse_de_venit = get_incasari_pe_surse(anul, valuta)
+    cheltuieli_pe_deductibilitate = get_cheltuieli_pe_deductibilitate(anul, valuta)
 
     rows = [
         {
@@ -439,11 +473,13 @@ def incasari_cheltuieli_dupa_anul_inserarii(anul: int):
 
 
 def get_registru_jurnal_incasari_si_plati(
-    request, incasari=None, cheltuieli=None, anul=None
+    request, incasari=None, cheltuieli=None, anul=None, valuta=None
 ):
     # `anul` poate fi dat explicit (ex. exportul pe an din Setari).
     if anul is None:
         anul = get_year_from_request(request)
+    if valuta is None:
+        valuta = get_valuta_from_request(request)
 
     if incasari is None and cheltuieli is None:
         incasari, cheltuieli = incasari_cheltuieli_dupa_anul_inserarii(anul)
@@ -485,10 +521,14 @@ def get_registru_jurnal_incasari_si_plati(
 
         if isinstance(entry, IncasariModel):
             incasari_numerar = (
-                D(entry.suma_in_ron) if entry.tip_tranzactie == "NUMERAR" else D(0)
+                in_valuta_afisare(entry.suma_in_ron, valuta, anul)
+                if entry.tip_tranzactie == "NUMERAR"
+                else D(0)
             )
             incasari_bancar = (
-                D(entry.suma_in_ron) if entry.tip_tranzactie == "BANCAR" else D(0)
+                in_valuta_afisare(entry.suma_in_ron, valuta, anul)
+                if entry.tip_tranzactie == "BANCAR"
+                else D(0)
             )
 
             total_incasari_numerar += incasari_numerar
@@ -502,7 +542,7 @@ def get_registru_jurnal_incasari_si_plati(
                     "documentId": str(entry.fisier).split("_")[0],
                     "felul_operatiunii": "Incasare"
                     + (
-                        f" ({entry.suma} {entry.valuta})"
+                        f" ({format_suma(entry.suma)} {entry.valuta})"
                         if entry.valuta != "RON"
                         else ""
                     ),
@@ -516,10 +556,14 @@ def get_registru_jurnal_incasari_si_plati(
 
         else:
             cheltuieli_numerar = (
-                D(entry.suma_in_ron) if entry.tip_tranzactie == "NUMERAR" else D(0)
+                in_valuta_afisare(entry.suma_in_ron, valuta, anul)
+                if entry.tip_tranzactie == "NUMERAR"
+                else D(0)
             )
             cheltuieli_bancar = (
-                D(entry.suma_in_ron) if entry.tip_tranzactie == "BANCAR" else D(0)
+                in_valuta_afisare(entry.suma_in_ron, valuta, anul)
+                if entry.tip_tranzactie == "BANCAR"
+                else D(0)
             )
 
             total_cheltuieli_numerar += cheltuieli_numerar
@@ -533,7 +577,7 @@ def get_registru_jurnal_incasari_si_plati(
                     "documentId": str(entry.fisier).split("_")[0],
                     "felul_operatiunii": f"Cheltuiala {entry.nume_cheltuiala}"
                     + (
-                        f" ({entry.suma} {entry.valuta})"
+                        f" ({format_suma(entry.suma)} {entry.valuta})"
                         if entry.valuta != "RON"
                         else ""
                     ),

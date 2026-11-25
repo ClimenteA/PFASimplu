@@ -6,6 +6,7 @@ from fpdf_table import Align, PDFTable
 
 from cheltuieli.models import CheltuialaModel
 from core.settings import get_extracts_path, get_font_path, get_media_path
+from utils.decimale import format_suma
 
 
 def create_fisa_mijloc_fix_pdf(db_id: int, nr_inventar: int, doar_pdf: bool = False):
@@ -40,8 +41,8 @@ def create_fisa_mijloc_fix_pdf(db_id: int, nr_inventar: int, doar_pdf: bool = Fa
     pdf.table_row([""])
     pdf.table_row(["Nr. Inventar: ", str(nr_inventar)])
     pdf.table_row(["Fel, serie, nr. data document provenienţă: ", fel_document])
-    pdf.table_row(["Valoare de inventar: ", str(inv.suma_in_ron)])
-    pdf.table_row(["Amortizare lunară: ", str(inv.amortizare_lunara)])
+    pdf.table_row(["Valoare de inventar: ", format_suma(inv.suma_in_ron)])
+    pdf.table_row(["Amortizare lunară: ", format_suma(inv.amortizare_lunara)])
     pdf.table_row(
         [
             "Denumirea mijlocului fix şi caracteristici tehnice: ",

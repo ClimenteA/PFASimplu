@@ -8,7 +8,7 @@ from fpdf_table import Align, PDFTable
 from unidecode import unidecode
 
 from core.settings import get_font_path
-from utils.decimale import D, rotund2, suma
+from utils.decimale import D, format_suma, rotund2, suma
 from utils.files import get_save_path
 from utils.localitati import Localitati
 from utils.models import UserOwnedModel, UserScopedManager
@@ -436,9 +436,9 @@ def creeaza_factura_pdf(data: dict, pdf_output_path: str):
             ps["id"],
             ps["nume_produs_sau_serviciu"],
             ps["cod_unitate"],
-            ps["numar_unitati"],
-            ps["pret_pe_unitate"],
-            ps["subtotal"],
+            format_suma(ps["numar_unitati"]),
+            format_suma(ps["pret_pe_unitate"]),
+            format_suma(ps["subtotal"]),
         ]
         pdf.table_row(psrow, width_cols, option="responsive")
 
@@ -448,10 +448,11 @@ def creeaza_factura_pdf(data: dict, pdf_output_path: str):
     else:
         pdf.table_row([""])
 
-    pdf.table_header(
-        [f"{data['header_total_de_plata']} {data['total_de_plata']} {data['valuta']}"],
-        align=Align.R,
+    total_text = (
+        f"{data['header_total_de_plata']} "
+        f"{format_suma(data['total_de_plata'])} {data['valuta']}"
     )
+    pdf.table_header([total_text], align=Align.R)
 
     pdf.output(pdf_output_path)
 
@@ -552,9 +553,9 @@ class FacturaModel(UserOwnedModel):
                 "id": str(l.id),
                 "nume_produs_sau_serviciu": l.nume,
                 "cod_unitate": l.cod_unitate,
-                "numar_unitati": str(l.cantitate),
-                "pret_pe_unitate": str(l.pret_unitar),
-                "subtotal": str(l.subtotal),
+                "numar_unitati": format_suma(l.cantitate),
+                "pret_pe_unitate": format_suma(l.pret_unitar),
+                "subtotal": format_suma(l.subtotal),
             }
             for l in self.linii.all()
         ]

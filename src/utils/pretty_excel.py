@@ -2,10 +2,20 @@ from openpyxl import load_workbook
 from openpyxl.styles import PatternFill
 
 
-def make_excel_pretty(excel_path: str):
+def make_excel_pretty(excel_path: str, number_format: str | None = None):
 
     wb = load_workbook(excel_path)
     ws = wb.active
+
+    if number_format:
+        # Sumele au deja cel mult 2 zecimale; "General" afiseaza 100 si
+        # 12.5 fara zerouri suplimentare.
+        for row in ws.iter_rows(min_row=2):
+            for cell in row:
+                if isinstance(cell.value, (int, float)) and not isinstance(
+                    cell.value, bool
+                ):
+                    cell.number_format = number_format
 
     for col in ws.columns:
         max_length = 0

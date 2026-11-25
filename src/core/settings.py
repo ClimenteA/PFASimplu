@@ -25,6 +25,12 @@ def _get_app_version() -> str:
 
 APP_VERSION = _get_app_version()
 
+# Versiunea anunțată ca disponibilă, afișată în footerul paginii Setări.
+# Se actualizează manual când se publică un release pe GitHub (cache-ul
+# HTTP al interogării către pyproject.toml putea afișa o versiune veche).
+AVAILABLE_APP_VERSION = "3.0.1"
+GITHUB_REPO_URL = "https://github.com/ClimenteA/PFASimplu"
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/

@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load decimale %}
 
 {% block page-title %} Facturi {% endblock %}
 
@@ -255,11 +256,10 @@
                         <i class="bi bi-plus-lg"></i> Adauga
                     </button>
 
-                    <label for="{{ facturi_form.total_de_plata.id_for_label }}">
-                        {{ facturi_form.total_de_plata.label }}:
+                    <label for="id_total_de_plata">
+                        Total de plata:
                         <input type="number" x-ref="total_de_plata_el" name="total_de_plata" step="any" readonly
                             required="" id="id_total_de_plata">
-                        {{ facturi_form.total_de_plata.errors }}
                     </label>
                 </div>
 
@@ -342,7 +342,7 @@
                     </td>
                     <td>{{ item.cif }}</td>
                     <td>{{ item.nume }}</td>
-                    <td>{{ item.total_de_plata }}</td>
+                    <td>{{ item.total_de_plata|suma2 }}</td>
                     <td>{{ item.valuta }}</td>
                     <td>
                         {% if item.tip_tranzactie == 'BANCAR' %}

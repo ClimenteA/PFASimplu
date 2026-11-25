@@ -11,7 +11,7 @@ from django.template.loader import render_to_string
 
 from core.settings import get_media_path
 from setari.models import SetariModel
-from utils.decimale import rotund2
+from utils.decimale import format_suma
 from utils.valuta import TipTranzactie
 
 from .models import FacturaModel, TipFactura, creeaza_factura_pdf
@@ -58,7 +58,7 @@ def construieste_context(factura: FacturaModel) -> dict:
         "cod_modalitate_plata": _COD_PLATA_XML.get(
             factura.tip_tranzactie, factura.tip_tranzactie
         ),
-        "total_de_plata": str(rotund2(factura.total_de_plata)),
+        "total_de_plata": format_suma(factura.total_de_plata),
         "produse_sau_servicii": factura.produse_sau_servicii,
     }
 

@@ -49,3 +49,16 @@ def suma(values) -> Decimal:
     for value in values:
         total += D(value)
     return total
+
+
+def format_suma(value) -> str:
+    """Text afișabil pentru o sumă: maxim 2 zecimale, fără zerouri inutile.
+
+    Exemple: ``12.3456 -> "12.35"``, ``100.0000 -> "100"``,
+    ``12.30 -> "12.3"``. Se folosește în interfață, PDF-uri și exporturi,
+    nu și în calculele intermediare (care rămân la 4 zecimale).
+    """
+    rotunjit = rotund2(value)
+    if not rotunjit:
+        return "0"
+    return format(rotunjit.normalize(), "f")

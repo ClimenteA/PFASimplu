@@ -2,6 +2,7 @@ import itertools
 import json
 import os
 from datetime import datetime, timedelta
+from decimal import Decimal
 
 import pandas as pd
 from django.contrib import messages
@@ -14,6 +15,7 @@ from django.utils import timezone
 
 from core.settings import get_extracts_path
 
+from .decimale import format_suma, rotund2
 from .pretty_excel import make_excel_pretty
 
 
@@ -99,6 +101,26 @@ def get_page_items(
     return form, page_items
 
 
+def pregateste_df_export(df: pd.DataFrame, pentru_csv: bool = False) -> pd.DataFrame:
+    """Rotunjeste la 2 zecimale toate celulele ``Decimal`` dintr-un DataFrame.
+
+    Pentru CSV scriem textul fara zerouri inutile (``12.35``, ``100``), iar
+    pentru XLSX lasam numere reale, ca sa poata fi folosite in formule.
+    """
+    df = df.copy()
+    for coloana in df.columns:
+        df[coloana] = df[coloana].map(
+            lambda v: (
+                format_suma(v)
+                if pentru_csv
+                else float(rotund2(v))
+            )
+            if isinstance(v, Decimal)
+            else v
+        )
+    return df
+
+
 def download_dataframe(request, df: pd.DataFrame, filename: str):
     """Scrie DataFrame-ul intr-un singur CSV sau XLSX (dupa ?filetype=) si il
     trimite direct ca fisier, fara arhiva zip."""
@@ -112,13 +134,13 @@ def download_dataframe(request, df: pd.DataFrame, filename: str):
 
     if filetype == "csv":
         content_type = "text/csv"
-        df.to_csv(filepath, index=False)
+        pregateste_df_export(df, pentru_csv=True).to_csv(filepath, index=False)
     else:
         content_type = (
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
-        df.to_excel(filepath, index=False)
-        make_excel_pretty(filepath)
+        pregateste_df_export(df).to_excel(filepath, index=False)
+        make_excel_pretty(filepath, number_format="General")
 
     response = HttpResponse(open(filepath, "rb"), content_type=content_type)
     response["Content-Disposition"] = (

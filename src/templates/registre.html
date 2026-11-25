@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load decimale %}
 
 {% block page-title %} Registre {% endblock %}
 
@@ -32,9 +33,9 @@
             Totodata ai disponibile si registrele contabile obligatorii pe care trebuie sa le ai in relatia cu ANAF.
             Nu trebuie sa plateasca CASS: cei care cu profesii liberale (avocat, notar etc.) care au venituri nete sub 6
             salarii minime.
-            Total plati catre stat pana acum: {{total_platite_la_stat_pe_toti_anii}} {{valuta}}.
-            Total incasari net pana acum: {{total_incasari_net_pe_toti_anii}} {{valuta}}.
-            Rest de plata: {{rest_de_plata_catre_stat}} {{valuta}}.
+            Total plati catre stat pana acum: {{total_platite_la_stat_pe_toti_anii|suma2}} {{valuta}}.
+            Total incasari net pana acum: {{total_incasari_net_pe_toti_anii|suma2}} {{valuta}}.
+            Rest de plata: {{rest_de_plata_catre_stat|suma2}} {{valuta}}.
         </p>
     </hgroup>
 
@@ -47,7 +48,7 @@
                 <strong class="pico-color-zinc-350">Total neincasate</strong>
 
                 <h3 class="pico-color-amber-250">
-                    🫰 {{total_neincasate}} {{valuta}}
+                    🫰 {{total_neincasate|suma2}} {{valuta}}
                 </h3>
 
             </article>
@@ -61,21 +62,21 @@
             <article class="text-center pico-background-cyan-900">
                 <strong class="pico-color-zinc-450">Total incasari brut</strong>
                 <h3 class="pico-color-zinc-50">
-                    💰 {{ total_incasari_brut|floatformat:2 }} {{valuta}}
+                    💰 {{ total_incasari_brut|suma2 }} {{valuta}}
                 </h3>
             </article>
 
             <article class="text-center pico-background-cyan-900">
                 <strong class="pico-color-zinc-450">Total incasari net</strong>
                 <h3 class="pico-color-zinc-50">
-                    💵 {{ total_incasari_net }} {{valuta}}
+                    💵 {{ total_incasari_net|suma2 }} {{valuta}}
                 </h3>
             </article>
 
             <article class="text-center pico-background-cyan-900">
                 <strong class="pico-color-zinc-450">Total cheltuieli</strong>
                 <h3 class="pico-color-zinc-50">
-                    💵 {{ total_cheltuieli }} {{valuta}}
+                    💵 {{ total_cheltuieli|suma2 }} {{valuta}}
                 </h3>
             </article>
 
@@ -85,28 +86,28 @@
             <article class="text-center pico-background-yellow-900">
                 <strong class="pico-color-zinc-450">Total taxe/impozite</strong>
                 <h3 class="pico-color-zinc-50">
-                    🏛️ {{ total_taxe_impozite }} {{valuta}}
+                    🏛️ {{ total_taxe_impozite|suma2 }} {{valuta}}
                 </h3>
             </article>
 
             <article class="text-center pico-background-yellow-900">
                 <strong class="pico-color-zinc-450">Pensie (CAS)</strong>
                 <h3 class="pico-color-zinc-50">
-                    🏡 {{ cas_pensie }} {{valuta}}
+                    🏡 {{ cas_pensie|suma2 }} {{valuta}}
                 </h3>
             </article>
 
             <article class="text-center pico-background-yellow-900">
                 <strong class="pico-color-zinc-450">Sanatate (CASS)</strong>
                 <h3 class="pico-color-zinc-50">
-                    🏥 {{ cass_sanatate }} {{valuta}}
+                    🏥 {{ cass_sanatate|suma2 }} {{valuta}}
                 </h3>
             </article>
 
             <article class="text-center pico-background-yellow-900">
                 <strong class="pico-color-zinc-450">Impozit pe venit</strong>
                 <h3 class="pico-color-zinc-50">
-                    🏢 {{ impozit_pe_venit }} {{valuta}}
+                    🏢 {{ impozit_pe_venit|suma2 }} {{valuta}}
                 </h3>
             </article>
         </div>
@@ -145,11 +146,11 @@
     <div x-show="active == 'rjip'" class="overflow-auto mt-2 mb-6">
 
         <div x-data="{ downloaded_csv: false, downloaded_xlsx: false }" style="display: flex; justify-content: end; overflow: hidden;">
-            <a href="{% url 'descarca-registru-jurnal' %}?filetype=CSV&anul={{ anul }}" @click="downloaded_csv = true" :class="downloaded_csv ? 'px-1 pico-color-purple-500': 'px-1 secondary'"
+            <a href="{% url 'descarca-registru-jurnal' %}?filetype=CSV&anul={{ anul }}&valuta={{ valuta }}" @click="downloaded_csv = true" :class="downloaded_csv ? 'px-1 pico-color-purple-500': 'px-1 secondary'"
                 data-tooltip="Descarca CSV">
                 <i class="bi bi-filetype-csv"></i>
             </a>
-            <a href="{% url 'descarca-registru-jurnal' %}?filetype=XLSX&anul={{ anul }}" @click="downloaded_xlsx = true" :class="downloaded_xlsx ? 'px-1 pico-color-purple-500': 'px-1 secondary'"
+            <a href="{% url 'descarca-registru-jurnal' %}?filetype=XLSX&anul={{ anul }}&valuta={{ valuta }}" @click="downloaded_xlsx = true" :class="downloaded_xlsx ? 'px-1 pico-color-purple-500': 'px-1 secondary'"
                 data-tooltip="Descarca XLSX">
                 <i class="bi bi-filetype-xlsx"></i>
             </a>
@@ -177,10 +178,10 @@
                     <td>{{ item.data }}</td>
                     <td>{{ item.documentul }}</td>
                     <td class="pico-background-grey">{{ item.felul_operatiunii }}</td>
-                    <td class="pico-background-grey">{{ item.incasari_numerar }}</td>
-                    <td class="pico-background-grey">{{ item.incasari_banca }}</td>
-                    <td class="pico-background-grey">{{ item.plati_numerar }}</td>
-                    <td class="pico-background-grey">{{ item.plati_banca }}</td>
+                    <td class="pico-background-grey">{{ item.incasari_numerar|suma2 }}</td>
+                    <td class="pico-background-grey">{{ item.incasari_banca|suma2 }}</td>
+                    <td class="pico-background-grey">{{ item.plati_numerar|suma2 }}</td>
+                    <td class="pico-background-grey">{{ item.plati_banca|suma2 }}</td>
                 </tr>
                 {% else %}
                 <tr>
@@ -193,10 +194,10 @@
                         </a>
                     </td>
                     <td>{{ item.felul_operatiunii }}</td>
-                    <td>{{ item.incasari_numerar }}</td>
-                    <td>{{ item.incasari_banca }}</td>
-                    <td>{{ item.plati_numerar }}</td>
-                    <td>{{ item.plati_banca }}</td>
+                    <td>{{ item.incasari_numerar|suma2 }}</td>
+                    <td>{{ item.incasari_banca|suma2 }}</td>
+                    <td>{{ item.plati_numerar|suma2 }}</td>
+                    <td>{{ item.plati_banca|suma2 }}</td>
                 </tr>
                 {% endif %}
 
@@ -209,11 +210,11 @@
 
 
         <div x-data="{ downloaded_csv: false, downloaded_xlsx: false }" style="display: flex; justify-content: end; overflow: hidden;">
-            <a href="{% url 'descarca-registru-fiscal' %}?filetype=CSV&anul={{ anul }}" @click="downloaded_csv = true" :class="downloaded_csv ? 'px-1 pico-color-purple-500': 'px-1 secondary'"
+            <a href="{% url 'descarca-registru-fiscal' %}?filetype=CSV&anul={{ anul }}&valuta={{ valuta }}" @click="downloaded_csv = true" :class="downloaded_csv ? 'px-1 pico-color-purple-500': 'px-1 secondary'"
                 data-tooltip="Descarca CSV">
                 <i class="bi bi-filetype-csv"></i>
             </a>
-            <a href="{% url 'descarca-registru-fiscal' %}?filetype=XLSX&anul={{ anul }}" @click="downloaded_xlsx = true" :class="downloaded_xlsx ? 'px-1 pico-color-purple-500': 'px-1 secondary'"
+            <a href="{% url 'descarca-registru-fiscal' %}?filetype=XLSX&anul={{ anul }}&valuta={{ valuta }}" @click="downloaded_xlsx = true" :class="downloaded_xlsx ? 'px-1 pico-color-purple-500': 'px-1 secondary'"
                 data-tooltip="Descarca XLSX">
                 <i class="bi bi-filetype-xlsx"></i>
             </a>
@@ -233,7 +234,7 @@
                 <tr>
                     <td>{{ item.nr_crt }}</td>
                     <td>{{ item.elemente_de_calcul }}</td>
-                    <td>{{ item.valoare }}</td>
+                    <td>{{ item.valoare|suma2 }}</td>
                     <td>{{ item.anul }}</td>
                 </tr>
                 {% endfor %}
@@ -244,11 +245,11 @@
     <div x-show="active == 'rinv'" class="overflow-auto mt-2 mb-6">
 
         <div x-data="{ downloaded_csv: false, downloaded_xlsx: false }" style="display: flex; justify-content: end; overflow: hidden;">
-            <a href="{% url 'descarca-registru-inventar' %}?filetype=CSV&anul={{ anul }}" @click="downloaded_csv = true" :class="downloaded_csv ? 'px-1 pico-color-purple-500': 'px-1 secondary'"
+            <a href="{% url 'descarca-registru-inventar' %}?filetype=CSV&anul={{ anul }}&valuta={{ valuta }}" @click="downloaded_csv = true" :class="downloaded_csv ? 'px-1 pico-color-purple-500': 'px-1 secondary'"
                 data-tooltip="Descarca CSV">
                 <i class="bi bi-filetype-csv"></i>
             </a>
-            <a href="{% url 'descarca-registru-inventar' %}?filetype=XLSX&anul={{ anul }}" @click="downloaded_xlsx = true" :class="downloaded_xlsx ? 'px-1 pico-color-purple-500': 'px-1 secondary'"
+            <a href="{% url 'descarca-registru-inventar' %}?filetype=XLSX&anul={{ anul }}&valuta={{ valuta }}" @click="downloaded_xlsx = true" :class="downloaded_xlsx ? 'px-1 pico-color-purple-500': 'px-1 secondary'"
                 data-tooltip="Descarca XLSX">
                 <i class="bi bi-filetype-xlsx"></i>
             </a>
@@ -269,7 +270,7 @@
                 <tr>
                     <td>{{ item.nr_crt }}</td>
                     <td>{{ item.nume_cheltuiala }}</td>
-                    <td>{{ item.deducere_in_ron }}</td>
+                    <td>{{ item.deducere_in_ron|suma2 }}</td>
                     <td>
                         {% if item.data_inserarii %}
                         {{ item.data_inserarii }}
@@ -303,11 +304,11 @@
         <div class="overflow-auto">
 
         <div x-data="{ downloaded_csv: false, downloaded_xlsx: false }" style="display: flex; justify-content: end; overflow: hidden;">
-            <a href="{% url 'descarca-jurnal-cumparari' %}?filetype=CSV&anul={{ anul }}" @click="downloaded_csv = true" :class="downloaded_csv ? 'px-1 pico-color-purple-500': 'px-1 secondary'"
+            <a href="{% url 'descarca-jurnal-cumparari' %}?filetype=CSV&anul={{ anul }}&valuta={{ valuta }}" @click="downloaded_csv = true" :class="downloaded_csv ? 'px-1 pico-color-purple-500': 'px-1 secondary'"
                 data-tooltip="Descarca CSV">
                 <i class="bi bi-filetype-csv"></i>
             </a>
-            <a href="{% url 'descarca-jurnal-cumparari' %}?filetype=XLSX&anul={{ anul }}" @click="downloaded_xlsx = true" :class="downloaded_xlsx ? 'px-1 pico-color-purple-500': 'px-1 secondary'"
+            <a href="{% url 'descarca-jurnal-cumparari' %}?filetype=XLSX&anul={{ anul }}&valuta={{ valuta }}" @click="downloaded_xlsx = true" :class="downloaded_xlsx ? 'px-1 pico-color-purple-500': 'px-1 secondary'"
                 data-tooltip="Descarca XLSX">
                 <i class="bi bi-filetype-xlsx"></i>
             </a>
@@ -341,9 +342,9 @@
                     <td>{{ item.nr_doc }}</td>
                     <td>{{ item.furnizor_denumire }}</td>
                     <td>{{ item.furnizor_cod_fiscal }}</td>
-                    <td>{{ item.total_document }}</td>
-                    <td>{{ item.baza }}</td>
-                    <td>{{ item.tva }}</td>
+                    <td>{{ item.total_document|suma2 }}</td>
+                    <td>{{ item.baza|suma2 }}</td>
+                    <td>{{ item.tva|suma2 }}</td>
                     <td>{{ item.cod_referinta }}</td>
                 </tr>
                 {% endfor %}

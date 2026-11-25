@@ -15,6 +15,8 @@ from cheltuieli.calcul import q_mijloc_fix, q_scos_din_uz
 from cheltuieli.models import CheltuialaModel
 from core.settings import (
     APP_VERSION,
+    AVAILABLE_APP_VERSION,
+    GITHUB_REPO_URL,
     get_extracts_path,
     get_media_path,
     make_media_dir,
@@ -37,7 +39,6 @@ from registre.views import (
 )
 from utils.calcule import calculeaza_taxe_si_impozite
 from utils.decimale import D, rotund2
-from utils.github_data import get_latest_app_version
 from utils.localitati import lista_localitati
 from utils.mijloc_fix_pdf import create_fisa_mijloc_fix_pdf
 from utils.pretty_excel import make_excel_pretty
@@ -50,6 +51,7 @@ from utils.trezorerie import (
 )
 from utils.tva import calculeaza_jurnal_cumparari
 from utils.valuta import Valuta
+from utils.views import pregateste_df_export
 
 from .forms import SetariForm
 from .models import McpApiKey, SetariModel
@@ -71,7 +73,6 @@ def _este_versiune_mai_noua(remote: str, local: str) -> bool:
 def get_setari_context(form, request):
     result = SetariModel.objects.first()
     localitate = form.initial.get("localitate") or (result.localitate if result else "")
-    latest_app_version = get_latest_app_version()
     context = {
         "setari_form": form,
         "lista_localitati": lista_localitati,
@@ -81,8 +82,11 @@ def get_setari_context(form, request):
         "ani_export": get_ani_export(),
         "anul_curent": timezone.now().year,
         "app_version": APP_VERSION,
-        "latest_app_version": latest_app_version,
-        "update_available": _este_versiune_mai_noua(latest_app_version, APP_VERSION),
+        "latest_app_version": AVAILABLE_APP_VERSION,
+        "repo_url": GITHUB_REPO_URL,
+        "update_available": _este_versiune_mai_noua(
+            AVAILABLE_APP_VERSION, APP_VERSION
+        ),
         "mcp_key": McpApiKey.objects.filter(user=request.user).first(),
         "mcp_key_once": None,
     }
@@ -275,8 +279,8 @@ class SetariViewDownloadData(View):
 
         def salveaza_xlsx(df, nume_fisier):
             fp = os.path.join(extracts_path, nume_fisier)
-            df.to_excel(fp, index=False)
-            make_excel_pretty(fp)
+            pregateste_df_export(df).to_excel(fp, index=False)
+            make_excel_pretty(fp, number_format="General")
             fisiere_registre.append(fp)
 
         rjip_data = get_registru_jurnal_incasari_si_plati(

@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load decimale %}
 
 {% block page-title %} Inventar {% endblock %}
 
@@ -103,7 +104,7 @@
                         </a>
                     </td>
                     <td>{{ item.nume_cheltuiala }}</td>
-                    <td>{{ item.deducere_in_ron }}</td>
+                    <td>{{ item.deducere_in_ron|suma2 }}</td>
                     <td>
                         {% if item.data_inserarii %}
                         {{ item.data_inserarii|date:"Y-m-d" }}
