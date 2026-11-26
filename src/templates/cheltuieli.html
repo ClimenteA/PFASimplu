@@ -35,7 +35,7 @@
         Achizitiile/Cheltuielile care nu isi pierd valoarea in timp cum ar fi terenuri, aur, case nu sunt deductibile.
 
         Pentru <strong>servicii cumparate din UE sau din afara UE</strong> (ex. Google, Cloudflare, OpenAI)
-        alege originea furnizorului mai jos: aplicatia calculeaza automat TVA-ul datorat prin taxare inversa (21%)
+        alege originea furnizorului mai jos: aplicatia calculeaza automat TVA-ul datorat prin taxare inversa (cota standard de 21%)
         si il adauga la cheltuiala deductibila. Declaratiile D301/D390 se descarca din filtrul
         „Cheltuieli externe (TVA)" de deasupra tabelului, pe luna selectata.
 
@@ -121,7 +121,25 @@
                             value="{{ cheltuieli_form.data_punerii_in_functiune.value|date:'Y-m-d' }}">
                         {{ cheltuieli_form.data_punerii_in_functiune.errors }}
                     </label>
-                    
+
+                    <label for="{{ cheltuieli_form.este_sediu_social_neexclusiv.id_for_label }}">
+                        {{ cheltuieli_form.este_sediu_social_neexclusiv }}
+                        {{ cheltuieli_form.este_sediu_social_neexclusiv.label }}
+                        {{ cheltuieli_form.este_sediu_social_neexclusiv.errors }}
+                    </label>
+
+                    <label for="{{ cheltuieli_form.este_autoturism_m1.id_for_label }}">
+                        {{ cheltuieli_form.este_autoturism_m1 }}
+                        {{ cheltuieli_form.este_autoturism_m1.label }}
+                        {{ cheltuieli_form.este_autoturism_m1.errors }}
+                    </label>
+
+                    <label for="{{ cheltuieli_form.exceptie_1500.id_for_label }}">
+                        {{ cheltuieli_form.exceptie_1500 }}
+                        {{ cheltuieli_form.exceptie_1500.label }}
+                        {{ cheltuieli_form.exceptie_1500.errors }}
+                    </label>
+
                 </div>
             </div>
         </div>

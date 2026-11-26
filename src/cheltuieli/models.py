@@ -29,6 +29,10 @@ class Deductibilitate(models.TextChoices):
         "AUTO_50",
         _("Vehicule nefolosite exclusiv in activitate, 50% (art. 68 alin. 7 lit. k)"),
     )
+    DEDUCTIBILA_PARTIAL_BURSE = (
+        "BURSE",
+        _("Burse private max. 5% din baza de calcul (art. 68 alin. 5 lit. a)"),
+    )
     DEDUCTIBILA_PARTIAL_SPORT_2024 = (
         "SPORT",
         _("Sport, sali de fitness etc. max. 100 EUR pe an"),
@@ -36,6 +40,18 @@ class Deductibilitate(models.TextChoices):
     DEDUCTIBILA_PARTIAL_PENSIE_PILON_3 = (
         "PENSIE_III",
         _("Pensie pilon III max. 400 EUR pe an"),
+    )
+    DEDUCTIBILA_PARTIAL_PENSIE_OCUPATIONALA = (
+        "PENSIE_OCUP",
+        _("Pensie ocupationala max. 400 EUR pe an (din 2026)"),
+    )
+    DEDUCTIBILA_PARTIAL_PEPP = (
+        "PEPP",
+        _("Produs paneuropean de pensii (PEPP) max. 400 EUR pe an (din 1.03.2026)"),
+    )
+    DEDUCTIBILA_PARTIAL_ETF = (
+        "ETF",
+        _("ETF max. 400 EUR pe an (din 1.03.2026)"),
     )
     DEDUCTIBILA_PARTIAL_ASIG_MEDICALE_PRIVAT = (
         "ASIG_MED",
@@ -109,6 +125,18 @@ class CheltuialaModel(CommonIncasariCheltuieliModel):
     # Doar suprascrierea optionala a duratei din catalog; altfel se deriva.
     ani_amortizare = models.IntegerField(null=True, blank=True)
     data_punerii_in_functiune = models.DateField(null=True, blank=True)
+    este_sediu_social_neexclusiv = models.BooleanField(
+        default=False,
+        verbose_name=_("Sediu social folosit si in scop personal (amortizare 50%)"),
+    )
+    este_autoturism_m1 = models.BooleanField(
+        default=False,
+        verbose_name=_("Autoturism M1 (limita 1.500 lei/luna)"),
+    )
+    exceptie_1500 = models.BooleanField(
+        default=False,
+        verbose_name=_("Exceptie de la limita de 1.500 lei/luna (art. 28 alin. 14)"),
+    )
 
     # Iesirea din uz a unui obiect de inventar / mijloc fix
     modalitate_iesire_din_uz = models.CharField(

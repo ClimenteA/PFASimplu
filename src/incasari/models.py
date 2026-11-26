@@ -73,6 +73,20 @@ class IncasariModel(CommonIncasariCheltuieliModel):
             total += D(incasare.suma_in_ron)
         return rotund2(total)
 
+    @staticmethod
+    def get_total_incasari_alte_surse(year: int):
+        """Total incasari din categorii diferite de activitatea independenta.
+
+        Pentru acestea CASS se calculeaza pe trepte de 6/12/24 salarii minime
+        (art. 170 alin. 2-3 din Codul fiscal), nu liniar ca la PFA.
+        """
+        total = D(0)
+        for incasare in IncasariModel.objects.filter(
+            data_incasarii__isnull=False, data_incasarii__year=year
+        ).exclude(sursa_venit=SursaVenit.ACTIVITATE_PRINCIPALA.value):
+            total += D(incasare.suma_in_ron)
+        return rotund2(total)
+
     class Meta:
         app_label = "incasari"
         verbose_name_plural = "Incasari"

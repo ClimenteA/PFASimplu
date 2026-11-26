@@ -318,8 +318,12 @@ def get_cheltuieli_pe_deductibilitate(anul: int, valuta: str = "RON"):
         Deductibilitate.DEDUCTIBILA_INTEGRAL_SALARII,
         None,
         Deductibilitate.DEDUCTIBILA_PARTIAL_AUTO_CASA_UTILITATI,
+        Deductibilitate.DEDUCTIBILA_PARTIAL_BURSE,
         Deductibilitate.DEDUCTIBILA_PARTIAL_SPORT_2024,
         Deductibilitate.DEDUCTIBILA_PARTIAL_PENSIE_PILON_3,
+        Deductibilitate.DEDUCTIBILA_PARTIAL_PENSIE_OCUPATIONALA,
+        Deductibilitate.DEDUCTIBILA_PARTIAL_PEPP,
+        Deductibilitate.DEDUCTIBILA_PARTIAL_ETF,
         Deductibilitate.DEDUCTIBILA_PARTIAL_ASIG_MEDICALE_PRIVAT,
         Deductibilitate.DEDUCTIBILA_PARTIAL_PROTOCOL,
         Deductibilitate.DEDUCTIBILA_PARTIAL_SOCIALE,
@@ -700,6 +704,7 @@ def get_cards_and_charts_data(request):
 
     # CALCUL TAXE IMPOZITE
 
+    alte_venituri_an = IncasariModel.get_total_incasari_alte_surse(anul)
     if furnizor:
         la_stat = calculeaza_taxe_si_impozite(
             max(total_incasari_net, 0),
@@ -707,9 +712,14 @@ def get_cards_and_charts_data(request):
             furnizor.scutit_cas,
             furnizor.scutit_cass,
             furnizor.scutit_impozit,
+            alte_venituri=alte_venituri_an,
         )
     else:
-        la_stat = calculeaza_taxe_si_impozite(max(total_incasari_net, 0), anul)
+        la_stat = calculeaza_taxe_si_impozite(
+            max(total_incasari_net, 0),
+            anul,
+            alte_venituri=alte_venituri_an,
+        )
 
     total_platite_la_stat_pe_toti_anii = DocumenteModel.total_plati_la_stat()
 
@@ -725,6 +735,7 @@ def get_cards_and_charts_data(request):
         total_incasari_brut_pe_toti_anii += D(tib)
         incasari_net = rotund2(D(tib) - D(tc))
 
+        alte_venituri_yr = IncasariModel.get_total_incasari_alte_surse(yr)
         if furnizor:
             tiy = calculeaza_taxe_si_impozite(
                 max(incasari_net, 0),
@@ -732,11 +743,13 @@ def get_cards_and_charts_data(request):
                 furnizor.scutit_cas,
                 furnizor.scutit_cass,
                 furnizor.scutit_impozit,
+                alte_venituri=alte_venituri_yr,
             )["total_taxe_impozite"]
         else:
             tiy = calculeaza_taxe_si_impozite(
                 max(incasari_net, 0),
                 yr,
+                alte_venituri=alte_venituri_yr,
             )["total_taxe_impozite"]
 
         total_de_platit_la_stat_pe_toti_anii += D(tiy)

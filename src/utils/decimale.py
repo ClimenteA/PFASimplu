@@ -1,8 +1,8 @@
-"""Calcul financiar cu ``Decimal`` (precizie de 4 zecimale).
+"""Calcul financiar cu ``Decimal`` (precizie maxima in calcul).
 
 Reguli folosite in toata aplicatia:
-- toate calculele intermediate se fac cu ``Decimal`` si se pastreaza cel mult
-  4 zecimale (``rotund4``);
+- calculele intermediare se fac cu ``Decimal`` si pastreaza toate zecimalele,
+  fara rotunjiri (``D()``), ca sa nu se piarda exactitatea pe parcurs;
 - sumele finale (totaluri afisate/platite) se rotunjesc cu ``ROUND_HALF_UP``
   la 2 zecimale (``rotund2``): ce e peste .5 urca, ce e sub .5 coboara;
 - conversia din float/str in ``Decimal`` trece intotdeauna prin ``D()``, ca sa
@@ -11,7 +11,6 @@ Reguli folosite in toata aplicatia:
 
 from decimal import ROUND_HALF_UP, Decimal
 
-ZECIMALE_CALCUL = Decimal("0.0001")
 ZECIMALE_SUMA = Decimal("0.01")
 ZECIMALE_INTREG = Decimal(1)
 
@@ -26,11 +25,6 @@ def D(value) -> Decimal:
         return Decimal(int(value))
     # str() evită transformarea lui 0.1 în 0.1000000000000000055...
     return Decimal(str(value))
-
-
-def rotund4(value) -> Decimal:
-    """Valoare folosită în calcule: cel mult 4 zecimale, rotunjire .5 în sus."""
-    return D(value).quantize(ZECIMALE_CALCUL, rounding=ROUND_HALF_UP)
 
 
 def rotund2(value) -> Decimal:
@@ -56,7 +50,7 @@ def format_suma(value) -> str:
 
     Exemple: ``12.3456 -> "12.35"``, ``100.0000 -> "100"``,
     ``12.30 -> "12.3"``. Se folosește în interfață, PDF-uri și exporturi,
-    nu și în calculele intermediare (care rămân la 4 zecimale).
+    nu și în calculele intermediare (care păstrează toate zecimalele).
     """
     rotunjit = rotund2(value)
     if not rotunjit:
