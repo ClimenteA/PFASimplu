@@ -5,17 +5,13 @@ from datetime import timedelta
 
 import requests_cache
 
-from core.settings import get_extracts_path, get_salarii_minim_brut_local
+from core.settings import get_extracts_path
 
 cache_path = os.path.join(get_extracts_path(), "app_version_cache")
 requests_session = requests_cache.CachedSession(
     cache_path, backend="filesystem", expire_after=timedelta(days=1)
 )
 
-
-get_url = lambda filename: (
-    f"https://raw.githubusercontent.com/ClimenteA/PFASimplu/refs/heads/main/static/{filename}"
-)
 
 PYPROJECT_URL = "https://raw.githubusercontent.com/ClimenteA/PFASimplu/refs/heads/main/pyproject.toml"
 
@@ -36,14 +32,3 @@ def get_latest_app_version():
     except Exception:
         logger.exception("Nu am putut prelua ultima versiune PFASimplu de pe GitHub")
         return ""
-
-
-def get_salarii_minim_brut():
-    try:
-        response = requests_session.get(get_url("minim_brut_an_val.json"))
-        data = response.json()
-        data = {int(k): v for k, v in data.items()}
-        return data
-    except Exception:
-        logger.exception("Nu am putut prelua ultimele salarii minime brute")
-        return get_salarii_minim_brut_local()

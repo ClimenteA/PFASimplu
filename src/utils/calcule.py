@@ -1,5 +1,6 @@
+from core.settings import get_salarii_minim_brut_local
+
 from .decimale import D, rotund2, rotund4
-from .github_data import get_salarii_minim_brut
 
 
 def get_venit_net(year: int):
@@ -29,7 +30,7 @@ def calculeaza_taxe_si_impozite(
 ):
     """Calculul taxelor, cu Decimal (4 zecimale in calcul, 2 la sumele finale)."""
     venit_net = D(venit_net)
-    minim_brute_an_val = get_salarii_minim_brut()
+    minim_brute_an_val = get_salarii_minim_brut_local()
 
     if anul in minim_brute_an_val:
         salariuMinimBrut = D(minim_brute_an_val[anul])
