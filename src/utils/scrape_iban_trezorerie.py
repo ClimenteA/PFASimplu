@@ -20,10 +20,12 @@ Rezultat: static/iban_trezorerie.json (date statice, verificate la build).
 
 import io
 import json
+import logging
 import os
 import re
 import sys
 import time
+from logging.handlers import RotatingFileHandler
 
 import requests
 from pypdf import PdfReader
@@ -47,6 +49,8 @@ def get_output_path() -> str:
 
 OUTPUT_PATH = get_output_path()
 
+logger = logging.getLogger(__name__)
+
 SESSION = requests.Session()
 SESSION.headers.update({"User-Agent": "Mozilla/5.0 (PFASimplu IBAN scraper)"})
 
@@ -60,7 +64,7 @@ def fetch(url: str) -> bytes:
         except Exception as err:
             if incercare == 2:
                 raise
-            print(f"  retry {url}: {err}")
+            logger.warning("Retry %s: %s", url, err)
             time.sleep(2)
 
 
@@ -120,7 +124,7 @@ def extrage_ibanuri_tva_din_pdf(pdf_bytes: bytes) -> dict[str, dict]:
 def scrape(verbose: bool = True) -> list[dict]:
     def log(msg):
         if verbose:
-            print(msg)
+            logger.info(msg)
 
     log(f"Descarc pagina principala: {ANAF_CODURI_IBAN}")
     html = fetch(ANAF_CODURI_IBAN).decode("utf-8", errors="replace")
@@ -226,16 +230,40 @@ def salveaza_json(randuri: list[dict], output_path: str | None = None) -> str:
     return output_path
 
 
+def _configure_logging():
+    """Logare pentru rulare standalone (fara Django): consola + appdata/logs."""
+    log_dir = os.environ.get("PFASIMPLU_LOG_DIR") or os.path.join(
+        os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+        "appdata",
+        "logs",
+    )
+    os.makedirs(log_dir, exist_ok=True)
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+        handlers=[
+            logging.StreamHandler(),
+            RotatingFileHandler(
+                os.path.join(log_dir, "pfasimplu.log"),
+                maxBytes=5 * 1024 * 1024,
+                backupCount=3,
+                encoding="utf-8",
+            ),
+        ],
+    )
+
+
 def main():
     randuri = scrape()
-    print(f"\nTotal trezorerii cu IBAN TVA: {len(randuri)}")
+    logger.info("Total trezorerii cu IBAN TVA: %d", len(randuri))
     if not randuri:
-        print("EROARE: nu s-a extras niciun IBAN; nu suprascriu fisierul existent.")
+        logger.error("Nu s-a extras niciun IBAN; nu suprascriu fisierul existent.")
         return 1
     output_path = salveaza_json(randuri)
-    print(f"Scris: {output_path}")
+    logger.info("Scris: %s", output_path)
     return 0
 
 
 if __name__ == "__main__":
+    _configure_logging()
     sys.exit(main())

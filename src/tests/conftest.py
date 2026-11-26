@@ -2,7 +2,7 @@
 
 Testele ruleaza impotriva unui server Django pornit pe o baza de date SQLite
 separata (`src/tests/.runtime/test.db`), ca sa nu atinga datele reale din
-`src/dbsqlite/stocare.db`. Migrarile sunt generate automat la fiecare rulare
+`appdata/db/stocare.db`. Migrarile sunt generate automat la fiecare rulare
 (proiectul nu tine migrarile in git - vezi `make purge-migration-dirs`).
 
 Rulare:

@@ -19,9 +19,8 @@ services:
     env_file:
       - .env.prod
     volumes:
-      # Datele raman pe gazda (vizibile si dupa rebuild) in src/*.
-      - ./src/dbsqlite:/data/dbsqlite
-      - ./src/media:/data/media
+      # Datele raman pe gazda in ./appdata (db/, files/, logs/), si dupa rebuild.
+      - ./appdata:/data
       - ./staticfiles:/app/staticfiles
 
   pfasimplu-mcp:
@@ -39,8 +38,7 @@ services:
     env_file:
       - .env.prod
     volumes:
-      - ./src/dbsqlite:/data/dbsqlite
-      - ./src/media:/data/media
+      - ./appdata:/data
     # Serverul MCP e un proces ASGI separat de waitress (Django e WSGI).
     # Autorizarea se face cu cheia generata in /setari (Bearer).
     command: ["python", "-m", "uvicorn", "mcp_server.http_app:app", "--host", "0.0.0.0", "--port", "8001"]

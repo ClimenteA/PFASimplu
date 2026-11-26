@@ -102,8 +102,3 @@ class DocumenteModel(UserOwnedModel):
 
     def __str__(self):
         return f"{self.tip_document} {self.mentiuni} {self.actualizat_la.isoformat()}"
-
-
-# Compatibilitate: parserii au fost mutati in services, dar raman importabili
-# de aici (teste / cod extern).
-from .services import pdf_parser, recipisa_parser  # noqa: F401

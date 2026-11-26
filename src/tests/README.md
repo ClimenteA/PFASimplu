@@ -45,7 +45,7 @@ uv run pytest src/tests/ -v -k "setari or mijloace"
 
 - Serverul Django de test porneste automat pe un port liber, cu baza de date
   separata `src/tests/.runtime/test.db` (prin variabila de mediu
-  `PFASIMPLU_DB_PATH`) — **datele reale din `src/dbsqlite/stocare.db` nu sunt
+  `PFASIMPLU_DB_PATH`) — **datele reale din `appdata/db/stocare.db` nu sunt
   atinse**.
 - Migrarile sunt generate automat la fiecare rulare (proiectul nu le
   versioneaza, vezi `make purge-migration-dirs`).

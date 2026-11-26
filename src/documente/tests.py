@@ -23,11 +23,8 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from cheltuieli.models import CheltuialaModel, Deductibilitate, TipAchizitie
-from documente.models import (
-    DocumenteModel,
-    TipDocument,
-    recipisa_parser,
-)
+from documente.models import DocumenteModel, TipDocument
+from documente.services import recipisa_parser
 from setari.models import SetariModel
 from utils.decimale import D, rotund4
 from utils.tari import este_tara_ue
@@ -64,7 +61,7 @@ def creeaza_setari(**kwargs):
     defaults = {
         "nume": "CLIMENTE ALIN IONEL PERSOANA FIZICA AUTORIZATA",
         "localitate": "RO-IS, jud. Iasi, Iasi",
-        "adresa": "str. SOS. NATIONALA, nr. 182, bl. A2, sc. A, ap. 3, jud. IASI",
+        "adresa": "str. SOS. PRINCIPALA, nr. 162, bl. A7, sc. A, ap. 9, jud. IASI",
         "nr_reg_com": "F22/123/2020",
         "cif": "43000098",
         "email": "test@example.com",

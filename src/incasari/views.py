@@ -1,3 +1,5 @@
+import logging
+
 from django.contrib import messages
 from django.core.files.base import ContentFile
 from django.shortcuts import HttpResponseRedirect, get_object_or_404, render
@@ -14,6 +16,8 @@ from utils.views import (
 
 from .forms import IncasariForm
 from .models import IncasariModel
+
+logger = logging.getLogger(__name__)
 
 
 class IncasariDescarcareView(View):
@@ -108,7 +112,7 @@ class IncasariView(View):
 
         # Invalid
         if not form.is_valid():
-            print(form)
+            logger.warning("Formular incasare invalid: %s", form.errors)
             fields_with_errors = [field for field in form.errors]
             if (
                 "fisier" in fields_with_errors

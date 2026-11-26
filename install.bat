@@ -66,8 +66,9 @@ if exist "%INSTALL_DIR%\.git" (
 cd /d "%INSTALL_DIR%"
 
 REM Directoarele montate in containere (create de utilizator, nu de root).
-if not exist "src\dbsqlite" mkdir "src\dbsqlite"
-if not exist "src\media" mkdir "src\media"
+if not exist "appdata\db" mkdir "appdata\db"
+if not exist "appdata\files" mkdir "appdata\files"
+if not exist "appdata\logs" mkdir "appdata\logs"
 if not exist "staticfiles" mkdir "staticfiles"
 
 REM Portul aplicatiei se citeste din .env (daca exista).
@@ -103,8 +104,8 @@ start "" "http://localhost:%PORT%/conturi/inregistrare/"
 echo.
 echo Gata! PFASimplu ruleaza la http://localhost:%PORT%
 echo   * Logarea este obligatorie: creeaza cont in pagina deschisa.
-echo   * Datele sunt pe gazda, in %INSTALL_DIR%\src\dbsqlite\ (baza de date) si
-echo     %INSTALL_DIR%\src\media\ (fisierele urcate/generate) -> fa backup la aceste foldere.
+echo   * Datele sunt pe gazda, in %INSTALL_DIR%\appdata\db\ (baza de date) si
+echo     %INSTALL_DIR%\appdata\files\ (fisierele urcate/generate) -> fa backup la appdata\.
 echo   * Oprire: docker compose -f docker-compose-local.yaml down
 echo   * Loguri: docker compose -f docker-compose-local.yaml logs -f
 echo   * Actualizare: ruleaza din nou acest script (face git pull + rebuild).

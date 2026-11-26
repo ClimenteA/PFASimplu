@@ -11,11 +11,12 @@ python src/manage.py collectstatic --noinput
 if [ -n "$DJANGO_SUPERUSER_EMAIL" ] && [ -n "$DJANGO_SUPERUSER_PASSWORD" ]; then
     python src/manage.py shell -c "
 from django.contrib.auth.models import User
+import logging
 import os
 email = os.environ['DJANGO_SUPERUSER_EMAIL'].strip().lower()
 if not User.objects.filter(username=email).exists():
     User.objects.create_superuser(email, email, os.environ['DJANGO_SUPERUSER_PASSWORD'])
-    print('Superuser creat:', email)
+    logging.getLogger('pfasimplu').info('Superuser creat: %s', email)
 "
 fi
 

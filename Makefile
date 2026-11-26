@@ -12,7 +12,7 @@ install:
 
 # Dezvoltare cu uv run: server cu auto-reload pe http://127.0.0.1:8990.
 # Foloseste aceeasi baza de date si acelasi folder media ca Docker-ul local
-# (src/dbsqlite/stocare.db si src/media/) - datele nu se pierd la trecerea
+# (appdata/db/stocare.db si appdata/files/) - datele nu se pierd la trecerea
 # de la `make dev` la `make start-local`. Opreste intai containerul local
 # daca vrei sa rulezi pe acelasi port.
 DEV_PORT ?= 8990
@@ -22,7 +22,7 @@ dev:
 	uv run src/manage.py runserver $(DEV_PORT)
 
 # Ruleaza aplicatia pe baza de date lasata de `make test-e2e`, pe acelasi port
-# ca `make dev`. Datele reale (src/dbsqlite/stocare.db) nu sunt atinse.
+# ca `make dev`. Datele reale (appdata/db/stocare.db) nu sunt atinse.
 # Login: test@pfasimplu.ro / parola-test-e2e-123 (contul creat de teste).
 dev-e2e:
 	test -f src/tests/.runtime/test.db || (echo "Ruleaza intai make test-e2e"; exit 1)
@@ -85,7 +85,7 @@ purge-migration-dirs:
 
 purge-db:
 	make purge-migration-dirs
-	rm src/dbsqlite/stocare.db
+	rm appdata/db/stocare.db
 
 test-e2e:
 	uv run playwright install chromium

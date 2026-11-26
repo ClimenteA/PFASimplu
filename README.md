@@ -90,7 +90,7 @@ Scriptul instaleaza Docker Desktop si git prin `winget`, daca lipsesc. Daca le i
 
 Dupa instalare, deschide `http://localhost:8990` si creeaza-ti contul in pagina de **inregistrare** (loginul este obligatoriu).
 
-Baza de date (`src/dbsqlite/stocare.db`) si fisierele (`src/media/`) sunt montate in container de pe disc. Ele nu sunt incluse in imaginea Docker si nu se urca in git, deci un `git pull` sau un rebuild nu le atinge. Fa backup periodic la `src/dbsqlite/` si `src/media/`.
+Baza de date (`appdata/db/stocare.db`) si fisierele (`appdata/files/`) sunt montate in container de pe disc. Ele nu sunt incluse in imaginea Docker si nu se urca in git, deci un `git pull` sau un rebuild nu le atinge. Fa backup periodic la `appdata/db/` si `appdata/files/`.
 
 
 ## Instalare pt. developeri
@@ -105,7 +105,7 @@ Aplicatia e facuta in Python (>= 3.12), Django cu SQLiteDB. Pentru utilizatori r
 
 Pe Windows, echivalentul comenzilor make e `.\makefile.bat X` (ex: `start-local`, `stop-local`, `logs-local`, `migrate-all`). Pentru teste: activeaza venvul cu `& D:/PFASimplu/.venv/Scripts/Activate.ps1` (daca PowerShell blocheaza, `Set-ExecutionPolicy Unrestricted -Scope Process`).
 
-Datele stau pe gazda in `src/dbsqlite/` si `src/media/` (mount-uri in `docker-compose-local.yaml`) si nu se urca in git. Configurarea locala e in `.env` (ignorat de git, cu valori mock in `.env.example`); .env.prod e doar pentru VPS.
+Datele stau pe gazda in `appdata/db/` si `appdata/files/` (mount-uri in `docker-compose-local.yaml`) si nu se urca in git. Configurarea locala e in `.env` (ignorat de git, cu valori mock in `.env.example`); .env.prod e doar pentru VPS.
 
 
 ## Instalare pe VPS (Docker + Caddy)
@@ -113,7 +113,7 @@ Datele stau pe gazda in `src/dbsqlite/` si `src/media/` (mount-uri in `docker-co
 Aplicatia ruleaza cu **login/inregistrare pe email + parola** (obligatoriu si in
 varianta locala) si **date izolate per utilizator**: fiecare cont isi vede doar
 propriile incasari, cheltuieli, facturi, documente si setari, iar fisierele
-urcate stau in `src/media/user_<id>/` si pot fi descarcate doar de proprietar.
+urcate stau in `appdata/files/user_<id>/` si pot fi descarcate doar de proprietar.
 
 Sunt doua fisiere Docker Compose:
 
@@ -136,9 +136,10 @@ cp .env.prod.example .env.prod
 docker compose -f docker-compose.yaml up -d --build   # sau: make start
 ```
 
-- Baza de date SQLite si fisierele urcate raman pe gazda, in `src/dbsqlite/`
-  si `src/media/` (bind mount in ambele compose-uri) - acestea sunt singurele
-  foldere de care ai nevoie pentru backup. Nu sunt incluse in imagine sau in git.
+- Baza de date SQLite si fisierele urcate raman pe gazda, in `appdata/db/`
+  si `appdata/files/` (folderul `appdata/` e montat la `/data` in ambele
+  compose-uri) - e singurul folder de care ai nevoie pentru backup.
+  Nu e inclus in imagine sau in git.
 - La pornire containerul aplica migrarile si colectorul de fisiere statice automat.
 - Optional: seteaza `DJANGO_SUPERUSER_EMAIL` / `DJANGO_SUPERUSER_PASSWORD` in
   `.env.prod` pentru a crea un cont de admin (`/admin/`) la prima pornire.
@@ -270,9 +271,9 @@ Oricand, dar musai inainte de a completa Declaratia Unica: cardurile cu totaluri
 **8. La final de an:** din `Setari` → `Exporta datele din aplicatie` alegi anul si primesti un zip cu toate documentele justificative, registrele in Excel, fisele mijloacelor fixe si `SUMAR.html` - arhiva completa pentru acel an, de pastrat pentru controlul ANAF.
 
 **Ce face aplicatia in spate cu fisierele:**
-- fiecare fisier urcat sau generat (facturi PDF/XML, justificative, fise mijloc fix) e salvat in `src/media/` cu un prefix-id unic de 8 caractere (ex. `0x4rf2KW_factura_PFT-1.pdf`), ca sa nu existe coliziuni de nume; la re-incarcarea unui fisier deja prefixat, prefixul vechi e inlocuit;
-- fisierele stau in `src/media/user_<id>/` (directoarele sunt montate de pe gazda in container) si pot fi descarcate doar de proprietar;
-- exporturile CSV/XLSX ale registrelor si zip-urile generate (D301/D390, exportul pe an) se construiesc temporar in `src/media/extracts/` si se livreaza la download;
+- fiecare fisier urcat sau generat (facturi PDF/XML, justificative, fise mijloc fix) e salvat in `appdata/files/` cu un prefix-id unic de 8 caractere (ex. `0x4rf2KW_factura_PFT-1.pdf`), ca sa nu existe coliziuni de nume; la re-incarcarea unui fisier deja prefixat, prefixul vechi e inlocuit;
+- fisierele stau in `appdata/files/user_<id>/` (directoarele sunt montate de pe gazda in container) si pot fi descarcate doar de proprietar;
+- exporturile CSV/XLSX ale registrelor si zip-urile generate (D301/D390, exportul pe an) se construiesc temporar in `appdata/files/extracts/` si se livreaza la download;
 - la stergerea unei inregistrari din aplicatie, fisierul atasat ei este sters automat de pe disc (django-cleanup); `Sterge toate datele` din Setari sterge si baza de date si fisierele;
 - cursurile BNR se iau online prin `cursvalutarbnr` si se cache-uiesc local, deci anii trecuti functioneaza si offline.
 
@@ -471,14 +472,14 @@ In tab-ul **Jurnal Cumparaturi** gasesti **Jurnalul de cumpărări**: daca ai ch
 
 Versiunea pe care o rulezi apare in subsolul paginii `Setari` (ex. `PFASimplu V3.0.0`), iar versiunile noi se publica in [Github Releases](https://github.com/ClimenteA/PFASimplu/releases).
 
-**Actualizare locala:** re-ruleaza scriptul de instalare (`./install.sh` sau `install.bat`). El face `git pull`, reconstruieste imaginea si reporneste containerele. Baza de date si fisierele raman pe loc: sunt in `src/dbsqlite/` si `src/media/` pe disc, nu in imagine. Echivalent manual:
+**Actualizare locala:** re-ruleaza scriptul de instalare (`./install.sh` sau `install.bat`). El face `git pull`, reconstruieste imaginea si reporneste containerele. Baza de date si fisierele raman pe loc: sunt in `appdata/db/` si `appdata/files/` pe disc, nu in imagine. Echivalent manual:
 
 ```bash
 git pull
 docker compose -f docker-compose-local.yaml up -d --build
 ```
 
-Pe VPS, folosesti `docker-compose.yaml`. Pentru siguranta, inainte de actualizare poti face un export pe an din `Setari` → `Exporta datele din aplicatie` (sau copiaza direct cele doua foldere).
+Pe VPS, folosesti `docker-compose.yaml`. Pentru siguranta, inainte de actualizare poti face un export pe an din `Setari` → `Exporta datele din aplicatie` (sau copiaza direct folderul `appdata/`).
 
 
 ## Debug si testare (dezvoltatori)
@@ -517,7 +518,7 @@ make migrate-all        # regenerare migrari (daca ai modificat modelele)
 ```
 
 `make dev` foloseste **aceeasi baza de date si acelasi folder media ca Docker-ul
-local** (`src/dbsqlite/stocare.db` si `src/media/`), deci datele se pastreaza
+local** (`appdata/db/stocare.db` si `appdata/files/`), deci datele se pastreaza
 cand treci de la `make dev` la `make start-local`. Daca ambele ruleaza pe 8990,
 opreste unul dintre ele sau schimba portul cu `make dev DEV_PORT=8991`.
 Pe Windows: `.\makefile.bat dev` (si `dev-superuser`).
@@ -526,8 +527,9 @@ Variabile de mediu utile (`src/core/settings.py` si fisierele compose):
 
 | Variabila | Rol | Implicit |
 |---|---|---|
-| `PFASIMPLU_DB_PATH` / `PFASIMPLU_DB_DIR` | locatia bazei de date SQLite (in Docker: `/data/dbsqlite`, montat din `src/dbsqlite/`) | `src/dbsqlite/stocare.db` |
-| `PFASIMPLU_MEDIA_ROOT` | folderul fisierelor urcate/generate (in Docker: `/data/media`, montat din `src/media/`) | `src/media/` |
+| `PFASIMPLU_DB_PATH` / `PFASIMPLU_DB_DIR` | locatia bazei de date SQLite (in Docker: `/data/db`, montat din `appdata/db/`) | `appdata/db/stocare.db` |
+| `PFASIMPLU_MEDIA_ROOT` | folderul fisierelor urcate/generate (in Docker: `/data/files`, montat din `appdata/files/`) | `appdata/files/` |
+| `PFASIMPLU_LOG_DIR` | folderul logurilor (in Docker: `/data/logs`, montat din `appdata/logs/`); fisierul e `pfasimplu.log`, cu rotatie la 5 MB | `appdata/logs/` |
 | `PFASIMPLU_STATIC_ROOT` | folderul fisierelor statice colectate | `src/staticfiles/` |
 | `PFASIMPLU_PORT` | portul aplicatiei in compose-ul local | `8990` |
 | `PFASIMPLU_DEBUG` | `0` = mod productie (fara trace-uri in browser) | `1` |
@@ -543,7 +545,8 @@ Radacina repo-ului contine configuratia proiectului, documentatia, fisierele Doc
 
 | Folder / fisier | Rol |
 |---|---|
-| `src/` | sursele aplicatiei: app-urile Django, `core/`, `mcp_server/`, `templates/`, `static/`, `tests/` si datele locale (`media/`, `dbsqlite/`) |
+| `src/` | sursele aplicatiei: app-urile Django, `core/`, `mcp_server/`, `templates/`, `static/`, `tests/` |
+| `appdata/` | datele locale: `db/stocare.db` (SQLite), `files/` (fisiere urcate/generate) si `logs/pfasimplu.log`; ignorate de git si montate in Docker |
 | `Dockerfile`, `docker-entrypoint.sh` | imaginea aplicatiei (migrari + collectstatic la pornire) |
 | `docker-compose.yaml` | varianta VPS: aplicatie + MCP + Caddy |
 | `docker-compose-local.yaml` | varianta locala: aplicatie + MCP, fara Caddy |
@@ -588,9 +591,10 @@ Dupa rulare, baza de date de test ramane in `src/tests/.runtime/` pentru inspect
 - **Serverul nu porneste / port ocupat**: portul aplicatiei e `PFASIMPLU_PORT` in `.env` (implicit 8990), cel al MCP `PFASIMPLU_MCP_PORT` (implicit 8997); dupa modificare, `docker compose -f docker-compose-local.yaml up -d`.
 - **Erori de migrari dupa modificari de modele**: `make migrate-all`; daca migrarile sunt corupte, `make purge-migration-dirs` apoi `make migrate-all` (atenție: pe o baza de date existenta cu schema veche poate fi nevoie de `make purge-db`, care **sterge datele**).
 - **Curs BNR indisponibil**: `cursvalutarbnr` ia cursurile online si le cache-uieste in folderul temporar al sistemului (`cache_cursvalutarbnr`); prima rulare necesita internet.
-- **Fisiere lipsa dupa mutarea bazei de date**: fisierele sunt referite relativ la `PFASIMPLU_MEDIA_ROOT` - muta si folderul `src/media/` odata cu `stocare.db`.
+- **Fisiere lipsa dupa mutarea bazei de date**: fisierele sunt referite relativ la `PFASIMPLU_MEDIA_ROOT` - muta tot folderul `appdata/` odata cu baza de date.
 - **Login nu functioneaza pe HTTP local**: verifica `PFASIMPLU_SECURE_COOKIES=0` in `.env` (cookie-urile `Secure` nu sunt trimise de browser pe `http://localhost`).
-- **Datele nu se vad dupa rebuild**: sunt bind-mount-uite din `src/dbsqlite/` si `src/media/`; nu le stergi si nu le muta fara sa actualizezi compose-ul.
+- **Datele nu se vad dupa rebuild**: sunt bind-mount-uite din `appdata/`; nu le stergi si nu le muta fara sa actualizezi compose-ul.
+- **Loguri / erori de zi cu zi**: verifica `appdata/logs/pfasimplu.log` (in Docker: `/data/logs/pfasimplu.log`); se roteste la 5 MB, cu 3 copii vechi. `docker compose logs` arata doar iesirea consolei.
 - **Eroare `env_file` lipseste**: copiaza `.env.example` in `.env` inainte de `docker compose`.
 
 

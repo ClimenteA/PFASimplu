@@ -110,7 +110,7 @@ fi
 cd "$INSTALL_DIR"
 
 # Directoarele de date montate in containere (le creem ca utilizator, nu ca root).
-mkdir -p src/dbsqlite src/media staticfiles
+mkdir -p appdata/db appdata/files appdata/logs staticfiles
 
 # Porturile se citesc din .env (fisierul e versionat cu valori mock), ca sa
 # nu existe diferenta intre ce afiseaza scriptul si ce foloseste Compose.
@@ -158,8 +158,8 @@ Gata! PFASimplu ruleaza la http://localhost:${PORT}
 
   * Logarea este obligatorie: creeaza cont la
     http://localhost:${PORT}/conturi/inregistrare/
-  * Datele sunt pe gazda, in $(pwd)/src/dbsqlite/ (baza de date) si
-    $(pwd)/src/media/ (fisierele urcate/generate) -> fa backup la aceste foldere.
+  * Datele sunt pe gazda, in $(pwd)/appdata/db/ (baza de date) si
+    $(pwd)/appdata/files/ (fisierele urcate/generate) -> fa backup la appdata/.
   * Oprire:   docker compose -f ${COMPOSE_FILE} down
   * Loguri:   docker compose -f ${COMPOSE_FILE} logs -f
   * Actualizare: ruleaza din nou acest script (face git pull + rebuild).

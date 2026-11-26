@@ -1,4 +1,5 @@
 import itertools
+import logging
 import os
 from copy import copy
 
@@ -30,6 +31,8 @@ from utils.views import download_csv_or_xlsx, download_dataframe
 matplotlib.use("SVG")
 
 import matplotlib.pyplot as plt
+
+logger = logging.getLogger(__name__)
 
 
 def in_valuta_afisare(value, valuta: str, anul: int):
@@ -625,7 +628,12 @@ def get_cards_and_charts_data(request):
         try:
             total_cheltuieli = CheltuialaModel.get_total_cheltuieli(anul)
         except Exception as err:
-            print("0 total cheltuieli", err)
+            logger.warning(
+                "Nu s-a putut calcula totalul cheltuielilor pentru anul %s; "
+                "folosesc 0: %s",
+                anul,
+                err,
+            )
             total_cheltuieli = 0
 
         # Venitul net poate fi negativ (pierdere fiscala); se afiseaza ca atare in registrul
@@ -674,8 +682,12 @@ def get_cards_and_charts_data(request):
             anul, incasari_pe_luni, cheltuieli_pe_luni, valuta
         )
 
-    except Exception as err:
-        print("all-zero", err)
+    except Exception:
+        logger.exception(
+            "Eroare la calculul cardurilor/graficelor pentru anul %s; "
+            "folosesc valori zero",
+            anul,
+        )
         total_neincasate = 0
         total_incasari_brut = 0
         total_incasari_net = 0

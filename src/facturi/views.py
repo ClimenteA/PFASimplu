@@ -1,3 +1,5 @@
+import logging
+
 from django.contrib import messages
 from django.db.models import OuterRef, Subquery
 from django.http import JsonResponse
@@ -15,6 +17,8 @@ from utils.views import (
 from .forms import FacturaForm
 from .generare import genereaza_documente
 from .models import FacturaModel
+
+logger = logging.getLogger(__name__)
 
 
 class FacturiSearchClientName(View):
@@ -73,7 +77,7 @@ class FacturiView(View):
         form = FacturaForm(request.POST)
 
         if not form.is_valid():
-            print("-----form.errors", form.errors)
+            logger.warning("Formular factura invalid: %s", form.errors)
             messages.add_message(
                 request,
                 messages.ERROR,

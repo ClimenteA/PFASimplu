@@ -1,6 +1,6 @@
+import logging
 import os
 import tomllib
-import traceback
 from datetime import timedelta
 
 import requests_cache
@@ -21,6 +21,8 @@ PYPROJECT_URL = (
     "https://raw.githubusercontent.com/ClimenteA/PFASimplu/refs/heads/main/pyproject.toml"
 )
 
+logger = logging.getLogger(__name__)
+
 
 def get_latest_app_version():
     """Ultima versiune publicata, citita din pyproject.toml de pe GitHub
@@ -33,9 +35,8 @@ def get_latest_app_version():
         response = requests_session.get(PYPROJECT_URL, timeout=5, refresh=True)
         response.raise_for_status()
         return tomllib.loads(response.text)["project"]["version"]
-    except Exception as err:
-        print(traceback.format_exc())
-        print("Nu am putut prelua ultima versiune PFASimplu de pe GitHub:", str(err))
+    except Exception:
+        logger.exception("Nu am putut prelua ultima versiune PFASimplu de pe GitHub")
         return ""
 
 
@@ -45,7 +46,6 @@ def get_salarii_minim_brut():
         data = response.json()
         data = {int(k): v for k, v in data.items()}
         return data
-    except Exception as err:
-        print(traceback.format_exc())
-        print("Nu am putut prelua ultimele salarii minime brute:", str(err))
+    except Exception:
+        logger.exception("Nu am putut prelua ultimele salarii minime brute")
         return get_salarii_minim_brut_local()

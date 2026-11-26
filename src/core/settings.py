@@ -3,11 +3,79 @@ import os
 import shutil
 from pathlib import Path
 
-# BASE_DIR = radacina surselor (src/), care contine app-urile, templates/,
-# static/, media/ si dbsqlite/. PROJECT_ROOT = radacina repo-ului, unde sta
-# pyproject.toml.
+# BASE_DIR = radacina surselor (src/), care contine app-urile, templates/ si
+# static/. PROJECT_ROOT = radacina repo-ului, unde stau pyproject.toml si
+# appdata/ (datele locale: db/ cu SQLite si files/ cu fisierele urcate).
 BASE_DIR = Path(__file__).resolve().parent.parent
 PROJECT_ROOT = BASE_DIR.parent
+APPDATA_DIR = PROJECT_ROOT / "appdata"
+
+# Logurile aplicatiei se scriu in appdata/logs/ (in Docker: /data/logs, din
+# mount-ul ./appdata); calea poate fi schimbata prin PFASIMPLU_LOG_DIR.
+LOG_DIR = os.environ.get("PFASIMPLU_LOG_DIR") or os.path.join(APPDATA_DIR, "logs")
+os.makedirs(LOG_DIR, exist_ok=True)
+LOG_FILE = os.path.join(LOG_DIR, "pfasimplu.log")
+
+# Pastram configuratia implicita Django (django, django.server, mail_admins) si
+# adaugam un handler de fisier RotatingFileHandler pentru logurile aplicatiei.
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "filters": {
+        "require_debug_false": {"()": "django.utils.log.RequireDebugFalse"},
+        "require_debug_true": {"()": "django.utils.log.RequireDebugTrue"},
+    },
+    "formatters": {
+        "pfasimplu": {
+            "format": "{asctime} [{levelname}] {name}: {message}",
+            "style": "{",
+        },
+        "django.server": {
+            "()": "django.utils.log.ServerFormatter",
+            "format": "[{server_time}] {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "console": {
+            "level": "INFO",
+            "filters": ["require_debug_true"],
+            "class": "logging.StreamHandler",
+        },
+        "django.server": {
+            "level": "INFO",
+            "class": "logging.StreamHandler",
+            "formatter": "django.server",
+        },
+        "mail_admins": {
+            "level": "ERROR",
+            "filters": ["require_debug_false"],
+            "class": "django.utils.log.AdminEmailHandler",
+        },
+        "file": {
+            "level": "INFO",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": LOG_FILE,
+            "maxBytes": 5 * 1024 * 1024,
+            "backupCount": 3,
+            "encoding": "utf-8",
+            "formatter": "pfasimplu",
+        },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console", "mail_admins", "file"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "django.server": {
+            "handlers": ["django.server"],
+            "level": "INFO",
+            "propagate": False,
+        },
+    },
+    "root": {"handlers": ["file", "console"], "level": "INFO"},
+}
 
 
 def _get_app_version() -> str:
@@ -143,7 +211,7 @@ WSGI_APPLICATION = "core.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DB_DIR = os.environ.get("PFASIMPLU_DB_DIR") or os.path.join(BASE_DIR, "dbsqlite")
+DB_DIR = os.environ.get("PFASIMPLU_DB_DIR") or os.path.join(APPDATA_DIR, "db")
 
 if not os.path.exists(DB_DIR):
     os.makedirs(DB_DIR)
@@ -224,7 +292,9 @@ def get_salarii_minim_brut_local():
 
 
 MEDIA_URL = "/media/"
-MEDIA_ROOT = os.environ.get("PFASIMPLU_MEDIA_ROOT") or os.path.join(BASE_DIR, "media")
+MEDIA_ROOT = os.environ.get("PFASIMPLU_MEDIA_ROOT") or os.path.join(
+    APPDATA_DIR, "files"
+)
 
 
 def make_media_dir():
@@ -236,8 +306,8 @@ make_media_dir()
 
 
 def get_media_path():
-    """Folderul media al utilizatorului curent: media/user_<id>/.
-    Fara utilizator in context (comenzi de management) ramane media/."""
+    """Folderul media al utilizatorului curent: files/user_<id>/ in appdata.
+    Fara utilizator in context (comenzi de management) ramane in appdata/files/."""
     from utils.multiuser import get_user_media_prefix
 
     prefix = get_user_media_prefix()

@@ -6,8 +6,7 @@
 .pytest_cache
 __pycache__
 *.pyc
-src/dbsqlite
-src/media
+appdata
 staticfiles
 data
 build

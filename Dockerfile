@@ -17,12 +17,13 @@ RUN uv sync --frozen --no-dev --no-install-project
 COPY . .
 
 # Directoarele de date (montate ca volume in docker-compose).
-RUN mkdir -p /data/dbsqlite /data/media /app/staticfiles
+RUN mkdir -p /data/db /data/files /app/staticfiles
 
 # Sursele Django (core, app-urile, mcp_server) sunt in /app/src.
 ENV PYTHONPATH=/app/src \
-    PFASIMPLU_DB_DIR=/data/dbsqlite \
-    PFASIMPLU_MEDIA_ROOT=/data/media \
+    PFASIMPLU_DB_DIR=/data/db \
+    PFASIMPLU_MEDIA_ROOT=/data/files \
+    PFASIMPLU_LOG_DIR=/data/logs \
     PFASIMPLU_STATIC_ROOT=/app/staticfiles \
     PFASIMPLU_DEBUG=0 \
     PFASIMPLU_MCP_PORT=8001

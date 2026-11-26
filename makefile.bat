@@ -42,7 +42,7 @@ IF "%1"=="dev" (
     rmdir /s /q src\setari\migrations
 ) ELSE IF "%1"=="purge-db" (
     call %0 purge-migration-dirs
-    del src\dbsqlite\stocare.db
+    del appdata\db\stocare.db
 ) ELSE (
     echo Invalid command. Available commands: dev, dev-superuser, start-local, stop-local, logs-local, migrate-all, purge-migration-dirs, purge-db
 )

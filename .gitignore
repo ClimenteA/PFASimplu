@@ -3,8 +3,7 @@ stocare*
 .vscode
 .ipynb_checkpoints
 __pycache__
-src/media/*
-src/dbsqlite/*
+appdata/*
 staticfiles/
 data/
 *.db

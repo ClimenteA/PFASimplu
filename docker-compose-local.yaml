@@ -10,9 +10,9 @@
 # Loginul este obligatoriu: la prima deschidere creaza un cont in
 # http://localhost:8990/conturi/inregistrare/ (sau foloseste /admin/).
 #
-# Baza de date si fisierele urcate/generate sunt direct pe gazda, in
-# src/dbsqlite si src/media; se vad si se pot copia/backup-ui, si nu sunt
-# afectate de rebuild-ul imaginii.
+# Baza de date, fisierele si logurile sunt direct pe gazda, in
+# appdata/db, appdata/files si appdata/logs; se vad si se pot copia/backup-ui,
+# si nu sunt afectate de rebuild-ul imaginii.
 #
 # "restart: unless-stopped" + serviciul Docker pornit la boot => aplicatia
 # revine singura dupa restartul calculatorului (mai putin daca a fost oprita
@@ -30,8 +30,8 @@ services:
     env_file:
       - .env
     volumes:
-      - ./src/dbsqlite:/data/dbsqlite
-      - ./src/media:/data/media
+      # Toate datele (baza + fisiere) stau in ./appdata, montate la /data.
+      - ./appdata:/data
       - ./staticfiles:/app/staticfiles
 
   pfasimplu-mcp-local:
@@ -49,8 +49,7 @@ services:
     env_file:
       - .env
     volumes:
-      - ./src/dbsqlite:/data/dbsqlite
-      - ./src/media:/data/media
+      - ./appdata:/data
     # Serverul MCP e un proces ASGI separat de waitress (Django e WSGI).
     # Autorizarea se face cu cheia generata in /setari (Bearer).
     command: ["python", "-m", "uvicorn", "mcp_server.http_app:app", "--host", "0.0.0.0", "--port", "8001"]
