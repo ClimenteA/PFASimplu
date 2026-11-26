@@ -1,4 +1,4 @@
-.PHONY: install dev dev-e2e dev-superuser test-e2e migrate-all purge-migration-dirs purge-db build-local start-local stop-local logs-local build start stop logs format lint ruff check
+.PHONY: install dev dev-e2e dev-superuser test-e2e migrate-all purge-migration-dirs purge-db build-local start-local stop-local logs-local build start stop logs format lint ruff check dist
 
 # Sursele aplicatiei sunt in src/. Comenzile de mai jos ruleaza din radacina
 # repo-ului, deci folosim calea explicita catre src/manage.py si PYTHONPATH=src
@@ -58,6 +58,11 @@ stop:
 
 logs:
 	docker compose -f docker-compose.yaml logs -f --tail=100
+
+# Executabil standalone pentru OS-ul curent: wheel + PyCrucible (build-time
+# only, prin uvx). Rezultatul apare in dist/; vezi si scripts/smoke_dist.py.
+dist:
+	uv run --no-project python scripts/build_dist.py
 
 # Migrari (versionate in git; utile cand modifice modelele in dezvoltare).
 migrate-all:

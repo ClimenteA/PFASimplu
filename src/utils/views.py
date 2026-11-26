@@ -111,12 +111,10 @@ def pregateste_df_export(df: pd.DataFrame, pentru_csv: bool = False) -> pd.DataF
     for coloana in df.columns:
         df[coloana] = df[coloana].map(
             lambda v: (
-                format_suma(v)
-                if pentru_csv
-                else float(rotund2(v))
+                (format_suma(v) if pentru_csv else float(rotund2(v)))
+                if isinstance(v, Decimal)
+                else v
             )
-            if isinstance(v, Decimal)
-            else v
         )
     return df
 

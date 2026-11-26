@@ -17,9 +17,7 @@ get_url = lambda filename: (
     f"https://raw.githubusercontent.com/ClimenteA/PFASimplu/refs/heads/main/static/{filename}"
 )
 
-PYPROJECT_URL = (
-    "https://raw.githubusercontent.com/ClimenteA/PFASimplu/refs/heads/main/pyproject.toml"
-)
+PYPROJECT_URL = "https://raw.githubusercontent.com/ClimenteA/PFASimplu/refs/heads/main/pyproject.toml"
 
 logger = logging.getLogger(__name__)
 
