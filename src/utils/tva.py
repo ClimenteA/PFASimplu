@@ -6,7 +6,7 @@ Reguli (conform ghidului din stocare/completare-declaratii-tva):
 - Servicii non-UE: doar D301 sectiunea 4 (fara D390), declarate cu CIF-ul normal din Setari.
 - Intr-o luna cu ambele tipuri se genereaza doua D301 separate, fiecare pe codul ei.
 - Baza si TVA: 2 zecimale; baza D390: rotunjita la intreg (lei).
-- TVA = baza x cota standard (21%); total document jurnal = baza + TVA.
+- TVA = baza x cota standard de 21% (doar pentru furnizori straini); total document jurnal = baza + TVA.
 - Termen depunere/plata: 25 inclusiv a lunii urmatoare exigibilitatii.
 """
 

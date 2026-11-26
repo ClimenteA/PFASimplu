@@ -13,7 +13,6 @@ Declaratiile se descarca din pagina Cheltuieli (filtru pe luna + Descarca):
 import datetime
 import os
 import tempfile
-from pathlib import Path
 from unittest.mock import patch
 from zipfile import ZipFile
 
@@ -26,7 +25,7 @@ from cheltuieli.models import CheltuialaModel, Deductibilitate, TipAchizitie
 from documente.models import DocumenteModel, TipDocument
 from documente.services import recipisa_parser
 from setari.models import SetariModel
-from utils.decimale import D, rotund4
+from utils.decimale import D
 from utils.tari import este_tara_ue
 from utils.trezorerie import get_judet_din_localitate, get_link_iban_trezorerie
 from utils.tva import (
@@ -53,12 +52,45 @@ CURSURI_TEST = {
 }
 
 
+USER_TEST = None
+
+
+def login_test_client(testcase):
+    """Autentifica clientul de test si seteaza utilizatorul pentru fixtures."""
+    global USER_TEST
+    from django.contrib.auth.models import User
+
+    USER_TEST, _ = User.objects.get_or_create(username="test@pfasimplu.ro")
+    testcase.user = USER_TEST
+    testcase.client.force_login(USER_TEST)
+
+
 def mock_get_bnr_rates(dateValue):
     return CURSURI_TEST
 
 
+def pdf_recipisa_d301() -> bytes:
+    """Recipisa D301 sintetica pentru teste (PDF-urile reale sunt in stocare/,
+    exclusa din git prin .gitignore, deci nu e disponibila intr-un checkout curat)."""
+    from fpdf import FPDF
+
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Helvetica", size=12)
+    for linie in (
+        "Declaratie tip D301",
+        "perioada de raportare 10 2026",
+        "CIF: 52937756",
+        "Index incarcare: 1296415962 din 13.10.2026",
+        "Nu exista erori de validare",
+    ):
+        pdf.cell(0, 9, linie, new_x="LMARGIN", new_y="NEXT")
+    return bytes(pdf.output())
+
+
 def creeaza_setari(**kwargs):
     defaults = {
+        "user": USER_TEST,
         "nume": "CLIMENTE ALIN IONEL PERSOANA FIZICA AUTORIZATA",
         "localitate": "RO-IS, jud. Iasi, Iasi",
         "adresa": "str. SOS. PRINCIPALA, nr. 162, bl. A7, sc. A, ap. 9, jud. IASI",
@@ -76,6 +108,7 @@ def creeaza_setari(**kwargs):
 def creeaza_cheltuiala_ue(**kwargs):
     """Factura Cortecs (Austria): 21 EUR, 02.10.2026."""
     defaults = {
+        "user": USER_TEST,
         "nume_cheltuiala": "Top-up AI inference Cortecs",
         "suma": 21.0,
         "valuta": "EUR",
@@ -98,6 +131,7 @@ def creeaza_cheltuiala_ue(**kwargs):
 def creeaza_cheltuiala_non_ue(**kwargs):
     """Factura Cloudflare (SUA): 21 USD, 19.09.2026."""
     defaults = {
+        "user": USER_TEST,
         "nume_cheltuiala": "Cloudflare subscription",
         "suma": 21.0,
         "valuta": "USD",
@@ -120,23 +154,27 @@ def creeaza_cheltuiala_non_ue(**kwargs):
 @override_settings(MEDIA_ROOT=tempfile.mkdtemp(prefix="pfasimplu_test_media_"))
 @patch("utils.valuta.cursvalutarbnr.get_bnr_rates", side_effect=mock_get_bnr_rates)
 class TaxareInversaCheltuialaTests(TestCase):
+    def setUp(self):
+        login_test_client(self)
+
     """Calculele automate la salvare pe cheltuiala (cazul Cortecs)."""
 
     def test_calcul_automat_ue(self, _mock):
         c = creeaza_cheltuiala_ue()
         self.assertEqual(c.curs_bnr_aplicat, D("5.3447"))
         self.assertEqual(c.baza_in_lei, D("112.2387"))
-        self.assertEqual(c.tva_autolichidata, D("23.5701"))
+        self.assertEqual(c.tva_autolichidata, D("23.570127"))
 
     def test_tva_adaugata_la_deducere(self, _mock):
         c = creeaza_cheltuiala_ue()
         # TVA autolichidata este cheltuiala deductibila a PFA-ului (art. 317):
         # deducerea = suma_in_ron (cursul zilei bancare anterioare: 21 x 5.3)
-        #            + TVA autolichidat (112.2387 x 0.21 = 23.5701)
-        self.assertEqual(c.deducere_in_ron, rotund4(D("111.3000") + D("23.5701")))
+        #            + TVA autolichidat (112.2387 x 0.21 = 23.570127)
+        self.assertEqual(c.deducere_in_ron, D("134.870127"))
 
     def test_cheltuiala_romania_neschimbata(self, _mock):
         c = CheltuialaModel.objects.create(
+            user=USER_TEST,
             nume_cheltuiala="Consumabile",
             suma=100.0,
             valuta="RON",
@@ -179,7 +217,7 @@ class TaxareInversaCheltuialaTests(TestCase):
         c.suma = 42.0
         c.save()
         self.assertEqual(c.curs_bnr_aplicat, D("5.3447"))
-        self.assertEqual(c.baza_in_lei, rotund4(D("42.0") * D("5.3447")))
+        self.assertEqual(c.baza_in_lei, D("42.0") * D("5.3447"))
 
     def test_data_facturii_fallback_pe_data_cheltuielii(self, _mock):
         c = creeaza_cheltuiala_ue(data_facturii=None)
@@ -192,6 +230,7 @@ class CalculDeclaratiiTests(TestCase):
     """Agregarea lunara D301/D390/jurnal, pe exemplele reale."""
 
     def setUp(self):
+        login_test_client(self)
         self.setari = creeaza_setari()
 
     def test_d301_ue_cortecs(self, _mock):
@@ -356,6 +395,7 @@ class GenerareDocumenteTests(TestCase):
     """Zip-ul generat: declaratii Markdown grupate in foldere pe CIF/cod TVA."""
 
     def setUp(self):
+        login_test_client(self)
         self.setari = creeaza_setari()
 
     def test_pachet_zip_complet(self, _mock):
@@ -486,6 +526,9 @@ class GenerareDocumenteTests(TestCase):
 
 
 class RecipisaParserTests(TestCase):
+    def setUp(self):
+        login_test_client(self)
+
     """Parsarea recipiselor D301/D390 (text real din exemplele depuse)."""
 
     RECIPISA_D301 = """MINISTERUL FINANŢELOR
@@ -545,6 +588,9 @@ Nu există erori de validare.
 
 
 class SetariTVAFieldsTests(TestCase):
+    def setUp(self):
+        login_test_client(self)
+
     def test_iban_trezorerie_valid(self):
         s = creeaza_setari()
         self.assertEqual(s.cont_iban_trezoreria, "RO41TREZ40620A100101XTVA")
@@ -605,6 +651,9 @@ class SetariTVAFieldsTests(TestCase):
 
 
 class IbanTrezorerieAutoTests(TestCase):
+    def setUp(self):
+        login_test_client(self)
+
     """IBAN-ul trezoreriei se deduce automat din localitatea selectata in Setari
     (date extrase din sursele oficiale ANAF - static/iban_trezorerie.json)."""
 
@@ -864,6 +913,7 @@ class FluxCheltuieliTVATests(TestCase):
     """Fluxul prin pagina Cheltuieli: filtru pe luni + Descarca declaratiile TVA."""
 
     def setUp(self):
+        login_test_client(self)
         self.setari = creeaza_setari()
 
     def test_descarca_zip_pentru_luna(self, _mock):
@@ -902,6 +952,7 @@ class FluxCheltuieliTVATests(TestCase):
         creeaza_cheltuiala_ue()  # octombrie, UE
         creeaza_cheltuiala_non_ue()  # septembrie, non-UE
         CheltuialaModel.objects.create(
+            user=USER_TEST,
             nume_cheltuiala="Consumabile",
             suma=100.0,
             valuta="RON",
@@ -920,16 +971,9 @@ class FluxCheltuieliTVATests(TestCase):
         self.assertNotContains(response, "Consumabile")
 
     def test_recipisa_detectata_la_incarcare(self, _mock):
-        # PDF recipisa real din exemplele depuse (src/stocare/)
-        recipisa_path = (
-            Path(__file__).resolve().parent.parent
-            / "stocare/completare-declaratii-tva/DTVA-OCT-2026/"
-            "recipisa_d301_cif_52937756_oct_2026_1296415962.pdf"
+        upload = SimpleUploadedFile(
+            "recipisa.pdf", pdf_recipisa_d301(), content_type="application/pdf"
         )
-        with open(recipisa_path, "rb") as f:
-            upload = SimpleUploadedFile(
-                "recipisa.pdf", f.read(), content_type="application/pdf"
-            )
 
         response = self.client.post(
             reverse("documente"),
@@ -956,6 +1000,7 @@ class FluxCheltuieliTVATests(TestCase):
 @patch("utils.valuta.cursvalutarbnr.get_bnr_rates", side_effect=mock_get_bnr_rates)
 class JurnalCumparariRegistreTests(TestCase):
     def setUp(self):
+        login_test_client(self)
         self.setari = creeaza_setari()
 
     def test_descarca_jurnal_csv(self, _mock):
@@ -986,6 +1031,7 @@ class CheltuieliFormularViewTests(TestCase):
     """Fluxul prin formularul de cheltuieli: precompletare minima, calcule automate."""
 
     def setUp(self):
+        login_test_client(self)
         self.setari = creeaza_setari()
 
     def test_post_cheltuiala_ue_calculeaza_automat(self, _mock):
@@ -1016,7 +1062,7 @@ class CheltuieliFormularViewTests(TestCase):
         self.assertEqual(response.status_code, 302)
         c = CheltuialaModel.objects.get(numar_factura="PBW-2026-003576")
         self.assertEqual(c.baza_in_lei, D("112.2387"))
-        self.assertEqual(c.tva_autolichidata, D("23.5701"))
+        self.assertEqual(c.tva_autolichidata, D("23.570127"))
         self.assertEqual(c.curs_bnr_aplicat, D("5.3447"))
 
     def test_typeahead_furnizor(self, _mock):

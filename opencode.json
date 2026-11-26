@@ -1,0 +1,14 @@
+{
+  "mcp": {
+    "servers": {
+      "chatcodfiscal": {
+        "type": "remote",
+        "codemode": true,
+        "url": "https://mcp.chatcodfiscal.ro/mcp",
+        "headers": {
+          "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjb250YWN0QHNvZnRnYXRhLmNvbSIsImV4cCI6MTgyNjMxNjAwMCwiaWF0IjoxNzk0ODM5MDA1LCJqdGkiOiJiMWNjYTFiZTM3NWE0NjhkOWU4MDZhMWU0NmU0NDA1YSJ9.P6Jr7Ta_1HurTsoWWOLUFQByYRUxZ_m_2kf9uoQGPfM"
+        }
+      }
+    }
+  }
+}

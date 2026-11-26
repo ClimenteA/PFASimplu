@@ -14,7 +14,8 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from utils.cursuri import curs_bnr_data_exigibilitatii, to_ron
-from utils.decimale import D, rotund2, rotund4
+from utils.decimale import D, rotund2
+from utils.parametri import get_parametri
 from utils.tari import (
     TARI_NON_UE_CHOICES,
     TARI_UE_CHOICES,
@@ -23,8 +24,6 @@ from utils.tari import (
 
 from .catalog import CODURI_CLASIFICARE
 from .models import CheltuialaModel, Deductibilitate, TipAchizitie
-
-COTA_TVA_STANDARD = D("0.21")
 
 UE_CODES = [cod for cod, _ in TARI_UE_CHOICES]
 NON_UE_CODES = [cod for cod, _ in TARI_NON_UE_CHOICES]
@@ -99,13 +98,29 @@ def curs_bnr_aplicat(c):
 def baza_in_lei(c):
     if not este_taxare_inversa(c):
         return None
-    return rotund4(D(c.suma) * D(curs_bnr_aplicat(c)))
+    return D(c.suma) * D(curs_bnr_aplicat(c))
+
+
+def cota_tva_autolichidata(c):
+    """Cota TVA standard pentru taxare inversa, din parametrii fiscali.
+
+    Se aplica doar pentru furnizori straini; pentru cei romani nu exista
+    taxare inversa.
+    """
+    if not c.furnizor_tara:
+        return D(0)
+    an = (
+        c.data_facturii.year
+        if c.data_facturii
+        else (c.data_inserarii.year if c.data_inserarii else timezone.now().year)
+    )
+    return D(str(get_parametri(an)["cote"]["tva_standard"]))
 
 
 def tva_autolichidata(c):
     if not este_taxare_inversa(c):
         return None
-    return rotund4(D(baza_in_lei(c)) * COTA_TVA_STANDARD)
+    return D(baza_in_lei(c)) * cota_tva_autolichidata(c)
 
 
 # --- amortizare --------------------------------------------------------------
@@ -170,7 +185,22 @@ def amortizare_lunara(c):
     ani = ani_amortizare(c)
     if not ani:
         return None
-    return rotund4(D(suma_in_ron(c)) / D(ani * 12))
+    lunar = D(suma_in_ron(c)) / D(ani * 12)
+    an = anul_darii_in_folosinta(c) or timezone.now().year
+    parametri = get_parametri(an)
+    procente = parametri["deductibilitati"]["procente"]
+
+    # Sediu social folosit si in scop personal: amortizare deductibila 50%
+    # (art. 28 alin. 12 lit. i^1 din Codul fiscal).
+    if c.este_sediu_social_neexclusiv:
+        lunar = D(lunar * D(str(procente["sediu_social"])))
+
+    # Autoturisme M1: limita lunara de 1.500 lei, cu exceptiile de la
+    # art. 28 alin. (14) lit. a)-d) (art. 28 alin. 14).
+    if c.este_autoturism_m1 and not c.exceptie_1500:
+        lunar = min(lunar, D(parametri["amortizare_auto_m1_lunar"]))
+
+    return lunar
 
 
 def cota_de_amortizare(c):
@@ -178,7 +208,7 @@ def cota_de_amortizare(c):
     total = D(suma_in_ron(c))
     if lunar is None or not total:
         return None
-    return rotund4(D(lunar) / total * D(100))
+    return D(lunar) / total * D(100)
 
 
 def anul_darii_in_folosinta(c):
@@ -247,11 +277,14 @@ def total_amortizari(an):
 
 # --- deductibilitate ---------------------------------------------------------
 
-_EUR_CAPS = {
-    Deductibilitate.DEDUCTIBILA_PARTIAL_SPORT_2024.value: 100,
-    Deductibilitate.DEDUCTIBILA_PARTIAL_PENSIE_PILON_3.value: 400,
-    Deductibilitate.DEDUCTIBILA_PARTIAL_ASIG_MEDICALE_PRIVAT.value: 400,
-    Deductibilitate.DEDUCTIBILA_PARTIAL_COTIZATII_VOLUNTARE_ASOC_ORG.value: 4000,
+_EUR_CAP_CODURI = {
+    Deductibilitate.DEDUCTIBILA_PARTIAL_SPORT_2024.value: "sport",
+    Deductibilitate.DEDUCTIBILA_PARTIAL_PENSIE_PILON_3.value: "pensie_facultativa",
+    Deductibilitate.DEDUCTIBILA_PARTIAL_PENSIE_OCUPATIONALA.value: "pensie_ocupationala",
+    Deductibilitate.DEDUCTIBILA_PARTIAL_PEPP.value: "pepp",
+    Deductibilitate.DEDUCTIBILA_PARTIAL_ETF.value: "etf",
+    Deductibilitate.DEDUCTIBILA_PARTIAL_ASIG_MEDICALE_PRIVAT.value: "asig_med",
+    Deductibilitate.DEDUCTIBILA_PARTIAL_COTIZATII_VOLUNTARE_ASOC_ORG.value: "cotizatii",
 }
 
 
@@ -295,7 +328,7 @@ def _reviziune(an):
 
 
 def calculeaza_deduceri_anului(an: int, candidat=None):
-    """Dictionar {pk: deducere_in_ron} pentru tot anul, intr-o singura trecere.
+    """Dictionar {pk: deducere_in_ron} pentru tot anul.
 
      Regulile cu plafon anual se evalueaza in ordinea (data_inserarii, id), exact
      ca la introducerea randurilor in aplicatie. `candidat` inlocuieste randul
@@ -328,17 +361,26 @@ def calculeaza_deduceri_anului(an: int, candidat=None):
 
     rezultate = {}
     salarii = D(0)
-    protocol_deja = D(0)
     sociale_deja = D(0)
     contrib_deja = D(0)
-    plafon_deja = {cod: D(0) for cod in _EUR_CAPS}
-    altele_deduse = D(0)  # non-protocol, non-mijloc fix
+    plafon_deja = {cod: D(0) for cod in _EUR_CAP_CODURI}
+    burse_deja = D(0)
+    altele_deduse = D(0)  # non-protocol, non-burse, non-mijloc fix
+
+    parametri = get_parametri(an)
+    procente = parametri["deductibilitati"]["procente"]
+    plafoane_eur = parametri["deductibilitati"]["plafoane_eur"]
+    coduri_baza = (
+        Deductibilitate.DEDUCTIBILA_PARTIAL_PROTOCOL.value,
+        Deductibilitate.DEDUCTIBILA_PARTIAL_BURSE.value,
+    )
 
     for c in rows:
         cod = c.deductibila
+        if cod in coduri_baza:
+            continue
         base = D(suma_in_ron(c))
         tva = D(tva_autolichidata(c) or 0)
-        fix = mijloc_fix(c)
 
         if cod in (
             Deductibilitate.DEDUCTIBILA_INTEGRAL.value,
@@ -346,22 +388,13 @@ def calculeaza_deduceri_anului(an: int, candidat=None):
             Deductibilitate.DEDUCTIBILA_INTEGRAL_INVENTAR.value,
             Deductibilitate.DEDUCTIBILA_INTEGRAL_AMORTIZATA.value,
         ):
-            deducere = rotund4(base + tva)
+            deducere = D(base + tva)
             if cod == Deductibilitate.DEDUCTIBILA_INTEGRAL_SALARII.value:
                 salarii += deducere
         elif cod == Deductibilitate.DEDUCTIBILA_PARTIAL_AUTO_CASA_UTILITATI.value:
-            deducere = rotund4(base / D(2) + tva)
-        elif cod == Deductibilitate.DEDUCTIBILA_PARTIAL_PROTOCOL.value:
-            # baza de calcul = venit net + protocolul deja dedus = incasari -
-            # deducerile care nu sunt protocol - amortizari.
-            baza_calcul = incasari_totale - altele_deduse - amortizari
-            admis = rotund4(D(baza_calcul) * D("0.02"))
-            if protocol_deja + base > admis:
-                raise _eroare_plafon(admis - protocol_deja)
-            deducere = base
-            protocol_deja += deducere
+            deducere = D(base * D(str(procente["auto"])) + tva)
         elif cod == Deductibilitate.DEDUCTIBILA_PARTIAL_SOCIALE.value:
-            admis = rotund4(salarii * D("0.05"))
+            admis = D(salarii * D(str(procente["sociale"])))
             if sociale_deja + base > admis:
                 raise _eroare_plafon(admis - sociale_deja)
             deducere = base
@@ -370,13 +403,15 @@ def calculeaza_deduceri_anului(an: int, candidat=None):
             cod
             == Deductibilitate.DEDUCTIBILA_PARTIAL_CONTRIBUTII_OBLIGATORII_ASOC_ORG.value
         ):
-            admis = rotund4(incasari_totale * D("0.05"))
+            admis = D(incasari_totale * D(str(procente["contributii_obligatorii"])))
             if contrib_deja + base > admis:
                 raise _eroare_plafon(admis - contrib_deja)
             deducere = base
             contrib_deja += deducere
-        elif cod in _EUR_CAPS:
-            euro_in_ron = to_ron(_EUR_CAPS[cod], "EUR", c.data_inserarii)
+        elif cod in _EUR_CAP_CODURI:
+            euro_in_ron = to_ron(
+                plafoane_eur[_EUR_CAP_CODURI[cod]], "EUR", c.data_inserarii
+            )
             if plafon_deja[cod] + base > euro_in_ron:
                 raise _eroare_plafon(euro_in_ron - plafon_deja[cod])
             deducere = base
@@ -385,8 +420,30 @@ def calculeaza_deduceri_anului(an: int, candidat=None):
             deducere = base
 
         rezultate[c.pk] = deducere
-        if cod != Deductibilitate.DEDUCTIBILA_PARTIAL_PROTOCOL.value and not fix:
+        if not mijloc_fix(c):
             altele_deduse += deducere
+
+    # Baza de calcul (art. 68 alin. 6): venitul brut minus cheltuielile
+    # deductibile, cu exceptia burselor private si a protocolului.
+    baza_calcul = incasari_totale - altele_deduse - amortizari
+    admis_protocol = D(baza_calcul * D(str(procente["protocol"])))
+    admis_burse = D(baza_calcul * D(str(procente["burse_private"])))
+
+    protocol_deja = D(0)
+    for c in rows:
+        cod = c.deductibila
+        if cod not in coduri_baza:
+            continue
+        base = D(suma_in_ron(c))
+        if cod == Deductibilitate.DEDUCTIBILA_PARTIAL_PROTOCOL.value:
+            if protocol_deja + base > admis_protocol:
+                raise _eroare_plafon(admis_protocol - protocol_deja)
+            protocol_deja += base
+        else:
+            if burse_deja + base > admis_burse:
+                raise _eroare_plafon(admis_burse - burse_deja)
+            burse_deja += base
+        rezultate[c.pk] = base
 
     if candidat is None:
         _CACHE[an] = (rev, rezultate)

@@ -1,4 +1,3 @@
-import json
 import os
 import shutil
 from pathlib import Path
@@ -288,13 +287,14 @@ def get_font_path():
 
 
 def get_salarii_minim_brut_local():
-    filepath = os.path.join(static_files_path, "minim_brut_an_val.json")
-    with open(filepath, "r") as f:
-        data = json.load(f)
+    """Salariile minime din fisierul de parametri fiscali, pe ani."""
+    from utils.parametri import _citeste
 
-    data = {int(k): v for k, v in data.items()}
-
-    return data
+    return {
+        int(cheie): valori["salariu_minim_brut"]
+        for cheie, valori in _citeste().items()
+        if cheie.isdigit() and "salariu_minim_brut" in valori
+    }
 
 
 MEDIA_URL = "/media/"

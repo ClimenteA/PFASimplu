@@ -58,7 +58,8 @@ Do not copy or invent fiscal formulas. Do not call exchange-rate APIs from views
 ## Money rules
 
 - Always `Decimal`, never `float`. Convert with `D(value)`.
-- `rotund4` for intermediate steps, `rotund2` for final amounts (`ROUND_HALF_UP`).
+- keep full `Decimal` precision in intermediate steps (`D()`), `rotund2` for
+  final amounts (`ROUND_HALF_UP`); `rotund_intreg` only for the D390 integer base.
 - `suma(...)` for exact totals; `format_suma(...)` or `|suma2` for display.
 
 ## Models and data

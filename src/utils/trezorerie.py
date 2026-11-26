@@ -152,7 +152,9 @@ def get_iban_trezorerie_pentru_localitate(localitate: str) -> dict | None:
         ("otelul ", "otelu "),
         ("viseul ", "viseu "),
     ]
-    for v in variante:
+    # Iteram peste o copie: setul e extins in bucla, iar modificarea lui in
+    # timpul iterarii ar ridica RuntimeError ("Set changed size during iteration").
+    for v in tuple(variante):
         for lung, scurt in perechi:
             if lung in v:
                 variante.add(v.replace(lung, scurt))
@@ -189,7 +191,7 @@ def get_iban_trezorerie_pentru_localitate(localitate: str) -> dict | None:
                 if _norm(t["localitate"]) == nume_comuna:
                     return t
             variante_comuna = {nume_comuna}
-            for v in variante_comuna:
+            for v in tuple(variante_comuna):
                 for lung, scurt in perechi:
                     if lung in v:
                         variante_comuna.add(v.replace(lung, scurt))

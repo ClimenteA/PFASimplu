@@ -243,6 +243,7 @@ def register_tools(mcp) -> None:
                 bool(setari and setari.scutit_cas),
                 bool(setari and setari.scutit_cass),
                 bool(setari and setari.scutit_impozit),
+                alte_venituri=IncasariModel.get_total_incasari_alte_surse(an),
             )
             rezultat = {
                 "an": an,

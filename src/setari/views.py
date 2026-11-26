@@ -443,6 +443,7 @@ class SetariViewDownloadData(View):
         )
 
         setari = SetariModel.objects.first()
+        alte_venituri = IncasariModel.get_total_incasari_alte_surse(anul)
         if setari:
             la_stat = calculeaza_taxe_si_impozite(
                 max(total_incasari_net, 0),
@@ -450,9 +451,14 @@ class SetariViewDownloadData(View):
                 setari.scutit_cas,
                 setari.scutit_cass,
                 setari.scutit_impozit,
+                alte_venituri=alte_venituri,
             )
         else:
-            la_stat = calculeaza_taxe_si_impozite(max(total_incasari_net, 0), anul)
+            la_stat = calculeaza_taxe_si_impozite(
+                max(total_incasari_net, 0),
+                anul,
+                alte_venituri=alte_venituri,
+            )
 
         total_neincasate = IncasariModel.get_total_neincasate(anul)
 

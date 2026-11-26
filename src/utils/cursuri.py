@@ -11,7 +11,7 @@ import datetime
 import cursvalutarbnr
 from django.db import models
 
-from .decimale import D, rotund4
+from .decimale import D
 
 
 class CursBnr(models.Model):
@@ -50,14 +50,14 @@ def _curs_din_bnr(currency: str, zi: datetime.date):
     if not zile:
         raise ValueError(f"Nu exista curs BNR publicat pana la {zi.isoformat()}")
     ultima_zi = max(zile)
-    curs = rotund4(D(rates[ultima_zi.isoformat()][currency]))
+    curs = D(rates[ultima_zi.isoformat()][currency])
     # Salvam tot ce am obtinut pentru ziua gasita, casa nu mai intervenim la
     # urmatoarea operatiune din aceeasi zi (weekend/sarbatoare inclusiv).
     for valuta, valoare in rates[ultima_zi.isoformat()].items():
         CursBnr.objects.get_or_create(
             data=ultima_zi,
             valuta=valuta,
-            defaults={"curs": rotund4(D(valoare))},
+            defaults={"curs": D(valoare)},
         )
     return curs
 
@@ -90,9 +90,9 @@ def curs_bnr_ziua_bancara_anterioara(currency: str, dateValue):
         CursBnr.objects.get_or_create(
             data=ultima_zi,
             valuta=valuta,
-            defaults={"curs": rotund4(D(valoare))},
+            defaults={"curs": D(valoare)},
         )
-    return rotund4(D(rates[ultima_zi.isoformat()][currency]))
+    return D(rates[ultima_zi.isoformat()][currency])
 
 
 def curs_bnr_data_exigibilitatii(currency: str, dateValue):
@@ -110,4 +110,4 @@ def to_ron(amount, currency: str, dateValue=None):
     if not dateValue:
         dateValue = datetime.date.today()
     rate = curs_bnr_ziua_bancara_anterioara(currency, _data(dateValue))
-    return rotund4(D(amount) * D(rate))
+    return D(amount) * D(rate)

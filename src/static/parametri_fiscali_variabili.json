@@ -1,0 +1,61 @@
+{
+  "_meta": {
+    "scop": "Parametri fiscali pe ani, folositi de calcule.",
+    "regula_fallback": "Pentru anul cerut se caută cheia lui exactă; dacă lipsește, se merge înapoi pe cheile de ani disponibile și se folosește valoarea din ultimul an anterior care definește parametrul. Un an nou conține DOAR parametrii care se schimbă; tot ce nu e specificat se moștenește de la anul anterior. Pentru anii înaintea primei chei (2026) nu se face fallback: se ridică eroare.",
+    "cum_se_actualizeaza": [
+      "Se adaugă o cheie nouă cu anul, conținând numai valorile care diferă față de anul precedent.",
+      "Nu se modifică valorile unui an deja trecut decât în caz de eroare constatată.",
+      "Valorile derivate (baze minime/maxime și sumele de CASS/CAS corespunzătoare) se calculează din salariul minim al anului respectiv, nu se stochează.",
+      "Orice valoare nouă se verifică prin MCP înainte de a fi scrisă: Codul fiscal, Normele metodologice, Codul muncii și formularele ANAF.",
+      "Cotele se aplică la data faptului generator (art. 291 alin. 4), iar salariul minim fiscal e cel de la 1 ianuarie al anului venitului (art. 135^1 alin. 3)."
+    ],
+    "surse": "Codul fiscal (codul-fiscal), Normele metodologice (norme-metodologice-de-aplicare-a-codului-fiscal), Codul muncii (codul-muncii), formularele D212/D301/D390."
+  },
+  "2026": {
+    "salariu_minim_brut": 4050,
+    "cote": {
+      "cas": 0.25,
+      "cass": 0.10,
+      "impozit_pe_venit": 0.10,
+      "tva_standard": 0.21
+    },
+    "cas_salarii": {
+      "min": 12,
+      "max": 24
+    },
+    "cass_salarii": {
+      "min": 6,
+      "max": 72,
+      "trepte_alte_categorii": [
+        6,
+        12,
+        24
+      ]
+    },
+    "tva_prag_scutire": 395000,
+    "mijloc_fix_prag": 5000,
+    "amortizare_auto_m1_lunar": 1500,
+    "deductibilitati": {
+      "procente": {
+        "protocol": 0.02,
+        "burse_private": 0.05,
+        "sociale": 0.05,
+        "contributii_obligatorii": 0.05,
+        "auto": 0.50,
+        "sediu_social": 0.50
+      },
+      "plafoane_eur": {
+        "pensie_facultativa": 400,
+        "pensie_ocupationala": 400,
+        "pepp": 400,
+        "etf": 400,
+        "asig_med": 400,
+        "cotizatii": 4000,
+        "sport": 100
+      }
+    }
+  },
+  "2027": {
+    "salariu_minim_brut": 4325
+  }
+}
