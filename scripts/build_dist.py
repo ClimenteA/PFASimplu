@@ -36,7 +36,7 @@ if __name__ == "__main__":
     main()
 '''
 
-LAUNCHER_PYPROJECT = f'''[project]
+LAUNCHER_PYPROJECT = """[project]
 name = "pfasimplu-launcher"
 version = "0.1.0"
 requires-python = ">=3.12,<3.13"
@@ -59,7 +59,12 @@ uv_version = "{UV_VERSION}"
 [tool.pycrucible.patterns]
 include = ["*.py", "**/*.py", "*.whl"]
 exclude = [".venv/**/*", "**/__pycache__/**", "**/*.pyc"]
-'''
+
+# Marker folosit de utils/actualizare.py pentru a gasi propriul executabil si
+# a sti ca rularea e standalone (in Docker/dev aceste variabile nu exista).
+[tool.pycrucible.env]
+PFASIMPLU_EXE_NAME = "{EXE_NAME}"
+"""
 
 log = logging.getLogger("build_dist")
 
@@ -85,7 +90,7 @@ def run(command: list[str]) -> None:
     subprocess.run(command, cwd=ROOT, check=True)
 
 
-def prepare_launcher() -> None:
+def prepare_launcher(version: str) -> None:
     """Creeaza proiectul PyCrucible, fara sa depinda de fisiere gitignorate."""
     LAUNCHER_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -101,7 +106,10 @@ def prepare_launcher() -> None:
     shutil.rmtree(LAUNCHER_DIR / "__pycache__", ignore_errors=True)
 
     (LAUNCHER_DIR / "launcher.py").write_text(LAUNCHER_PY, encoding="utf-8")
-    (LAUNCHER_DIR / "pyproject.toml").write_text(LAUNCHER_PYPROJECT, encoding="utf-8")
+    (LAUNCHER_DIR / "pyproject.toml").write_text(
+        LAUNCHER_PYPROJECT.format(UV_VERSION=UV_VERSION, EXE_NAME=target_name(version)),
+        encoding="utf-8",
+    )
 
 
 def main() -> None:
@@ -121,7 +129,7 @@ def main() -> None:
         raise SystemExit(f"Nu am gasit wheel-ul pfasimplu-{version} in {DIST}")
     wheel = wheels[-1]
 
-    prepare_launcher()
+    prepare_launcher(version)
 
     # uv tine in cache wheel-urile locale dupa nume. Un build tag derivat din
     # continut schimba numele cand se modifica codul, deci o reconstruire cu

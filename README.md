@@ -520,6 +520,8 @@ In tab-ul **Jurnal Cumparaturi** gasesti **Jurnalul de cumpărări**: daca ai ch
 
 Versiunea pe care o rulezi apare in subsolul paginii `Setari` (ex. `PFASimplu V3.0.0`), iar versiunile noi se publica in [Github Releases](https://github.com/ClimenteA/PFASimplu/releases).
 
+**Actualizare executabil standalone:** daca rulezi binarul si apare notificarea `(disponibil V...)`, apasa `Actualizeaza` din subsolul paginii `Setari`, apoi `Confirma instalarea`. Aplicatia descarca arhiva pentru sistemul tau de pe GitHub, o verifica si inlocuieste executabilul **cand inchizi aplicatia**, apoi reporneste singura cu versiunea noua. Baza de date, documentele si celelalte date raman in directorul de date al sistemului (`%LOCALAPPDATA%\PFASimplu`, `~/Library/Application Support/PFASimplu` sau `~/.local/share/pfasimplu`), deci nu sunt atinse. Butonul nu apare in Docker sau la rulare din sursa; acolo folosesti procedura de mai jos. Arhiva este descarcata prin HTTPS, dar binarul nu este semnat (vezi sectiunea de distributie standalone).
+
 **Actualizare locala:** re-ruleaza scriptul de instalare (`./install.sh` sau `install.bat`). El face `git pull`, reconstruieste imaginea si reporneste containerele. Baza de date si fisierele raman pe loc: sunt in `appdata/db/` si `appdata/files/` pe disc, nu in imagine. Echivalent manual:
 
 ```bash
