@@ -1,6 +1,6 @@
 [project]
 name = "pfasimplu"
-version = "3.0.0"
+version = "3.0.1"
 description = "Aplicatie de contabilitate pentru PFA-uri"
 readme = "README.md"
 requires-python = ">=3.12"
