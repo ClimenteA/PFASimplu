@@ -36,6 +36,3 @@ target-version = "py312"
 
 [tool.ruff.lint]
 ignore = ["RUF012", "BLE001"]
-
-#Warning: Mutable default value for class attribute
-
