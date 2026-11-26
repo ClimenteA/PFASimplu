@@ -21,6 +21,46 @@ LAUNCHER_DIR = ROOT / "dist-build"
 PYCRUCIBLE_VERSION = "0.4.8"
 UV_VERSION = "0.9.21"
 
+# dist-build/ e gitignorat (contine wheel-ul copiat si .venv-ul generat), deci
+# proiectul mic embed-uit de PyCrucible trebuie creat la fiecare build, altfel
+# pe un checkout curat (CI) nu exista nici macar directorul.
+LAUNCHER_PY = '''"""Entrypoint pentru proiectul mic embed-uit de PyCrucible.
+
+Wheel-ul pfasimplu este instalat de uv in venv-ul proiectului, deci modulul
+core.launcher vine din pachet, nu din acest director.
+"""
+
+from core.launcher import main
+
+if __name__ == "__main__":
+    main()
+'''
+
+LAUNCHER_PYPROJECT = f'''[project]
+name = "pfasimplu-launcher"
+version = "0.1.0"
+requires-python = ">=3.12,<3.13"
+dependencies = ["pfasimplu"]
+
+# Proiectul nu se instaleaza ca pachet; doar rezolva wheel-ul pfasimplu din
+# directorul curent (copiat aici de scripts/build_dist.py) si dependentele lui.
+[tool.uv]
+package = false
+find-links = ["."]
+
+[tool.pycrucible]
+entrypoint = "launcher.py"
+
+[tool.pycrucible.options]
+extract_to_temp = false
+delete_after_run = false
+uv_version = "{UV_VERSION}"
+
+[tool.pycrucible.patterns]
+include = ["*.py", "**/*.py", "*.whl"]
+exclude = [".venv/**/*", "**/__pycache__/**", "**/*.pyc"]
+'''
+
 log = logging.getLogger("build_dist")
 
 
@@ -45,6 +85,25 @@ def run(command: list[str]) -> None:
     subprocess.run(command, cwd=ROOT, check=True)
 
 
+def prepare_launcher() -> None:
+    """Creeaza proiectul PyCrucible, fara sa depinda de fisiere gitignorate."""
+    LAUNCHER_DIR.mkdir(parents=True, exist_ok=True)
+
+    # Curatam reziduurile unei rulari anterioare: un uv.lock sau .venv vechi
+    # ar trimite la alt wheel decat cel proaspat construit.
+    for stale in (LAUNCHER_DIR / ".venv", LAUNCHER_DIR / "uv.lock"):
+        if stale.is_dir():
+            shutil.rmtree(stale)
+        elif stale.exists():
+            stale.unlink()
+    for old in LAUNCHER_DIR.glob("*.whl"):
+        old.unlink()
+    shutil.rmtree(LAUNCHER_DIR / "__pycache__", ignore_errors=True)
+
+    (LAUNCHER_DIR / "launcher.py").write_text(LAUNCHER_PY, encoding="utf-8")
+    (LAUNCHER_DIR / "pyproject.toml").write_text(LAUNCHER_PYPROJECT, encoding="utf-8")
+
+
 def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     version = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))[
@@ -62,16 +121,7 @@ def main() -> None:
         raise SystemExit(f"Nu am gasit wheel-ul pfasimplu-{version} in {DIST}")
     wheel = wheels[-1]
 
-    # Curatam reziduurile unei rulari anterioare: un uv.lock sau .venv vechi
-    # ar trimite la alt wheel decat cel proaspat construit.
-    for stale in (LAUNCHER_DIR / ".venv", LAUNCHER_DIR / "uv.lock"):
-        if stale.is_dir():
-            shutil.rmtree(stale)
-        elif stale.exists():
-            stale.unlink()
-    for old in LAUNCHER_DIR.glob("*.whl"):
-        old.unlink()
-    shutil.rmtree(LAUNCHER_DIR / "__pycache__", ignore_errors=True)
+    prepare_launcher()
 
     # uv tine in cache wheel-urile locale dupa nume. Un build tag derivat din
     # continut schimba numele cand se modifica codul, deci o reconstruire cu
