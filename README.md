@@ -93,6 +93,54 @@ Dupa instalare, deschide `http://localhost:8990` si creeaza-ti contul in pagina 
 Baza de date (`appdata/db/stocare.db`) si fisierele (`appdata/files/`) sunt montate in container de pe disc. Ele nu sunt incluse in imaginea Docker si nu se urca in git, deci un `git pull` sau un rebuild nu le atinge. Fa backup periodic la `appdata/db/` si `appdata/files/`.
 
 
+## Distributie standalone (fara Docker)
+
+Pentru utilizatorii care nu vor Docker exista un executabil nativ per sistem de
+operare. Pipeline-ul este: `uv build --wheel` → wheel-ul este integrat la
+[PyCrucible](https://github.com/razorblade23/PyCrucible) → un singur binar.
+
+Construire locala (necesita `uv`; PyCrucible este instalat prin `uvx` doar la
+build, nu este dependenta aplicatiei):
+
+```bash
+make dist
+# rezultat: dist/pfasimplu-<versiune>-<os>-<arhitectura>[.exe]
+# + dist/pfasimplu-<versiune>-<os>-<arhitectura>.zip (folosit in release)
+```
+
+Pe Windows fara `make`: `uv run --no-project python scripts/build_dist.py`.
+Test rapid al binarului: `uv run --no-project python scripts/smoke_dist.py`.
+
+**Prima pornire** are nevoie de internet: `uv` (inclus in binar) descarca Python
+3.12 si dependentele. Pornirile urmatoare folosesc environment-ul din folderul
+`pycrucible_payload` creat langa executabil. Pastreaza
+executabilul intr-un folder in care ai drept de scriere (ex. `Downloads`,
+`Desktop`, home), nu in `Program Files` sau intr-un director read-only.
+
+Aplicatia se deschide intr-o fereastra de tip desktop (flaskwebgui) daca exista
+Chrome, Edge, Brave sau Chromium; altfel foloseste browserul implicit.
+
+**Datele utilizatorului** nu stau langa executabil si nu sunt atinse de upgrade:
+
+| Sistem | Director de date |
+|---|---|
+| Windows | `%LOCALAPPDATA%\PFASimplu` |
+| macOS | `~/Library/Application Support/PFASimplu` |
+| Linux | `${XDG_DATA_HOME:-~/.local/share}/pfasimplu` |
+
+In el se afla `db/stocare.db`, `files/` (documente), `logs/`, `staticfiles/` si
+`secret_key` (generata aleator la prima pornire). Pentru **backup** copiaza
+intregul director (sau foloseste exportul din `Setari`). Pentru **upgrade**
+inlocuieste doar executabilul; la pornire se aplica automat migrarile noi.
+
+Binarul este nesemnat: Windows SmartScreen si macOS Gatekeeper vor afisa
+avertismente. Code signing si notarization macOS sunt pasi urmatori.
+GitHub Actions publica automat un release cu arhivele `.zip` pentru fiecare
+platforma la un tag `v*`, la un merge in `main` sau la rulare manuala
+(`workflow_dispatch`). Jobul `macos-latest` produce arm64 (Apple Silicon),
+iar pentru Mac Intel este nevoie de un job `macos-13`.
+
+
 ## Instalare pt. developeri
 
 Aplicatia e facuta in Python (>= 3.12), Django cu SQLiteDB. Pentru utilizatori ruleaza in Docker; pentru dezvoltare se poate folosi si `uv run` (vezi [Rulare cu uv run](#rulare-cu-uv-run-dezvoltare)).

@@ -248,7 +248,10 @@ def get_obiecte_inventar():
 
 
 def get_registru_inventar(
-    dbid: bool = True, obiecte_inventar=None, valuta: str = "RON", anul: int | None = None
+    dbid: bool = True,
+    obiecte_inventar=None,
+    valuta: str = "RON",
+    anul: int | None = None,
 ):
 
     if obiecte_inventar is None:
@@ -261,9 +264,7 @@ def get_registru_inventar(
         data = {
             "nr_crt": idx,
             "nume_cheltuiala": item.nume_cheltuiala,
-            "deducere_in_ron": in_valuta_afisare(
-                item.deducere_in_ron, valuta, anul
-            ),
+            "deducere_in_ron": in_valuta_afisare(item.deducere_in_ron, valuta, anul),
             "data_inserarii": item.data_inserarii.isoformat(),
             "fisier": item.fisier.path,
             "mijloc_fix": item.mijloc_fix,

@@ -81,6 +81,7 @@ LOGGING = {
 def _get_app_version() -> str:
     """Versiunea aplicatiei, citita din pyproject.toml (sursa unica de adevar)."""
     import tomllib
+    from importlib.metadata import PackageNotFoundError, version
 
     for pyproject in (BASE_DIR / "pyproject.toml", PROJECT_ROOT / "pyproject.toml"):
         try:
@@ -88,7 +89,12 @@ def _get_app_version() -> str:
                 return tomllib.load(f)["project"]["version"]
         except (OSError, KeyError, tomllib.TOMLDecodeError):
             continue
-    return ""
+    # In wheel-ul instalat nu exista pyproject.toml; metadatele wheel-ului au
+    # aceeasi versiune ca [project].version din sursa.
+    try:
+        return version("pfasimplu")
+    except PackageNotFoundError:
+        return ""
 
 
 APP_VERSION = _get_app_version()

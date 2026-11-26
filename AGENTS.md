@@ -134,6 +134,7 @@ make check                       # format check + lint (CI)
 make test-e2e                    # Playwright suite (isolated DB)
 uv run src/manage.py test conturi documente   # Django TestCase tests
 make migrate-all                 # makemigrations + migrate
+make dist                        # wheel + PyCrucible executable in dist/
 ```
 
 First run of the e2e suite may need browsers: `uv run playwright install chromium`.

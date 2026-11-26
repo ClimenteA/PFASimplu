@@ -1,0 +1,89 @@
+name: Release
+
+# Tag `v*` sau un merge in main (push-ul rezultat) sau rulare manuala.
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Eticheta release (implicit: v<versiunea din pyproject.toml>)"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+          - os: windows-latest
+          # macos-latest este arm64 (Apple Silicon). Binarul nu ruleaza pe
+          # Mac-uri Intel; pentru x86_64 trebuie adaugat un job macos-13.
+          - os: macos-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v10.4.0
+
+      - name: Install Python 3.12
+        run: uv python install 3.12
+
+      # PyCrucible este instalat prin uvx, pin-uit in scripts/build_dist.py;
+      # nu este dependenta de runtime a aplicatiei.
+      - name: Build wheel and standalone executable
+        run: uv run --no-project --python 3.12 python scripts/build_dist.py
+
+      - name: Smoke test (login page + data dir)
+        run: uv run --no-project --python 3.12 python scripts/smoke_dist.py
+
+      - name: Upload archive
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: pfasimplu-${{ runner.os }}-${{ runner.arch }}
+          path: dist/*.zip
+          if-no-files-found: error
+
+  release:
+    name: Publish GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - uses: actions/download-artifact@v8.0.2
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Determine release tag
+        id: tag
+        shell: bash
+        run: |
+          if [ -n "${{ inputs.tag }}" ]; then
+            TAG="${{ inputs.tag }}"
+          elif [ "${{ github.ref_type }}" = "tag" ]; then
+            TAG="${{ github.ref_name }}"
+          else
+            TAG="v$(python3 -c "import tomllib, pathlib; print(tomllib.loads(pathlib.Path('pyproject.toml').read_text())['project']['version'])")"
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      # Arhivele sunt nesemnate: Windows SmartScreen si macOS Gatekeeper vor
+      # afisa avertismente. Code signing si notarization raman pasi urmatori.
+      - uses: softprops/action-gh-release@v3.0.4
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          name: PFASimplu ${{ steps.tag.outputs.tag }}
+          files: dist/*.zip
+          generate_release_notes: true
