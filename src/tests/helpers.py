@@ -149,8 +149,11 @@ def emite_factura(
         page.fill("#alege-localitatea", localitate)
     page.fill("#id_adresa", adresa)
 
+    # Switch-ul "Client UE" e unchecked by default.
+    expect(page.locator("#id_client_ue")).not_to_be_checked()
+
     # Campurile de date sunt in sectiunea "Mai mult".
-    page.locator("input[role='switch']").check()
+    page.locator("#mai-mult-switch").check()
     page.fill("#id_data_emitere", data_emitere.isoformat())
     page.fill("#id_data_scadenta", data_scadenta.isoformat())
     if nota:

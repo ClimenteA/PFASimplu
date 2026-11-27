@@ -66,27 +66,35 @@
                     {{ facturi_form.nume.errors }}
                 </label>
 
-                <div class="grid">
-
-                    <label class="text-bold" for="{{ facturi_form.cif.id_for_label }}">
-                        CIF/CUI/VAT:
-                        {{ facturi_form.cif }}
-                        {{ facturi_form.cif.errors }}
+                <div class="client-ue-switch">
+                    <label for="{{ facturi_form.client_ue.id_for_label }}">
+                        {{ facturi_form.client_ue }}
+                        <span class="text-bold">Client UE</span>
                     </label>
-
-                    <label class="text-bold" for="{{ facturi_form.serie.id_for_label }}">
-                        Serie fact.:
-                        {{ facturi_form.serie }}
-                        {{ facturi_form.serie.errors }}
-                    </label>
-
-                    <label class="text-bold" for="{{ facturi_form.numar.id_for_label }}">
-                        Nr.fact.:
-                        {{ facturi_form.numar }}
-                        {{ facturi_form.numar.errors }}
-                    </label>
-
                 </div>
+
+            </div>
+
+
+            <div class="grid">
+
+                <label class="text-bold" for="{{ facturi_form.cif.id_for_label }}">
+                    CIF/CUI/VAT:
+                    {{ facturi_form.cif }}
+                    {{ facturi_form.cif.errors }}
+                </label>
+
+                <label class="text-bold" for="{{ facturi_form.serie.id_for_label }}">
+                    Serie fact.:
+                    {{ facturi_form.serie }}
+                    {{ facturi_form.serie.errors }}
+                </label>
+
+                <label class="text-bold" for="{{ facturi_form.numar.id_for_label }}">
+                    Nr.fact.:
+                    {{ facturi_form.numar }}
+                    {{ facturi_form.numar.errors }}
+                </label>
 
             </div>
 
@@ -121,11 +129,9 @@
                     input: $refs.searchInputEl,
                     source: { local: localitati }
                 });">
-                    <label class="text-bold">
-                        Alege localitatea:
-                        <input name="localitate" x-ref="searchInputEl" id="alege-localitatea" autocomplete="__away"
-                            type="text" placeholder="Iasi...">
-                    </label>
+                    <label class="text-bold" for="alege-localitatea">Alege localitatea:</label>
+                    <input name="localitate" x-ref="searchInputEl" id="alege-localitatea" autocomplete="__away"
+                        type="text" placeholder="Iasi...">
                 </div>
 
                 <label class="text-bold" for="{{ facturi_form.adresa.id_for_label }}">
@@ -136,11 +142,10 @@
 
             </div>
 
-
             <div class="mt-1">
 
                 <label class="mb-2">
-                    <input x-model="moreFields" type="checkbox" role="switch" />
+                    <input id="mai-mult-switch" x-model="moreFields" type="checkbox" role="switch" />
                     <span x-text="moreFields ? 'Mai putin': 'Mai mult'"></span>
                 </label>
 

@@ -507,6 +507,7 @@ class FacturaModel(UserOwnedModel):
         default=Localitati.LOCALITATE_GENERIC,
     )
     adresa = models.CharField(max_length=1000)
+    client_ue = models.BooleanField(default=False, verbose_name="Client UE")
     email = models.EmailField(max_length=250, null=True, blank=True)
     telefon = models.CharField(max_length=250, null=True, blank=True)
     # Plata: aceeasi enumerare cu incasarile (nu mai avem codurile 42/10).

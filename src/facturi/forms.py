@@ -1,6 +1,6 @@
 from django import forms
 from django.db import transaction
-from django.forms import DateInput, ModelForm, Textarea
+from django.forms import CheckboxInput, DateInput, ModelForm, Textarea
 
 from .models import FacturaModel
 
@@ -13,6 +13,7 @@ class FacturaForm(ModelForm):
         fields = "__all__"
         exclude = ["user"]
         widgets = {
+            "client_ue": CheckboxInput(attrs={"role": "switch"}),
             "nota": Textarea(attrs={"rows": "1"}),
             "data_emitere": DateInput(format=("%m/%d/%Y"), attrs={"type": "date"}),
             "data_scadenta": DateInput(format=("%m/%d/%Y"), attrs={"type": "date"}),
