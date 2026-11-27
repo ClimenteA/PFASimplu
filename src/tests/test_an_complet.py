@@ -480,14 +480,14 @@ def test_05_mijloace_fixe_si_tva_anual(page, db):
 
 
 def test_06_verificari_ui(page, db):
-    """Cateva verificari directe in interfata (tabele, TVA D301, amortizare)."""
+    """Cateva verificari directe in interfata (tabele, TVA, amortizare)."""
     # Un mijloc fix apare in tabel cu suma dedusa integral.
     mf = CheltuialaModel.objects.filter(q_mijloc_fix()).first()
     row = rand_cheltuiala(page, mf.nume_cheltuiala)
     expect(row).to_be_visible()
     assert cell_float(row, 5) == pytest.approx(float(mf.suma_in_ron), abs=0.02)
 
-    # O cheltuiala cu taxare inversa afiseaza TVA-ul in coloana "TVA D301".
+    # O cheltuiala cu taxare inversa afiseaza TVA-ul in coloana "TVA".
     tva_row = CheltuialaModel.objects.filter(furnizor_tara__in=UE_CODES).first()
     row = rand_cheltuiala(page, tva_row.nume_cheltuiala)
     assert cell_float(row, 6) == pytest.approx(

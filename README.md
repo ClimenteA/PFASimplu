@@ -333,7 +333,7 @@ Daca ai cod special de TVA intracomunitar (art. 317) si cumperi servicii de la f
 - cursul BNR din data exigibilitatii (data facturii), luat automat din `cursvalutarbnr`;
 - baza in lei = valoarea in valuta x curs;
 - TVA autolichidata = baza x 21% (cota standard);
-- TVA-ul se adauga automat la cheltuiala deductibila (este o cheltuiala a PFA-ului, platita la ANAF prin D301) - vezi coloana `TVA D301` din tabel, cu badge 🇪🇺 (UE) sau 🌍 (non-UE).
+- TVA-ul se adauga automat la cheltuiala deductibila (este o cheltuiala a PFA-ului, platita la ANAF prin D301) - vezi coloana `TVA` din tabel, cu badge 🇪🇺 (UE) sau 🌍 (non-UE).
 
 Odata salvata, cheltuiala apare automat in **Jurnalul de cumparari (TVA)** din pagina [Registre](#registre) (tab `Jurnal Cumparaturi`) - este generat din calcul, nu trebuie inserat nimic. Declaratiile D301/D390 se descarca din filtrul „Cheltuieli externe (TVA)" de deasupra tabelului - vezi sectiunea [TVA intracomunitar](#tva-intracomunitar-d301-d390-si-jurnal-de-cumparari).
 

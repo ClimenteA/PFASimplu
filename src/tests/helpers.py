@@ -292,7 +292,7 @@ def rand_cheltuiala(page: Page, nume: str):
 
 
 def cell_float(row, index: int) -> float:
-    # Celulele pot contine si emoji (ex. "90.92 🇪🇺" la TVA D301):
+    # Celulele pot contine si emoji (ex. "90.92 🇪🇺" la TVA):
     # pastram doar primul numar din text.
     text = row.locator("td").nth(index).inner_text().strip()
     match = re.search(r"-?\d+(?:[.,]\d+)?", text)
