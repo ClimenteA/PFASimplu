@@ -1,4 +1,4 @@
-.PHONY: install dev dev-e2e dev-superuser test-e2e migrate-all purge-migration-dirs purge-db build-local start-local stop-local logs-local build start stop logs format lint ruff check dist
+.PHONY: install dev dev-e2e dev-superuser test-e2e migrate-all purge-migration-dirs purge-db build-local start-local restart-local stop-local logs-local build start restart stop logs format lint ruff check dist
 
 # Sursele aplicatiei sunt in src/. Comenzile de mai jos ruleaza din radacina
 # repo-ului, deci folosim calea explicita catre src/manage.py si PYTHONPATH=src
@@ -34,11 +34,19 @@ dev-superuser:
 
 # Docker local, fara Caddy, mereu pornit (http://localhost:8990;
 # port prin PFASIMPLU_PORT).
+# Codul sursa e montat live din ./src in container, deci editarile de cod nu
+# necesita rebuild. `start-local` construieste imaginea doar daca nu exista;
+# pentru schimbari de dependinte (pyproject.toml/uv.lock) sau Dockerfile foloseste
+# `build-local`. Dupa editari de cod, `restart-local` recreeaza containerele ca
+# waitress/uvicorn sa incarce codul nou (nu au auto-reload).
 build-local:
 	docker compose -f docker-compose-local.yaml build
 
 start-local:
-	docker compose -f docker-compose-local.yaml up -d --build
+	docker compose -f docker-compose-local.yaml up -d
+
+restart-local:
+	docker compose -f docker-compose-local.yaml up -d --force-recreate
 
 stop-local:
 	docker compose -f docker-compose-local.yaml down
@@ -46,12 +54,17 @@ stop-local:
 logs-local:
 	docker compose -f docker-compose-local.yaml logs -f --tail=100
 
-# Docker prod (aplicatie + Caddy, pe VPS; necesita server/.env.prod).
+# Docker prod (aplicatie + Caddy, pe VPS; necesita .env.prod).
+# Aceeasi logica: codul e montat live, asa ca dupa un `git pull` e suficient
+# `restart`; `build` ramane pentru schimbari de dependinte/Dockerfile.
 build:
 	docker compose -f docker-compose.yaml build
 
 start:
-	docker compose -f docker-compose.yaml up -d --build
+	docker compose -f docker-compose.yaml up -d
+
+restart:
+	docker compose -f docker-compose.yaml up -d --force-recreate
 
 stop:
 	docker compose -f docker-compose.yaml down

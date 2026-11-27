@@ -6,6 +6,10 @@
 #
 # Caddyfile-ul se monteaza din radacina; domeniul se seteaza in .env.prod
 # (PFASIMPLU_DOMAIN) sau direct in Caddyfile.
+#
+# Codul sursa (./src) e montat live la /app/src, deci un `git pull` nu necesita
+# rebuild pentru cod. Reporneste cu `make restart`; rebuild-ul (`make build`)
+# ramane necesar doar cand se schimba dependintele sau Dockerfile-ul.
 
 services:
   pfasimplu-app:
@@ -22,6 +26,9 @@ services:
       # Datele raman pe gazda in ./appdata (db/, files/, logs/), si dupa rebuild.
       - ./appdata:/data
       - ./staticfiles:/app/staticfiles
+      # Codul sursa e montat live: modificarile din ./src nu necesita rebuild,
+      # doar repornirea containerului (make restart).
+      - ./src:/app/src
 
   pfasimplu-mcp:
     container_name: pfasimplu-mcp
@@ -39,6 +46,7 @@ services:
       - .env.prod
     volumes:
       - ./appdata:/data
+      - ./src:/app/src
     # Serverul MCP e un proces ASGI separat de waitress (Django e WSGI).
     # Autorizarea se face cu cheia generata in /setari (Bearer).
     command: ["python", "-m", "uvicorn", "mcp_server.http_app:app", "--host", "0.0.0.0", "--port", "8001"]

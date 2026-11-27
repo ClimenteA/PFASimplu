@@ -529,6 +529,10 @@ git pull
 docker compose -f docker-compose-local.yaml up -d --build
 ```
 
+Daca update-ul schimba doar codul (fara `pyproject.toml`/`uv.lock`), rebuild-ul
+nu e necesar: sursa e montata live, deci ajunge `make restart-local` (local)
+sau `make restart` (VPS).
+
 Pe VPS, folosesti `docker-compose.yaml`. Pentru siguranta, inainte de actualizare poti face un export pe an din `Setari` → `Exporta datele din aplicatie` (sau copiaza direct folderul `appdata/`).
 
 
@@ -538,11 +542,19 @@ Pe VPS, folosesti `docker-compose.yaml`. Pentru siguranta, inainte de actualizar
 
 ```bash
 make start-local        # http://localhost:8990 (fara Caddy), restart: unless-stopped
+make restart-local      # dupa editari de cod: reincarca sursa, fara rebuild
 make logs-local         # logurile aplicatiei
 make stop-local
 
 make start              # varianta cu Caddy (necesita .env.prod)
+make restart            # echivalentul lui restart-local pentru VPS
 ```
+
+Codul sursa e montat live in containere (`./src` la `/app/src`), deci dupa
+modificari de cod e suficient `make restart-local` (respectiv `make restart` pe
+VPS); waitress/uvicorn nu au auto-reload, asa ca containerele trebuie recreate.
+`make build-local` / `make build` raman necesare doar cand se schimba
+dependintele (`pyproject.toml`, `uv.lock`) sau `Dockerfile`-ul.
 
 Aplicatia ruleaza in container cu `PFASIMPLU_DEBUG=0`. Pe HTTP (localhost)
 cookie-urile `Secure` sunt dezactivate prin `PFASIMPLU_SECURE_COOKIES=0`,

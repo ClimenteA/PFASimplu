@@ -14,7 +14,10 @@ IF "%1"=="dev" (
 ) ELSE IF "%1"=="dev-superuser" (
     python src\manage.py createsuperuser
 ) ELSE IF "%1"=="start-local" (
-    docker compose -f docker-compose-local.yaml up -d --build
+    docker compose -f docker-compose-local.yaml up -d
+) ELSE IF "%1"=="restart-local" (
+    REM Codul e montat live: repornim fara rebuild dupa editari.
+    docker compose -f docker-compose-local.yaml up -d --force-recreate
 ) ELSE IF "%1"=="stop-local" (
     docker compose -f docker-compose-local.yaml down
 ) ELSE IF "%1"=="logs-local" (
@@ -44,5 +47,5 @@ IF "%1"=="dev" (
     call %0 purge-migration-dirs
     del appdata\db\stocare.db
 ) ELSE (
-    echo Invalid command. Available commands: dev, dev-superuser, start-local, stop-local, logs-local, migrate-all, purge-migration-dirs, purge-db
+    echo Invalid command. Available commands: dev, dev-superuser, start-local, restart-local, stop-local, logs-local, migrate-all, purge-migration-dirs, purge-db
 )
