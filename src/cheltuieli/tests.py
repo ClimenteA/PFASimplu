@@ -1,8 +1,12 @@
 import datetime
+import tempfile
 from decimal import Decimal
 
+from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-from django.test import TestCase
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import TestCase, override_settings
+from django.urls import reverse
 
 from incasari.models import IncasariModel
 from utils.cursuri import to_ron
@@ -133,3 +137,26 @@ class CotaTvaTest(TestCase):
             data_inserarii=datetime.date(2026, 1, 15),
         )
         self.assertIsNone(cheltuiala.tva_autolichidata)
+
+
+@override_settings(MEDIA_ROOT=tempfile.mkdtemp(prefix="pfasimplu_test_paginare_media_"))
+class PaginareTest(TestCase):
+    def test_lista_are_20_de_elemente_pe_pagina(self):
+        user = User.objects.create_user(username="paginare@test.ro", password="parola")
+        self.client.force_login(user)
+        for i in range(21):
+            CheltuialaModel.objects.create(
+                user=user,
+                nume_cheltuiala=f"Cheltuiala {i}",
+                suma=D("100"),
+                data_inserarii=ZIUA,
+                fisier=SimpleUploadedFile(f"bon{i}.pdf", b"%PDF-1.4 test"),
+            )
+
+        response = self.client.get(reverse("cheltuieli"))
+        page_items = response.context["page_items"]
+        self.assertEqual(len(list(page_items)), 20)
+        self.assertEqual(page_items.paginator.num_pages, 2)
+
+        response = self.client.get(reverse("cheltuieli"), {"page": 2})
+        self.assertEqual(len(list(response.context["page_items"])), 1)

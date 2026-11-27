@@ -129,7 +129,7 @@ class CheltuieliView(View):
 
         if extern:
             results = get_cheltuieli_taxare_inversa(anul_extern, luna_extern)
-            page_items = Paginator(results, 100).get_page(request.GET.get("page") or 1)
+            page_items = Paginator(results, 20).get_page(request.GET.get("page") or 1)
 
         return render(
             request,

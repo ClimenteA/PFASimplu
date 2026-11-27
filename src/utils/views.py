@@ -95,7 +95,7 @@ def get_page_items(
     else:
         results = theModel.objects.all().order_by(order_by)
 
-    paginator = Paginator(results, 100)
+    paginator = Paginator(results, 20)
     page_items = paginator.get_page(page_number)
 
     return form, page_items

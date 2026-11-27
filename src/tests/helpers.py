@@ -286,8 +286,18 @@ def adauga_cheltuiala(
 
 
 def rand_cheltuiala(page: Page, nume: str):
-    """Randul din tabelul de cheltuieli pentru o cheltuiala cu numele dat."""
+    """Randul din tabelul de cheltuieli pentru o cheltuiala cu numele dat.
+
+    Tabelul afiseaza 20 de randuri pe pagina, asa ca cautam in toate paginile.
+    """
     page.goto("/cheltuieli/")
+    text_paginare = page.locator(".pagination p").inner_text()
+    numar_pagini = int(re.search(r"din (\d+)", text_paginare).group(1))
+    for nr_pagina in range(1, numar_pagini + 1):
+        page.goto(f"/cheltuieli/?page={nr_pagina}#tabel-cheltuieli")
+        rand = page.locator("#tabel-cheltuieli tbody tr").filter(has_text=nume).first
+        if rand.count():
+            return rand
     return page.locator("#tabel-cheltuieli tbody tr").filter(has_text=nume).first
 
 
