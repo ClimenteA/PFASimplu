@@ -122,6 +122,7 @@ def emite_factura(
     adresa: str = "STR. TESTULUI NR. 1, BUCURESTI",
     localitate: str = "",
     nota: str = "",
+    client_ue: bool = False,
 ) -> Decimal:
     """Emite o factura prin formularul Alpine din pagina Facturi.
 
@@ -150,7 +151,10 @@ def emite_factura(
     page.fill("#id_adresa", adresa)
 
     # Switch-ul "Client UE" e unchecked by default.
-    expect(page.locator("#id_client_ue")).not_to_be_checked()
+    if client_ue:
+        page.locator("#id_client_ue").check()
+    else:
+        expect(page.locator("#id_client_ue")).not_to_be_checked()
 
     # Campurile de date sunt in sectiunea "Mai mult".
     page.locator("#mai-mult-switch").check()
