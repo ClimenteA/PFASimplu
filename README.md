@@ -2,7 +2,7 @@
 
 ![GitHub all releases](https://img.shields.io/github/downloads/ClimenteA/PFASimplu/total?label=descarcari&style=for-the-badge)
 
-Aplicatie pentru simplificarea gestiunii contabilitatii facuta in partida simpla (versiunea 3).  
+Aplicatie pentru simplificarea gestiunii contabilitatii facuta in partida simpla (versiunea 3).
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
@@ -22,6 +22,7 @@ Aplicatie pentru simplificarea gestiunii contabilitatii facuta in partida simpla
   - [Servicii cumparate din UE / non-UE (taxare inversa)](#servicii-cumparate-din-ue--non-ue-taxare-inversa)
 - [Documente](#documente)
 - [TVA intracomunitar: D301, D390 si Jurnal de cumparari](#tva-intracomunitar-d301-d390-si-jurnal-de-cumparari)
+  - [D390 VIES pentru clienti UE (vanzari)](#d390-vies-pentru-clienti-ue-vanzari)
 - [Inventar](#inventar)
 - [Registre](#registre)
 - [Actualizare aplicatie](#actualizare-aplicatie)
@@ -42,6 +43,7 @@ Aplicatie pentru simplificarea gestiunii contabilitatii facuta in partida simpla
 - Impozitare in sistem real (fara norma de venit);
 - Nu au depasit pragul TVA (venituri sub 395k RON pe an);
 - Sunt prestatori de servicii;
+- Incaseaza numerar doar B2B maximum 5k/zi ron de la un client SRL/PFA (nu au casa de marcat);
 
 Aplicatia te ajuta sa:
 - creezi facturi: e-factura (fara TVA), facturi PDF in mai multe limbi si valute;
@@ -50,6 +52,7 @@ Aplicatia te ajuta sa:
 - arhivezi declaratiile depuse la ANAF;
 - calculeaza automat taxele si impozitele datorate in functie de incasari/cheltuieli;
 - calculeaza automat TVA-ul datorat pentru servicii cumparate din UE/non-UE (taxare inversa) si genereaza declaratiile D301/D390 + Jurnalul de cumparari, daca ai cod special de TVA intracomunitar (art. 317);
+- genereaza D390 VIES (tip P) si Jurnalul de vanzari pentru facturile emise catre clienti UE marcati „Client UE VIES";
 
 
 ## Poate aplicatia sa faca X,Y,Z?
@@ -201,21 +204,23 @@ Docker pornit la boot, aplicatia revine singura dupa restartul calculatorului
 
 Ordinea conteaza: aplicatia foloseste datele din `Setari` in toate celelalte pagini (antetul facturilor, IBAN-ul in moneda facturii, calculele de taxe, IBAN-ul trezoreriei pentru TVA).
 
+Toate tabelele (Facturi, Incasari, Cheltuieli, Documente, Inventar) au un formular de cautare `Cauta` / `Coloana` si paginare cate **20 de inregistrari pe pagina** - cautarea se face pe coloana aleasa sau pe toate coloanele, iar filtrele active se pastreaza la paginare. Butoanele CSV/XLSX descarca **toate** inregistrarile contului, nu doar pagina curenta. Coloana `Data Modificare` arata data ultimei modificari a inregistrarii.
+
 **1. Prima deschidere - completeaza Setari**
 
-Deschide aplicatia, autentifica-te (sau inregistreaza-te la prima folosire) si mergi intai in pagina `Setari`: numele PFA-ului, CIF, adresa, localitatea (aleasa din sugestii), conturile IBAN (unul per moneda: RON, EUR etc.), codul CAEN. Bifeaza scutirile doar daca ai statut special (pensionar, persoana cu handicap etc.). Daca ai cod special de TVA intracomunitar (art. 317), deschide sectiunea `TVA intracomunitar (D301/D390)` si completeaza codul - IBAN-ul trezoreriei se completeaza automat la alegerea localitatii. Salveaza. Fara acest pas, facturile nu au datele emitentului corecte.
+Deschide aplicatia, autentifica-te (sau inregistreaza-te la prima folosire) si mergi intai in pagina `Setari`: numele PFA-ului, CIF, Nr.Reg.Com., telefon, email, adresa, localitatea (aleasa din sugestii), codul CAEN principal (si, optional, CAEN-uri secundare sub `Adauga CAEN-uri Secundare`) si conturile IBAN (unul per moneda: RON, EUR etc., cu butoane `+ Adauga cont IBAN` / 🗑 pentru stergere). Bifeaza separat `Scutit CAS`, `Scutit CASS` si `Scutit Impozit` doar daca ai statut special (pensionar, persoana cu handicap, profesie liberala cu casa de asigurari proprie etc.). Daca ai cod special de TVA intracomunitar (art. 317), deschide sectiunea `TVA intracomunitar (D301/D390)` si completeaza codul - IBAN-ul trezoreriei se completeaza automat la alegerea localitatii. Salveaza. Fara acest pas, facturile nu au datele emitentului corecte.
 
 **2. Emite prima factura (pagina Facturi)**
 
-Completeaza clientul, seria si numarul (propuse automat: prima factura primeste seria `INV` si numarul `1`, apoi se continua seria existenta cu numarul urmator - poti schimba seria si numarul), articolele (denumire, UM, cantitate, pret), tipul facturii (e-factura pentru B2B in Romania, sau PDF in alta limba/valuta pentru extern). La salvare aplicatia genereaza automat PDF-ul facturii (si XML-ul UBL pentru e-factura) si le salveaza cu un prefix-id de 8 caractere. Le descarci din coloanele XML/PDF ale tabelului.
+Completeaza clientul, seria si numarul (propuse automat: prima factura primeste seria `INV` si numarul `1`, apoi se continua seria existenta cu numarul urmator - poti schimba seria si numarul), articolele (denumire, UM, cantitate, pret), tipul facturii (e-factura pentru B2B in Romania, sau PDF in alta limba/valuta pentru extern), tipul tranzactiei (💳 `BANCAR` sau 💵 `NUMERAR`) si, daca facturezi catre o firma din alt stat UE, comutatorul `Client UE VIES` - campul `CIF/CUI/VAT` trebuie atunci sa contina codul TVA cu prefixul tarii (ex. `ATU77164426`), nu un CIF roman; aplicatia adauga automat in factura mentiunea de taxare inversa in limba formularului ales. La salvare aplicatia genereaza automat PDF-ul facturii (si XML-ul UBL pentru e-factura) si le salveaza cu un prefix-id de 8 caractere. Le descarci din coloanele XML/PDF ale tabelului.
 
 **3. Inregistreaza incasarea (pagina Incasari)**
 
-Cand intra banii: din pagina `Facturi`, click pe 💳 (`Incasata`) in dreptul facturii - formularul de incasare se completeaza automat (suma, valuta, client), iar PDF-ul facturii devine document justificativ atasat incasarii. Pentru incasari fara factura emisa in aplicatie, completezi formularul din `Incasari` si urci documentul justificativ (extras de cont, chitanta; mai multe documente → un zip). Conversia in RON se face automat la cursul BNR din ultima zi bancara inaintea datei incasarii.
+Cand intra banii: din pagina `Facturi`, click pe 💳 in dreptul facturii - formularul de incasare se completeaza automat (nume incasare, suma, valuta, client, tip tranzactie), iar PDF-ul facturii devine document justificativ atasat incasarii. O factura care are deja incasare nu mai poate avea una a doua (iconita e dezactivata, cu avertisment). Pentru incasari fara factura emisa in aplicatie, completezi formularul din `Incasari` (`Sursa venit`, `Nume incasare`, `Suma`, `Valuta`, `Tip tranzactie`, `Data incasarii`) si urci documentul justificativ (extras de cont, chitanta; mai multe documente → un zip). Conversia in RON se face automat la cursul BNR din ultima zi bancara inaintea datei incasarii. Coloana `VIES` arata daca incasarea provine dintr-o factura cu `Client UE VIES` - pentru acestea se depune lunar D390 (vezi [D390 VIES pentru clienti UE](#d390-vies-pentru-clienti-ue-vanzari)).
 
 **4. Inregistreaza cheltuielile (pagina Cheltuieli)**
 
-De fiecare data cand cumperi ceva pentru activitatea PFA-ului: urci factura/bonul, alegi deductibilitatea (integral, partial 50%/2%, mijloc fix cu amortizare, obiect de inventar), iar pentru servicii din UE/non-UE alegi originea furnizorului - TVA-ul prin taxare inversa se calculeaza singur. Obiectele de inventar si mijloacele fixe apar automat in pagina [Inventar](#inventar) cu numar de inventar; pentru mijloacele fixe se genereaza fisa de mijloc fix (PDF), iar amortizarea lunara apare in Registrul fiscal.
+De fiecare data cand cumperi ceva pentru activitatea PFA-ului: urci factura/bonul, alegi deductibilitatea (integral, obiect de inventar, mijloc fix peste 5000 RON cu amortizare, sau una din limitele speciale: 50% pentru autovehicule/chirii/utilitati folosite si personal, 2% mese protocol, burse private max. 5%, sport/fitness max. 100 EUR/an, pensie pilon III / ocupationala / PEPP / ETF / asigurari medicale private max. 400 EUR/an, salarii, ajutoare pentru angajati etc.), completezi `Tip tranzactie` (bancar/numerar) si, pentru servicii din UE/non-UE, alegi `Origine furnizor` - TVA-ul prin taxare inversa se calculeaza singur. Pentru mijloace fixe poti bifa optiuni suplimentare care modifica amortizarea: sediu social folosit si in scop personal (50%), autoturism M1 (limita 1500 lei/luna) sau exceptie de la aceasta limita. Obiectele de inventar si mijloacele fixe apar automat in pagina [Inventar](#inventar) cu numar de inventar; pentru mijloacele fixe se genereaza fisa de mijloc fix (PDF), iar amortizarea lunara apare in Registrul fiscal.
 
 **5. Arhiveaza relatia cu ANAF (pagina Documente)**
 
@@ -223,9 +228,9 @@ Dupa ce depui Declaratia Unica (D212) sau platesti taxele, urci aici recipisa/do
 
 **6. Verifica situatia (pagina Registre)**
 
-Oricand, dar musai inainte de a completa Declaratia Unica: cardurile cu totaluri si taxele estimate (CAS, CASS, impozit), graficul pe luni si registrele obligatorii (jurnal, fiscal, inventar, jurnal de cumparari). Sumele se pot vedea in RON sau EUR, pe orice an.
+Oricand, dar musai inainte de a completa Declaratia Unica: cardurile cu totaluri (neincasate, incasari brut/net, cheltuieli) si taxele estimate (CAS, CASS, impozit), graficul pe luni si registrele obligatorii, in 5 taburi: `Registru jurnal`, `Registru fiscal`, `Registru inventar`, `Jurnal Cumparaturi` si `Jurnal Vanzari`. Sumele se pot vedea in RON sau EUR, pe orice an. Sub titlu gasesti si totalul platilor catre stat pe toti anii, totalul incasarilor nete si restul de plata.
 
-**7. Lunar, daca ai cod TVA intracomunitar:** filtreaza `Cheltuieli externe (TVA)` in pagina Cheltuieli pe luna trecuta, descarca zip-ul cu D301/D390 completate, depune-le pana pe 25, incarca recipisele in Documente si plateste TVA-ul la trezorerie (detalii in [TVA intracomunitar](#tva-intracomunitar-d301-d390-si-jurnal-de-cumparari)).
+**7. Lunar, daca ai cod TVA intracomunitar:** in pagina `Cheltuieli` filtreaza `Cheltuieli externe (TVA)` pe luna si anul trecute si descarca zip-ul cu D301/D390 completate, iar in pagina `Incasari` filtreaza `Incasari din UE (TVA)` si descarca D390 pentru facturile emise catre clienti UE. Depune declaratiile pana pe 25, incarca recipisele in Documente si plateste TVA-ul datorat la trezorerie (detalii in [TVA intracomunitar](#tva-intracomunitar-d301-d390-si-jurnal-de-cumparari)).
 
 **8. La final de an:** din `Setari` → `Exporta datele din aplicatie` alegi anul si primesti un zip cu toate documentele justificative, registrele in Excel, fisele mijloacelor fixe si `SUMAR.html` - arhiva completa pentru acel an, de pastrat pentru controlul ANAF.
 
@@ -238,11 +243,13 @@ Oricand, dar musai inainte de a completa Declaratia Unica: cardurile cu totaluri
 
 ## Setari 
 
-In pagina `Setari` trebuie sa adaugi datele pfa-ului tau.
+In pagina `Setari` trebuie sa adaugi datele pfa-ului tau: nume, CIF, Nr.Reg.Com., telefon, email, adresa, localitatea (din sugestii), codul CAEN principal si, optional, pana la 5 CAEN-uri secundare (butonul `+ Adauga CAEN-uri Secundare`).
+Sunt trei casute separate pentru scutiri: `Scutit CAS`, `Scutit CASS`, `Scutit Impozit` - bifeaza-le doar daca ai statut special (pensionar, persoana cu handicap, profesie liberala cu casa de asigurari proprie etc.); aplicatia foloseste bifa respective la calculul taxelor din pagina Registre.
 Poti sterge toate datele.
 Aceasta pagina trebuie completata la prima deschidere a aplicatiei.
 Cam rar vei schimba datele din aceasta pagina.
-Poti adauga mai multe conturi IBAN (RON, EUR, USD etc.), cate unul pentru fiecare moneda. La emiterea unei facturi se foloseste automat contul IBAN in moneda facturii, iar daca nu exista un cont in acea moneda, se foloseste contul de RON.
+Poti adauga mai multe conturi IBAN (RON, EUR, USD etc.), cate unul pentru fiecare moneda, direct in formular (butonul `+ Adauga cont IBAN`, respectiv iconita 🗑 pentru fiecare rand). La emiterea unei facturi se foloseste automat contul IBAN in moneda facturii, iar daca nu exista un cont in acea moneda, se foloseste contul de RON.
+Sectiunea `TVA intracomunitar (D301/D390)` e colapsata initial si se deschide cu butonul cu acelasi nume (vezi mai jos).
 
 Cu butonul `Exporta datele din aplicatie` descarci un zip cu datele pentru **anul selectat**. Zip-ul contine:
 - `documente/`, `cheltuieli/`, `incasari/` - documentele justificative urcate in aplicatie pentru anul selectat;
@@ -272,15 +279,19 @@ Poti prelua date CUI firma [de aici.](https://mfinante.gov.ro/apps/agenticod.htm
 Campurile: Serie, Numar factura vor fi completate automat in functie de facturile din trecut. 
 Seria + numarul facturii sunt verificate sa fie unice in baza de date.
 Pe masura ce completezi campul Nume Client vor aparea sugestii de clienti existenti - 
-cu un click poti selecta clientul si formularul va fi completat automat.
+cu un click poti selecta clientul si formularul va fi completat automat (nume, CIF, adresa, localitate, tip factura, tip tranzactie, valuta, date de contact si starea `Client UE VIES`).
 In campul Tip factura poti alege sa generezi factura in alta limba (non e-factura). 
-Poti schimba si valuta in care emiti factura.
+Poti schimba si valuta in care emiti factura (pentru e-factura si factura in romana valuta e blocata pe RON).
 
-Din coloanele XML si PDF poti descarca facturile generate. In dreapta sus a tabelului sunt 2 butoane pentru a descarca toate facturile in format CSV sau XLSX. In coloana Del. poti sterge o factura.
+Campul `Tip tranzactie` (💳 BANCAR / 💵 NUMERAR) se preia in incasarea generata din factura si apare in Registrul jurnal pe coloanele de incasari bancare, respectiv numerar.
 
-Din coloana **Incasata** (butonul 💳) treci direct la pagina [Incasari](#incasari) cu formularul precompletat din factura respectiva (suma, valuta, client), iar PDF-ul facturii este atasat automat ca document justificativ al incasarii.
+Comutatorul `Client UE VIES` se bifeaza doar pentru clienti persoane impozabile din alte state UE, care datoreaza ei TVA-ul prin taxare inversa. Campul `CIF/CUI/VAT` trebuie sa contina codul TVA complet cu prefixul tarii (ex. `ATU77164426`); un CIF roman (`RO...`) este respins. Aplicatia completeaza automat campul `Nota` cu mentiunea de taxare inversa in limba facturii alese si foloseste factura pentru D390 VIES (vezi [D390 VIES pentru clienti UE](#d390-vies-pentru-clienti-ue-vanzari)).
 
-Optional: Daca dai click pe Mai mult vei putea completa si alte date alte clientului precum:
+Din coloanele XML si PDF poti descarca facturile generate. In dreapta sus a tabelului sunt 2 butoane pentru a descarca toate facturile in format CSV sau XLSX. In coloana Del. poti sterge o factura. Tabelul are si cautare pe coloane si paginare; coloanele arata CIF/CUI/VAT, numele clientului, totalul, valuta, tipul tranzactiei, seria/numarul, emailul, telefonul, scadenta si starea incasarii.
+
+Din coloana **Incasata** (butonul 💳) treci direct la pagina [Incasari](#incasari) cu formularul precompletat din factura respectiva (nume incasare, suma, valuta, client, tip tranzactie), iar PDF-ul facturii este atasat automat ca document justificativ al incasarii. Daca factura are deja o incasare, butonul e dezactivat si trebuie stearsa incasarea existenta pentru a o adauga din nou.
+
+Optional: Daca dai click pe Mai mult vei putea completa si alte date ale clientului precum:
 Nr.Registru Comertului, Telefon, Email, Data Emitere factura (completata automat pentru ziua curenta), Data scadenta (calculata automat la 30 in viitor fata de ziua curenta) si Nota (unde poti adauga niste mentiuni in factura).
 
 
@@ -290,9 +301,11 @@ Nr.Registru Comertului, Telefon, Email, Data Emitere factura (completata automat
 
 ## Incasari
 
-Aici poti aduga documentele justificative (facturi, chitante) prin care ai incasat bani oferind produse sau servicii cu PFA-ul tau. Daca ai incasari din alte surse decat din emitere facturi/bonuri selecteaza o alta sursa a venitului. In cazul incasarilor in alta moneda decat RON conversia va fi facuta automat la cursul zilei anterioare setata in campul 'Data incasarii'. Completeaza 'Data incasare' doar daca ai incasat banii, lasa campul gol daca nu ai incasat inca (vei putea modifica mai tarziu). Sumele incasate in alta valuta (EUR,USD etc) - sumele sunt convertite in RON in functie de 'Data incasare'.
+Aici poti aduga documentele justificative (facturi, chitante) prin care ai incasat bani oferind produse sau servicii cu PFA-ul tau. Daca ai incasari din alte surse decat din emitere facturi/bonuri selecteaza o alta sursa a venitului. Completeaza campul `Nume incasare` (de obicei numele clientului + seria si numarul facturii). In cazul incasarilor in alta moneda decat RON conversia va fi facuta automat la cursul zilei bancare anterioare datei din campul `Data incasarii`. Completeaza 'Data incasare' doar daca ai incasat banii, lasa campul gol daca nu ai incasat inca (vei putea modifica mai tarziu) - in tabel aceste randuri apar cu `Neincasata`. Campul `Tip tranzactie` (💳 BANCAR / 💵 NUMERAR) e preluat automat de la factura cand incasarea vine din pagina Facturi si determina coloana din Registrul jurnal in care se inscrie suma.
 
-Cu un click intr-o celula din coloana Mod. poti modifica o incasare. Din coloana Doc. poti descarca o incasare si in coloana Del. poti sterge o incasare. Daca trebuie sa adaugi mai mult de un document poti crea un zip cu toate documentele necesare.
+Tabelul arata numele incasarii, coloana `VIES` (Da/Nu, dupa cum factura e marcata `Client UE VIES`), suma primita, valuta, suma in RON, tipul tranzactiei, data incasarii, sursa venitului si data modificarii; are cautare pe coloane si paginare. Cu un click in coloana Mod. poti modifica o incasare, din coloana Doc. o poti descarca, iar in coloana Del. o poti sterge. Daca trebuie sa adaugi mai mult de un document poti crea un zip cu toate documentele necesare.
+
+Filtrul `Incasari din UE (TVA)` de deasupra tabelului arata incasarile din facturile cu `Client UE VIES`, grupate pe luna emiterii si pe an; butonul `Descarca` genereaza D390 VIES completat, jurnalul de vanzari in Excel si facturile emise (vezi [D390 VIES pentru clienti UE](#d390-vies-pentru-clienti-ue-vanzari)).
 
 
 ![incasari](readmepics/incasari.png)
@@ -301,13 +314,25 @@ Cu un click intr-o celula din coloana Mod. poti modifica o incasare. Din coloana
 
 ## Cheltuieli
 
-Aici poti aduga documentele justificative (facturi, chitante) pentru cheltuielile pe care le-ai facut in scopul prestarii activitatii tale de PFA. Unele cheltuieli sunt integral deductibile: consumabile, plati servicii, achizitii bunuri sub 5000 RON etc. Altele sunt partial deductibile: 2% din baza de calcul pentru cheltuielile cu potentialii clienti (mancare, cadouri sub 100 RON, etc), 50% cheltuieli cu autovehicul/chirii/utilitati daca sunt folosite si in scop personal. Unele cheltuieli au nevoie de documente justificative in plus pe langa bonul sau factura care justifica cheltuiala. Cheltuielile care depasesc prag mijloc fix vor trebui amortizate in functie de codul de clasificare din tabelul de amortizare mijloace fixe. Achizitiile/Cheltuielile care nu isi pierd valoarea in timp cum ar fi terenuri, aur, case nu sunt deductibile. Daca trebuie sa adaugi mai mult de un document poti crea un zip cu toate documentele necesare.
+Aici poti aduga documentele justificative (facturi, chitante) pentru cheltuielile pe care le-ai facut in scopul prestarii activitatii tale de PFA. Campul `Tip tranzactie` (💳 BANCAR / 💵 NUMERAR) determina coloana din Registrul jurnal in care se inscrie plata.
 
-Campul Deductibila contine si cheltuielile deductibile partial care vor fi calculate automat in functie de datele existente in aplicatie.
+Campul `Deductibila` contine atat cheltuielile integral deductibile (consumabile, plati servicii, achizitii bunuri sub 5000 RON, salarii), cat si pe cele limitate, ale caror limite se calculeaza automat:
+
+- **Obiect de inventar (deductibil integral)** si **Mijloc fix peste 5000 RON (ded. integral cu amortizare)** - apar automat in [Inventar](#inventar);
+- **50%** pentru vehicule nefolosite exclusiv in activitate (art. 68 alin. 7 lit. k), inclusiv chirii/utilitati folosite si in scop personal;
+- **2% din baza de calcul** pentru mese protocol (cadouri sub 100 RON etc.);
+- **5% din baza de calcul** pentru burse private si **5% din totalul salariilor** pentru ajutoare acordate angajatilor;
+- **max. 100 EUR/an** pentru sport/sali de fitness;
+- **max. 400 EUR/an** pentru pensie pilon III, pensie ocupationala, PEPP, ETF si asigurari medicale private;
+- **max. 4000 EUR/an** pentru cotizatii voluntare la asociatii/organizatii si **max. 5% din brut** pentru contributii obligatorii.
+
+Pentru mijloacele fixe poti bifa `Sediu social folosit si in scop personal (amortizare 50%)`, `Autoturism M1 (limita 1.500 lei/luna)` sau `Exceptie de la limita de 1.500 lei/luna`. Unele cheltuieli au nevoie de documente justificative in plus pe langa bonul sau factura care justifica cheltuiala. Achizitiile care nu isi pierd valoarea in timp (terenuri, aur, case) nu sunt deductibile. Daca trebuie sa adaugi mai mult de un document poti crea un zip cu toate documentele necesare.
+
+Tabelul arata suma in valuta, suma in RON, suma dedusa in RON, TVA-ul autolichidat (cu badge 🇪🇺 / 🌍), tipul tranzactiei, data cheltuielii, tipul deductibilitatii si data modificarii; are cautare pe coloane si paginare. Regulile de deductibilitate si limitele sunt explicate pe larg in [Ghidul PFA in sistem real](GHID_PFA_SISTEM_REAL.md).
 
 ![cheltuieli](readmepics/cheltuieli.png)
 
-Atunci cand ai de adaugat un obiect de inventar cu valoarea peste 5000 RON trebuie sa selectezi `Mijloc fix peste 5000 RON (ded. integral cu amortizare)`. In campul nume cheltuiala poti vedea valorile pentru mijloace fixe. Campul Nume cheltuiala poate fi folosit pentru a filtra tipul cheltuielii.
+Atunci cand ai de adaugat un obiect de inventar cu valoarea peste 5000 RON trebuie sa selectezi `Mijloc fix peste 5000 RON (ded. integral cu amortizare)`. In campul `Nume cheltuiala` apar sugestii cu denumirile folosite anterior; cautarea din tabel filtreaza si pe acest camp (ca si pe celelalte coloane).
 
 Uite un exemplu pentru a amortiza o cheltuiala amortizabila cu un Laptop. 
 Cel mai apropiat de un laptop in tabel este valoarea `Calculatoare electronice` care are codul `2.2.9.` 
@@ -342,9 +367,9 @@ Odata salvata, cheltuiala apare automat in **Jurnalul de cumparari (TVA)** din p
 
 Aici poti introduce documentele create in relatia cu ANAF. Declaratii, dovezi plati taxe si impozite si alte documente pe care le consideri importante. Daca nu ai depasit plafonul TVA de 395000 RON pe an si nu ai angajati (poti avea 3 angajati) singura declaratie pe care trebuie sa o completezi este Declaratia Unica 212. Daca ai depasit plafonul TVA sau ai angajati poate un SRL ar fi mai potrivit. Daca nu gasesti tipul declaratiei alege 'Document util' si completeaza in campul 'Mentiuni' detalii despre documentul incarcat.
 
-In cazul dovezii platii de impozite (pdf-ul primit de la ghiseul.ro) si al declaratiei unice datele relevante sunt automat extrase din PDF-ul incarcat.
+In cazul dovezii platii de impozite (pdf-ul primit de la ghiseul.ro) si al declaratiei unice datele relevante sunt automat extrase din PDF-ul incarcat. Campul `Document pentru data` (implicit ziua curenta) se foloseste pentru anul in care se arhiveaza documentul; in tabel apare coloana `Doc. Anul`.
 
-Recipisele D301/D390 primite de la ANAF se incarca tot aici - tipul declaratiei, perioada, CIF-ul si indexul de incarcare se detecteaza automat din PDF. Declaratiile in sine se genereaza din pagina [Cheltuieli](#tva-intracomunitar-d301-d390-si-jurnal-de-cumparari).
+Recipisele D301/D390 primite de la ANAF se incarca tot aici - tipul declaratiei, perioada, CIF-ul si indexul de incarcare se detecteaza automat din PDF. Declaratiile in sine se genereaza din pagina [Cheltuieli](#tva-intracomunitar-d301-d390-si-jurnal-de-cumparari), respectiv [Incasari](#d390-vies-pentru-clienti-ue-vanzari). Tabelul are cautare pe coloane, paginare si coloana `Data Modificare`.
 
 ![documente](readmepics/documente.png)
 
@@ -352,7 +377,10 @@ Recipisele D301/D390 primite de la ANAF se incarca tot aici - tipul declaratiei,
 
 ## TVA intracomunitar: D301, D390 si Jurnal de cumparari
 
-Pentru PFA-urile cu **cod special de TVA intracomunitar (art. 317 Cod fiscal)** care cumpara servicii din UE sau din afara UE, TVA-ul se datoreaza in Romania prin **taxare inversa**: chiar daca furnizorul factureaza 0% TVA, beneficiarul calculeaza si plateste 21% la ANAF. Aplicatia automatizeaza tot fluxul:
+Pentru PFA-urile cu **cod special de TVA intracomunitar (art. 317 Cod fiscal)** aplicatia acopera doua fluxuri distincte:
+
+1. **cumpararea** de servicii din UE / afara UE, unde TVA-ul se datoreaza in Romania prin **taxare inversa** (furnizorul factureaza 0% TVA, beneficiarul calculeaza si plateste 21% la ANAF);
+2. **vanzarea** de servicii catre clienti persoane impozabile din UE (facturi marcate `Client UE VIES`), unde taxa e datorata de client in statul lui, iar tu depui doar D390 (informativ) - vezi [D390 VIES pentru clienti UE](#d390-vies-pentru-clienti-ue-vanzari).
 
 **Ce se depune:**
 
@@ -360,11 +388,12 @@ Pentru PFA-urile cu **cod special de TVA intracomunitar (art. 317 Cod fiscal)** 
 |---|---|---|---|
 | Furnizor din UE (Austria, Irlanda, Germania etc.) | Da - secțiunea 4 + secțiunea 4.1 | Da - tip S | Codul special de TVA intracomunitar |
 | Furnizor din afara UE (SUA, UK, Canada etc.) | Da - doar secțiunea 4 | Nu | Codul normal al PFA-ului (CIF) |
+| Client din UE (factura cu `Client UE VIES`) | Nu | Da - tip P (prestari de servicii) | Codul special de TVA intracomunitar |
 
 **Fluxul in aplicatie (pagina Cheltuieli, filtrul „Cheltuieli externe (TVA)"):**
 
 1. **Adaugi cheltuielile** cu origine UE/non-UE (vezi [Cheltuieli](#cheltuieli)) - cursul BNR, baza si TVA-ul se calculeaza automat;
-2. **Filtrezi pe luna** - din selectorul „Cheltuieli externe (TVA)" de deasupra tabelului alegi luna de raportare (lunile cu facturi UE/non-UE, grupate dupa data facturii); tabelul arata doar facturile pentru care trebuie completate declaratiile;
+2. **Filtrezi pe luna si an** - din selectorul „Cheltuieli externe (TVA)" de deasupra tabelului alegi luna de raportare (lunile cu facturi UE/non-UE, grupate dupa data facturii, sau `UE + non-UE, tot anul`); selectorul `Anul` apare dupa activarea filtrului si permite alegerea altui an; tabelul arata doar facturile pentru care trebuie completate declaratiile;
 3. **Descarci** - un click pe butonul `Descarca` si primesti un zip cu declaratiile completate in **Markdown**, **grupate in cate un folder pentru fiecare cod fiscal**, cu prefix dupa tipul codului:
    - **`TVA-<cod>`** (codul special de TVA intracomunitar, art. 317): **D301** (sectiunile 4 + 4.1) + **D390 VIES** (tip S, cod operator fara prefixul tarii, baza rotunjita la intreg) + jurnalul de cumparari in **Excel** doar cu facturile UE + **facturile furnizorilor** (subfolder `facturi/`);
    - **`CIF-<cod>`** (codul normal al PFA-ului): **D301** (doar sectiunea 4) + jurnalul de cumparari in **Excel** doar cu facturile non-UE + **facturile furnizorilor** (subfolder `facturi/`);
@@ -380,7 +409,23 @@ Daca lipsesc date din Setari (cod TVA intracomunitar, IBAN trezorerie) apar aver
 
 **Jurnalul de cumparari** este disponibil si in pagina [Registre](#registre) (tab `Jurnal Cumparaturi`), cu descarcare CSV/XLSX pe luna sau pe tot anul. Totalul documentului include TVA autolichidata, chiar daca furnizorul a facturat 0% TVA.
 
-> **Atentie:** codul TVA intracomunitar (art. 317) nu confera calitatea de platitor normal de TVA (art. 316). Aceasta functionalitate acopera regimul art. 317 (D301/D390), nu decontul D300. Pentru situatii speciale confirma tratamentul cu contabilul.
+### D390 VIES pentru clienti UE (vanzari)
+
+Pentru facturile emise catre clienti persoane impozabile stabiliti in alte state UE, locul prestarii e in statul clientului, iar **clientul datoreaza TVA-ul prin taxare inversa**. Tu nu colectezi si nu platesti TVA pentru aceste facturi, dar trebuie sa le raportezi lunar in **D390 VIES**, la linia **P - Prestari intracomunitare de servicii**.
+
+Fluxul in aplicatie:
+
+1. **Marchezi ca `Client UE VIES`** in formularul de factura (pagina [Facturi](#facturi)) si completezi `CIF/CUI/VAT` cu codul TVA al clientului, cu prefixul tarii (ex. `ATU77164426`); aplicatia adauga automat mentiunea de taxare inversa in factura;
+2. **Inregistrezi incasarea** (pagina [Incasari](#incasari)) - coloana `VIES` devine `Da`;
+3. **Filtrezi** in pagina Incasari optiunea `Incasari din UE (TVA)` pe luna (sau `Clienti UE, tot anul`) si pe an;
+4. **Descarci** zip-ul cu **D390 completat in Markdown** (cu ghid pas cu pas pentru aplicatia ANAF), **jurnalul de vanzari in Excel** si **facturile emise** catre clientii UE (PDF/XML);
+5. **Depui D390** pana pe 25 inclusiv a lunii urmatoare, online, cu certificat digital, in SPV-ul deschis pe codul de TVA intracomunitar, apoi descarci recipisa si o arhivezi in [Documente](#documente).
+
+Declaratia contine codul tau de art. 317 (calitatea „Persoane inregistrate conform art. 317"), codurile clientilor **fara prefixul tarii** si baza in lei rotunjita la intreg. Nu se completeaza D301 si nicio suma de plata.
+
+> **Atentie:** aplicatia genereaza codul **P** (prestari de servicii). Daca vinzi **bunuri** livrate intracomunitar, codul corect e **L** si trebuie corectat in aplicatia ANAF inainte de depunere. Nu se depune D390 pentru clienti scutiti de TVA in statul membru al clientului sau pentru persoane neimpozabile. Vezi [Ghidul PFA in sistem real](GHID_PFA_SISTEM_REAL.md) pentru detalii.
+
+> **Atentie generala:** codul TVA intracomunitar (art. 317) nu confera calitatea de platitor normal de TVA (art. 316). Aceasta functionalitate acopera regimul art. 317 (D301/D390), nu decontul D300. Pentru situatii speciale confirma tratamentul cu contabilul.
 
 
 
@@ -389,7 +434,7 @@ Daca lipsesc date din Setari (cod TVA intracomunitar, IBAN trezorerie) apar aver
 Aici gasesti tabelul cu toate obiectele de inventar si mijloacele/activele fixe achizitionate pana acum. Tot aici poti scoate din inventar un obiect de inventar sau mijloc fix. Daca ai vandut obiectul de inventar/mijlocul fix va trebui sa-l introduci si la incasari la Sursa venit: 'Venit din alte surse'. 
 
 Pentru a scoate un obiect de inventar din uz trebuie sa dai click in coloana Mod. pe iconita de modificare. 
-Formularul va fi completat cu datele salvate anterior pe care acum le poti modifica si salva (bifezi „Scoate din uz").
+Formularul va fi completat cu datele salvate anterior pe care acum le poti modifica si salva: bifezi „Scoate din uz", alegi `Modalitatea iesirii din uz` (Casat, Vandut, Donat, Pierdut), `Data iesirii din uz` si urci documentul justificativ (proces-verbal de scoatere din functiune/declasare, factura de vanzare etc.). In tabel, coloana `In uz?` devine `Nu`, iar coloana `Justif.` arata documentul atasat; coloana `Data Modificare` arata ultima actualizare. Tabelul are si cautare pe coloane si paginare.
 
 Registrul-inventar se descarca din pagina [Registre](#registre) (tab `Registru inventar`, iconitele CSV/XLSX), direct ca fisier CSV sau XLSX.
 
@@ -400,9 +445,9 @@ Registrul-inventar se descarca din pagina [Registre](#registre) (tab `Registru i
 
 ## Registre
 
-Aici ai o vedere de ansamblu asupra incasarilor, cheltuielilor precum si taxele/impozitele de platit pentru anul selectat, venituri vs cheltuieli pe ani, notificari facturi neincasate, declaratii de urcat in SPV etc. Totodata ai disponibile si registrele contabile obligatorii pe care trebuie sa le ai in relatia cu ANAF, in tab-urile: `Registru jurnal`, `Registru fiscal`, `Registru inventar` si `Jurnal Cumparaturi`.
+Aici ai o vedere de ansamblu asupra incasarilor, cheltuielilor precum si taxele/impozitele de platit pentru anul selectat, venituri vs cheltuieli pe ani, notificari facturi neincasate, declaratii de urcat in SPV etc. Totodata ai disponibile si registrele contabile obligatorii pe care trebuie sa le ai in relatia cu ANAF, in 5 taburi: `Registru jurnal`, `Registru fiscal`, `Registru inventar`, `Jurnal Cumparaturi` si `Jurnal Vanzari`.
 
-Poti alege anul si sa vezi sumele din grafic si total carduri in EUR sau RON.
+Selectoarele de langa titlu aleg **anul** (doar anii cu inregistrari) si moneda de afisare (`In RON` / `In EUR`) pentru grafic si pentru toate cardurile. Cardurile arata total neincasate (cu `E ok 👍` daca nu ai), total incasari brut, total incasari net, total cheltuieli si, in a doua rand, total taxe/impozite, pensie (CAS), sanatate (CASS) si impozit pe venit. Sub titlu vezi si totalul platilor catre stat pe toti anii, totalul incasarilor nete pe toti anii si restul de plata.
 
 Taxele se calculeaza pe regulile din anul selectat (vezi `src/utils/calcule.py`). Cei scutiti (profesii liberale cu casa de asigurari proprie, pensionari etc.) pot bifa scutirile in [Setari](#setari).
 
@@ -412,13 +457,15 @@ Poti descarca registrele dand click fie pe iconita de csv sau xlsx. Se descarca 
 
 In tab-ul **Jurnal Cumparaturi** gasesti **Jurnalul de cumpărări**: daca ai cheltuieli cu servicii din UE/non-UE (taxare inversa), jurnalul pentru cumparari cu referinta `15-16`, baza impozitabila, TVA autolichidata si totalurile, descarcabil in CSV sau XLSX (pe luna sau pe tot anul).
 
+In tab-ul **Jurnal Vanzari** gasesti facturile emise catre clienti `Client UE VIES`, cu valoarea in lei, data incasarii si documentul justificativ; acelasi jurnal e inclus si in zip-ul D390 descris mai sus.
+
 
 ![registre](readmepics/registre.png)
 
 
 ## Actualizare aplicatie
 
-Versiunea pe care o rulezi apare in subsolul paginii `Setari` (ex. `PFASimplu V3.0.0`). Cand exista o versiune noua, langa ea apare `(disponibil V...)` impreuna cu un link catre [GitHub Releases](https://github.com/ClimenteA/PFASimplu/releases), de unde o poti descarca. Aplicatia nu descarca si nu instaleaza nimic automat.
+Versiunea pe care o rulezi apare in subsolul paginii `Setari` (ex. `PFASimplu V3.0.4`). Cand exista o versiune noua, langa ea apare `(disponibil V...)` impreuna cu un link catre [GitHub Releases](https://github.com/ClimenteA/PFASimplu/releases), de unde o poti descarca. Aplicatia nu descarca si nu instaleaza nimic automat.
 
 **Actualizare executabil standalone:** descarca arhiva `.zip` pentru sistemul tau de operare, dezarhiveaza-o si ruleaza executabilul nou. Executabilul vechi poate fi sters: baza de date, documentele si celelalte date raman in directorul de date al sistemului (`%LOCALAPPDATA%\PFASimplu`, `~/Library/Application Support/PFASimplu` sau `~/.local/share/pfasimplu`), deci nu sunt afectate. Ca masura de precautie, inainte de upgrade copiaza acest director (backup) si fa un export al datelor din `Setari` → `Exporta datele din aplicatie`. Arhiva este descarcata prin HTTPS, dar binarul nu este semnat (vezi sectiunea de distributie standalone). Pentru Docker sau rulare din sursa folosesti procedura de mai jos.
 
@@ -506,6 +553,8 @@ Radacina repo-ului contine configuratia proiectului, documentatia si fisierele D
 
 | Folder / fisier | Rol |
 |---|---|
+| `README.md` | documentatia aplicatiei (instalare, ghid de utilizare, depanare) |
+| `GHID_PFA_SISTEM_REAL.md` | ghid legislativ: registre, declaratii, deductibilitati, TVA, cu trimiteri la actele normative |
 | `src/` | sursele aplicatiei: app-urile Django, `core/`, `templates/`, `static/`, `tests/` |
 | `appdata/` | datele locale: `db/stocare.db` (SQLite), `files/` (fisiere urcate/generate) si `logs/pfasimplu.log`; ignorate de git si montate in Docker |
 | `Dockerfile`, `docker-entrypoint.sh` | imaginea aplicatiei (migrari + collectstatic la pornire) |
@@ -519,19 +568,19 @@ Radacina repo-ului contine configuratia proiectului, documentatia si fisierele D
 |---|---|
 | `setari/` | datele PFA-ului, IBAN-uri, cod TVA intracomunitar, export/stergere date |
 | `facturi/` | emitere facturi: PDF multi-limba + XML e-factura (UBL) |
-| `incasari/` | incasari + documente justificative, conversie BNR |
-| `cheltuieli/` | cheltuieli, deductibilitate, amortizare, taxare inversa TVA |
+| `incasari/` | incasari + documente justificative, conversie BNR, filtru UE si D390 pentru clienti UE |
+| `cheltuieli/` | cheltuieli, deductibilitate, amortizare, taxare inversa TVA, D301/D390 pentru achizitii |
 | `documente/` | arhiva ANAF (D212, dovezi plata, recipise D301/D390) cu parsing PDF |
-| `inventar/` | obiecte de inventar si mijloace fixe |
-| `registre/` | dashboard + registrele contabile, exporturi CSV/XLSX |
+| `inventar/` | obiecte de inventar si mijloace fixe, iesire din uz |
+| `registre/` | dashboard + registrele contabile (inclusiv Jurnal Vanzari), exporturi CSV/XLSX |
 | `conturi/` | login/inregistrare/logout (obligatorii) si izolarea datelor pe cont |
-| `utils/` | calcule taxe (`calcule.py`), TVA (`tva.py`, `tva_documente.py`), curs BNR (`valuta.py`), fisiere (`files.py`), PDF-uri (`mijloc_fix_pdf.py`) |
-| `templates/` + `static/` | UI: PicoCSS + Alpine.js, typeahead; fara build step de frontend |
+| `utils/` | calcule taxe (`calcule.py`), TVA si generare D301/D390 (`tva.py`, `tva_documente.py`), curs BNR (`valuta.py`), cautare/paginare/export (`views.py`), fisiere (`files.py`), PDF-uri (`mijloc_fix_pdf.py`) |
+| `templates/` + `static/` | UI dark: PicoCSS + Alpine.js, typeahead; fara build step de frontend |
 | `tests/` | teste end-to-end Playwright (vezi mai jos) |
 
 ### Teste end-to-end
 
-Testele ruleaza un scenariu complet pe anul curent (Setari → Facturi → Incasari → Cheltuieli, inclusiv taxare inversa si mijloace fixe) intr-un browser real, pe o **bază de date izolata** (`src/tests/.runtime/test.db`) - datele reale nu sunt atinse. Detalii in [tests/README.md](src/tests/README.md).
+Testele ruleaza un scenariu complet pe anul curent (Setari → Facturi → Incasari → Cheltuieli, inclusiv taxare inversa, clienti UE VIES si mijloace fixe) intr-un browser real, pe o **bază de date izolata** (`src/tests/.runtime/test.db`) - datele reale nu sunt atinse. Sunt acoperite si validarea codului TVA pentru clientii UE, autocompletarea clientilor salvati si generarea D390 pentru incasarile din UE. Detalii in [tests/README.md](src/tests/README.md).
 
 ```bash
 make test-e2e           # instaleaza Chromium (daca lipseste) + ruleaza toate testele
