@@ -1,11 +1,10 @@
 # Varianta dockerizata pentru uz local, mereu pornita, FARA Caddy / TLS.
 # Toate fisierele de deploy sunt in radacina repo-ului.
 #
-#   cp .env.example .env     # generat automat de install.sh
+#   cp .env.example .env
 #   docker compose -f docker-compose-local.yaml up -d --build
 #
 # Aplicatia: http://localhost:8990  (PFASIMPLU_PORT in .env)
-# MCP:       http://localhost:8997/mcp  (PFASIMPLU_MCP_PORT in .env)
 #
 # Loginul este obligatoriu: la prima deschidere creaza un cont in
 # http://localhost:8990/conturi/inregistrare/ (sau foloseste /admin/).
@@ -41,24 +40,3 @@ services:
       # Codul sursa e montat live: modificarile din ./src nu necesita rebuild,
       # doar repornirea containerului (make restart-local).
       - ./src:/app/src
-
-  pfasimplu-mcp-local:
-    container_name: pfasimplu-mcp-local
-    build:
-      context: .
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    depends_on:
-      - pfasimplu-local
-    # Migrarile/staticle le face containerul aplicatiei, nu si asta.
-    entrypoint: []
-    ports:
-      - "${PFASIMPLU_MCP_PORT:-8997}:8001"
-    env_file:
-      - .env
-    volumes:
-      - ./appdata:/data
-      - ./src:/app/src
-    # Serverul MCP e un proces ASGI separat de waitress (Django e WSGI).
-    # Autorizarea se face cu cheia generata in /setari (Bearer).
-    command: ["python", "-m", "uvicorn", "mcp_server.http_app:app", "--host", "0.0.0.0", "--port", "8001"]

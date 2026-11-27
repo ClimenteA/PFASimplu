@@ -30,27 +30,6 @@ services:
       # doar repornirea containerului (make restart).
       - ./src:/app/src
 
-  pfasimplu-mcp:
-    container_name: pfasimplu-mcp
-    build:
-      context: .
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    depends_on:
-      - pfasimplu-app
-    # Migrarile/staticle le face containerul aplicatiei, nu si asta.
-    entrypoint: []
-    expose:
-      - "8001"
-    env_file:
-      - .env.prod
-    volumes:
-      - ./appdata:/data
-      - ./src:/app/src
-    # Serverul MCP e un proces ASGI separat de waitress (Django e WSGI).
-    # Autorizarea se face cu cheia generata in /setari (Bearer).
-    command: ["python", "-m", "uvicorn", "mcp_server.http_app:app", "--host", "0.0.0.0", "--port", "8001"]
-
   external-caddy-proxy:
     container_name: external-caddy-proxy
     image: caddy:2-alpine

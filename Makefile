@@ -1,14 +1,10 @@
-.PHONY: install dev dev-e2e dev-superuser test-e2e migrate-all purge-migration-dirs purge-db build-local start-local restart-local stop-local logs-local build start restart stop logs format lint ruff check dist
+.PHONY: dev dev-e2e dev-superuser test-e2e migrate-all purge-migration-dirs purge-db build-local start-local restart-local stop-local logs-local build start restart stop logs format lint ruff check dist
 
 # Sursele aplicatiei sunt in src/. Comenzile de mai jos ruleaza din radacina
 # repo-ului, deci folosim calea explicita catre src/manage.py si PYTHONPATH=src
 # pentru modulele python -m.
-# Pentru utilizatori aplicatia ruleaza in Docker (docker-compose*.yaml).
-# `make dev` e doar pentru dezvoltare, cu date separate de cele din Docker.
-
-# Instalare completa (Docker + clone + build + start) pentru uz local.
-install:
-	./install.sh
+# Pentru utilizare zilnica, aplicatia desktop se descarca din GitHub Releases.
+# Docker (docker-compose*.yaml) si `make dev` sunt pentru dezvoltare / self-hosting.
 
 # Dezvoltare cu uv run: server cu auto-reload pe http://127.0.0.1:8990.
 # Foloseste aceeasi baza de date si acelasi folder media ca Docker-ul local
@@ -37,8 +33,8 @@ dev-superuser:
 # Codul sursa e montat live din ./src in container, deci editarile de cod nu
 # necesita rebuild. `start-local` construieste imaginea doar daca nu exista;
 # pentru schimbari de dependinte (pyproject.toml/uv.lock) sau Dockerfile foloseste
-# `build-local`. Dupa editari de cod, `restart-local` recreeaza containerele ca
-# waitress/uvicorn sa incarce codul nou (nu au auto-reload).
+# `build-local`. Dupa editari de cod, `restart-local` recreeaza containerul ca
+# waitress sa incarce codul nou (nu are auto-reload).
 build-local:
 	docker compose -f docker-compose-local.yaml build
 

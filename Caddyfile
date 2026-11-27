@@ -1,6 +1,5 @@
 # Schimba domeniul in .env.prod (PFASIMPLU_DOMAIN) - DNS-ul trebuie sa pointeze spre VPS.
-# Se foloseste si subdomeniul mcp.<domeniu> pentru serverul MCP.
-# Pentru test local fara domeniu: foloseste ":80" (fara TLS automat) si comenteaza blocul MCP.
+# Pentru test local fara domeniu: foloseste ":80" (fara TLS automat).
 {$PFASIMPLU_DOMAIN:pfa.exemplu.ro} {
 	# Static files direct din Caddy (optional - whitenoise le serveste si el).
 	handle_path /static/* {
@@ -10,15 +9,6 @@
 
 	handle {
 		reverse_proxy pfasimplu-app:8000
-	}
-
-	encode gzip zstd
-}
-
-# Serverul MCP (FastMCP) - endpoint public: https://mcp.<domeniu>/mcp
-mcp.{$PFASIMPLU_DOMAIN:pfa.exemplu.ro} {
-	handle {
-		reverse_proxy pfasimplu-mcp:8001
 	}
 
 	encode gzip zstd

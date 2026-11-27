@@ -16,8 +16,6 @@
         bifeaza casuta corespunzatoare pentru a calcula corect darile la stat.
         Ai si optiunea de a adauga CAEN-uri secondare.
         Ai disponibile si 2 butoane sub formular pentru exportul si stergerea datelor.
-        Sub formular gasesti si sectiunea pentru cheia de acces MCP (folosita de agenti AI
-        precum OpenCode).
 
         Butonul "Exporta datele din aplicatie" va crea un zip in folderul Descarcari (Downloads)
         cu datele pentru anul selectat: documentele justificative (in folderele documente,
@@ -300,79 +298,6 @@
             </button>
         </div>
     </form>
-</article>
-
-<article class="article-form mt-4 container" id="cheie-mcp" style="scroll-margin-top: 1rem;">
-    <hgroup>
-        <h2>🤖 Cheie de acces MCP (agenti AI)</h2>
-        <p>
-            O singura cheie per cont, legata de datele tale. In baza de date se salveaza doar
-            hash-ul, asa ca cheia in clar e afisata o singura data, imediat dupa generare.
-            Copiaza-o atunci - dupa ce parasesti pagina nu mai poate fi afisata.
-        </p>
-    </hgroup>
-
-    <label for="cheia-mcp-valoare">
-        Cheia MCP
-        <div style="display: flex; gap: 0.5rem; align-items: center;">
-            <input type="password" id="cheia-mcp-valoare" readonly
-                value="{{ mcp_key_once|default:'' }}"
-                placeholder="{% if mcp_key %}Cheia exista doar ca hash - genereaza alta daca ai pierdut-o{% else %}Nicio cheie generata{% endif %}"
-                style="flex: 1;">
-            <button type="button" class="outline secondary" style="width: auto;"
-                onclick="const i = document.getElementById('cheia-mcp-valoare'); if (i.value) { navigator.clipboard.writeText(i.value); document.getElementById('mcp-copiat').hidden = false; }">
-                <i class="bi bi-clipboard"></i> Copiaza
-            </button>
-        </div>
-        {% if mcp_key_once %}
-        <small><strong>Cheia noua e in camp - copiaza-o acum!</strong></small>
-        {% elif mcp_key %}
-        <small>
-            Activa: <code>{{ mcp_key.prefix }}...</code> (creata la {{ mcp_key.created_at|date:"d.m.Y H:i" }}{% if mcp_key.last_used_at %}, ultima folosire {{ mcp_key.last_used_at|date:"d.m.Y H:i" }}{% endif %}).
-            Pentru alta cheie, revoca-o si apoi genereaza.
-        </small>
-        {% endif %}
-        <small id="mcp-copiat" hidden>Copiata in clipboard!</small>
-    </label>
-
-    <div class="mt-2">
-        {% if mcp_key %}
-        <button type="button" class="pico-background-red-550 outline"
-            onclick="document.getElementById('dialog-revoca-mcp').showModal()">
-            <i class="bi bi-trash"></i> Revoca cheia
-        </button>
-
-        <dialog id="dialog-revoca-mcp">
-            <article>
-                <header>
-                    <button type="button" onclick="document.getElementById('dialog-revoca-mcp').close()" aria-label="Inchide" rel="prev"></button>
-                    <p><strong>Revoci cheia MCP?</strong></p>
-                </header>
-                <p>
-                    Cheia va fi revocata imediat, iar agentul tau AI nu va mai putea accesa
-                    aplicatia. Poti genera una noua dupa revocare.
-                </p>
-                <footer style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
-                    <button type="button" class="secondary" style="width: 100%; margin: 0;"
-                        onclick="document.getElementById('dialog-revoca-mcp').close()">Renunta</button>
-                    <form action="{% url 'mcp-key-revoke' %}" method="post" style="margin: 0; width: 100%;">
-                        {% csrf_token %}
-                        <button type="submit" class="pico-background-red-550" style="width: 100%; margin: 0;">
-                            <i class="bi bi-trash"></i> Revoca cheia
-                        </button>
-                    </form>
-                </footer>
-            </article>
-        </dialog>
-        {% else %}
-        <form action="{% url 'mcp-key-generate' %}" method="post" style="margin: 0;">
-            {% csrf_token %}
-            <button type="submit">
-                <i class="bi bi-key"></i> Genereaza cheia
-            </button>
-        </form>
-        {% endif %}
-    </div>
 </article>
 
 <div class="container" style="margin-top: 6rem;">

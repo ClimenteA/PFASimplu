@@ -19,17 +19,16 @@ COPY . .
 # Directoarele de date (montate ca volume in docker-compose).
 RUN mkdir -p /data/db /data/files /app/staticfiles
 
-# Sursele Django (core, app-urile, mcp_server) sunt in /app/src.
+# Sursele Django (core si app-urile) sunt in /app/src.
 ENV PYTHONPATH=/app/src \
     PFASIMPLU_DB_DIR=/data/db \
     PFASIMPLU_MEDIA_ROOT=/data/files \
     PFASIMPLU_LOG_DIR=/data/logs \
     PFASIMPLU_STATIC_ROOT=/app/staticfiles \
-    PFASIMPLU_DEBUG=0 \
-    PFASIMPLU_MCP_PORT=8001
+    PFASIMPLU_DEBUG=0
 
-# 8000 = aplicatia web (waitress), 8001 = serverul MCP (uvicorn/FastMCP).
-EXPOSE 8000 8001
+# 8000 = aplicatia web (waitress).
+EXPOSE 8000
 
 ENTRYPOINT ["./docker-entrypoint.sh"]
 CMD ["python", "-m", "waitress", "--threads=6", "--listen=*:8000", "core.wsgi:application"]

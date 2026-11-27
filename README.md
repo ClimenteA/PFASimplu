@@ -10,10 +10,10 @@ Aplicatie pentru simplificarea gestiunii contabilitatii facuta in partida simpla
 
 - [Pentru cine este de folos aceasta aplicatie?](#pentru-cine-este-de-folos-aceasta-aplicatie)
 - [Poate aplicatia sa faca X,Y,Z?](#poate-aplicatia-sa-faca-xyz)
-- [Instalare pt. utilizatori](#instalare-pt-utilizatori)
+- [Instalare (aplicatia desktop din Releases)](#instalare-aplicatia-desktop-din-releases)
 - [Instalare pt. developeri](#instalare-pt-developeri)
+  - [Distributia standalone (build)](#distributia-standalone-build)
 - [Instalare pe VPS (Docker + Caddy)](#instalare-pe-vps-docker--caddy)
-- [Utilizare din agenti AI (MCP / OpenCode)](#utilizare-din-agenti-ai-mcp--opencode)
 - [Ghid de utilizare: de la instalare la rutina zilnica](#ghid-de-utilizare-de-la-instalare-la-rutina-zilnica)
 - [Setari](#setari)
 - [Facturi](#facturi)
@@ -41,7 +41,7 @@ Aplicatie pentru simplificarea gestiunii contabilitatii facuta in partida simpla
 - Pentru cei care detin PFA, PFI, II, etc si pot tine contabilitatea in partida simpla;
 - Impozitare in sistem real (fara norma de venit);
 - Nu au depasit pragul TVA (venituri sub 395k RON pe an);
-- Sunt prestatori de servicii (freelanceri, instalatori, curieri glovo, tazz, soferi taxi, bold, uber etc.);
+- Sunt prestatori de servicii;
 
 Aplicatia te ajuta sa:
 - creezi facturi: e-factura (fara TVA), facturi PDF in mai multe limbi si valute;
@@ -54,73 +54,30 @@ Aplicatia te ajuta sa:
 
 ## Poate aplicatia sa faca X,Y,Z?
 
-Aplicatia am facut-o potrivita pentru nevoile mele. Daca pe parcurs voi avea nevoie de X,Y,Z atunci poate voi actualiza aplicatia sa contina si X,Y,Z (cum am facut cu e-factura).
+Aplicatia am facut-o potrivita pentru nevoile mele. Daca pe parcurs voi avea nevoie de X,Y,Z atunci poate voi actualiza aplicatia sa contina si X,Y,Z.
 
 As fi vrut sa adaug mai multe functionalitati, dar nu am cunostinte solide de contabilitate. 
 Daca deschizi un `New issue` din tabul `Issues` din aceasta pagina si spui pas cu pas care sunt cerintele voi lua in considerare sa adaug in aplicatie o noua functionalitate (in functie de timp si cunostinte).
 
 
-## Instalare pt. utilizatori
+## Instalare (aplicatia desktop din Releases)
 
-Aplicatia **se ruleaza in Docker**. Scriptul de instalare face totul: instaleaza Docker daca lipseste, trage codul din GitHub, construieste imaginea si porneste aplicatia la `http://localhost:8990`.
+Aplicatia este disponibila ca executabil in [GitHub Releases](https://github.com/ClimenteA/PFASimplu/releases).
 
-**Linux / macOS:**
+**Cum procedezi:**
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/ClimenteA/PFASimplu/main/install.sh | bash
-```
+1. Deschide [pagina de Releases](https://github.com/ClimenteA/PFASimplu/releases)
+   si descarca arhiva `.zip` pentru sistemul tau de operare.
+2. Dezarhiveaza-o intr-un folder.
+3. Ruleaza executabilul.
+4. La **prima pornire** va dura un pic sa-si instaleze dependintele (`pycrucible` e folosit pentru a genera executabilul).
+5. Deschide pagina de **inregistrare** si creeaza-ti contul (totul e local, datele tale nu sunt trimise catre un server), apoi completeaza [Setari](#setari).
 
-Daca ai deja repo-ul, poti rula direct `./install.sh` (din radacina). Scriptul foloseste directorul `$HOME/PFASimplu`; pentru porturi si alte setari editeaza `.env` (vezi mai jos). Poti schimba directorul cu `PFASIMPLU_DIR`.
-
-Fara script, configurationarea manuala e:
-
-```bash
-cp .env.example .env        # valori mock, nimic secret; .env e in .gitignore
-docker compose -f docker-compose-local.yaml up -d --build
-```
-
-**Windows** (PowerShell sau Command Prompt):
-
-```
-curl -o install.bat https://raw.githubusercontent.com/ClimenteA/PFASimplu/main/install.bat
-install.bat
-```
-
-Scriptul instaleaza Docker Desktop si git prin `winget`, daca lipsesc. Daca le instaleaza la prima rulare, porneste Docker Desktop si **re-ruleaza scriptul**.
-
-Dupa instalare, deschide `http://localhost:8990` si creeaza-ti contul in pagina de **inregistrare** (loginul este obligatoriu).
-
-Baza de date (`appdata/db/stocare.db`) si fisierele (`appdata/files/`) sunt montate in container de pe disc. Ele nu sunt incluse in imaginea Docker si nu se urca in git, deci un `git pull` sau un rebuild nu le atinge. Fa backup periodic la `appdata/db/` si `appdata/files/`.
+Executabilul nu are semnatura digitala si vei primi cateva ferestre cu avertismente - ignora-le.
+Nu am cumparat semnatura digitala pentru acesta (e scumpa).
 
 
-## Distributie standalone (fara Docker)
-
-Pentru utilizatorii care nu vor Docker exista un executabil nativ per sistem de
-operare. Pipeline-ul este: `uv build --wheel` → wheel-ul este integrat la
-[PyCrucible](https://github.com/razorblade23/PyCrucible) → un singur binar.
-
-Construire locala (necesita `uv`; PyCrucible este instalat prin `uvx` doar la
-build, nu este dependenta aplicatiei):
-
-```bash
-make dist
-# rezultat: dist/pfasimplu-<versiune>-<os>-<arhitectura>[.exe]
-# + dist/pfasimplu-<versiune>-<os>-<arhitectura>.zip (folosit in release)
-```
-
-Pe Windows fara `make`: `uv run --no-project python scripts/build_dist.py`.
-Test rapid al binarului: `uv run --no-project python scripts/smoke_dist.py`.
-
-**Prima pornire** are nevoie de internet: `uv` (inclus in binar) descarca Python
-3.12 si dependentele. Pornirile urmatoare folosesc environment-ul din folderul
-`pycrucible_payload` creat langa executabil. Pastreaza
-executabilul intr-un folder in care ai drept de scriere (ex. `Downloads`,
-`Desktop`, home), nu in `Program Files` sau intr-un director read-only.
-
-Aplicatia se deschide intr-o fereastra de tip desktop (flaskwebgui) daca exista
-Chrome, Edge, Brave sau Chromium; altfel foloseste browserul implicit.
-
-**Datele utilizatorului** nu stau langa executabil si nu sunt atinse de upgrade:
+**Datele aplicatiei** nu stau langa executabil si nu sunt atinse la upgrade:
 
 | Sistem | Director de date |
 |---|---|
@@ -131,21 +88,23 @@ Chrome, Edge, Brave sau Chromium; altfel foloseste browserul implicit.
 In el se afla `db/stocare.db`, `files/` (documente), `logs/`, `staticfiles/` si
 `secret_key` (generata aleator la prima pornire). Pentru **backup** copiaza
 intregul director (sau foloseste exportul din `Setari`). Pentru **upgrade**
-inlocuieste doar executabilul; la pornire se aplica automat migrarile noi.
+inlocuieste doar executabilul sau foloseste butonul de actualizare din subsolul
+paginii `Setari` - la pornire se aplica automat migrarile noi; vezi
+[Actualizare aplicatie](#actualizare-aplicatie).
 
-Binarul este nesemnat: Windows SmartScreen si macOS Gatekeeper vor afisa
-avertismente. Code signing si notarization macOS sunt pasi urmatori.
-GitHub Actions publica automat un release cu arhivele `.zip` pentru fiecare
-platforma la un tag `v*`, la un merge in `main` sau la rulare manuala
-(`workflow_dispatch`). Jobul `macos-latest` produce arm64 (Apple Silicon),
-iar pentru Mac Intel este nevoie de un job `macos-13`.
+Variantele Docker si VPS sunt pentru dezvoltare si self-hosting: vezi
+[Instalare pt. developeri](#instalare-pt-developeri) si
+[Instalare pe VPS](#instalare-pe-vps-docker--caddy).
 
 
 ## Instalare pt. developeri
 
-Aplicatia e facuta in Python (>= 3.12), Django cu SQLiteDB. Pentru utilizatori ruleaza in Docker; pentru dezvoltare se poate folosi si `uv run` (vezi [Rulare cu uv run](#rulare-cu-uv-run-dezvoltare)).
+Aplicatia e facuta in Python (>= 3.12), Django cu SQLiteDB. Pentru utilizare
+zilnica, [aplicatia desktop din Releases](#instalare-aplicatia-desktop-din-releases)
+e metoda principala; Docker si `uv run` sunt pentru dezvoltare si self-hosting
+(vezi si [Rulare cu uv run](#rulare-cu-uv-run-dezvoltare)).
 
-- clone repo si `./install.sh` (sau `make start-local`) pentru aplicatie;
+- clone repo si `make start-local` pentru aplicatia in Docker la `http://localhost:8990`;
 - [instaleaza uv](https://docs.astral.sh/uv/getting-started/installation/) si `uv sync`, apoi `make dev` pentru serverul de dezvoltare cu auto-reload;
 - `make test-e2e` - ruleaza testele end-to-end (vezi [Debug si testare](#debug-si-testare-dezvoltatori));
 - `make migrate-all` / `make purge-db` / `make purge-migration-dirs` - utilitare pentru migrari;
@@ -155,8 +114,34 @@ Pe Windows, echivalentul comenzilor make e `.\makefile.bat X` (ex: `start-local`
 
 Datele stau pe gazda in `appdata/db/` si `appdata/files/` (mount-uri in `docker-compose-local.yaml`) si nu se urca in git. Configurarea locala e in `.env` (ignorat de git, cu valori mock in `.env.example`); .env.prod e doar pentru VPS.
 
+### Distributia standalone (build)
+
+Executabilul descarcat din Releases e construit astfel: `uv build --wheel` →
+wheel-ul e integrat in [PyCrucible](https://github.com/razorblade23/PyCrucible) →
+un singur binar per sistem de operare.
+
+Construire locala (necesita `uv`; PyCrucible se instaleaza prin `uvx` doar la
+build, nu e dependenta a aplicatiei):
+
+```bash
+make dist
+# rezultat: dist/pfasimplu-<versiune>-<os>-<arhitectura>[.exe]
+# + dist/pfasimplu-<versiune>-<os>-<arhitectura>.zip (folosit in release)
+```
+
+Pe Windows fara `make`: `uv run --no-project python scripts/build_dist.py`.
+Test rapid al binarului: `uv run --no-project python scripts/smoke_dist.py`.
+
+GitHub Actions publica automat un release cu arhivele `.zip` pentru fiecare
+platforma la un tag `v*`, la un merge in `main` sau la rulare manuala
+(`workflow_dispatch`). Jobul `macos-latest` produce arm64 (Apple Silicon),
+iar pentru Mac Intel este nevoie de un job `macos-13`. Binarul e nesemnat;
+code signing si notarization macOS sunt pasi urmatori.
+
 
 ## Instalare pe VPS (Docker + Caddy)
+
+Aceasta sectiune e pentru **dezvoltatori si self-hosting**.
 
 Aplicatia ruleaza cu **login/inregistrare pe email + parola** (obligatoriu si in
 varianta locala) si **date izolate per utilizator**: fiecare cont isi vede doar
@@ -167,8 +152,8 @@ Sunt doua fisiere Docker Compose:
 
 | Fisier | Continut | Acces |
 |---|---|---|
-| `docker-compose.yaml` | aplicatia + MCP + Caddy (TLS automat) - pentru VPS | `https://<domeniu>` si `https://mcp.<domeniu>/mcp` |
-| `docker-compose-local.yaml` | aplicatia + MCP, **fara Caddy** - pentru uz local | `http://localhost:8990` si `http://localhost:8997/mcp` |
+| `docker-compose.yaml` | aplicatia + Caddy (TLS automat) - pentru VPS | `https://<domeniu>` |
+| `docker-compose-local.yaml` | aplicatia, **fara Caddy** - pentru uz local | `http://localhost:8990` |
 
 Pe VPS (cu Docker si Docker Compose instalate):
 
@@ -202,88 +187,13 @@ Varianta locala (fara Caddy/TLS), mereu pornita:
 
 ```bash
 cp .env.example .env        # daca nu exista deja; continut mock, nu secrete
-docker compose -f docker-compose-local.yaml up -d --build   # sau: make start-local / ./install.sh
+docker compose -f docker-compose-local.yaml up -d # sau: make start-local
 ```
 
 Aplicatia e accesibila la `http://localhost:8990`. Portul se schimba prin
-`PFASIMPLU_PORT` in `.env` (ex. `PFASIMPLU_PORT=9000`), iar cel al MCP prin
-`PFASIMPLU_MCP_PORT` (implicit `8997`). Cu `restart: unless-stopped` si serviciul
+`PFASIMPLU_PORT` in `.env` (ex. `PFASIMPLU_PORT=9000`). Cu `restart: unless-stopped` si serviciul
 Docker pornit la boot, aplicatia revine singura dupa restartul calculatorului
 (mai putin daca a fost oprita manual inainte).
-
-
-## Utilizare din agenti AI (MCP / OpenCode)
-
-Aplicatia poate fi conectata la OpenCode (sau alt agent AI) prin
-[Model Context Protocol](https://modelcontextprotocol.io/), folosind
-`fastmcp`. Serverul MCP ruleaza in Docker (HTTP), local sau pe VPS, si foloseste
-aceeasi baza de date si aceleasi fisiere ca aplicatia web.
-
-### 1. Genereaza cheia de autorizare
-
-Intra in `Setari` si foloseste formularul mic **„Cheie de acces MCP”** de sub
-formularul principal:
-
-- apasa **Genereaza cheia** in sectiunea „Cheie de acces MCP (agenti AI)” de sub formularul principal;
-- **copiaza cheia imediat** - e afisata o singura data;
-- in baza de date se salveaza doar un hash (salt + SHA-256), niciodata cheia
-  in clar; la fiecare request MCP hash-ul primit e comparat cu cel salvat;
-- cheia e **legata de contul care a generat-o**: fiecare utilizator are cheia
-  lui, iar agentul vede si modifica doar datele acelui cont (inclusiv fisierele
-  lui); o cheie fara cont e refuzata;
-- generarea unei chei noi **revoca automat** doar cheia contului curent, iar
-  butonul **Revoca cheia** o sterge definitiv - efectul e imediat, fara restart;
-- pastreaz-o secret si nu o pune in git / `.env`.
-
-### 2. Varianta locala, prin HTTP
-
-Serviciul MCP porneste odata cu `docker-compose-local.yaml` si e expus pe
-portul `8997` (`PFASIMPLU_MCP_PORT`):
-
-```bash
-docker compose -f docker-compose-local.yaml up -d --build
-
-opencode mcp add pfasimplu-local \
-  --url http://localhost:8997/mcp \
-  --header 'Authorization=Bearer <CHEIA_TA>'
-```
-
-### 3. Varianta de pe VPS, prin HTTPS
-
-Caddy expune serverul MCP pe subdomeniul `mcp.<PFASIMPLU_DOMAIN>`.
-Seteaza `PFASIMPLU_DOMAIN` in `.env.prod`, apoi:
-
-```bash
-docker compose -f docker-compose.yaml up -d --build
-
-# Exemplu de conectare (foloseste propriul domeniu si cheia generata in /setari):
-opencode mcp add chatcodfiscal \
-  --url https://mcp.pfa.exemplu.ro/mcp \
-  --header 'Authorization=Bearer <CHEIA_TA>'
-```
-
-Endpoint-ul e `https://mcp.<domeniu>/mcp`; `https://mcp.<domeniu>/health` e
-public (pentru monitoring). Daca testezi local fara domeniu/TLS, comenteaza
-blocul `mcp....` din Caddyfile.
-
-### Tooluri expuse
-
-| Tool | Ce face |
-|---|---|
-| `ping` | verifica conexiunea si versiunea aplicatiei |
-| `get_setari` | datele PFA-ului din pagina Setari |
-| `list_incasari` / `list_cheltuieli` / `list_facturi` / `list_documente` | listare cu filtru optional pe an si limita |
-| `sumar_an` | totaluri, venit net, taxe estimate, TVA autolichidata (D301) |
-| `add_incasare` / `add_cheltuiala` | adauga inregistrare, cu document justificativ optional (base64) |
-
-**Nu exista tool-uri de stergere** (drop-data, delete etc.) - operatiile
-distructive raman doar in interfata web.
-
-Nu trebuie sa trimiti niciun ID de utilizator: identitatea vine din cheia
-generata in `/setari`. Serverul seteaza contextul contului respectiv pentru
-fiecare tool call, deci agentul nu poate citi sau modifica datele altui cont.
-O cheie fara user (generata inainte de aceasta schimbare) este refuzata -
-genereaza una noua.
 
 
 ## Ghid de utilizare: de la instalare la rutina zilnica
@@ -292,11 +202,11 @@ Ordinea conteaza: aplicatia foloseste datele din `Setari` in toate celelalte pag
 
 **1. Prima deschidere - completeaza Setari**
 
-Deschide aplicatia la `http://localhost:8990`, autentifica-te (sau inregistreaza-te la prima folosire) si mergi intai in pagina `Setari`: numele PFA-ului, CIF, adresa, localitatea (aleasa din sugestii), conturile IBAN (unul per moneda: RON, EUR etc.), codul CAEN. Bifeaza scutirile doar daca ai statut special (pensionar, persoana cu handicap etc.). Daca ai cod special de TVA intracomunitar (art. 317), deschide sectiunea `TVA intracomunitar (D301/D390)` si completeaza codul - IBAN-ul trezoreriei se completeaza automat la alegerea localitatii. Salveaza. Fara acest pas, facturile nu au datele emitentului corecte.
+Deschide aplicatia, autentifica-te (sau inregistreaza-te la prima folosire) si mergi intai in pagina `Setari`: numele PFA-ului, CIF, adresa, localitatea (aleasa din sugestii), conturile IBAN (unul per moneda: RON, EUR etc.), codul CAEN. Bifeaza scutirile doar daca ai statut special (pensionar, persoana cu handicap etc.). Daca ai cod special de TVA intracomunitar (art. 317), deschide sectiunea `TVA intracomunitar (D301/D390)` si completeaza codul - IBAN-ul trezoreriei se completeaza automat la alegerea localitatii. Salveaza. Fara acest pas, facturile nu au datele emitentului corecte.
 
 **2. Emite prima factura (pagina Facturi)**
 
-Completeaza clientul, seria si numarul (propuse automat: prima factura primeste seria `INV` si numarul `1`, apoi se continua seria existenta cu numarul urmator - poti schimba seria), articolele (denumire, UM, cantitate, pret), tipul facturii (e-factura pentru B2B in Romania, sau PDF in alta limba/valuta pentru extern). La salvare aplicatia genereaza automat PDF-ul facturii (si XML-ul UBL pentru e-factura) si le salveaza cu un prefix-id de 8 caractere. Le descarci din coloanele XML/PDF ale tabelului.
+Completeaza clientul, seria si numarul (propuse automat: prima factura primeste seria `INV` si numarul `1`, apoi se continua seria existenta cu numarul urmator - poti schimba seria si numarul), articolele (denumire, UM, cantitate, pret), tipul facturii (e-factura pentru B2B in Romania, sau PDF in alta limba/valuta pentru extern). La salvare aplicatia genereaza automat PDF-ul facturii (si XML-ul UBL pentru e-factura) si le salveaza cu un prefix-id de 8 caractere. Le descarci din coloanele XML/PDF ale tabelului.
 
 **3. Inregistreaza incasarea (pagina Incasari)**
 
@@ -323,7 +233,6 @@ Oricand, dar musai inainte de a completa Declaratia Unica: cardurile cu totaluri
 - fisierele stau in `appdata/files/user_<id>/` (directoarele sunt montate de pe gazda in container) si pot fi descarcate doar de proprietar;
 - exporturile CSV/XLSX ale registrelor si zip-urile generate (D301/D390, exportul pe an) se construiesc temporar in `appdata/files/extracts/` si se livreaza la download;
 - la stergerea unei inregistrari din aplicatie, fisierul atasat ei este sters automat de pe disc (django-cleanup); `Sterge toate datele` din Setari sterge si baza de date si fisierele;
-- cursurile BNR se iau online prin `cursvalutarbnr` si se cache-uiesc local, deci anii trecuti functioneaza si offline.
 
 
 ## Setari 
@@ -334,7 +243,7 @@ Aceasta pagina trebuie completata la prima deschidere a aplicatiei.
 Cam rar vei schimba datele din aceasta pagina.
 Poti adauga mai multe conturi IBAN (RON, EUR, USD etc.), cate unul pentru fiecare moneda. La emiterea unei facturi se foloseste automat contul IBAN in moneda facturii, iar daca nu exista un cont in acea moneda, se foloseste contul de RON.
 
-Cu butonul `Exporta datele din aplicatie` descarci un zip cu datele pentru **anul selectat** (ca sa nu se blocheze aplicatia procesand toti anii odata). Zip-ul contine:
+Cu butonul `Exporta datele din aplicatie` descarci un zip cu datele pentru **anul selectat**. Zip-ul contine:
 - `documente/`, `cheltuieli/`, `incasari/` - documentele justificative urcate in aplicatie pentru anul selectat;
 - registrele anului in format `.xlsx`: Registrul Jurnal, Registrul Inventar, Registrul Fiscal si Jurnalul de cumparari;
 - `fise_mijloace_fixe/` - fisele mijloacelor fixe (PDF);
@@ -345,17 +254,7 @@ Daca ai **cod special de TVA intracomunitar (art. 317 Cod fiscal)** si cumperi s
 - **Cod TVA intracomunitar** - codul special din certificatul de inregistrare in scopuri de TVA, fara prefixul RO. Este diferit de CIF-ul normal al PFA-ului: pentru facturi din UE se foloseste codul special, pentru non-UE codul normal (aplicatia alege automat codul corect);
 - **IBAN trezorerie pentru plata TVA** - se completeaza **automat cand selectezi localitatea** (campul `Alege localitatea`): aplicatia are tabelul IBAN-urilor extras din [sursele oficiale ANAF](https://www.anaf.ro/anaf/internet/ANAF/asistenta_contribuabili/plata_oblig_fiscale/coduri_iban) (202 trezorerii operative, inclusiv sectoarele Bucurestiului) si stie contul `20A100101 - TVA incasata pentru operatiuni interne` pentru localitatea ta. Linkul PDF-ului ANAF ramane afisat ca sa poti verifica. Daca tabelul `src/static/iban_trezorerie.json` lipseste, aplicatia il descarca automat de pe ANAF la prima salvare a Setarilor (necesita conexiune la internet; dureaza cateva minute). Daca localitatea nu are trezorerie operativa proprie (sate/comune), cauta IBAN-ul in lista ANAF pentru judetul tau si completeaza-l manual. TVA-ul din D301 NU se plateste in contul unic.
 
-**Cheie de acces MCP (agenti AI):** sub formularul principal gasesti sectiunea
-„Cheie de acces MCP (agenti AI)”. Apasa **Genereaza cheia** (o cheie per cont) si
-copiaza-o imediat: e afisata in clar o singura data, iar in baza de date se
-salveaza doar un hash (salt + SHA-256). Cheia e legata de contul care a generat-o,
-deci agentul AI vede si modifica doar datele acelui cont. Generarea unei chei noi
-o revoca pe cea veche, iar butonul **Revoca cheia** o sterge definitiv, cu efect
-imediat. Cu aceasta cheie conectezi OpenCode sau alt agent AI conform sectiunii
-[Utilizare din agenti AI (MCP / OpenCode)](#utilizare-din-agenti-ai-mcp--opencode);
-nu o pune in git sau in `.env`.
-
-![setari - datele PFA si cheia de acces MCP](readmepics/setari.png)
+![setari - datele PFA](readmepics/setari.png)
 
 
 
@@ -522,7 +421,7 @@ Versiunea pe care o rulezi apare in subsolul paginii `Setari` (ex. `PFASimplu V3
 
 **Actualizare executabil standalone:** daca rulezi binarul si apare notificarea `(disponibil V...)`, apasa `Actualizeaza` din subsolul paginii `Setari`, apoi `Confirma instalarea`. Aplicatia descarca arhiva pentru sistemul tau de pe GitHub, o verifica si inlocuieste executabilul **cand inchizi aplicatia**, apoi reporneste singura cu versiunea noua. Baza de date, documentele si celelalte date raman in directorul de date al sistemului (`%LOCALAPPDATA%\PFASimplu`, `~/Library/Application Support/PFASimplu` sau `~/.local/share/pfasimplu`), deci nu sunt atinse. Butonul nu apare in Docker sau la rulare din sursa; acolo folosesti procedura de mai jos. Arhiva este descarcata prin HTTPS, dar binarul nu este semnat (vezi sectiunea de distributie standalone).
 
-**Actualizare locala:** re-ruleaza scriptul de instalare (`./install.sh` sau `install.bat`). El face `git pull`, reconstruieste imaginea si reporneste containerele. Baza de date si fisierele raman pe loc: sunt in `appdata/db/` si `appdata/files/` pe disc, nu in imagine. Echivalent manual:
+**Actualizare locala (Docker / sursa):** fa `git pull`, reconstruieste imaginea si reporneste containerele. Baza de date si fisierele raman pe loc: sunt in `appdata/db/` si `appdata/files/` pe disc, nu in imagine.
 
 ```bash
 git pull
@@ -552,7 +451,7 @@ make restart            # echivalentul lui restart-local pentru VPS
 
 Codul sursa e montat live in containere (`./src` la `/app/src`), deci dupa
 modificari de cod e suficient `make restart-local` (respectiv `make restart` pe
-VPS); waitress/uvicorn nu au auto-reload, asa ca containerele trebuie recreate.
+VPS); waitress nu are auto-reload, asa ca containerul trebuie recreat.
 `make build-local` / `make build` raman necesare doar cand se schimba
 dependintele (`pyproject.toml`, `uv.lock`) sau `Dockerfile`-ul.
 
@@ -598,29 +497,26 @@ Variabile de mediu utile (`src/core/settings.py` si fisierele compose):
 | `PFASIMPLU_SECURE_COOKIES` | `0` = cookie-uri normale (HTTP local) | `1` cand `DEBUG=0` |
 | `PFASIMPLU_ALLOW_REGISTRATION` | `0` = blocheaza crearea de conturi | `1` |
 | `PFASIMPLU_SECRET_KEY`, `PFASIMPLU_ALLOWED_HOSTS`, `PFASIMPLU_CSRF_TRUSTED_ORIGINS` | necesare pe server (vezi `.env.prod.example`) | - |
-| `PFASIMPLU_DOMAIN` | domeniul folosit de Caddy (inclusiv `mcp.<domeniu>`) | `pfa.exemplu.ro` |
-| `PFASIMPLU_MCP_PORT` | portul MCP pe gazda in compose-ul local | `8997` |
+| `PFASIMPLU_DOMAIN` | domeniul folosit de Caddy | `pfa.exemplu.ro` |
 
 ### Structura codului
 
-Radacina repo-ului contine configuratia proiectului, documentatia, fisierele Docker si scripturile de instalare. Codul aplicatiei sta in `src/`.
+Radacina repo-ului contine configuratia proiectului, documentatia si fisierele Docker. Codul aplicatiei sta in `src/`.
 
 | Folder / fisier | Rol |
 |---|---|
-| `src/` | sursele aplicatiei: app-urile Django, `core/`, `mcp_server/`, `templates/`, `static/`, `tests/` |
+| `src/` | sursele aplicatiei: app-urile Django, `core/`, `templates/`, `static/`, `tests/` |
 | `appdata/` | datele locale: `db/stocare.db` (SQLite), `files/` (fisiere urcate/generate) si `logs/pfasimplu.log`; ignorate de git si montate in Docker |
 | `Dockerfile`, `docker-entrypoint.sh` | imaginea aplicatiei (migrari + collectstatic la pornire) |
-| `docker-compose.yaml` | varianta VPS: aplicatie + MCP + Caddy |
-| `docker-compose-local.yaml` | varianta locala: aplicatie + MCP, fara Caddy |
+| `docker-compose.yaml` | varianta VPS: aplicatie + Caddy |
+| `docker-compose-local.yaml` | varianta locala: aplicatie, fara Caddy |
 | `Caddyfile`, `.env.prod.example` | configurare TLS/domeniu pentru VPS |
 | `.env.example` / `.env` | configurare locala (mock, ignorata de git) |
-| `install.sh`, `install.bat` | instalare completa: Docker + git + build + start |
 | `readmepics/` | imagini folosite in acest README |
 
 | App / folder (in `src/`) | Rol |
 |---|---|
-| `setari/` | datele PFA-ului, IBAN-uri, cod TVA intracomunitar, export/stergere date, cheia MCP |
-| `mcp_server/` | server FastMCP: tool-uri, autorizare Bearer si transport HTTP (`http_app.py`) |
+| `setari/` | datele PFA-ului, IBAN-uri, cod TVA intracomunitar, export/stergere date |
 | `facturi/` | emitere facturi: PDF multi-limba + XML e-factura (UBL) |
 | `incasari/` | incasari + documente justificative, conversie BNR |
 | `cheltuieli/` | cheltuieli, deductibilitate, amortizare, taxare inversa TVA |
@@ -650,7 +546,7 @@ Dupa rulare, baza de date de test ramane in `src/tests/.runtime/` pentru inspect
 
 ### Depanare
 
-- **Serverul nu porneste / port ocupat**: portul aplicatiei e `PFASIMPLU_PORT` in `.env` (implicit 8990), cel al MCP `PFASIMPLU_MCP_PORT` (implicit 8997); dupa modificare, `docker compose -f docker-compose-local.yaml up -d`.
+- **Serverul nu porneste / port ocupat**: portul aplicatiei e `PFASIMPLU_PORT` in `.env` (implicit 8990); dupa modificare, `docker compose -f docker-compose-local.yaml up -d`.
 - **Erori de migrari dupa modificari de modele**: `make migrate-all`; daca migrarile sunt corupte, `make purge-migration-dirs` apoi `make migrate-all` (atenție: pe o baza de date existenta cu schema veche poate fi nevoie de `make purge-db`, care **sterge datele**).
 - **Curs BNR indisponibil**: `cursvalutarbnr` ia cursurile online si le cache-uieste in folderul temporar al sistemului (`cache_cursvalutarbnr`); prima rulare necesita internet.
 - **Fisiere lipsa dupa mutarea bazei de date**: fisierele sunt referite relativ la `PFASIMPLU_MEDIA_ROOT` - muta tot folderul `appdata/` odata cu baza de date.

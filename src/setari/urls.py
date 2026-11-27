@@ -3,8 +3,6 @@ from django.urls import path
 from .views import (
     SetariActualizeazaView,
     SetariIbanTrezorerieView,
-    SetariMcpKeyGenerateView,
-    SetariMcpKeyRevokeView,
     SetariView,
     SetariViewDownloadData,
     SetariViewDropData,
@@ -24,8 +22,4 @@ urlpatterns = [
         SetariIbanTrezorerieView.as_view(),
         name="setari-iban-trezorerie",
     ),
-    path(
-        "mcp-key/generate/", SetariMcpKeyGenerateView.as_view(), name="mcp-key-generate"
-    ),
-    path("mcp-key/revoke/", SetariMcpKeyRevokeView.as_view(), name="mcp-key-revoke"),
 ]

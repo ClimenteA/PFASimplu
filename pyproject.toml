@@ -1,6 +1,6 @@
 [project]
 name = "pfasimplu"
-version = "3.0.3"
+version = "3.0.4"
 description = "Aplicatie de contabilitate pentru PFA-uri"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -20,7 +20,6 @@ dependencies = [
     "whitenoise>=6.7.0",
     "fpdf-table>=1.1.5",
     "requests-cache>=1.3.3",
-    "fastmcp>=4.2,<5",
     "flaskwebgui>=1.1.9",
 ]
 
@@ -47,7 +46,6 @@ packages = [
     "src/inventar",
     "src/registre",
     "src/utils",
-    "src/mcp_server",
 ]
 
 [tool.hatch.build.targets.wheel.force-include]
@@ -73,7 +71,7 @@ ignore = [
     "RUF012",
     "BLE001",
     # Modele existente in cod, pastrate intentionat:
-    "E402", # mcp_server initializeaza django inainte de importuri (setup_django())
+    "E402", # importuri dupa sys.path/django.setup() in testele Playwright
     "E731", # lambda atribuita in utils/github_data.py
     "E741", # variabila `l` in facturi/models.py
     "E722", # except: in utils/pretty_excel.py
