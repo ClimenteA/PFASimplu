@@ -177,8 +177,8 @@ def emite_factura(
 def incasare_din_factura(page: Page, serie: str, numar: int, data_incasarii) -> None:
     """Incasare pornita din pagina Facturi (butonul 💳 'Incasata').
 
-    Formularul vine precompletat din factura (suma, valuta, tip tranzactie,
-    PDF atasat automat); completam doar data incasarii.
+    Formularul vine precompletat din factura (nume incasare, suma, valuta,
+    tip tranzactie, PDF atasat automat); completam doar data incasarii.
     """
     page.goto("/facturi/")
     page.wait_for_url("**/facturi/")
@@ -204,6 +204,7 @@ def incasare_din_factura(page: Page, serie: str, numar: int, data_incasarii) -> 
 
     page.wait_for_url("**/incasari/?factura_id=*")
     expect(page.locator("#form-incasare")).to_be_visible()
+    expect(page.locator("#id_nume_incasare")).to_have_value(re.compile(".+"))
     page.fill("#id_data_inserarii", data_incasarii.isoformat())
     page.get_by_role("button", name="Salveaza incasare").click()
     assert_saved(page)

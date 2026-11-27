@@ -1,4 +1,4 @@
-from django.forms import DateInput, ModelForm
+from django.forms import DateInput, ModelForm, TextInput
 
 from .models import IncasariModel
 
@@ -9,7 +9,8 @@ class IncasariForm(ModelForm):
         fields = "__all__"
         exclude = ["actualizat_la", "factura", "user", "data_incasarii"]
         widgets = {
-            "data_inserarii": DateInput(format=("%m/%d/%Y"), attrs={"type": "date"})
+            "nume_incasare": TextInput(attrs={"autocomplete": "off"}),
+            "data_inserarii": DateInput(format=("%m/%d/%Y"), attrs={"type": "date"}),
         }
 
     def save(self, commit=True):

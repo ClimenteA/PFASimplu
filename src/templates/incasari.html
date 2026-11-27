@@ -31,11 +31,19 @@
 
         {% csrf_token %}
 
-        <label for="{{ incasari_form.sursa_venit.id_for_label }}">
-            {{ incasari_form.sursa_venit.label }}:
-            {{ incasari_form.sursa_venit }}
-            {{ incasari_form.sursa_venit.errors }}
-        </label>
+        <div class="grid">
+            <label for="{{ incasari_form.sursa_venit.id_for_label }}">
+                {{ incasari_form.sursa_venit.label }}:
+                {{ incasari_form.sursa_venit }}
+                {{ incasari_form.sursa_venit.errors }}
+            </label>
+
+            <label for="{{ incasari_form.nume_incasare.id_for_label }}">
+                {{ incasari_form.nume_incasare.label }}:
+                {{ incasari_form.nume_incasare }}
+                {{ incasari_form.nume_incasare.errors }}
+            </label>
+        </div>
 
         <div class="grid mt-2">
 
@@ -161,6 +169,7 @@
             <thead>
                 <tr>
                     <th>Mod.</th>
+                    <th>Nume</th>
                     <th>Primit</th>
                     <th>Valuta</th>
                     <th>In RON</th>
@@ -180,6 +189,7 @@
                             <i class="bi bi-pencil-square"></i>
                         </a>
                     </td>
+                    <td>{{ item.nume_incasare|default:"N/A" }}</td>
                     <td>{{ item.suma|suma2 }}</td>
                     <td>
                         {{ item.valuta }}

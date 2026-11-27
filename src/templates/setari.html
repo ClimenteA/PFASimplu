@@ -99,7 +99,7 @@
             if ($refs.searchInputEl.value) actualizeazaIbanTrezorerie();">
                 <label>
                     <span>Alege localitatea:</span> 
-                    <input name="localitate" {% if setari_form.localitate.value %} value="{{ setari_form.localitate.value }}" {% endif %} x-ref="searchInputEl" autocomplete="off" type="text" placeholder="Iasi...">
+                    <input name="localitate" {% if setari_form.localitate.value %} value="{{ setari_form.localitate.value }}" {% endif %} x-ref="searchInputEl" autocomplete="__away" type="text" placeholder="Iasi...">
                     {{ setari_form.localitate.errors }}
                     <small>La selectarea localitatii, IBAN-ul trezoreriei pentru plata TVA se completeaza automat (din sursele ANAF).</small>
                 </label>

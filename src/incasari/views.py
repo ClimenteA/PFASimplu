@@ -6,8 +6,7 @@ from django.shortcuts import HttpResponseRedirect, get_object_or_404, render
 from django.utils import timezone
 from django.views import View
 
-from facturi.models import FacturaModel, ModalitatePlata
-from utils.valuta import TipTranzactie
+from facturi.models import FacturaModel
 from utils.views import (
     download_model_csv_or_xlsx,
     get_cautare,
@@ -24,6 +23,7 @@ CAUTARE_COLOANE = {
     "suma": ("Primit", ["suma"]),
     "valuta": ("Valuta", ["valuta"]),
     "data_incasarii": ("Incasare la", ["data_incasarii"]),
+    "nume_incasare": ("Nume incasare", ["nume_incasare"]),
     "sursa_venit": ("Venit din", ["sursa_venit"]),
     "actualizat_la": ("Data Modificare", ["actualizat_la"]),
 }
@@ -60,16 +60,12 @@ class IncasariView(View):
                     extra_tags="⚠️ Atentie!",
                 )
                 return HttpResponseRedirect("/incasari/")
-            tip_tranzactie = (
-                TipTranzactie.BANCAR.value
-                if factura.tip_tranzactie == ModalitatePlata.BANCAR.value
-                else TipTranzactie.NUMERAR.value
-            )
             form = IncasariForm(
                 initial={
+                    "nume_incasare": factura.nume,
                     "suma": factura.total_de_plata,
                     "valuta": factura.valuta,
-                    "tip_tranzactie": tip_tranzactie,
+                    "tip_tranzactie": factura.tip_tranzactie,
                     "data_inserarii": timezone.now().date(),
                 }
             )
