@@ -10,6 +10,7 @@ from facturi.models import FacturaModel, ModalitatePlata
 from utils.valuta import TipTranzactie
 from utils.views import (
     download_model_csv_or_xlsx,
+    get_cautare,
     get_page_items,
     handle_delete_id_query_param,
 )
@@ -18,6 +19,14 @@ from .forms import IncasariForm
 from .models import IncasariModel
 
 logger = logging.getLogger(__name__)
+
+CAUTARE_COLOANE = {
+    "suma": ("Primit", ["suma"]),
+    "valuta": ("Valuta", ["valuta"]),
+    "data_incasarii": ("Incasare la", ["data_incasarii"]),
+    "sursa_venit": ("Venit din", ["sursa_venit"]),
+    "actualizat_la": ("Data Modificare", ["actualizat_la"]),
+}
 
 
 class IncasariDescarcareView(View):
@@ -31,7 +40,10 @@ class IncasariView(View):
         if redirect_from_delete:
             return redirect_from_delete
 
-        form, page_items = get_page_items(request, IncasariForm, IncasariModel)
+        q_cautare, context_cautare = get_cautare(request, CAUTARE_COLOANE)
+        form, page_items = get_page_items(
+            request, IncasariForm, IncasariModel, cautare=q_cautare
+        )
 
         # Precompletare din factura (butonul "Incasata" din pagina Facturi)
         factura_id = request.GET.get("factura_id")
@@ -75,6 +87,7 @@ class IncasariView(View):
                 "factura_id": factura_id,
                 "fisier_factura": fisier_factura,
                 "nume_fisier_factura": nume_fisier_factura,
+                **context_cautare,
             },
         )
 
@@ -121,7 +134,10 @@ class IncasariView(View):
             ):
                 pass
             else:
-                _, page_items = get_page_items(request, IncasariForm, IncasariModel)
+                q_cautare, context_cautare = get_cautare(request, CAUTARE_COLOANE)
+                _, page_items = get_page_items(
+                    request, IncasariForm, IncasariModel, cautare=q_cautare
+                )
                 return render(
                     request,
                     "incasari.html",
@@ -138,6 +154,7 @@ class IncasariView(View):
                             if factura and factura.fisier_factura_pdf
                             else None
                         ),
+                        **context_cautare,
                     },
                 )
 

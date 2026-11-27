@@ -500,6 +500,41 @@ def test_06_verificari_ui(page, db):
     primul_rand = page.locator("#tabel-facturi tbody tr").first
     expect(primul_rand.locator("a[href*='.pdf']").first).to_be_visible()
 
+    # Filtrul "Cauta" e prezent deasupra tabelului pe toate paginile cu liste.
+    for url, tabel in (
+        ("/facturi/", "tabel-facturi"),
+        ("/incasari/", "tabel-incasari"),
+        ("/cheltuieli/", "tabel-cheltuieli"),
+        ("/documente/", "tabel-documente"),
+        ("/inventar/", "tabel-inventar"),
+    ):
+        page.goto(url)
+        form = page.locator(f"#{tabel} form#cautare")
+        expect(form.locator("input[name='cauta']")).to_be_visible()
+        expect(form.locator("select[name='coloana']")).to_be_visible()
+        expect(form.locator("select[name='coloana'] option").first).to_have_attribute(
+            "value", ""
+        )
+
+    # Fara coloana selectata cautarea gaseste numele in orice coloana; cu o
+    # coloana selectata (Data) acelasi text nu mai gaseste nimic.
+    page.goto("/cheltuieli/")
+    form = page.locator("#tabel-cheltuieli form#cautare")
+    form.locator("input[name='cauta']").fill(mf.nume_cheltuiala)
+    form.get_by_role("button", name="Cauta").click()
+    assert page.url.endswith("#cautare")
+    expect(page.locator("#tabel-cheltuieli form#cautare")).to_be_in_viewport()
+    randuri = page.locator("#tabel-cheltuieli tbody tr")
+    expect(randuri).to_have_count(1)
+    expect(randuri.first).to_contain_text(mf.nume_cheltuiala)
+    form = page.locator("#tabel-cheltuieli form#cautare")
+    form.locator("select[name='coloana']").select_option("data_inserarii")
+    form.get_by_role("button", name="Cauta").click()
+    expect(page.locator("#tabel-cheltuieli tbody tr")).to_have_count(0)
+    expect(
+        page.locator("#tabel-cheltuieli form#cautare input[name='cauta']")
+    ).to_have_value(mf.nume_cheltuiala)
+
     # Pagina Registre se incarca pentru anul testat.
     page.goto("/registre/")
     expect(page.locator("h1").first).to_be_visible()

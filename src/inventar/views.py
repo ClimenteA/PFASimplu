@@ -10,9 +10,16 @@ from django.views import View
 from cheltuieli.calcul import q_inventar
 from cheltuieli.models import CheltuialaModel
 from utils.mijloc_fix_pdf import create_fisa_mijloc_fix_pdf
-from utils.views import handle_delete_id_query_param
+from utils.views import get_cautare, handle_delete_id_query_param
 
 from .forms import InventarForm
+
+CAUTARE_COLOANE = {
+    "nume_cheltuiala": ("Denumirea elementelor inventariate", ["nume_cheltuiala"]),
+    "data_inserarii": ("Data", ["data_inserarii"]),
+    "modalitate_iesire_din_uz": ("In uz?", ["modalitate_iesire_din_uz"]),
+    "actualizat_la": ("Data Modificare", ["actualizat_la"]),
+}
 
 
 class InventarDescarcaFisierView(View):
@@ -42,6 +49,7 @@ class InventarView(View):
 
         page_number = request.GET.get("page")
         item_id = request.GET.get("id")
+        q_cautare, context_cautare = get_cautare(request, CAUTARE_COLOANE)
 
         if item_id:
             item = get_object_or_404(CheltuialaModel, id=item_id)
@@ -52,8 +60,10 @@ class InventarView(View):
         if not page_number:
             page_number = 1
 
-        results = CheltuialaModel.objects.filter(q_inventar()).order_by(
-            "-data_inserarii"
+        results = (
+            CheltuialaModel.objects.filter(q_inventar())
+            .filter(q_cautare)
+            .order_by("-data_inserarii")
         )
 
         paginator = Paginator(results, 100)
@@ -66,6 +76,7 @@ class InventarView(View):
                 "inventar_form": form,
                 "page_items": page_items,
                 "item_id": item_id,
+                **context_cautare,
             },
         )
 
