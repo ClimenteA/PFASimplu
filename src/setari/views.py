@@ -1,5 +1,4 @@
 import datetime
-import logging
 import os
 import shutil
 import zipfile
@@ -37,11 +36,6 @@ from registre.views import (
     registru_inventar_dataframe,
     registru_jurnal_dataframe,
 )
-from utils.actualizare import (
-    EroareActualizare,
-    este_standalone,
-    pregateste_actualizarea,
-)
 from utils.calcule import calculeaza_taxe_si_impozite
 from utils.decimale import D, rotund2
 from utils.github_data import get_latest_app_version
@@ -63,7 +57,6 @@ from .forms import SetariForm
 from .models import SetariModel
 
 lista_valute = [choice.value for choice in Valuta]
-logger = logging.getLogger(__name__)
 
 
 def _este_versiune_mai_noua(remote: str, local: str) -> bool:
@@ -81,7 +74,6 @@ def get_setari_context(form, request):
     result = SetariModel.objects.first()
     localitate = form.initial.get("localitate") or (result.localitate if result else "")
     latest_app_version = get_latest_app_version()
-    standalone = este_standalone()
     context = {
         "setari_form": form,
         "lista_localitati": lista_localitati,
@@ -92,9 +84,8 @@ def get_setari_context(form, request):
         "anul_curent": timezone.now().year,
         "app_version": APP_VERSION,
         "latest_app_version": latest_app_version,
-        "repo_url": GITHUB_REPO_URL,
+        "releases_url": f"{GITHUB_REPO_URL}/releases",
         "update_available": _este_versiune_mai_noua(latest_app_version, APP_VERSION),
-        "poate_actualiza": standalone,
     }
     return context
 
@@ -198,33 +189,6 @@ class SetariView(View):
             "Datele au fost salvate!",
             extra_tags="✅ Succes!",
         )
-        return redirect("/setari/")
-
-
-class SetariActualizeazaView(View):
-    """Instaleaza executabilul nou, numai la cererea utilizatorului."""
-
-    def post(self, request):
-        versiune = get_latest_app_version()
-        if not versiune or not _este_versiune_mai_noua(versiune, APP_VERSION):
-            messages.add_message(
-                request,
-                messages.ERROR,
-                "Nu exista o versiune noua de instalat.",
-                extra_tags="🟥 Eroare!",
-            )
-            return redirect("/setari/")
-
-        try:
-            mesaj = pregateste_actualizarea(versiune)
-        except EroareActualizare as exc:
-            logger.warning("Actualizare esuata: %s", exc)
-            messages.add_message(
-                request, messages.ERROR, str(exc), extra_tags="🟥 Eroare!"
-            )
-            return redirect("/setari/")
-
-        messages.add_message(request, messages.SUCCESS, mesaj, extra_tags="✅ Succes!")
         return redirect("/setari/")
 
 

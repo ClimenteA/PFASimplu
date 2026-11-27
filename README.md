@@ -88,8 +88,9 @@ Nu am cumparat semnatura digitala pentru acesta (e scumpa).
 In el se afla `db/stocare.db`, `files/` (documente), `logs/`, `staticfiles/` si
 `secret_key` (generata aleator la prima pornire). Pentru **backup** copiaza
 intregul director (sau foloseste exportul din `Setari`). Pentru **upgrade**
-inlocuieste doar executabilul sau foloseste butonul de actualizare din subsolul
-paginii `Setari` - la pornire se aplica automat migrarile noi; vezi
+descarca executabilul nou din Releases si inlocuieste-l pe cel vechi (pe care il
+poti sterge); datele raman in directorul de mai sus, deci nu sunt afectate. La
+pornire se aplica automat migrarile noi; vezi
 [Actualizare aplicatie](#actualizare-aplicatie).
 
 Variantele Docker si VPS sunt pentru dezvoltare si self-hosting: vezi
@@ -403,9 +404,9 @@ Aici ai o vedere de ansamblu asupra incasarilor, cheltuielilor precum si taxele/
 
 Poti alege anul si sa vezi sumele din grafic si total carduri in EUR sau RON.
 
-Taxele se calculeaza pe regulile din anul selectat (vezi `src/utils/calcule.py`): din 2025, daca venitul net este 0 sau negativ nu datorezi CASS; pentru venit net pozitiv CASS este 10% din venitul net, cu o baza minima de 6 salarii minime brute si o baza maxima de 60 de salarii (72 din 2026). CAS (25%) se datoreaza doar peste pragul de 12 salarii minime, iar impozitul pe venit (10%) se aplica la venitul net din care se scad CAS si CASS. Cei scutiti (profesii liberale cu casa de asigurari proprie, pensionari etc.) pot bifa scutirile in [Setari](#setari).
+Taxele se calculeaza pe regulile din anul selectat (vezi `src/utils/calcule.py`). Cei scutiti (profesii liberale cu casa de asigurari proprie, pensionari etc.) pot bifa scutirile in [Setari](#setari).
 
-Toate calculele financiare se fac cu `Decimal` (vezi `src/utils/decimale.py`), cu precizie de 4 zecimale pentru valorile intermediare. Sumele finale (totaluri, taxe de plata) se rotunjesc la 2 zecimale cu regula „ce e peste .5 urca, ce e sub .5 coboara" (`ROUND_HALF_UP`), nu cu rotunjirea implicita a Pythonului.
+Toate calculele financiare se fac cu `Decimal` (vezi `src/utils/decimale.py`), pastrand toate zecimalele in calculele intermediare, fara rotunjiri. Sumele finale (totaluri, taxe de plata) se rotunjesc la 2 zecimale cu `rotund2` (`ROUND_HALF_UP`).
 
 Poti descarca registrele dand click fie pe iconita de csv sau xlsx. Se descarca direct un singur fisier CSV sau XLSX cu datele registrului, fara arhiva zip si fara documentele justificative. Toate fisierele salvate in aplicatie vor avea un prefix id de 8 caractere dupa care le puteti gasi (ex: `0x4rf2KW_Factura_etc.pdf`).  
 
@@ -417,9 +418,9 @@ In tab-ul **Jurnal Cumparaturi** gasesti **Jurnalul de cumpărări**: daca ai ch
 
 ## Actualizare aplicatie
 
-Versiunea pe care o rulezi apare in subsolul paginii `Setari` (ex. `PFASimplu V3.0.0`), iar versiunile noi se publica in [Github Releases](https://github.com/ClimenteA/PFASimplu/releases).
+Versiunea pe care o rulezi apare in subsolul paginii `Setari` (ex. `PFASimplu V3.0.0`). Cand exista o versiune noua, langa ea apare `(disponibil V...)` impreuna cu un link catre [GitHub Releases](https://github.com/ClimenteA/PFASimplu/releases), de unde o poti descarca. Aplicatia nu descarca si nu instaleaza nimic automat.
 
-**Actualizare executabil standalone:** daca rulezi binarul si apare notificarea `(disponibil V...)`, apasa `Actualizeaza` din subsolul paginii `Setari`, apoi `Confirma instalarea`. Aplicatia descarca arhiva pentru sistemul tau de pe GitHub, o verifica si inlocuieste executabilul **cand inchizi aplicatia**, apoi reporneste singura cu versiunea noua. Baza de date, documentele si celelalte date raman in directorul de date al sistemului (`%LOCALAPPDATA%\PFASimplu`, `~/Library/Application Support/PFASimplu` sau `~/.local/share/pfasimplu`), deci nu sunt atinse. Butonul nu apare in Docker sau la rulare din sursa; acolo folosesti procedura de mai jos. Arhiva este descarcata prin HTTPS, dar binarul nu este semnat (vezi sectiunea de distributie standalone).
+**Actualizare executabil standalone:** descarca arhiva `.zip` pentru sistemul tau de operare, dezarhiveaza-o si ruleaza executabilul nou. Executabilul vechi poate fi sters: baza de date, documentele si celelalte date raman in directorul de date al sistemului (`%LOCALAPPDATA%\PFASimplu`, `~/Library/Application Support/PFASimplu` sau `~/.local/share/pfasimplu`), deci nu sunt afectate. Ca masura de precautie, inainte de upgrade copiaza acest director (backup) si fa un export al datelor din `Setari` → `Exporta datele din aplicatie`. Arhiva este descarcata prin HTTPS, dar binarul nu este semnat (vezi sectiunea de distributie standalone). Pentru Docker sau rulare din sursa folosesti procedura de mai jos.
 
 **Actualizare locala (Docker / sursa):** fa `git pull`, reconstruieste imaginea si reporneste containerele. Baza de date si fisierele raman pe loc: sunt in `appdata/db/` si `appdata/files/` pe disc, nu in imagine.
 
