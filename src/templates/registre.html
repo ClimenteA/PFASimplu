@@ -140,22 +140,12 @@
             <button @click="active = 'ref'" :class="active == 'ref' ? '': 'outline'">Registru fiscal</button>
             <button @click="active = 'rinv'" :class="active == 'rinv' ? '': 'outline'">Registru inventar</button>
             <button @click="active = 'jurnale'" :class="active == 'jurnale' ? '': 'outline'">Jurnal Cumparaturi</button>
+            <button @click="active = 'jurnale-vanzari'" :class="active == 'jurnale-vanzari' ? '': 'outline'">Jurnal Vanzari</button>
         </div>
     </div>
 
     <div x-show="active == 'rjip'" class="overflow-auto mt-2 mb-6">
 
-        <div x-data="{ downloaded_csv: false, downloaded_xlsx: false }" style="display: flex; justify-content: end; overflow: hidden;">
-            <a href="{% url 'descarca-registru-jurnal' %}?filetype=CSV&anul={{ anul }}&valuta={{ valuta }}" @click="downloaded_csv = true" :class="downloaded_csv ? 'px-1 pico-color-purple-500': 'px-1 secondary'"
-                data-tooltip="Descarca CSV">
-                <i class="bi bi-filetype-csv"></i>
-            </a>
-            <a href="{% url 'descarca-registru-jurnal' %}?filetype=XLSX&anul={{ anul }}&valuta={{ valuta }}" @click="downloaded_xlsx = true" :class="downloaded_xlsx ? 'px-1 pico-color-purple-500': 'px-1 secondary'"
-                data-tooltip="Descarca XLSX">
-                <i class="bi bi-filetype-xlsx"></i>
-            </a>
-        </div>
-        
         <table>
             <thead>
                 <tr>
@@ -204,21 +194,20 @@
                 {% endfor %}
             </tbody>
         </table>
-    </div>
-
-    <div x-show="active == 'ref'" class="overflow-auto mt-2 mb-6">
-
 
         <div x-data="{ downloaded_csv: false, downloaded_xlsx: false }" style="display: flex; justify-content: end; overflow: hidden;">
-            <a href="{% url 'descarca-registru-fiscal' %}?filetype=CSV&anul={{ anul }}&valuta={{ valuta }}" @click="downloaded_csv = true" :class="downloaded_csv ? 'px-1 pico-color-purple-500': 'px-1 secondary'"
+            <a href="{% url 'descarca-registru-jurnal' %}?filetype=CSV&anul={{ anul }}&valuta={{ valuta }}" @click="downloaded_csv = true" :class="downloaded_csv ? 'px-1 pico-color-purple-500': 'px-1 secondary'"
                 data-tooltip="Descarca CSV">
                 <i class="bi bi-filetype-csv"></i>
             </a>
-            <a href="{% url 'descarca-registru-fiscal' %}?filetype=XLSX&anul={{ anul }}&valuta={{ valuta }}" @click="downloaded_xlsx = true" :class="downloaded_xlsx ? 'px-1 pico-color-purple-500': 'px-1 secondary'"
+            <a href="{% url 'descarca-registru-jurnal' %}?filetype=XLSX&anul={{ anul }}&valuta={{ valuta }}" @click="downloaded_xlsx = true" :class="downloaded_xlsx ? 'px-1 pico-color-purple-500': 'px-1 secondary'"
                 data-tooltip="Descarca XLSX">
                 <i class="bi bi-filetype-xlsx"></i>
             </a>
         </div>
+    </div>
+
+    <div x-show="active == 'ref'" class="overflow-auto mt-2 mb-6">
 
         <table class="striped">
             <thead>
@@ -240,20 +229,20 @@
                 {% endfor %}
             </tbody>
         </table>
-    </div>
-
-    <div x-show="active == 'rinv'" class="overflow-auto mt-2 mb-6">
 
         <div x-data="{ downloaded_csv: false, downloaded_xlsx: false }" style="display: flex; justify-content: end; overflow: hidden;">
-            <a href="{% url 'descarca-registru-inventar' %}?filetype=CSV&anul={{ anul }}&valuta={{ valuta }}" @click="downloaded_csv = true" :class="downloaded_csv ? 'px-1 pico-color-purple-500': 'px-1 secondary'"
+            <a href="{% url 'descarca-registru-fiscal' %}?filetype=CSV&anul={{ anul }}&valuta={{ valuta }}" @click="downloaded_csv = true" :class="downloaded_csv ? 'px-1 pico-color-purple-500': 'px-1 secondary'"
                 data-tooltip="Descarca CSV">
                 <i class="bi bi-filetype-csv"></i>
             </a>
-            <a href="{% url 'descarca-registru-inventar' %}?filetype=XLSX&anul={{ anul }}&valuta={{ valuta }}" @click="downloaded_xlsx = true" :class="downloaded_xlsx ? 'px-1 pico-color-purple-500': 'px-1 secondary'"
+            <a href="{% url 'descarca-registru-fiscal' %}?filetype=XLSX&anul={{ anul }}&valuta={{ valuta }}" @click="downloaded_xlsx = true" :class="downloaded_xlsx ? 'px-1 pico-color-purple-500': 'px-1 secondary'"
                 data-tooltip="Descarca XLSX">
                 <i class="bi bi-filetype-xlsx"></i>
             </a>
         </div>
+    </div>
+
+    <div x-show="active == 'rinv'" class="overflow-auto mt-2 mb-6">
 
         <table class="striped">
             <thead>
@@ -297,22 +286,22 @@
                 {% endfor %}
             </tbody>
         </table>
+
+        <div x-data="{ downloaded_csv: false, downloaded_xlsx: false }" style="display: flex; justify-content: end; overflow: hidden;">
+            <a href="{% url 'descarca-registru-inventar' %}?filetype=CSV&anul={{ anul }}&valuta={{ valuta }}" @click="downloaded_csv = true" :class="downloaded_csv ? 'px-1 pico-color-purple-500': 'px-1 secondary'"
+                data-tooltip="Descarca CSV">
+                <i class="bi bi-filetype-csv"></i>
+            </a>
+            <a href="{% url 'descarca-registru-inventar' %}?filetype=XLSX&anul={{ anul }}&valuta={{ valuta }}" @click="downloaded_xlsx = true" :class="downloaded_xlsx ? 'px-1 pico-color-purple-500': 'px-1 secondary'"
+                data-tooltip="Descarca XLSX">
+                <i class="bi bi-filetype-xlsx"></i>
+            </a>
+        </div>
     </div>
 
     <div x-show="active == 'jurnale'" class="mt-2 mb-6">
 
         <div class="overflow-auto">
-
-        <div x-data="{ downloaded_csv: false, downloaded_xlsx: false }" style="display: flex; justify-content: end; overflow: hidden;">
-            <a href="{% url 'descarca-jurnal-cumparari' %}?filetype=CSV&anul={{ anul }}&valuta={{ valuta }}" @click="downloaded_csv = true" :class="downloaded_csv ? 'px-1 pico-color-purple-500': 'px-1 secondary'"
-                data-tooltip="Descarca CSV">
-                <i class="bi bi-filetype-csv"></i>
-            </a>
-            <a href="{% url 'descarca-jurnal-cumparari' %}?filetype=XLSX&anul={{ anul }}&valuta={{ valuta }}" @click="downloaded_xlsx = true" :class="downloaded_xlsx ? 'px-1 pico-color-purple-500': 'px-1 secondary'"
-                data-tooltip="Descarca XLSX">
-                <i class="bi bi-filetype-xlsx"></i>
-            </a>
-        </div>
 
         <p style="font-size: 14px;">
             Facturi de servicii UE/non-UE cu taxare inversa. Referința <strong>15-16</strong> =
@@ -350,6 +339,71 @@
                 {% endfor %}
             </tbody>
         </table>
+
+        <div x-data="{ downloaded_csv: false, downloaded_xlsx: false }" style="display: flex; justify-content: end; overflow: hidden;">
+            <a href="{% url 'descarca-jurnal-cumparari' %}?filetype=CSV&anul={{ anul }}&valuta={{ valuta }}" @click="downloaded_csv = true" :class="downloaded_csv ? 'px-1 pico-color-purple-500': 'px-1 secondary'"
+                data-tooltip="Descarca CSV">
+                <i class="bi bi-filetype-csv"></i>
+            </a>
+            <a href="{% url 'descarca-jurnal-cumparari' %}?filetype=XLSX&anul={{ anul }}&valuta={{ valuta }}" @click="downloaded_xlsx = true" :class="downloaded_xlsx ? 'px-1 pico-color-purple-500': 'px-1 secondary'"
+                data-tooltip="Descarca XLSX">
+                <i class="bi bi-filetype-xlsx"></i>
+            </a>
+        </div>
+        </div>
+    </div>
+
+    <div x-show="active == 'jurnale-vanzari'" class="mt-2 mb-6">
+
+        <div class="overflow-auto">
+
+        <p style="font-size: 14px;">
+            Facturi emise catre clienti cu bifa <strong>Client UE VIES</strong>, cu locul prestarii in alt stat membru.
+            TVA-ul se contabilizeaza de destinatar (taxare inversa, art. 196 din Directiva 2006/112/CE);
+            in Romania se depune doar D390, fara plata TVA.
+        </p>
+
+        <table class="striped">
+            <thead>
+                <tr>
+                    <th>Nr.Crt.</th>
+                    <th>Data</th>
+                    <th>Număr document</th>
+                    <th>Client</th>
+                    <th>Cod fiscal</th>
+                    <th>Valoare în valută</th>
+                    <th>Valuta</th>
+                    <th>Bază impozitare</th>
+                    <th>Data încasare</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in rjv.randuri %}
+                <tr>
+                    <td>{{ item.nr_crt }}</td>
+                    <td>{{ item.data_doc }}</td>
+                    <td>{{ item.nr_doc }}</td>
+                    <td>{{ item.client_denumire }}</td>
+                    <td>{{ item.client_cod_fiscal }}</td>
+                    <td>{{ item.val_valuta|suma2 }}</td>
+                    <td>{{ item.tip_valuta }}</td>
+                    <td>{{ item.baza|suma2 }}</td>
+                    <td>{{ item.data_incasare }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div x-data="{ downloaded_csv: false, downloaded_xlsx: false }" style="display: flex; justify-content: end; overflow: hidden;">
+            <a href="{% url 'descarca-jurnal-vanzari' %}?filetype=CSV&anul={{ anul }}&valuta={{ valuta }}" @click="downloaded_csv = true" :class="downloaded_csv ? 'px-1 pico-color-purple-500': 'px-1 secondary'"
+                data-tooltip="Descarca CSV">
+                <i class="bi bi-filetype-csv"></i>
+            </a>
+            <a href="{% url 'descarca-jurnal-vanzari' %}?filetype=XLSX&anul={{ anul }}&valuta={{ valuta }}" @click="downloaded_xlsx = true" :class="downloaded_xlsx ? 'px-1 pico-color-purple-500': 'px-1 secondary'"
+                data-tooltip="Descarca XLSX">
+                <i class="bi bi-filetype-xlsx"></i>
+            </a>
+        </div>
         </div>
     </div>
 

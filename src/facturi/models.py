@@ -42,6 +42,30 @@ class TipFactura(models.TextChoices):
     # FACTURA_PORTUGHEZA = "factura-portugheza", _("Factura in portugheza")
 
 
+# Nota implicita pentru clientii inregistrati in VIES (taxare inversa, art. 196
+# din Directiva 2006/112/CE), in limba formularului ales pentru factura.
+NOTA_TAXARE_INVERSA_VIES = {
+    "e-factura": "Servicii supuse unei taxe inverse - TVA-ul va fi contabilizat de către destinatar, conform art. 196 din Directiva consiliului 2006/112/CE",
+    "factura-romana": "Servicii supuse unei taxe inverse - TVA-ul va fi contabilizat de către destinatar, conform art. 196 din Directiva consiliului 2006/112/CE",
+    "factura-engleza": "Services subject to reverse charge - VAT is to be accounted for by the recipient, in accordance with Article 196 of Council Directive 2006/112/EC",
+    "factura-germana": "Dienstleistungen, die der Umkehrung der Steuerschuldnerschaft unterliegen - Die MwSt. wird vom Empfänger gemäß Artikel 196 der Richtlinie 2006/112/EG des Rates abgerechnet",
+    "factura-franceza": "Services soumis à l'autoliquidation - La TVA doit être comptabilisée par le destinataire, conformément à l'article 196 de la directive 2006/112/CE du Conseil",
+    "factura-spaniola": "Servicios sujetos a inversión del sujeto pasivo - El IVA será contabilizado por el destinatario, de conformidad con el artículo 196 de la Directiva 2006/112/CE del Consejo",
+    "factura-italiana": "Servizi soggetti a inversione contabile - L'IVA è contabilizzata dal destinatario, ai sensi dell'articolo 196 della direttiva 2006/112/CE del Consiglio",
+    "factura-daneza": "Tjenester omfattet af omvendt betalingspligt - Momsen skal bogføres af modtageren, jf. artikel 196 i Rådets direktiv 2006/112/EF",
+    "factura-olandeza": "Diensten onderworpen aan de verleggingsregeling - De btw wordt door de afnemer verantwoord, overeenkomstig artikel 196 van Richtlijn 2006/112/EG van de Raad",
+    "factura-suedeza": "Tjänster som omfattas av omvänd betalningsskyldighet - Momsen ska redovisas av mottagaren, i enlighet med artikel 196 i rådets direktiv 2006/112/EG",
+    "factura-finlandeza": "Palvelut, joihin sovelletaan käänteistä verovelvollisuutta - Arvonlisävero lasketaan vastaanottajan toimesta neuvoston direktiivin 2006/112/EY 196 artiklan mukaisesti",
+}
+
+
+def nota_taxare_inversa_vies(tip_factura: str) -> str:
+    """Nota cu mentiunea de taxare inversa, in limba facturii selectate."""
+    return NOTA_TAXARE_INVERSA_VIES.get(
+        tip_factura, NOTA_TAXARE_INVERSA_VIES[TipFactura.E_FACTURA.value]
+    )
+
+
 factura_romana_pdf = {
     "header_factura": "FACTURA",
     "header_date_factura": ["Serie", "Numar", "Data factura", "Data scadenta"],
@@ -507,7 +531,7 @@ class FacturaModel(UserOwnedModel):
         default=Localitati.LOCALITATE_GENERIC,
     )
     adresa = models.CharField(max_length=1000)
-    client_ue = models.BooleanField(default=False, verbose_name="Client UE")
+    client_ue = models.BooleanField(default=False, verbose_name="Client UE VIES")
     email = models.EmailField(max_length=250, null=True, blank=True)
     telefon = models.CharField(max_length=250, null=True, blank=True)
     # Plata: aceeasi enumerare cu incasarile (nu mai avem codurile 42/10).

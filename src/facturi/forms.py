@@ -2,7 +2,7 @@ from django import forms
 from django.db import transaction
 from django.forms import CheckboxInput, DateInput, ModelForm, Textarea
 
-from .models import FacturaModel
+from .models import NOTA_TAXARE_INVERSA_VIES, FacturaModel, nota_taxare_inversa_vies
 
 
 class FacturaForm(ModelForm):
@@ -14,10 +14,26 @@ class FacturaForm(ModelForm):
         exclude = ["user"]
         widgets = {
             "client_ue": CheckboxInput(attrs={"role": "switch"}),
-            "nota": Textarea(attrs={"rows": "1"}),
+            "nota": Textarea(attrs={"rows": "3"}),
             "data_emitere": DateInput(format=("%m/%d/%Y"), attrs={"type": "date"}),
             "data_scadenta": DateInput(format=("%m/%d/%Y"), attrs={"type": "date"}),
         }
+
+    def clean(self):
+        cleaned = super().clean()
+        if cleaned.get("client_ue"):
+            # Completam nota doar daca e goala sau contine inca textul implicit
+            # (de exemplu la schimbarea limbii facturii), ca sa nu stergem o
+            # mentiune scrisa manual de utilizator.
+            nota = (cleaned.get("nota") or "").strip()
+            if not nota or nota in NOTA_TAXARE_INVERSA_VIES.values():
+                cleaned["nota"] = nota_taxare_inversa_vies(
+                    cleaned.get("tip_factura") or ""
+                )
+        elif (cleaned.get("nota") or "").strip() in NOTA_TAXARE_INVERSA_VIES.values():
+            # Clientul nu mai e VIES: stergem doar nota generata automat.
+            cleaned["nota"] = ""
+        return cleaned
 
     def clean_produse_sau_servicii(self):
         linii = self.cleaned_data["produse_sau_servicii"]

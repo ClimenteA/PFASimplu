@@ -23,6 +23,8 @@ from django.urls import reverse
 
 from cheltuieli.models import CheltuialaModel, Deductibilitate, TipAchizitie
 from documente.models import DocumenteModel, TipDocument
+from facturi.models import FacturaModel, LinieFactura
+from incasari.models import IncasariModel
 from documente.services import recipisa_parser
 from setari.models import SetariModel
 from utils.decimale import D
@@ -32,11 +34,14 @@ from utils.tva import (
     calculeaza_d301,
     calculeaza_d301_lista,
     calculeaza_d390,
+    calculeaza_d390_incasari,
     calculeaza_jurnal_cumparari,
+    calculeaza_jurnal_vanzari,
+    get_luni_cu_facturi_ue,
     get_luni_cu_taxare_inversa,
     termen_depunere,
 )
-from utils.tva_documente import genereaza_pachet_tva
+from utils.tva_documente import genereaza_pachet_d390_incasari, genereaza_pachet_tva
 
 # Cursuri BNR fixe pentru teste (nu cerem reteaua).
 CURSURI_TEST = {
@@ -1076,3 +1081,202 @@ class CheltuieliFormularViewTests(TestCase):
         self.assertEqual(len(data), 1)
         self.assertEqual(data[0]["furnizor_cod_fiscal"], "ATU77164426")
         self.assertEqual(data[0]["furnizor_tara"], "AT")
+
+
+@override_settings(MEDIA_ROOT=tempfile.mkdtemp(prefix="pfasimplu_test_d390_incasari_"))
+@patch("utils.valuta.cursvalutarbnr.get_bnr_rates", side_effect=mock_get_bnr_rates)
+class D390IncasariUETests(TestCase):
+    """D390 VIES pentru facturile emise catre clienti UE (tip P, cod art. 317)."""
+
+    def setUp(self):
+        login_test_client(self)
+        self.setari = creeaza_setari()
+
+    def creeaza_factura_ue(
+        self,
+        numar,
+        nume="CORTECS GMBH",
+        cif="ATU77164426",
+        valuta="EUR",
+        pret=21.0,
+        data=datetime.date(2026, 10, 2),
+        client_ue=True,
+    ):
+        factura = FacturaModel.objects.create(
+            user=self.user,
+            serie="INV",
+            numar=numar,
+            nume=nume,
+            cif=cif,
+            adresa="Strada Client nr. 1",
+            client_ue=client_ue,
+            valuta=valuta,
+            data_emitere=data,
+            fisier_factura_pdf=SimpleUploadedFile(
+                f"factura_{numar}.pdf", b"%PDF-1.4 test", content_type="application/pdf"
+            ),
+        )
+        LinieFactura.objects.create(
+            factura=factura, nume="Prestare servicii", cantitate=1, pret_unitar=pret
+        )
+        return factura
+
+    def test_calcul_d390_incasari_groupeaza_clienti_si_rotunjeste_baza(self, _mock):
+        # Doua facturi AT x 21 EUR la cursul 5.3 -> 111.30 + 111.30 = 222.60 -> 223 lei.
+        self.creeaza_factura_ue(1)
+        self.creeaza_factura_ue(2)
+        # Client DE, 100 RON -> 100 lei.
+        self.creeaza_factura_ue(
+            3, nume="DEMO GMBH", cif="DE123456789", valuta="RON", pret=100
+        )
+        # Factura catre client roman: nu se declara in D390.
+        self.creeaza_factura_ue(
+            4,
+            nume="CLIENT RO",
+            cif="RO1234567",
+            valuta="RON",
+            pret=999,
+            client_ue=False,
+        )
+
+        d390 = calculeaza_d390_incasari(2026, 10, self.setari)
+
+        self.assertEqual(d390["cif"], "52937756")
+        self.assertEqual(d390["nr_facturi"], 3)
+        self.assertEqual(d390["nr_operatori"], 2)
+        self.assertEqual(d390["bazaP"], 323)
+        self.assertEqual(d390["total_baza"], 323)
+        self.assertEqual(d390["total_de_plata"], 0)
+        self.assertEqual(d390["termen"], datetime.date(2026, 11, 25))
+
+        randuri = {r["cod_operator"]: r for r in d390["randuri"]}
+        self.assertEqual(len(randuri), 2)
+        at = randuri["U77164426"]
+        self.assertEqual(at["tip"], "P")
+        self.assertEqual(at["tara"], "AT")
+        self.assertEqual(at["denumire_operator"], "CORTECS GMBH")
+        self.assertEqual(at["baza"], 223)
+        de = randuri["123456789"]
+        self.assertEqual(de["tara"], "DE")
+        self.assertEqual(de["baza"], 100)
+
+        self.assertEqual(get_luni_cu_facturi_ue(2026), [10])
+        self.assertIsNone(calculeaza_d390_incasari(2026, 11, self.setari))
+
+    def test_fara_cod_intracomunitar_observatie(self, _mock):
+        self.setari.cod_tva_intracomunitar = None
+        self.setari.save()
+        self.creeaza_factura_ue(1, valuta="RON", pret=100)
+
+        d390 = calculeaza_d390_incasari(2026, 10, self.setari)
+
+        self.assertEqual(d390["cif"], "43000098")
+        self.assertTrue(any("codul special" in o for o in d390["observatii"]))
+
+    def test_pachet_d390_incasari_zip(self, _mock):
+        self.creeaza_factura_ue(1)
+        pachet = genereaza_pachet_d390_incasari(2026, 10, self.setari)
+
+        self.assertIsNotNone(pachet)
+        with ZipFile(pachet["zip_path"]) as zf:
+            nume = zf.namelist()
+            self.assertIn("TVA-52937756/D390_2026_10.md", nume)
+            self.assertIn("TVA-52937756/Jurnal_vanzari_2026_10.xlsx", nume)
+            self.assertTrue(
+                any(
+                    n.startswith("TVA-52937756/facturi/factura_INV-1.pdf") for n in nume
+                )
+            )
+            self.assertFalse(any(n.startswith("CIF-") for n in nume))
+            self.assertFalse(any(n.endswith(".xml") for n in nume))
+            md = zf.read("TVA-52937756/D390_2026_10.md").decode("utf-8")
+            self.assertIn("P - Prestari intracomunitare de servicii", md)
+            self.assertIn("U77164426", md)
+            self.assertIn("art. 317", md)
+            self.assertIn("Nu se depune D301", md)
+            self.assertIn("25.11.2026", md)
+
+    def test_jurnal_vanzari_valori_exacte(self, _mock):
+        self.creeaza_factura_ue(1)  # 21 EUR x 5.3 = 111.30 lei
+        factura2 = self.creeaza_factura_ue(
+            2, nume="DEMO GMBH", cif="DE123456789", valuta="RON", pret=100
+        )
+        IncasariModel.objects.create(
+            user=self.user,
+            suma=D("100"),
+            factura=factura2,
+            data_incasarii=datetime.date(2026, 10, 5),
+            fisier=SimpleUploadedFile(
+                "incasare.pdf", b"%PDF-1.4 test", content_type="application/pdf"
+            ),
+        )
+
+        jurnal = calculeaza_jurnal_vanzari(2026, 10)
+
+        self.assertEqual(len(jurnal["randuri"]), 2)
+        self.assertEqual(jurnal["total_baza"], D("211.3000"))
+        primul, al_doilea = jurnal["randuri"]
+        self.assertEqual(primul["nr_doc"], "INV-1")
+        self.assertEqual(primul["client_cod_fiscal"], "U77164426")
+        self.assertEqual(primul["baza"], D("111.3000"))
+        self.assertEqual(primul["data_incasare"], "")
+        self.assertEqual(al_doilea["baza"], D("100.0000"))
+        self.assertEqual(al_doilea["data_incasare"], "05.10.2026")
+        self.assertIsNone(calculeaza_jurnal_vanzari(2026, 11))
+
+    def test_filtru_si_download_din_pagina_incasari(self, _mock):
+        factura = self.creeaza_factura_ue(1, valuta="RON", pret=100)
+        incasare_ue = IncasariModel.objects.create(
+            user=self.user,
+            suma=D("100"),
+            nume_incasare="CORTECS GMBH",
+            factura=factura,
+            data_incasarii=datetime.date(2026, 10, 2),
+            fisier=SimpleUploadedFile(
+                "incasare.pdf", b"%PDF-1.4 test", content_type="application/pdf"
+            ),
+        )
+        IncasariModel.objects.create(
+            user=self.user,
+            suma=D("50"),
+            nume_incasare="Client roman",
+            fisier=SimpleUploadedFile(
+                "incasare2.pdf", b"%PDF-1.4 test", content_type="application/pdf"
+            ),
+        )
+
+        response = self.client.get(
+            "/incasari/", {"ue": "1", "anul_ue": 2026, "luna_ue": 10}
+        )
+        self.assertEqual(response.status_code, 200)
+        # Filtrul inlocuieste tabelul de mai jos cu incasarile din UE.
+        self.assertEqual(
+            list(response.context["page_items"].object_list), [incasare_ue]
+        )
+        self.assertContains(response, "Incasari din UE (TVA)")
+        self.assertContains(response, "se filtreaza automat")
+        self.assertContains(response, "Descarca")
+        self.assertNotContains(response, "Cod TVA client")
+        self.assertRegex(response.content.decode(), r">\s*Da\s*</td>")
+        self.assertNotRegex(response.content.decode(), r">\s*Nu\s*</td>")
+
+        # Fara filtru, coloana VIES arata si "Nu" pentru clientii non-UE.
+        response = self.client.get("/incasari/")
+        self.assertRegex(response.content.decode(), r">\s*Nu\s*</td>")
+
+        # Coloana VIES din formularul de cautare.
+        response = self.client.get("/incasari/", {"coloana": "ue", "cauta": "ue"})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context["page_items"].object_list), 1)
+
+        download = self.client.get(
+            reverse("incasari-ue-descarca"), {"anul": 2026, "luna": 10}
+        )
+        self.assertEqual(download.status_code, 200)
+        self.assertEqual(download["Content-Type"], "application/zip")
+        self.assertIn("D390_2026_10.zip", download["Content-Disposition"])
+
+        gol = self.client.get(
+            reverse("incasari-ue-descarca"), {"anul": 2026, "luna": 11}
+        )
+        self.assertRedirects(gol, "/incasari/")

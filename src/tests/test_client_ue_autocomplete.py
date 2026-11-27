@@ -2,6 +2,7 @@
 cand numele este ales din lista de sugestii."""
 
 import datetime
+import re
 
 import pytest
 from conftest import TEST_YEAR
@@ -81,6 +82,8 @@ def test_client_ue_se_completeaza_din_sugestii(page):
     expect(suggestie).to_be_visible(timeout=10_000)
     suggestie.click()
 
+    expect(page.get_by_text("Client UE VIES")).to_be_visible()
     expect(page.locator("#id_client_ue")).to_be_checked()
+    expect(page.locator("#id_nota")).to_have_value(re.compile("reverse charge"))
     expect(page.locator("#id_cif")).to_have_value(CIF_CLIENT)
     expect(page.locator("#id_adresa")).to_have_value(ADRESA_CLIENT)

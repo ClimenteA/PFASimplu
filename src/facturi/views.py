@@ -1,3 +1,4 @@
+import json
 import logging
 
 from django.contrib import messages
@@ -17,9 +18,11 @@ from utils.views import (
 
 from .forms import FacturaForm
 from .generare import genereaza_documente
-from .models import FacturaModel
+from .models import NOTA_TAXARE_INVERSA_VIES, FacturaModel
 
 logger = logging.getLogger(__name__)
+
+NOTE_UE_VIES_JSON = json.dumps(NOTA_TAXARE_INVERSA_VIES, ensure_ascii=False)
 
 CAUTARE_COLOANE = {
     "cif": ("CIF/CUI/VAT", ["cif"]),
@@ -83,6 +86,7 @@ class FacturiView(View):
                 "facturi_form": form,
                 "unitati_de_masura": unitati_de_masura,
                 "lista_localitati": lista_localitati,
+                "note_ue_vies_json": NOTE_UE_VIES_JSON,
                 "page_items": page_items,
                 **context_cautare,
             },

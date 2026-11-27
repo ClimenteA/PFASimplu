@@ -24,4 +24,9 @@ urlpatterns = [
         views.RegistruJurnalCumparariDescarcaView.as_view(),
         name="descarca-jurnal-cumparari",
     ),
+    path(
+        "descarca-rjv/",
+        views.RegistruJurnalVanzariDescarcaView.as_view(),
+        name="descarca-jurnal-vanzari",
+    ),
 ]

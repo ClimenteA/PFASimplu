@@ -50,7 +50,16 @@ def handle_delete_id_query_param(
         )
 
 
-PARAMETRI_PASTRATI = ("id", "factura_id", "extern", "anul_extern", "luna_extern")
+PARAMETRI_PASTRATI = (
+    "id",
+    "factura_id",
+    "extern",
+    "anul_extern",
+    "luna_extern",
+    "ue",
+    "anul_ue",
+    "luna_ue",
+)
 
 
 def get_cautare(request, coloane: dict[str, tuple[str, list[str]]]):
@@ -77,7 +86,16 @@ def get_cautare(request, coloane: dict[str, tuple[str, list[str]]]):
     query = Q()
     if cauta:
         for camp in campuri:
-            query |= Q(**{f"{camp}__icontains": cauta})
+            if camp.startswith("bool:"):
+                # Coloanele boolean (ex. „UE") se cauta cu da/nu, nu cu text.
+                nume = camp.removeprefix("bool:")
+                valoare = cauta.lower()
+                if valoare in ("ue", "da", "1", "true", "yes"):
+                    query |= Q(**{nume: True})
+                elif valoare in ("non-ue", "non ue", "nu", "0", "false", "no"):
+                    query |= Q(**{nume: False}) | Q(**{f"{nume}__isnull": True})
+            else:
+                query |= Q(**{f"{camp}__icontains": cauta})
 
     # Pastram filtrele deja active (editare, precompletare, filtrul TVA) la
     # submiterea cautarii si la schimbarea paginii. `delete_id` nu e in lista

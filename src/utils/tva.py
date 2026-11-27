@@ -4,6 +4,8 @@ Reguli (conform ghidului din stocare/completare-declaratii-tva):
 - Servicii UE:     D301 sectiunea 4 + sectiunea 4.1 (tip_operatie 5) + D390 tip S,
                    declarate cu codul special de TVA intracomunitar (art. 317) din Setari.
 - Servicii non-UE: doar D301 sectiunea 4 (fara D390), declarate cu CIF-ul normal din Setari.
+- Incasari din UE (facturi cu Client UE): doar D390 tip P (prestari), pe codul art. 317,
+  fara D301 si fara TVA de plata (clientul datoreaza taxa in statul lui membru).
 - Intr-o luna cu ambele tipuri se genereaza doua D301 separate, fiecare pe codul ei.
 - Baza si TVA: 2 zecimale; baza D390: rotunjita la intreg (lei).
 - TVA = baza x cota standard de 21% (doar pentru furnizori straini); total document jurnal = baza + TVA.
@@ -18,9 +20,11 @@ from django.db.models import Q
 
 from cheltuieli.calcul import q_taxare_inversa
 from cheltuieli.models import CheltuialaModel
+from facturi.models import FacturaModel
 from setari.models import SetariModel
+from utils.cursuri import to_ron
 from utils.decimale import D, rotund2, rotund_intreg, suma
-from utils.tari import denumire_tara
+from utils.tari import TARI, denumire_tara, este_tara_ue
 
 COD_REFERINTA_JURNAL = "15-16"
 DENUMIRE_REFERINTA_JURNAL = (
@@ -230,6 +234,163 @@ def calculeaza_d390(
         "total_baza": total_baza,
         "total_de_plata": 0,  # D390 este informativa, fara plata
         "termen": termen_depunere(anul, luna),
+    }
+
+
+def get_facturi_ue(anul: int, luna: int | None = None):
+    """Facturile emise catre clienti UE (bifa „Client UE") din luna/anul de
+    raportare. Luna de raportare este data emiterii facturii (exigibilitatea
+    TVA la client, prin taxare inversa in statul membru al acestuia)."""
+    query = Q(client_ue=True)
+    if luna is not None:
+        query &= Q(data_emitere__year=anul, data_emitere__month=luna)
+    else:
+        query &= Q(data_emitere__year=anul)
+    return FacturaModel.objects.filter(query).order_by("data_emitere", "id")
+
+
+def get_luni_cu_facturi_ue(anul: int) -> list[int]:
+    """Lunile cu facturi catre clienti UE, pentru filtrul din pagina Incasari."""
+    return sorted(
+        set(get_facturi_ue(anul).values_list("data_emitere__month", flat=True))
+    )
+
+
+def _operator_client(cif: str) -> tuple[str, str]:
+    """Desparte codul TVA al clientului UE in tara (prefix ISO) si cod operator
+    (fara prefix), asa cum se completeaza in D390."""
+    cod = (cif or "").strip().upper()
+    prefix = cod[:2]
+    if TARI.get(prefix, ("", False))[1]:
+        return prefix, cod[2:]
+    return "", cod
+
+
+def calculeaza_d390_incasari(
+    anul: int, luna: int, setari: SetariModel | None = None
+) -> dict | None:
+    """D390 VIES pentru vanzarile/prestarile catre clienti UE (tip P), declarate
+    pe codul special de TVA intracomunitar (art. 317), fara TVA de plata:
+    - art. 325 alin. (1) lit. c) Cod fiscal: se declara prestarile de servicii
+      cu locul in alt stat membru (art. 278 alin. (2)) catre persoane impozabile
+      din UE, altele decat cele scutite de TVA in statul lor;
+    - art. 325 alin. (3) lit. b), f): codul clientului si valoarea totala pe
+      fiecare client in parte; baza in lei, rotunjita la intreg.
+    Nu se depune D301: TVA-ul se datoreaza de client in statul sau membru."""
+    setari = setari or SetariModel.objects.first()
+    if not setari:
+        return None
+
+    facturi = list(get_facturi_ue(anul, luna))
+    if not facturi:
+        return None
+
+    operatori = {}
+    observatii = []
+    for factura in facturi:
+        tara, cod_operator = _operator_client(factura.cif)
+        denumire = (factura.nume or "").strip().upper()
+        cheie = (tara, cod_operator, denumire)
+        # Conversia foloseste aceeasi sursa (BNR) ca restul aplicatiei, la data
+        # emiterii facturii; precizia Decimal se pastreaza pana la rotunjirea finala.
+        baza = D(to_ron(factura.total_de_plata, factura.valuta, factura.data_emitere))
+        operatori.setdefault(cheie, Decimal(0))
+        operatori[cheie] += baza
+
+        numar = f"{factura.serie}-{factura.numar}"
+        if not tara:
+            observatii.append(
+                f"Factura {numar}: codul clientului '{factura.cif}' nu are prefix de tara. "
+                "Completeaza codul TVA cu prefixul tarii (ex. ATU77164426)."
+            )
+        elif not este_tara_ue(tara):
+            observatii.append(
+                f"Factura {numar}: codul clientului are prefixul {tara}, care nu este stat UE. "
+                "D390 se depune doar pentru clienti din UE."
+            )
+
+    randuri = []
+    for idx, ((tara, cod_operator, denumire), baza) in enumerate(
+        operatori.items(), start=1
+    ):
+        randuri.append(
+            {
+                "nr_crt": idx,
+                "tip": "P",
+                "tara": tara,
+                "tara_denumire": denumire_tara(tara) if tara else "?",
+                "cod_operator": cod_operator,
+                "denumire_operator": denumire,
+                "baza": rotund_intreg(baza),
+            }
+        )
+
+    total_baza = int(suma([r["baza"] for r in randuri]))
+    if not setari.cod_tva_intracomunitar:
+        observatii.append(
+            "Ai facturi catre clienti UE dar nu ai completat codul special de TVA "
+            "intracomunitar in Setari. Declaratia se va genera cu CIF-ul normal, "
+            "ceea ce poate fi gresit."
+        )
+
+    return {
+        "anul": anul,
+        "luna": luna,
+        "cif": setari.get_cif_pentru_achizitie(este_ue=True),
+        "randuri": randuri,
+        "nr_operatori": len(randuri),
+        "nr_facturi": len(facturi),
+        "bazaP": total_baza,
+        "total_baza": total_baza,
+        "total_de_plata": 0,  # D390 este informativa; TVA-ul il plateste clientul.
+        "termen": termen_depunere(anul, luna),
+        "observatii": observatii,
+    }
+
+
+def calculeaza_jurnal_vanzari(anul: int, luna: int | None = None) -> dict | None:
+    """Jurnalul de vanzari (registru contabil, nu declaratie): facturile emise
+    catre clienti UE, cu valoarea in lei si documentul justificativ."""
+    facturi = list(get_facturi_ue(anul, luna))
+    if not facturi:
+        return None
+
+    randuri = []
+    for idx, factura in enumerate(facturi, start=1):
+        _, cod_operator = _operator_client(factura.cif)
+        baza = D(to_ron(factura.total_de_plata, factura.valuta, factura.data_emitere))
+        incasare = getattr(factura, "incasare", None)
+        data_incasare = (
+            incasare.data_incasarii
+            if incasare is not None and incasare.data_incasarii
+            else None
+        )
+        randuri.append(
+            {
+                "nr_crt": idx,
+                "data_doc": factura.data_emitere.strftime("%d.%m.%Y"),
+                "nr_doc": f"{factura.serie}-{factura.numar}",
+                "client_denumire": factura.nume or "",
+                "client_cod_fiscal": cod_operator,
+                "val_valuta": factura.total_de_plata,
+                "tip_valuta": factura.valuta,
+                "baza": rotund2(baza),
+                "data_incasare": (
+                    data_incasare.strftime("%d.%m.%Y") if data_incasare else ""
+                ),
+                "fisier": (
+                    os.path.basename(factura.fisier_factura_pdf.path)
+                    if factura.fisier_factura_pdf
+                    else ""
+                ),
+            }
+        )
+
+    return {
+        "anul": anul,
+        "luna": luna,
+        "randuri": randuri,
+        "total_baza": rotund2(suma([r["baza"] for r in randuri])),
     }
 
 
