@@ -111,6 +111,19 @@ class AmortizareLimitataTest(TestCase):
         mf = self._mijloc_fix(este_sediu_social_neexclusiv=True)
         self.assertEqual(mf.amortizare_lunara, Decimal("1250"))
 
+    def test_cota_de_amortizare_rotunjita_la_doua_zecimale(self):
+        mf = CheltuialaModel.objects.create(
+            nume_cheltuiala="Echipament",
+            suma=D("36000"),
+            deductibila=Deductibilitate.DEDUCTIBILA_INTEGRAL_AMORTIZATA.value,
+            cod_de_clasificare="2.2.9.",
+            ani_amortizare=3,
+            data_punerii_in_functiune=datetime.date(2026, 1, 1),
+            data_inserarii=datetime.date(2026, 1, 1),
+        )
+        # 36.000 / 36 luni = 1.000 lei/luna -> 2,777...%, afisat 2,78%.
+        self.assertEqual(mf.cota_de_amortizare, Decimal("2.78"))
+
 
 class CotaTvaTest(TestCase):
     def _cheltuiala_externa(self):

@@ -2,6 +2,8 @@ from django import forms
 from django.db import transaction
 from django.forms import CheckboxInput, DateInput, ModelForm, Textarea
 
+from utils.tari import este_tara_ue
+
 from .models import NOTA_TAXARE_INVERSA_VIES, FacturaModel, nota_taxare_inversa_vies
 
 
@@ -22,6 +24,20 @@ class FacturaForm(ModelForm):
     def clean(self):
         cleaned = super().clean()
         if cleaned.get("client_ue"):
+            # D390 VIES se completeaza doar pentru clienti UE: codul TVA trebuie
+            # sa aiba prefixul tarii (ex. ATU77164426). Un CIF roman (RO...) nu
+            # inseamna client UE, asa ca il respingem inainte de salvare.
+            cif = (cleaned.get("cif") or "").strip().upper()
+            if len(cif) <= 2 or not este_tara_ue(cif[:2]):
+                raise forms.ValidationError(
+                    {
+                        "cif": (
+                            "Pentru client UE VIES, completeaza codul TVA cu "
+                            "prefixul tarii UE (ex. ATU77164426). Clientii din "
+                            "Romania (RO...) nu se bifeaza ca 'Client UE VIES'."
+                        )
+                    }
+                )
             # Completam nota doar daca e goala sau contine inca textul implicit
             # (de exemplu la schimbarea limbii facturii), ca sa nu stergem o
             # mentiune scrisa manual de utilizator.

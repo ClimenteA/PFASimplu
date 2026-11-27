@@ -13,6 +13,7 @@ pytestmark = pytest.mark.e2e
 
 NUME_CLIENT = "CLIENT AUTOMAT UE"
 CIF_CLIENT = "RO12345678"
+CIF_CLIENT_UE = "ATU12345678"
 ADRESA_CLIENT = "STR. CLIENTULUI NR. 7, BUCURESTI"
 
 
@@ -61,11 +62,11 @@ def test_client_ue_se_completeaza_din_sugestii(page):
         adresa=ADRESA_CLIENT,
     )
 
-    # A doua factura, cu Client UE bifat pentru acelasi client.
+    # A doua factura, cu Client UE bifat: trebuie cod TVA cu prefix de tara UE.
     emite_factura(
         page,
         nume_client=NUME_CLIENT,
-        cif_client=CIF_CLIENT,
+        cif_client=CIF_CLIENT_UE,
         numar=2,
         data_emitere=data_emitere + datetime.timedelta(days=1),
         data_scadenta=data_emitere + datetime.timedelta(days=31),
@@ -82,8 +83,8 @@ def test_client_ue_se_completeaza_din_sugestii(page):
     expect(suggestie).to_be_visible(timeout=10_000)
     suggestie.click()
 
-    expect(page.get_by_text("Client UE VIES")).to_be_visible()
+    expect(page.get_by_text("Client UE VIES", exact=True)).to_be_visible()
     expect(page.locator("#id_client_ue")).to_be_checked()
     expect(page.locator("#id_nota")).to_have_value(re.compile("reverse charge"))
-    expect(page.locator("#id_cif")).to_have_value(CIF_CLIENT)
+    expect(page.locator("#id_cif")).to_have_value(CIF_CLIENT_UE)
     expect(page.locator("#id_adresa")).to_have_value(ADRESA_CLIENT)

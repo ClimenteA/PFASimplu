@@ -134,3 +134,32 @@ class NotaClientUEVIESTest(TestCase):
             nota_taxare_inversa_vies("necunoscut"),
             NOTA_TAXARE_INVERSA_VIES["e-factura"],
         )
+
+    def test_client_ue_cu_cif_romanesc_este_respins(self):
+        date = self.form_data(203)
+        date["cif"] = "RO12345678"
+        form = FacturaForm(date)
+        self.assertFalse(form.is_valid())
+        self.assertIn("cif", form.errors)
+        self.assertIn("prefixul tarii UE", str(form.errors["cif"]))
+
+    def test_client_ue_cu_cif_fara_prefix_este_respins(self):
+        date = self.form_data(204)
+        date["cif"] = "12345678"
+        form = FacturaForm(date)
+        self.assertFalse(form.is_valid())
+        self.assertIn("cif", form.errors)
+
+    def test_client_ue_cu_prefix_non_ue_este_respins(self):
+        date = self.form_data(205)
+        date["cif"] = "US12345678"
+        form = FacturaForm(date)
+        self.assertFalse(form.is_valid())
+        self.assertIn("cif", form.errors)
+
+    def test_client_non_ue_cu_cif_romanesc_se_salveaza(self):
+        date = self.form_data(206, client_ue=False)
+        date["cif"] = "RO12345678"
+        form = FacturaForm(date)
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertEqual(form.save().cif, "RO12345678")

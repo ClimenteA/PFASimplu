@@ -123,6 +123,7 @@ def emite_factura(
     localitate: str = "",
     nota: str = "",
     client_ue: bool = False,
+    salvare_asteptata: bool = True,
 ) -> Decimal:
     """Emite o factura prin formularul Alpine din pagina Facturi.
 
@@ -173,7 +174,8 @@ def emite_factura(
             page.get_by_role("button", name="Adauga", exact=True).click()
 
     page.get_by_role("button", name="Creeaza factura").click()
-    assert_saved(page)
+    if salvare_asteptata:
+        assert_saved(page)
 
     # Calculul se face cu Decimal (4 zecimale in intermediar, ROUND_HALF_UP la
     # 2 zecimale pentru totalul final), ca in formularul din src/templates/facturi.html.
@@ -211,7 +213,9 @@ def incasare_din_factura(page: Page, serie: str, numar: int, data_incasarii) -> 
 
     page.wait_for_url("**/incasari/?factura_id=*")
     expect(page.locator("#form-incasare")).to_be_visible()
-    expect(page.locator("#id_nume_incasare")).to_have_value(re.compile(".+"))
+    expect(page.locator("#id_nume_incasare")).to_have_value(
+        re.compile(rf".+ - {re.escape(serie)}-{numar}$")
+    )
     page.fill("#id_data_inserarii", data_incasarii.isoformat())
     page.get_by_role("button", name="Salveaza incasare").click()
     assert_saved(page)

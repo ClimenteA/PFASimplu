@@ -72,7 +72,7 @@ class IncasareDinFacturaTest(TestCase):
             TipTranzactie.NUMERAR.value,
         )
 
-    def test_nume_incasare_se_precompleteaza_cu_numele_clientului(self):
+    def test_nume_incasare_se_precompleteaza_cu_clientul_si_factura(self):
         factura = self.creeaza_factura(3, TipTranzactie.BANCAR.value)
 
         response = self.client.get("/incasari/", {"factura_id": factura.id})
@@ -80,7 +80,7 @@ class IncasareDinFacturaTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
             response.context["incasari_form"].initial["nume_incasare"],
-            factura.nume,
+            "CLIENT TEST - INV-3",
         )
         self.assertEqual(factura.nume, "CLIENT TEST")
 

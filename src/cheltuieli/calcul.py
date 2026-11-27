@@ -207,7 +207,7 @@ def cota_de_amortizare(c):
     total = D(suma_in_ron(c))
     if lunar is None or not total:
         return None
-    return D(lunar) / total * D(100)
+    return rotund2(D(lunar) / total * D(100))
 
 
 def anul_darii_in_folosinta(c):

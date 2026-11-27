@@ -2,6 +2,8 @@ from django import forms
 from django.forms import ModelForm, Textarea
 from django.utils import timezone
 
+from utils.widgets import NumeFisierFileInput
+
 from .models import DocumenteModel, validate_year
 
 
@@ -42,4 +44,7 @@ class DocumenteForm(ModelForm):
         fields = "__all__"
         exclude = ["actualizat_la", "user", "data_document"]
 
-        widgets = {"mentiuni": Textarea(attrs={"rows": "3"})}
+        widgets = {
+            "mentiuni": Textarea(attrs={"rows": "3"}),
+            "fisier": NumeFisierFileInput(),
+        }

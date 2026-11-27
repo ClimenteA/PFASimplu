@@ -12,6 +12,7 @@ Declaratiile se descarca din pagina Cheltuieli (filtru pe luna + Descarca):
 
 import datetime
 import os
+import re
 import tempfile
 from unittest.mock import patch
 from zipfile import ZipFile
@@ -1224,18 +1225,57 @@ class D390IncasariUETests(TestCase):
         self.assertEqual(al_doilea["data_incasare"], "05.10.2026")
         self.assertIsNone(calculeaza_jurnal_vanzari(2026, 11))
 
-    def test_filtru_si_download_din_pagina_incasari(self, _mock):
-        factura = self.creeaza_factura_ue(1, valuta="RON", pret=100)
-        incasare_ue = IncasariModel.objects.create(
+    def creeaza_incasare(self, factura, nume, suma, data, nume_fisier):
+        """Incasare legata de o factura cu Client UE VIES."""
+        return IncasariModel.objects.create(
             user=self.user,
-            suma=D("100"),
-            nume_incasare="CORTECS GMBH",
+            suma=D(suma),
+            nume_incasare=nume,
             factura=factura,
-            data_incasarii=datetime.date(2026, 10, 2),
+            data_incasarii=data,
             fisier=SimpleUploadedFile(
-                "incasare.pdf", b"%PDF-1.4 test", content_type="application/pdf"
+                nume_fisier, b"%PDF-1.4 test", content_type="application/pdf"
             ),
         )
+
+    def test_filtru_si_download_din_pagina_incasari(self, _mock):
+        factura_at = self.creeaza_factura_ue(
+            1, valuta="RON", pret=100, data=datetime.date(2026, 10, 2)
+        )
+        incasare_at = self.creeaza_incasare(
+            factura_at,
+            "CORTECS GMBH",
+            "100",
+            datetime.date(2026, 10, 2),
+            "incasare_at.pdf",
+        )
+        factura_de = self.creeaza_factura_ue(
+            2,
+            nume="DEMO GMBH",
+            cif="DE123456789",
+            valuta="RON",
+            pret=80,
+            data=datetime.date(2026, 10, 5),
+        )
+        incasare_de = self.creeaza_incasare(
+            factura_de, "DEMO GMBH", "80", datetime.date(2026, 10, 5), "incasare_de.pdf"
+        )
+        factura_it = self.creeaza_factura_ue(
+            3,
+            nume="ITALIA SRL",
+            cif="IT12345678901",
+            valuta="RON",
+            pret=50,
+            data=datetime.date(2026, 10, 8),
+        )
+        incasare_it = self.creeaza_incasare(
+            factura_it,
+            "ITALIA SRL",
+            "50",
+            datetime.date(2026, 10, 8),
+            "incasare_it.pdf",
+        )
+        # Incasare de la client roman: nu are factura cu Client UE VIES.
         IncasariModel.objects.create(
             user=self.user,
             suma=D("50"),
@@ -1249,16 +1289,22 @@ class D390IncasariUETests(TestCase):
             "/incasari/", {"ue": "1", "anul_ue": 2026, "luna_ue": 10}
         )
         self.assertEqual(response.status_code, 200)
-        # Filtrul inlocuieste tabelul de mai jos cu incasarile din UE.
+        # Filtrul inlocuieste tabelul de mai jos cu toate incasarile din UE,
+        # ordonate dupa data emiterii facturii (cea mai recenta prima).
         self.assertEqual(
-            list(response.context["page_items"].object_list), [incasare_ue]
+            list(response.context["page_items"].object_list),
+            [incasare_it, incasare_de, incasare_at],
         )
         self.assertContains(response, "Incasari din UE (TVA)")
         self.assertContains(response, "se filtreaza automat")
         self.assertContains(response, "Descarca")
+        self.assertContains(response, "CORTECS GMBH")
+        self.assertContains(response, "DEMO GMBH")
+        self.assertContains(response, "ITALIA SRL")
         self.assertNotContains(response, "Cod TVA client")
-        self.assertRegex(response.content.decode(), r">\s*Da\s*</td>")
-        self.assertNotRegex(response.content.decode(), r">\s*Nu\s*</td>")
+        html = response.content.decode()
+        self.assertEqual(len(re.findall(r">\s*Da\s*</td>", html)), 3)
+        self.assertNotRegex(html, r">\s*Nu\s*</td>")
 
         # Fara filtru, coloana VIES arata si "Nu" pentru clientii non-UE.
         response = self.client.get("/incasari/")
@@ -1267,7 +1313,7 @@ class D390IncasariUETests(TestCase):
         # Coloana VIES din formularul de cautare.
         response = self.client.get("/incasari/", {"coloana": "ue", "cauta": "ue"})
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.context["page_items"].object_list), 1)
+        self.assertEqual(len(response.context["page_items"].object_list), 3)
 
         download = self.client.get(
             reverse("incasari-ue-descarca"), {"anul": 2026, "luna": 10}

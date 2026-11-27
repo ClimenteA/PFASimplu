@@ -32,6 +32,7 @@ from registre.views import (
     get_registru_jurnal_incasari_si_plati,
     incasari_cheltuieli_dupa_anul_inserarii,
     jurnal_cumparari_dataframe,
+    jurnal_vanzari_dataframe,
     registru_fiscal_dataframe,
     registru_inventar_dataframe,
     registru_jurnal_dataframe,
@@ -49,7 +50,7 @@ from utils.trezorerie import (
     get_iban_trezorerie_pentru_localitate,
     get_link_iban_trezorerie,
 )
-from utils.tva import calculeaza_jurnal_cumparari
+from utils.tva import calculeaza_jurnal_cumparari, calculeaza_jurnal_vanzari
 from utils.valuta import Valuta
 from utils.views import pregateste_df_export
 
@@ -200,9 +201,9 @@ class SetariViewDownloadData(View):
     - cheltuieli/ -> documentele justificative ale cheltuielilor din anul selectat;
     - incasari/   -> documentele justificative ale incasarilor din anul selectat;
     - in root: registrele anului in format .xlsx (Registrul Jurnal, Registrul
-      Inventar, Registrul Fiscal, Jurnalul de cumparari), fisele mijloacelor fixe
-      in folderul fise_mijloace_fixe/ si SUMAR.html cu metricile anului, inclusiv
-      ultima serie si numar de factura emisa.
+      Inventar, Registrul Fiscal, Jurnalul de cumparari si Jurnalul de vanzari),
+      fisele mijloacelor fixe in folderul fise_mijloace_fixe/ si SUMAR.html cu
+      metricile anului, inclusiv ultima serie si numar de factura emisa.
 
     Exportul se face pe un singur an ca sa nu blocam aplicatia procesand
     toate datele dintr-o data.
@@ -308,6 +309,13 @@ class SetariViewDownloadData(View):
             salveaza_xlsx(
                 jurnal_cumparari_dataframe(jurnal_cumparari),
                 f"Jurnal_Cumparaturi_{anul}.xlsx",
+            )
+
+        jurnal_vanzari = calculeaza_jurnal_vanzari(anul)
+        if jurnal_vanzari:
+            salveaza_xlsx(
+                jurnal_vanzari_dataframe(jurnal_vanzari),
+                f"Jurnal_Vanzari_{anul}.xlsx",
             )
 
         # --- SUMAR.html cu metricile anului ---

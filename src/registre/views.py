@@ -321,6 +321,9 @@ def get_registru_inventar(
             "deducere_in_ron": in_valuta_afisare(item.deducere_in_ron, valuta, anul),
             "data_inserarii": item.data_inserarii.isoformat(),
             "fisier": item.fisier.path,
+            # `fisier` e calea de pe disc (folosita la export); pentru linkul
+            # de download din tabel ne trebuie URL-ul servit de /media/.
+            "fisier_url": item.fisier.url if item.fisier else "",
             "mijloc_fix": item.mijloc_fix,
         }
 
@@ -600,8 +603,14 @@ def get_registru_jurnal_incasari_si_plati(
                 {
                     "nr_crt": idx,
                     "data": entry.data_inserarii.isoformat(),
-                    "documentul": entry.fisier,
-                    "documentId": str(entry.fisier).split("_")[0],
+                    "documentul": (
+                        os.path.basename(entry.fisier.name) if entry.fisier else "-"
+                    ),
+                    "documentId": (
+                        os.path.basename(entry.fisier.name).split("_")[0]
+                        if entry.fisier
+                        else None
+                    ),
                     "felul_operatiunii": "Incasare"
                     + (
                         f" ({format_suma(entry.suma)} {entry.valuta})"
@@ -635,8 +644,14 @@ def get_registru_jurnal_incasari_si_plati(
                 {
                     "nr_crt": idx,
                     "data": entry.data_inserarii.isoformat(),
-                    "documentul": entry.fisier,
-                    "documentId": str(entry.fisier).split("_")[0],
+                    "documentul": (
+                        os.path.basename(entry.fisier.name) if entry.fisier else "-"
+                    ),
+                    "documentId": (
+                        os.path.basename(entry.fisier.name).split("_")[0]
+                        if entry.fisier
+                        else None
+                    ),
                     "felul_operatiunii": f"Cheltuiala {entry.nume_cheltuiala}"
                     + (
                         f" ({format_suma(entry.suma)} {entry.valuta})"

@@ -8,7 +8,7 @@ from urllib.parse import urlencode
 import pandas as pd
 from django.contrib import messages
 from django.core.paginator import Paginator
-from django.db.models import Model, Q
+from django.db.models import FileField, Model, Q
 from django.forms import ModelForm
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
@@ -250,11 +250,17 @@ def download_model_csv_or_xlsx(
 
     data = list(theModel.objects.all().order_by(order_by).values())
 
+    campuri_fisier = {
+        field.attname for field in theModel._meta.fields if isinstance(field, FileField)
+    }
+
     # openpyxl nu accepta datetime cu timezone sau liste/dict-uri direct in
     # celule; le convertim la valori care pot fi scrise in Excel/CSV.
     for item in data:
         for key, value in item.items():
-            if isinstance(value, datetime) and value.tzinfo is not None:
+            if key in campuri_fisier and value:
+                item[key] = os.path.basename(value)
+            elif isinstance(value, datetime) and value.tzinfo is not None:
                 item[key] = value.replace(tzinfo=None)
             elif isinstance(value, (list, dict)):
                 item[key] = json.dumps(value, ensure_ascii=False)

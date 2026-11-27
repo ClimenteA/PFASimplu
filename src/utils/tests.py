@@ -1,5 +1,6 @@
 import datetime
 from decimal import Decimal
+from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.test import RequestFactory, SimpleTestCase, TestCase
@@ -10,7 +11,8 @@ from facturi.models import FacturaModel
 from utils.calcule import calculeaza_cass_trepte, calculeaza_taxe_si_impozite
 from utils.decimale import D, rotund2, suma
 from utils.parametri import get_parametri
-from utils.views import get_cautare
+from utils.views import download_model_csv_or_xlsx, get_cautare
+from utils.widgets import NumeFisierFileInput
 
 
 class RotunjiriTest(SimpleTestCase):
@@ -217,3 +219,33 @@ class CautareTabelTest(TestCase):
             [d.pk for d in response.context["page_items"]],
             [DocumenteModel.objects.get(mentiuni="Platit factura de electricitate").pk],
         )
+
+
+class NumeFisierWidgetTest(SimpleTestCase):
+    def test_widgetul_afiseaza_doar_numele_fisierului(self):
+        nume = "XgERGebX_doc_cheltuiala_2026_02_05.pdf"
+
+        class Fisier:
+            name = f"user_1/{nume}"
+            url = f"/media/user_1/{nume}"
+
+        html = NumeFisierFileInput().render("fisier", Fisier(), {"id": "id_fisier"})
+
+        self.assertIn(f">{nume}</a>", html)
+        self.assertIn(f'href="{Fisier.url}"', html)
+        self.assertNotIn(f"user_1/{nume}</a>", html)
+
+
+class ExportNumeFisierTest(TestCase):
+    @patch("utils.views.download_dataframe")
+    def test_exportul_nu_contine_prefixul_de_folder(self, download_dataframe):
+        nume = "XgERGebX_doc_cheltuiala_2026_02_05.pdf"
+        DocumenteModel.objects.create(fisier=f"user_1/{nume}")
+
+        request = RequestFactory().get("/documente/", {"filetype": "csv"})
+        download_model_csv_or_xlsx(
+            request, DocumenteModel, "documente", order_by="-actualizat_la"
+        )
+
+        df = download_dataframe.call_args.args[1]
+        self.assertEqual(df.loc[0, "fisier"], nume)

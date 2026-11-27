@@ -115,6 +115,7 @@ class FacturiView(View):
                     "facturi_form": form,
                     "unitati_de_masura": unitati_de_masura,
                     "lista_localitati": lista_localitati,
+                    "note_ue_vies_json": NOTE_UE_VIES_JSON,
                     "page_items": page_items,
                     **context_cautare,
                 },

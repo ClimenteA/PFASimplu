@@ -1,9 +1,12 @@
 import datetime
+import tempfile
 
 from django.contrib.auth.models import User
-from django.test import TestCase
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import TestCase, override_settings
 from django.urls import reverse
 
+from cheltuieli.models import CheltuialaModel, Deductibilitate
 from facturi.models import FacturaModel, LinieFactura
 from setari.models import SetariModel
 from utils.decimale import D
@@ -80,3 +83,35 @@ class JurnalVanzariRegistreTest(TestCase):
             {"filetype": "CSV", "anul": 2026, "luna": 11},
         )
         self.assertRedirects(response, "/registre/")
+
+
+@override_settings(
+    MEDIA_ROOT=tempfile.mkdtemp(prefix="pfasimplu_test_registru_inventar_media_")
+)
+class RegistruInventarDocumentTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="inventar@test.ro")
+        self.client.force_login(self.user)
+
+    def test_obiect_de_inventar_descarca_documentul_justificativ(self):
+        CheltuialaModel.objects.create(
+            user=self.user,
+            nume_cheltuiala="Mouse wireless Logitech MX",
+            suma=D("2146"),
+            deductibila=Deductibilitate.DEDUCTIBILA_INTEGRAL_INVENTAR.value,
+            data_inserarii=datetime.date(2026, 3, 24),
+            fisier=SimpleUploadedFile("bon_mouse.pdf", b"%PDF-1.4 test"),
+        )
+
+        response = self.client.get("/registre/?anul=2026")
+
+        self.assertEqual(response.status_code, 200)
+        rand = response.context["ri"][0]
+        self.assertFalse(rand["mijloc_fix"])
+        # Obiectele de inventar au link direct catre document, nu zip de mijloc fix.
+        self.assertTrue(rand["fisier_url"].startswith("/media/"))
+        self.assertContains(response, f'href="{rand["fisier_url"]}" download')
+
+        document = self.client.get(rand["fisier_url"])
+        self.assertEqual(document.status_code, 200)
+        self.assertEqual(b"".join(document.streaming_content), b"%PDF-1.4 test")

@@ -156,7 +156,7 @@ class IncasariView(View):
                 return HttpResponseRedirect("/incasari/")
             form = IncasariForm(
                 initial={
-                    "nume_incasare": factura.nume,
+                    "nume_incasare": f"{factura.nume} - {factura.serie}-{factura.numar}",
                     "suma": factura.total_de_plata,
                     "valuta": factura.valuta,
                     "tip_tranzactie": factura.tip_tranzactie,

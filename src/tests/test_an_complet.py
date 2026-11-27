@@ -803,6 +803,16 @@ def test_10_descarcare_registru_inventar(page, db):
     page.goto(f"/registre/?anul={TEST_YEAR}")
     page.get_by_role("button", name="Registru inventar").click()
 
+    # Obiectele de inventar (care nu sunt mijloace fixe) au link direct catre
+    # documentul justificativ, nu catre zip-ul cu fisa mijlocului fix.
+    link_document = page.locator(
+        "div[x-show=\"active == 'rinv'\"] tbody tr a[href^='/media/']"
+    )
+    assert link_document.count() > 0
+    with page.expect_download() as download_info:
+        link_document.first.click()
+    assert download_info.value.suggested_filename.endswith(".pdf")
+
     for filetype, extensie in (("CSV", "csv"), ("XLSX", "xlsx")):
         nume_registru = f"registru_inventar.{extensie}"
         file_path = _descarca_din_registru(
@@ -914,3 +924,13 @@ def test_12_descarcare_liste_fara_zip(page, db):
             else:
                 df = pd.read_excel(file_path)
             assert len(df) == nr_inregistrari
+            for coloana in (
+                "fisier",
+                "fisier_efactura_xml",
+                "fisier_factura_pdf",
+                "document_justificativ_iesire_din_uz",
+            ):
+                if coloana in df.columns:
+                    assert all(
+                        not str(val).startswith("user_") for val in df[coloana].dropna()
+                    )

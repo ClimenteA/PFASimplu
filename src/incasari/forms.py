@@ -1,5 +1,7 @@
 from django.forms import DateInput, ModelForm, TextInput
 
+from utils.widgets import NumeFisierFileInput
+
 from .models import IncasariModel
 
 
@@ -11,6 +13,7 @@ class IncasariForm(ModelForm):
         widgets = {
             "nume_incasare": TextInput(attrs={"autocomplete": "off"}),
             "data_inserarii": DateInput(format=("%m/%d/%Y"), attrs={"type": "date"}),
+            "fisier": NumeFisierFileInput(),
         }
 
     def save(self, commit=True):

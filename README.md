@@ -246,7 +246,7 @@ Poti adauga mai multe conturi IBAN (RON, EUR, USD etc.), cate unul pentru fiecar
 
 Cu butonul `Exporta datele din aplicatie` descarci un zip cu datele pentru **anul selectat**. Zip-ul contine:
 - `documente/`, `cheltuieli/`, `incasari/` - documentele justificative urcate in aplicatie pentru anul selectat;
-- registrele anului in format `.xlsx`: Registrul Jurnal, Registrul Inventar, Registrul Fiscal si Jurnalul de cumparari;
+- registrele anului in format `.xlsx`: Registrul Jurnal, Registrul Inventar, Registrul Fiscal, Jurnalul de cumparari si Jurnalul de vanzari;
 - `fise_mijloace_fixe/` - fisele mijloacelor fixe (PDF);
 - `SUMAR.html` - metricile anului, in acelasi stil ca aplicatia (se deschide in orice browser): total incasari/cheltuieli, venit net, taxe si impozite de platit (CAS, CASS, impozit), ultima serie si numar de factura emisa (in anul exportat si in aplicatie), medii lunare, cea mai mare incasare/cheltuiala, incasari pe surse, cheltuieli pe deductibilitate si tabelele de amortizare per mijloc fix pana la amortizarea completa.
 
