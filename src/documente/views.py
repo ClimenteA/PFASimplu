@@ -2,11 +2,18 @@ from django.contrib import messages
 from django.shortcuts import HttpResponseRedirect, get_object_or_404, render
 from django.views import View
 
-from utils.views import get_page_items, handle_delete_id_query_param
+from utils.views import get_cautare, get_page_items, handle_delete_id_query_param
 
 from .forms import DocumenteForm
 from .models import DocumenteModel
 from .services import parseaza_document
+
+CAUTARE_COLOANE = {
+    "tip_document": ("Tip document", ["tip_document"]),
+    "mentiuni": ("Mentiuni", ["mentiuni"]),
+    "data_document": ("Doc. Anul", ["data_document"]),
+    "actualizat_la": ("Data Modificare", ["actualizat_la"]),
+}
 
 
 class DocumenteView(View):
@@ -15,8 +22,13 @@ class DocumenteView(View):
         if redirect_from_delete:
             return redirect_from_delete
 
+        q_cautare, context_cautare = get_cautare(request, CAUTARE_COLOANE)
         form, page_items = get_page_items(
-            request, DocumenteForm, DocumenteModel, order_by="-data_document"
+            request,
+            DocumenteForm,
+            DocumenteModel,
+            order_by="-data_document",
+            cautare=q_cautare,
         )
 
         return render(
@@ -26,6 +38,7 @@ class DocumenteView(View):
                 "documente_form": form,
                 "page_items": page_items,
                 "item_id": request.GET.get("id"),
+                **context_cautare,
             },
         )
 
@@ -49,7 +62,10 @@ class DocumenteView(View):
             ):
                 pass
             else:
-                _, page_items = get_page_items(request, DocumenteForm, DocumenteModel)
+                q_cautare, context_cautare = get_cautare(request, CAUTARE_COLOANE)
+                _, page_items = get_page_items(
+                    request, DocumenteForm, DocumenteModel, cautare=q_cautare
+                )
                 return render(
                     request,
                     "documente.html",
@@ -57,6 +73,7 @@ class DocumenteView(View):
                         "documente_form": form,
                         "page_items": page_items,
                         "item_id": request.GET.get("id"),
+                        **context_cautare,
                     },
                 )
 

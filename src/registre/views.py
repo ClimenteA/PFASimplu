@@ -23,7 +23,7 @@ from incasari.models import IncasariModel, SursaVenit
 from setari.models import SetariModel
 from utils.calcule import calculeaza_taxe_si_impozite
 from utils.decimale import D, format_suma, rotund2
-from utils.tva import calculeaza_jurnal_cumparari
+from utils.tva import calculeaza_jurnal_cumparari, calculeaza_jurnal_vanzari
 from utils.valuta import ron_to_eur
 from utils.views import download_csv_or_xlsx, download_dataframe
 
@@ -108,6 +108,25 @@ def jurnal_cumparari_dataframe(jurnal):
             "baza": "Baza impozitare",
             "tva": "Valoare T.V.A.",
             "cod_referinta": "Referinta cod",
+            "fisier": "Document justificativ (fisier)",
+        }
+    )
+
+
+def jurnal_vanzari_dataframe(jurnal):
+    """DataFrame-ul Jurnalului de vanzari (clienti UE VIES), cu antetul afisat."""
+    df = pd.DataFrame(jurnal["randuri"])
+    return df.rename(
+        columns={
+            "nr_crt": "Nr.Crt.",
+            "data_doc": "Document Data",
+            "nr_doc": "Document Numar",
+            "client_denumire": "Client Denumire",
+            "client_cod_fiscal": "Client Cod Fiscal",
+            "val_valuta": "Valoare in valuta",
+            "tip_valuta": "Tip valuta",
+            "baza": "Baza impozitare",
+            "data_incasare": "Data incasare",
             "fisier": "Document justificativ (fisier)",
         }
     )
@@ -201,6 +220,35 @@ class RegistruJurnalCumparariDescarcaView(View):
         return download_dataframe(request, df, f"jurnal_cumparari_{perioada}")
 
 
+class RegistruJurnalVanzariDescarcaView(View):
+    """Jurnalul de vanzari (facturi catre clienti UE VIES): CSV sau XLSX,
+    pe luna (daca se da parametrul luna) sau pe tot anul."""
+
+    def get(self, request):
+        anul = get_year_from_request(request)
+        luna = request.GET.get("luna")
+        luna = int(luna) if luna else None
+        valuta = get_valuta_from_request(request)
+
+        jurnal = calculeaza_jurnal_vanzari(anul, luna)
+        if not jurnal:
+            messages.add_message(
+                request,
+                messages.ERROR,
+                "Jurnalul de vanzari este gol: nu exista facturi catre clienti UE VIES.",
+                extra_tags="🟥 Eroare!",
+            )
+            return redirect("/registre/")
+
+        perioada = f"{anul}_{luna:02d}" if luna else str(anul)
+        if valuta == "EUR":
+            for rand in jurnal["randuri"]:
+                rand["baza"] = in_valuta_afisare(rand["baza"], valuta, anul)
+
+        df = jurnal_vanzari_dataframe(jurnal)
+        return download_dataframe(request, df, f"jurnal_vanzari_{perioada}")
+
+
 class RegistreView(View):
     def get(self, request):
         overview_data = get_cards_and_charts_data(request)
@@ -223,6 +271,11 @@ class RegistreView(View):
                 for camp in ("total_document", "baza", "tva"):
                     rand[camp] = in_valuta_afisare(rand[camp], valuta, anul)
 
+        jurnal_vanzari = calculeaza_jurnal_vanzari(anul)
+        if jurnal_vanzari and valuta == "EUR":
+            for rand in jurnal_vanzari["randuri"]:
+                rand["baza"] = in_valuta_afisare(rand["baza"], valuta, anul)
+
         return render(
             request,
             "registre.html",
@@ -232,6 +285,7 @@ class RegistreView(View):
                 "ref": registru_fiscal,
                 "ri": registru_inventar,
                 "rjc": jurnal_cumparari,
+                "rjv": jurnal_vanzari,
             },
         )
 
@@ -267,6 +321,9 @@ def get_registru_inventar(
             "deducere_in_ron": in_valuta_afisare(item.deducere_in_ron, valuta, anul),
             "data_inserarii": item.data_inserarii.isoformat(),
             "fisier": item.fisier.path,
+            # `fisier` e calea de pe disc (folosita la export); pentru linkul
+            # de download din tabel ne trebuie URL-ul servit de /media/.
+            "fisier_url": item.fisier.url if item.fisier else "",
             "mijloc_fix": item.mijloc_fix,
         }
 
@@ -546,8 +603,14 @@ def get_registru_jurnal_incasari_si_plati(
                 {
                     "nr_crt": idx,
                     "data": entry.data_inserarii.isoformat(),
-                    "documentul": entry.fisier,
-                    "documentId": str(entry.fisier).split("_")[0],
+                    "documentul": (
+                        os.path.basename(entry.fisier.name) if entry.fisier else "-"
+                    ),
+                    "documentId": (
+                        os.path.basename(entry.fisier.name).split("_")[0]
+                        if entry.fisier
+                        else None
+                    ),
                     "felul_operatiunii": "Incasare"
                     + (
                         f" ({format_suma(entry.suma)} {entry.valuta})"
@@ -581,8 +644,14 @@ def get_registru_jurnal_incasari_si_plati(
                 {
                     "nr_crt": idx,
                     "data": entry.data_inserarii.isoformat(),
-                    "documentul": entry.fisier,
-                    "documentId": str(entry.fisier).split("_")[0],
+                    "documentul": (
+                        os.path.basename(entry.fisier.name) if entry.fisier else "-"
+                    ),
+                    "documentId": (
+                        os.path.basename(entry.fisier.name).split("_")[0]
+                        if entry.fisier
+                        else None
+                    ),
                     "felul_operatiunii": f"Cheltuiala {entry.nume_cheltuiala}"
                     + (
                         f" ({format_suma(entry.suma)} {entry.valuta})"

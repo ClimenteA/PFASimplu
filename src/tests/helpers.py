@@ -122,6 +122,8 @@ def emite_factura(
     adresa: str = "STR. TESTULUI NR. 1, BUCURESTI",
     localitate: str = "",
     nota: str = "",
+    client_ue: bool = False,
+    salvare_asteptata: bool = True,
 ) -> Decimal:
     """Emite o factura prin formularul Alpine din pagina Facturi.
 
@@ -149,8 +151,14 @@ def emite_factura(
         page.fill("#alege-localitatea", localitate)
     page.fill("#id_adresa", adresa)
 
+    # Switch-ul "Client UE" e unchecked by default.
+    if client_ue:
+        page.locator("#id_client_ue").check()
+    else:
+        expect(page.locator("#id_client_ue")).not_to_be_checked()
+
     # Campurile de date sunt in sectiunea "Mai mult".
-    page.locator("input[role='switch']").check()
+    page.locator("#mai-mult-switch").check()
     page.fill("#id_data_emitere", data_emitere.isoformat())
     page.fill("#id_data_scadenta", data_scadenta.isoformat())
     if nota:
@@ -166,7 +174,8 @@ def emite_factura(
             page.get_by_role("button", name="Adauga", exact=True).click()
 
     page.get_by_role("button", name="Creeaza factura").click()
-    assert_saved(page)
+    if salvare_asteptata:
+        assert_saved(page)
 
     # Calculul se face cu Decimal (4 zecimale in intermediar, ROUND_HALF_UP la
     # 2 zecimale pentru totalul final), ca in formularul din src/templates/facturi.html.
@@ -177,8 +186,8 @@ def emite_factura(
 def incasare_din_factura(page: Page, serie: str, numar: int, data_incasarii) -> None:
     """Incasare pornita din pagina Facturi (butonul 💳 'Incasata').
 
-    Formularul vine precompletat din factura (suma, valuta, tip tranzactie,
-    PDF atasat automat); completam doar data incasarii.
+    Formularul vine precompletat din factura (nume incasare, suma, valuta,
+    tip tranzactie, PDF atasat automat); completam doar data incasarii.
     """
     page.goto("/facturi/")
     page.wait_for_url("**/facturi/")
@@ -204,6 +213,9 @@ def incasare_din_factura(page: Page, serie: str, numar: int, data_incasarii) -> 
 
     page.wait_for_url("**/incasari/?factura_id=*")
     expect(page.locator("#form-incasare")).to_be_visible()
+    expect(page.locator("#id_nume_incasare")).to_have_value(
+        re.compile(rf".+ - {re.escape(serie)}-{numar}$")
+    )
     page.fill("#id_data_inserarii", data_incasarii.isoformat())
     page.get_by_role("button", name="Salveaza incasare").click()
     assert_saved(page)
@@ -286,13 +298,23 @@ def adauga_cheltuiala(
 
 
 def rand_cheltuiala(page: Page, nume: str):
-    """Randul din tabelul de cheltuieli pentru o cheltuiala cu numele dat."""
+    """Randul din tabelul de cheltuieli pentru o cheltuiala cu numele dat.
+
+    Tabelul afiseaza 20 de randuri pe pagina, asa ca cautam in toate paginile.
+    """
     page.goto("/cheltuieli/")
+    text_paginare = page.locator(".pagination p").inner_text()
+    numar_pagini = int(re.search(r"din (\d+)", text_paginare).group(1))
+    for nr_pagina in range(1, numar_pagini + 1):
+        page.goto(f"/cheltuieli/?page={nr_pagina}#tabel-cheltuieli")
+        rand = page.locator("#tabel-cheltuieli tbody tr").filter(has_text=nume).first
+        if rand.count():
+            return rand
     return page.locator("#tabel-cheltuieli tbody tr").filter(has_text=nume).first
 
 
 def cell_float(row, index: int) -> float:
-    # Celulele pot contine si emoji (ex. "90.92 🇪🇺" la TVA D301):
+    # Celulele pot contine si emoji (ex. "90.92 🇪🇺" la TVA):
     # pastram doar primul numar din text.
     text = row.locator("td").nth(index).inner_text().strip()
     match = re.search(r"-?\d+(?:[.,]\d+)?", text)

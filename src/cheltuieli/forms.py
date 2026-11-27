@@ -1,6 +1,8 @@
 from django import forms
 from django.forms import DateInput, ModelForm, TextInput
 
+from utils.widgets import NumeFisierFileInput
+
 from .models import CheltuialaModel, TipAchizitie
 
 
@@ -36,6 +38,7 @@ class CheltuieliForm(ModelForm):
             "numar_factura": TextInput(
                 attrs={"autocomplete": "off", "placeholder": "ex. PBW-2026-003576"}
             ),
+            "fisier": NumeFisierFileInput(),
         }
         labels = {
             "furnizor_denumire": "Denumire furnizor",

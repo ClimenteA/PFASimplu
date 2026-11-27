@@ -36,6 +36,27 @@
     </hgroup>
 
 
+    <script>
+        // Mentiunea de taxare inversa pentru clientii VIES, in limba facturii.
+        const NOTE_UE_VIES = {{ note_ue_vies_json|safe }};
+
+        function actualizeazaNotaVies() {
+            const switchul = document.getElementById('id_client_ue');
+            const nota = document.getElementById('id_nota');
+            if (!switchul || !nota) return;
+            const limba = document.getElementById('id_tip_factura').value;
+            const text = NOTE_UE_VIES[limba] || NOTE_UE_VIES['e-factura'];
+            const valorile = Object.values(NOTE_UE_VIES);
+            if (switchul.checked) {
+                if (!nota.value.trim() || valorile.includes(nota.value.trim())) {
+                    nota.value = text;
+                }
+            } else if (valorile.includes(nota.value.trim())) {
+                nota.value = '';
+            }
+        }
+    </script>
+
     <article class="article-form mt-4 container" x-data="formHandler" x-init="$watch('collection', (currentCol) => {
         // Sumele se aduna in centrii intregi, ca sa nu se acumuleze eroarea
         // numerelor cu virgula mobila; conversia finala in lei se face o singura data.
@@ -66,27 +87,36 @@
                     {{ facturi_form.nume.errors }}
                 </label>
 
-                <div class="grid">
-
-                    <label class="text-bold" for="{{ facturi_form.cif.id_for_label }}">
-                        CIF/CUI/VAT:
-                        {{ facturi_form.cif }}
-                        {{ facturi_form.cif.errors }}
+                <div class="client-ue-switch">
+                    <label for="{{ facturi_form.client_ue.id_for_label }}">
+                        {{ facturi_form.client_ue }}
+                        <span class="text-bold">Client UE VIES</span>
                     </label>
-
-                    <label class="text-bold" for="{{ facturi_form.serie.id_for_label }}">
-                        Serie fact.:
-                        {{ facturi_form.serie }}
-                        {{ facturi_form.serie.errors }}
-                    </label>
-
-                    <label class="text-bold" for="{{ facturi_form.numar.id_for_label }}">
-                        Nr.fact.:
-                        {{ facturi_form.numar }}
-                        {{ facturi_form.numar.errors }}
-                    </label>
-
                 </div>
+
+            </div>
+
+
+            <div class="grid">
+
+                <label class="text-bold" for="{{ facturi_form.cif.id_for_label }}">
+                    CIF/CUI/VAT:
+                    {{ facturi_form.cif }}
+                    {{ facturi_form.cif.errors }}
+                    <small>Pentru client UE VIES: codul TVA complet cu prefixul tarii (ex. ATU77164426). Clientii din Romania nu se bifeaza ca UE.</small>
+                </label>
+
+                <label class="text-bold" for="{{ facturi_form.serie.id_for_label }}">
+                    Serie fact.:
+                    {{ facturi_form.serie }}
+                    {{ facturi_form.serie.errors }}
+                </label>
+
+                <label class="text-bold" for="{{ facturi_form.numar.id_for_label }}">
+                    Nr.fact.:
+                    {{ facturi_form.numar }}
+                    {{ facturi_form.numar.errors }}
+                </label>
 
             </div>
 
@@ -121,11 +151,9 @@
                     input: $refs.searchInputEl,
                     source: { local: localitati }
                 });">
-                    <label class="text-bold">
-                        Alege localitatea:
-                        <input name="localitate" x-ref="searchInputEl" id="alege-localitatea" autocomplete="off"
-                            type="text" placeholder="Iasi...">
-                    </label>
+                    <label class="text-bold" for="alege-localitatea">Alege localitatea:</label>
+                    <input name="localitate" x-ref="searchInputEl" id="alege-localitatea" autocomplete="__away"
+                        type="text" placeholder="Iasi...">
                 </div>
 
                 <label class="text-bold" for="{{ facturi_form.adresa.id_for_label }}">
@@ -136,11 +164,10 @@
 
             </div>
 
-
             <div class="mt-1">
 
                 <label class="mb-2">
-                    <input x-model="moreFields" type="checkbox" role="switch" />
+                    <input id="mai-mult-switch" x-model="moreFields" type="checkbox" role="switch" />
                     <span x-text="moreFields ? 'Mai putin': 'Mai mult'"></span>
                 </label>
 
@@ -287,17 +314,28 @@
 
 <div id="tabel-facturi" class="mt-4">
 
-    <div x-data="{ downloaded_csv: false, downloaded_xlsx: false }" style="display: flex; justify-content: end; overflow: hidden;">
-        <a href="{% url 'descarca-facturi' %}?filetype=CSV&anul={{ anul }}" @click="downloaded_csv = true" :class="downloaded_csv ? 'px-1 pico-color-purple-500': 'px-1 secondary'"
-            data-tooltip="Descarca CSV">
-            <i class="bi bi-filetype-csv"></i>
-        </a>
-        <a href="{% url 'descarca-facturi' %}?filetype=XLSX&anul={{ anul }}" @click="downloaded_xlsx = true" :class="downloaded_xlsx ? 'px-1 pico-color-purple-500': 'px-1 secondary'"
-            data-tooltip="Descarca XLSX">
-            <i class="bi bi-filetype-xlsx"></i>
-        </a>
-    </div>
-    
+    <form method="get" action="#cautare" id="cautare" class="mb-2" style="display: flex; gap: 1rem; justify-content: end;">
+        <label>
+            <small>Cauta</small>
+            <input type="text" name="cauta" value="{{ cauta }}" placeholder="Cauta in tabel..." aria-label="Cauta">
+        </label>
+        <label style="max-width: 350px;">
+            <small>Coloana</small>
+            <select name="coloana" aria-label="Coloana">
+                <option value="">Toate coloanele</option>
+                {% for cheie, eticheta in coloane_cautare %}
+                <option value="{{ cheie }}" {% if coloana == cheie %}selected{% endif %}>{{ eticheta }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        {% for nume, valoare in parametri_pastrati %}
+        <input type="hidden" name="{{ nume }}" value="{{ valoare }}">
+        {% endfor %}
+        <div style="display: flex; align-self: center; margin-top: 1.4rem; width: fit-content;">
+            <button type="submit" class="outline secondary">Cauta</button>
+        </div>
+    </form>
+
     <div class="overflow-auto mb-2">
         <table class="striped">
             <thead>
@@ -381,24 +419,35 @@
         </table>
     </div>
 
+    <div x-data="{ downloaded_csv: false, downloaded_xlsx: false }" style="display: flex; justify-content: end; overflow: hidden;">
+        <a href="{% url 'descarca-facturi' %}?filetype=CSV&anul={{ anul }}" @click="downloaded_csv = true" :class="downloaded_csv ? 'px-1 pico-color-purple-500': 'px-1 secondary'"
+            data-tooltip="Descarca CSV">
+            <i class="bi bi-filetype-csv"></i>
+        </a>
+        <a href="{% url 'descarca-facturi' %}?filetype=XLSX&anul={{ anul }}" @click="downloaded_xlsx = true" :class="downloaded_xlsx ? 'px-1 pico-color-purple-500': 'px-1 secondary'"
+            data-tooltip="Descarca XLSX">
+            <i class="bi bi-filetype-xlsx"></i>
+        </a>
+    </div>
+
     <div class="pagination">
         <div role="group">
             {% if page_items.has_previous %}
-            <a href="?page={{ page_items.previous_page_number }}#tabel-facturi" class="outline secondary" role="button">
+            <a href="?page={{ page_items.previous_page_number }}{{ query_cautare }}#tabel-facturi" class="outline secondary" role="button">
                 <i class="bi bi-chevron-left"></i>
             </a>
             {% else %}
-            <a href="?page=1#tabel-facturi" class="outline secondary" role="button" aria-disabled="true" disabled>
+            <a href="?page=1{{ query_cautare }}#tabel-facturi" class="outline secondary" role="button" aria-disabled="true" disabled>
                 <i class="bi bi-chevron-left"></i>
             </a>
             {% endif %}
 
             {% if page_items.has_next %}
-            <a href="?page={{ page_items.next_page_number }}#tabel-facturi" class="outline secondary" role="button">
+            <a href="?page={{ page_items.next_page_number }}{{ query_cautare }}#tabel-facturi" class="outline secondary" role="button">
                 <i class="bi bi-chevron-right"></i>
             </a>
             {% else %}
-            <a href="?page=1#tabel-facturi" class="outline secondary" role="button" aria-disabled="true" disabled>
+            <a href="?page=1{{ query_cautare }}#tabel-facturi" class="outline secondary" role="button" aria-disabled="true" disabled>
                 <i class="bi bi-chevron-right"></i>
             </a>
             {% endif %}
@@ -469,6 +518,8 @@
                 document.getElementById('id_cif').value = selected.cif;
                 document.getElementById('id_nr_reg_com').value = selected.nr_reg_com;
                 document.getElementById('id_adresa').value = selected.adresa;
+                document.getElementById('id_client_ue').checked = !!selected.client_ue;
+                actualizeazaNotaVies();
                 document.getElementById('id_email').value = selected.email;
                 document.getElementById('id_telefon').value = selected.telefon;
                 this.suggestedNames = [];
@@ -570,6 +621,11 @@
         let valutaSelectEl = document.getElementById("id_valuta");
         let alegeLocalitateaEl = document.getElementById("alege-localitatea");
 
+        actualizeazaNotaVies();
+        document
+            .getElementById("id_client_ue")
+            .addEventListener("change", actualizeazaNotaVies);
+
         valutaSelectEl.disabled = true;
 
         function switchValuta(val, text) {
@@ -583,6 +639,8 @@
         }
 
         tipFactSelectEl.addEventListener("change", (event) => {
+
+            actualizeazaNotaVies();
 
             if (tipFactSelectEl.value == "e-factura") {
                 valutaSelectEl.disabled = true;

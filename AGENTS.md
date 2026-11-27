@@ -50,8 +50,8 @@ files.
 | File paths and serving | `utils/files.py` |
 
 Apps whose purpose is not obvious from the name: `setari` (PFA data, bank
-accounts, MCP API keys), `registre` (dashboards, mandatory registers, exports),
-`utils` (shared code), `mcp_server` (FastMCP, read + add only).
+accounts), `registre` (dashboards, mandatory registers, exports),
+`utils` (shared code).
 
 Do not copy or invent fiscal formulas. Do not call exchange-rate APIs from views.
 
@@ -116,13 +116,6 @@ Messages use `extra_tags="✅ Succes!"`, `"🟥 Eroare!"` or `"🟥 Date necompl
 - Never expose another user's data. Rely on the scoped manager and the
   `user_<id>/` media prefix.
 - Settings come from `PFASIMPLU_*` env vars (see `.env.example`).
-
-## MCP server
-
-`src/mcp_server/` exposes read tools plus `add_incasare` / `add_cheltuiala`.
-It uses the same forms and `user_context()` so the scoped manager applies, and
-intentionally has no delete tools. New write tools must copy
-**`<REFERENCE_MCP_TOOL>`** and must not bypass form validation.
 
 ## Commands
 

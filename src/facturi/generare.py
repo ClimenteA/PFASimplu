@@ -27,6 +27,12 @@ def construieste_context(factura: FacturaModel) -> dict:
     if not furnizor:
         raise ValueError("Introdu mai intai datele PFA-ului in Setari!")
 
+    # Pentru clientii UE factura se emite pe codul special de TVA intracomunitar.
+    cif_furnizor = furnizor.cif
+    if factura.client_ue and furnizor.cod_tva_intracomunitar:
+        cod = furnizor.cod_tva_intracomunitar.strip().upper().removeprefix("RO")
+        cif_furnizor = f"RO{cod}"
+
     return {
         "tip_factura": factura.tip_factura,
         "valuta": factura.valuta,
@@ -40,7 +46,7 @@ def construieste_context(factura: FacturaModel) -> dict:
         "adresa_furnizor": furnizor.adresa,
         "localitate_furnizor": FacturaModel.get_localitate(furnizor.localitate),
         "cod_judet_furnizor": FacturaModel.get_cod_judet(furnizor.localitate),
-        "cif_furnizor": furnizor.cif,
+        "cif_furnizor": cif_furnizor,
         "nr_reg_com_furnizor": furnizor.nr_reg_com,
         "nume_furnizor": furnizor.nume,
         "email_furnizor": furnizor.email,

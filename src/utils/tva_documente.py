@@ -8,6 +8,10 @@ Zip-ul este grupat pe codul de identificare fiscala: cate un folder pentru
 fiecare CIF / cod TVA intracomunitar pe care se depun declaratii (UE pe codul
 special art. 317, non-UE pe CIF-ul normal), fiecare cu D301 (si D390 pentru UE)
 si jurnalul de cumparari in Excel cu facturile declarate pe codul respectiv.
+
+Pentru incasarile din UE se genereaza separat un zip doar cu D390 (tip P), pe
+codul art. 317, insotit de jurnalul de vanzari in Excel si de facturile emise
+catre clientii UE.
 """
 
 import os
@@ -24,8 +28,11 @@ from utils.trezorerie import COD_BUGETAR_TVA, get_link_iban_trezorerie
 from utils.tva import (
     calculeaza_d301_lista,
     calculeaza_d390,
+    calculeaza_d390_incasari,
     calculeaza_jurnal_cumparari,
+    calculeaza_jurnal_vanzari,
     get_cheltuieli_taxare_inversa,
+    get_facturi_ue,
     round2,
 )
 
@@ -305,6 +312,26 @@ def genereaza_jurnal_cumparari_xlsx(jurnal: dict, output_path: str):
     make_excel_pretty(output_path)
 
 
+def genereaza_jurnal_vanzari_xlsx(jurnal: dict, output_path: str):
+    """Jurnalul de vanzari in Excel, cu facturile emise catre clientii UE."""
+    df = pd.DataFrame(jurnal["randuri"]).rename(
+        columns={
+            "nr_crt": "Nr.Crt.",
+            "data_doc": "Document Data",
+            "nr_doc": "Document Numar",
+            "client_denumire": "Client Denumire",
+            "client_cod_fiscal": "Client Cod Fiscal",
+            "val_valuta": "Valoare in valuta",
+            "tip_valuta": "Tip valuta",
+            "baza": "Baza impozitare (lei)",
+            "data_incasare": "Data incasare",
+            "fisier": "Document justificativ (fisier)",
+        }
+    )
+    df.to_excel(output_path, index=False)
+    make_excel_pretty(output_path)
+
+
 def genereaza_pachet_tva(
     anul: int, luna: int, setari: SetariModel | None = None
 ) -> dict | None:
@@ -403,3 +430,177 @@ def genereaza_pachet_tva(
         "d390": d390,
         "jurnal": jurnal,
     }
+
+
+# ---------------------------------------------------------------------------
+# D390 VIES pentru incasari din UE (prestari de servicii, tip P)
+# ---------------------------------------------------------------------------
+
+
+def genereaza_d390_incasari_md(d390: dict, setari: SetariModel) -> str:
+    """D390 VIES completat pentru facturile emise catre clienti UE, cu ghid de
+    completare in aplicatia ANAF. Se depune doar D390, pe codul art. 317."""
+    cod_special = _este_cod_special(setari, d390["cif"])
+    tip_cod = (
+        "cod special de TVA intracomunitar (art. 317)"
+        if cod_special
+        else "CIF-ul normal al PFA-ului (codul special art. 317 nu este completat in Setari)"
+    )
+    linii = [
+        f"# D390 VIES - Incasari din UE - {LUNI_RO[d390['luna']]} {d390['anul']}",
+        "",
+        f"**Perioada de raportare:** luna {d390['luna']:02d} / anul {d390['anul']}  ",
+        f"**Cod de identificare fiscala:** `RO{d390['cif']}` - {tip_cod}  ",
+        f"**Denumire:** {_denumire_pfa(setari)}  ",
+        f"**Domiciliul fiscal:** {_adresa_declarant(setari)}",
+        "",
+        "> **Nu se depune D301 pentru aceste operatiuni.** PFA-ul are cod special de TVA",
+        "> intracomunitar (art. 317), dar nu este inregistrat normal in scopuri de TVA:",
+        "> nu colecteaza TVA si nu il plateste. Clientul UE este obligat la plata taxei",
+        "> in statul sau membru (taxare inversa, echivalentul art. 307 alin. (2)).",
+        "> Codul art. 317 nu confera calitatea de persoana inregistrata normal in scopuri",
+        "> de TVA (art. 317 alin. (10) Cod fiscal).",
+        "",
+        "## 1. Date de identificare",
+        "",
+        "| Camp | Valoare |",
+        "|---|---|",
+        f"| Anul / Luna | `{d390['anul']}` / `{d390['luna']:02d}` |",
+        f"| Cod de identificare fiscala | `RO{d390['cif']}` - {tip_cod} |",
+        "| Prefix | `RO` (bifat) |",
+        f"| Denumire / Nume, Prenume | `{_denumire_pfa(setari)}` |",
+        f"| Domiciliul fiscal | `{_adresa_declarant(setari)}` |",
+        "| Calitate | bifata **„Persoane care sunt inregistrate conform art. 317 din Legea nr. 227/2015”** |",
+        "| Declaratie rectificativa | nu se bifeaza |",
+        f"| Numar facturi UE in luna | `{d390['nr_facturi']}` |",
+        f"| Numar total operatori intracomunitari | `{d390['nr_operatori']}` |",
+        "",
+        "## 2. Rezumatul declaratiei",
+        "",
+        "| Tip operatiune | Valoare (lei) |",
+        "|---|---:|",
+        "| L - Livrari intracomunitare de bunuri | `0` |",
+        "| T - Livrari in cadrul unei operatiuni triunghiulare | `0` |",
+        "| A - Achizitii intracomunitare de bunuri | `0` |",
+        f"| **P - Prestari intracomunitare de servicii** | **`{d390['bazaP']}`** |",
+        "| S - Achizitii intracomunitare de servicii | `0` |",
+        "| R - Livrari in regimul special pentru agricultori | `0` |",
+        "",
+        "> **Atentie la codul operatiunii:** aplicatia genereaza codul **P** (prestari de",
+        "> servicii catre persoane impozabile in UE). Daca facturezi **bunuri** livrate",
+        "> intracomunitar, codul corect este **L** - verifica natura operatiunii inainte",
+        "> de depunere si corecteaza rezumatul in aplicatia ANAF.",
+        "",
+        "## 3. Lista operatorilor intracomunitari (clienti UE)",
+        "",
+        "| Nr. crt. | Tip | Tara | Cod operator intracomunitar | Denumire operator | Baza impozabila (lei) |",
+        "|---:|---|---|---|---|---:|",
+    ]
+    for r in d390["randuri"]:
+        linii.append(
+            f"| {r['nr_crt']} | `{r['tip']}` | `{r['tara_denumire']}-{r['tara']}` "
+            f"| `{r['cod_operator']}` | `{r['denumire_operator']}` | `{r['baza']}` |"
+        )
+    linii += [
+        f"| **TOTAL GENERAL** | | | | | **`{d390['total_baza']}`** |",
+        "",
+        "> Codul clientului se scrie **fara prefixul de tara** (tara este coloana separata):",
+        "> `ATU77164426` → tara `Austria-AT`, cod `U77164426`. Verifica codul in VIES.",
+        "> Valoarea se inscrie in lei, rotunjita la intreg (lei, fara zecimale).",
+        "",
+        "## 4. Cum se completeaza in aplicatia ANAF (pas cu pas)",
+        "",
+        "1. Intră pe [e-guvernare.ro](https://www.e-guvernare.ro/) → **DEPUNERE DECLARATII ANAF**",
+        "   ([decl.anaf.mfinante.gov.ro](https://decl.anaf.mfinante.gov.ro/my.policy)).",
+        "2. Alege formularul **390 VIES - Declaratie recapitulativa privind livrarile/",
+        "   achizitiile/prestarile intracomunitare**, anul si luna de raportare.",
+        "3. La datele de identificare inscrie codul de mai sus si bifeaza calitatea",
+        "   **„Persoane care sunt inregistrate conform art. 317”**. Nu bifa rectificativa.",
+        "4. In **Rezumatul declaratiei** completeaza la linia „P - Prestari intracomunitare",
+        f"   de servicii” suma de `{d390['bazaP']}` lei; celelalte linii raman 0.",
+        "5. In anexa, pentru **fiecare client** din tabelul de mai sus adauga un rand:",
+        "   tip `P`, tara, codul operatorului (fara prefix), denumirea si valoarea in lei.",
+        "6. Nu completeaza TVA si nu completeaza vreo suma de plata: D390 este informativa.",
+        "7. Semneaza cu certificat digital calificat si incarca declaratia.",
+        "8. Descarca recipisa din SPV-ul deschis **pe codul de TVA intracomunitar** si",
+        "   verifica ca nu are erori de validare.",
+        "",
+        "## 5. Termen si atentionari",
+        "",
+        f"- Termen depunere: **{d390['termen'].strftime('%d.%m.%Y')}** (25 inclusiv a lunii urmatoare).",
+        "- Nu se depune D390 pentru clienti scutiti de TVA in statul membru in care sunt",
+        "  impozabili (art. 325 alin. (1) lit. c) Cod fiscal). Verifica statutul clientului in VIES.",
+        "- Daca acesti clienti sunt persoane neimpozabile (fara cod TVA), locul prestarii",
+        "  este in Romania (art. 278 alin. (3)) si operatiunea nu se declara in D390.",
+        "- Nu se datoreaza TVA in Romania pentru aceste prestari; nu se completeaza D301.",
+    ]
+    if d390["observatii"]:
+        linii += ["", "### ⚠️ De verificat inainte de depunere", ""]
+        for observatie in d390["observatii"]:
+            linii.append(f"- {observatie}")
+    linii += [
+        "",
+        "---",
+        "",
+        "_Temei legal: Codul fiscal (`codul-fiscal`), versiunea 2026-10-25: art. 317 alin. (1)",
+        "lit. b) si alin. (10), art. 325 alin. (1) lit. c), alin. (3) lit. b) si f);",
+        "instructiuni D390 - Ordinul ANAF nr. 705/2020 (`instructiuni-completare-declaratia-d390-vies`),",
+        "versiunea 2026-11-07. Generat automat de PFASimplu._",
+    ]
+    return "\n".join(linii)
+
+
+def genereaza_pachet_d390_incasari(
+    anul: int, luna: int, setari: SetariModel | None = None
+) -> dict | None:
+    """Zip-ul lunii cu D390 VIES completat pentru incasarile din UE si cu
+    facturile emise catre clientii UE (documentele justificative)."""
+    setari = setari or SetariModel.objects.first()
+    if not setari:
+        return None
+
+    d390 = calculeaza_d390_incasari(anul, luna, setari)
+    if not d390:
+        return None
+
+    cod = d390["cif"]
+    nume_folder = f"{'TVA' if _este_cod_special(setari, cod) else 'CIF'}-{cod}"
+    folder = get_extracts_path("d390-incasari")
+    subfolder = os.path.join(folder, nume_folder)
+    os.makedirs(subfolder, exist_ok=True)
+    prefix = f"{anul}_{luna:02d}"
+    fisiere = []
+
+    d390_md = os.path.join(subfolder, f"D390_{prefix}.md")
+    with open(d390_md, "w", encoding="utf-8") as f:
+        f.write(genereaza_d390_incasari_md(d390, setari))
+    fisiere.append((d390_md, f"{nume_folder}/{os.path.basename(d390_md)}"))
+
+    jurnal = calculeaza_jurnal_vanzari(anul, luna)
+    if jurnal:
+        jurnal_xlsx = os.path.join(subfolder, f"Jurnal_vanzari_{prefix}.xlsx")
+        genereaza_jurnal_vanzari_xlsx(jurnal, jurnal_xlsx)
+        fisiere.append((jurnal_xlsx, f"{nume_folder}/{os.path.basename(jurnal_xlsx)}"))
+
+    nume_vazute = set()
+    for factura in get_facturi_ue(anul, luna):
+        nume_safe = re.sub(r"[^A-Za-z0-9_-]+", "-", f"{factura.serie}-{factura.numar}")
+        for camp, extensie in (
+            ("fisier_factura_pdf", "pdf"),
+            ("fisier_efactura_xml", "xml"),
+        ):
+            fisier = getattr(factura, camp)
+            if not fisier:
+                continue
+            nume = f"factura_{nume_safe}.{extensie}"
+            if nume in nume_vazute:
+                nume = f"factura_{nume_safe}_{factura.id}.{extensie}"
+            nume_vazute.add(nume)
+            fisiere.append((fisier.path, f"{nume_folder}/facturi/{nume}"))
+
+    zip_path = os.path.join(get_extracts_path(), f"D390_{prefix}.zip")
+    with ZipFile(zip_path, "w") as zipf:
+        for fp, nume_in_zip in fisiere:
+            zipf.write(fp, nume_in_zip)
+
+    return {"zip_path": zip_path, "d390": d390, "jurnal": jurnal}

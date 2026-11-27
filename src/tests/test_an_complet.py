@@ -480,14 +480,14 @@ def test_05_mijloace_fixe_si_tva_anual(page, db):
 
 
 def test_06_verificari_ui(page, db):
-    """Cateva verificari directe in interfata (tabele, TVA D301, amortizare)."""
+    """Cateva verificari directe in interfata (tabele, TVA, amortizare)."""
     # Un mijloc fix apare in tabel cu suma dedusa integral.
     mf = CheltuialaModel.objects.filter(q_mijloc_fix()).first()
     row = rand_cheltuiala(page, mf.nume_cheltuiala)
     expect(row).to_be_visible()
     assert cell_float(row, 5) == pytest.approx(float(mf.suma_in_ron), abs=0.02)
 
-    # O cheltuiala cu taxare inversa afiseaza TVA-ul in coloana "TVA D301".
+    # O cheltuiala cu taxare inversa afiseaza TVA-ul in coloana "TVA".
     tva_row = CheltuialaModel.objects.filter(furnizor_tara__in=UE_CODES).first()
     row = rand_cheltuiala(page, tva_row.nume_cheltuiala)
     assert cell_float(row, 6) == pytest.approx(
@@ -499,6 +499,41 @@ def test_06_verificari_ui(page, db):
     page.goto("/facturi/")
     primul_rand = page.locator("#tabel-facturi tbody tr").first
     expect(primul_rand.locator("a[href*='.pdf']").first).to_be_visible()
+
+    # Filtrul "Cauta" e prezent deasupra tabelului pe toate paginile cu liste.
+    for url, tabel in (
+        ("/facturi/", "tabel-facturi"),
+        ("/incasari/", "tabel-incasari"),
+        ("/cheltuieli/", "tabel-cheltuieli"),
+        ("/documente/", "tabel-documente"),
+        ("/inventar/", "tabel-inventar"),
+    ):
+        page.goto(url)
+        form = page.locator(f"#{tabel} form#cautare")
+        expect(form.locator("input[name='cauta']")).to_be_visible()
+        expect(form.locator("select[name='coloana']")).to_be_visible()
+        expect(form.locator("select[name='coloana'] option").first).to_have_attribute(
+            "value", ""
+        )
+
+    # Fara coloana selectata cautarea gaseste numele in orice coloana; cu o
+    # coloana selectata (Data) acelasi text nu mai gaseste nimic.
+    page.goto("/cheltuieli/")
+    form = page.locator("#tabel-cheltuieli form#cautare")
+    form.locator("input[name='cauta']").fill(mf.nume_cheltuiala)
+    form.get_by_role("button", name="Cauta").click()
+    assert page.url.endswith("#cautare")
+    expect(page.locator("#tabel-cheltuieli form#cautare")).to_be_in_viewport()
+    randuri = page.locator("#tabel-cheltuieli tbody tr")
+    expect(randuri).to_have_count(1)
+    expect(randuri.first).to_contain_text(mf.nume_cheltuiala)
+    form = page.locator("#tabel-cheltuieli form#cautare")
+    form.locator("select[name='coloana']").select_option("data_inserarii")
+    form.get_by_role("button", name="Cauta").click()
+    expect(page.locator("#tabel-cheltuieli tbody tr")).to_have_count(0)
+    expect(
+        page.locator("#tabel-cheltuieli form#cautare input[name='cauta']")
+    ).to_have_value(mf.nume_cheltuiala)
 
     # Pagina Registre se incarca pentru anul testat.
     page.goto("/registre/")
@@ -768,6 +803,16 @@ def test_10_descarcare_registru_inventar(page, db):
     page.goto(f"/registre/?anul={TEST_YEAR}")
     page.get_by_role("button", name="Registru inventar").click()
 
+    # Obiectele de inventar (care nu sunt mijloace fixe) au link direct catre
+    # documentul justificativ, nu catre zip-ul cu fisa mijlocului fix.
+    link_document = page.locator(
+        "div[x-show=\"active == 'rinv'\"] tbody tr a[href^='/media/']"
+    )
+    assert link_document.count() > 0
+    with page.expect_download() as download_info:
+        link_document.first.click()
+    assert download_info.value.suggested_filename.endswith(".pdf")
+
     for filetype, extensie in (("CSV", "csv"), ("XLSX", "xlsx")):
         nume_registru = f"registru_inventar.{extensie}"
         file_path = _descarca_din_registru(
@@ -879,3 +924,13 @@ def test_12_descarcare_liste_fara_zip(page, db):
             else:
                 df = pd.read_excel(file_path)
             assert len(df) == nr_inregistrari
+            for coloana in (
+                "fisier",
+                "fisier_efactura_xml",
+                "fisier_factura_pdf",
+                "document_justificativ_iesire_din_uz",
+            ):
+                if coloana in df.columns:
+                    assert all(
+                        not str(val).startswith("user_") for val in df[coloana].dropna()
+                    )

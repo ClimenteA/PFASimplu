@@ -1,3 +1,4 @@
+import json
 import logging
 
 from django.contrib import messages
@@ -10,15 +11,29 @@ from setari.models import SetariModel
 from utils.localitati import lista_localitati
 from utils.views import (
     download_model_csv_or_xlsx,
+    get_cautare,
     get_page_items,
     handle_delete_id_query_param,
 )
 
 from .forms import FacturaForm
 from .generare import genereaza_documente
-from .models import FacturaModel
+from .models import NOTA_TAXARE_INVERSA_VIES, FacturaModel
 
 logger = logging.getLogger(__name__)
+
+NOTE_UE_VIES_JSON = json.dumps(NOTA_TAXARE_INVERSA_VIES, ensure_ascii=False)
+
+CAUTARE_COLOANE = {
+    "cif": ("CIF/CUI/VAT", ["cif"]),
+    "nume": ("Nume", ["nume"]),
+    "valuta": ("Valuta", ["valuta"]),
+    "serie": ("Serie", ["serie"]),
+    "numar": ("Numar", ["numar"]),
+    "email": ("Email", ["email"]),
+    "telefon": ("Telefon", ["telefon"]),
+    "data_scadenta": ("Scadenta", ["data_scadenta"]),
+}
 
 
 class FacturiSearchClientName(View):
@@ -60,7 +75,10 @@ class FacturiView(View):
         if redirect_from_delete:
             return redirect_from_delete
 
-        form, page_items = get_page_items(request, FacturaForm, FacturaModel)
+        q_cautare, context_cautare = get_cautare(request, CAUTARE_COLOANE)
+        form, page_items = get_page_items(
+            request, FacturaForm, FacturaModel, cautare=q_cautare
+        )
         return render(
             request,
             template_name="facturi.html",
@@ -68,7 +86,9 @@ class FacturiView(View):
                 "facturi_form": form,
                 "unitati_de_masura": unitati_de_masura,
                 "lista_localitati": lista_localitati,
+                "note_ue_vies_json": NOTE_UE_VIES_JSON,
                 "page_items": page_items,
+                **context_cautare,
             },
         )
 
@@ -84,7 +104,10 @@ class FacturiView(View):
                 "Nu am putut inregistra factura!",
                 extra_tags="🟥 Eroare!",
             )
-            _, page_items = get_page_items(request, FacturaForm, FacturaModel)
+            q_cautare, context_cautare = get_cautare(request, CAUTARE_COLOANE)
+            _, page_items = get_page_items(
+                request, FacturaForm, FacturaModel, cautare=q_cautare
+            )
             return render(
                 request,
                 "facturi.html",
@@ -92,7 +115,9 @@ class FacturiView(View):
                     "facturi_form": form,
                     "unitati_de_masura": unitati_de_masura,
                     "lista_localitati": lista_localitati,
+                    "note_ue_vies_json": NOTE_UE_VIES_JSON,
                     "page_items": page_items,
+                    **context_cautare,
                 },
             )
 

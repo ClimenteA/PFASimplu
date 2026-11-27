@@ -1,6 +1,7 @@
 from django.forms import DateInput, ModelForm, TextInput
 
 from cheltuieli.models import CheltuialaModel
+from utils.widgets import NumeFisierFileInput
 
 
 class InventarForm(ModelForm):
@@ -18,4 +19,5 @@ class InventarForm(ModelForm):
             "data_iesirii_din_uz": DateInput(
                 format=("%m/%d/%Y"), attrs={"type": "date", "required": "true"}
             ),
+            "document_justificativ_iesire_din_uz": NumeFisierFileInput(),
         }

@@ -13,7 +13,7 @@ from django.db.models import Count, Max, Q
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from utils.cursuri import curs_bnr_data_exigibilitatii, to_ron
+from utils.cursuri import curs_bnr_ziua_bancara_anterioara, to_ron
 from utils.decimale import D, rotund2
 from utils.parametri import get_parametri
 from utils.tari import (
@@ -83,22 +83,21 @@ def suma_in_ron(c):
 
 
 def curs_bnr_aplicat(c):
+    """Cursul zilei bancare anterioare inserarii, acelasi cu cel din suma_in_ron.
+
+    Toate sumele unei facturi cu taxare inversa (suma, baza si TVA autolichidat)
+    se convertesc cu acelasi curs, ca sa fie consistent intre registru, D301/D390
+    si deducere.
+    """
     if not este_taxare_inversa(c):
         return None
-    data = c.data_facturii or c.data_inserarii
-    if not data:
-        raise ValidationError(
-            _(
-                "Pentru servicii din UE/non-UE trebuie completata data facturii (exigibilitatea TVA)."
-            )
-        )
-    return curs_bnr_data_exigibilitatii(c.valuta, data)
+    return curs_bnr_ziua_bancara_anterioara(c.valuta, c.data_inserarii)
 
 
 def baza_in_lei(c):
     if not este_taxare_inversa(c):
         return None
-    return D(c.suma) * D(curs_bnr_aplicat(c))
+    return D(suma_in_ron(c))
 
 
 def cota_tva_autolichidata(c):
@@ -208,7 +207,7 @@ def cota_de_amortizare(c):
     total = D(suma_in_ron(c))
     if lunar is None or not total:
         return None
-    return D(lunar) / total * D(100)
+    return rotund2(D(lunar) / total * D(100))
 
 
 def anul_darii_in_folosinta(c):
@@ -489,7 +488,6 @@ def valideaza(c):
             raise ValidationError(
                 _("Pentru servicii din UE/non-UE trebuie completat numarul facturii.")
             )
-        curs_bnr_aplicat(c)
 
     if c.deductibila == Deductibilitate.DEDUCTIBILA_INTEGRAL_AMORTIZATA.value:
         clasificare(c)

@@ -1,5 +1,4 @@
 import datetime
-import logging
 import os
 import shutil
 import zipfile
@@ -33,14 +32,10 @@ from registre.views import (
     get_registru_jurnal_incasari_si_plati,
     incasari_cheltuieli_dupa_anul_inserarii,
     jurnal_cumparari_dataframe,
+    jurnal_vanzari_dataframe,
     registru_fiscal_dataframe,
     registru_inventar_dataframe,
     registru_jurnal_dataframe,
-)
-from utils.actualizare import (
-    EroareActualizare,
-    este_standalone,
-    pregateste_actualizarea,
 )
 from utils.calcule import calculeaza_taxe_si_impozite
 from utils.decimale import D, rotund2
@@ -55,15 +50,14 @@ from utils.trezorerie import (
     get_iban_trezorerie_pentru_localitate,
     get_link_iban_trezorerie,
 )
-from utils.tva import calculeaza_jurnal_cumparari
+from utils.tva import calculeaza_jurnal_cumparari, calculeaza_jurnal_vanzari
 from utils.valuta import Valuta
 from utils.views import pregateste_df_export
 
 from .forms import SetariForm
-from .models import McpApiKey, SetariModel
+from .models import SetariModel
 
 lista_valute = [choice.value for choice in Valuta]
-logger = logging.getLogger(__name__)
 
 
 def _este_versiune_mai_noua(remote: str, local: str) -> bool:
@@ -91,15 +85,9 @@ def get_setari_context(form, request):
         "anul_curent": timezone.now().year,
         "app_version": APP_VERSION,
         "latest_app_version": latest_app_version,
-        "repo_url": GITHUB_REPO_URL,
+        "releases_url": f"{GITHUB_REPO_URL}/releases",
         "update_available": _este_versiune_mai_noua(latest_app_version, APP_VERSION),
-        "poate_actualiza": este_standalone(),
-        "mcp_key": McpApiKey.objects.filter(user=request.user).first(),
-        "mcp_key_once": None,
     }
-    # Cheia in clar e afisata o singura data, imediat dupa generare, si apoi
-    # stearsa din sesiune (nu ramane in istoric/URL/logs).
-    context["mcp_key_once"] = request.session.pop("mcp_key_once", None)
     return context
 
 
@@ -205,56 +193,6 @@ class SetariView(View):
         return redirect("/setari/")
 
 
-class SetariActualizeazaView(View):
-    """Instaleaza executabilul nou, numai la cererea utilizatorului."""
-
-    def post(self, request):
-        versiune = get_latest_app_version()
-        if not versiune or not _este_versiune_mai_noua(versiune, APP_VERSION):
-            messages.add_message(
-                request,
-                messages.ERROR,
-                "Nu exista o versiune noua de instalat.",
-                extra_tags="🟥 Eroare!",
-            )
-            return redirect("/setari/")
-
-        try:
-            mesaj = pregateste_actualizarea(versiune)
-        except EroareActualizare as exc:
-            logger.warning("Actualizare esuata: %s", exc)
-            messages.add_message(
-                request, messages.ERROR, str(exc), extra_tags="🟥 Eroare!"
-            )
-            return redirect("/setari/")
-
-        messages.add_message(request, messages.SUCCESS, mesaj, extra_tags="✅ Succes!")
-        return redirect("/setari/")
-
-
-class SetariMcpKeyGenerateView(View):
-    """Genereaza (sau roteste) cheia folosita de serverul MCP.
-    Cheia in clar ajunge doar in sesiune, ca sa fie afisata o singura data."""
-
-    def post(self, request):
-        _, key = McpApiKey.generate(request.user)
-        # Cheia e afisata direct in campul password de pe pagina Setari;
-        # un mesaj-modal ar acoperi butonul de copiat chiar cand e nevoie de el.
-        request.session["mcp_key_once"] = key
-        # Anchorul face pagina sa se deschida direct la sectiunea MCP.
-        return redirect("/setari/#cheie-mcp")
-
-
-class SetariMcpKeyRevokeView(View):
-    """Revoca definitiv cheia MCP curenta."""
-
-    def post(self, request):
-        McpApiKey.revoke(request.user)
-        request.session.pop("mcp_key_once", None)
-        # Fara mesaj-modal: vrem ca sectiunea MCP sa fie vizibila dupa scroll.
-        return redirect("/setari/#cheie-mcp")
-
-
 class SetariViewDownloadData(View):
     """Exportul datelor pentru un an selectat de utilizator.
 
@@ -263,9 +201,9 @@ class SetariViewDownloadData(View):
     - cheltuieli/ -> documentele justificative ale cheltuielilor din anul selectat;
     - incasari/   -> documentele justificative ale incasarilor din anul selectat;
     - in root: registrele anului in format .xlsx (Registrul Jurnal, Registrul
-      Inventar, Registrul Fiscal, Jurnalul de cumparari), fisele mijloacelor fixe
-      in folderul fise_mijloace_fixe/ si SUMAR.html cu metricile anului, inclusiv
-      ultima serie si numar de factura emisa.
+      Inventar, Registrul Fiscal, Jurnalul de cumparari si Jurnalul de vanzari),
+      fisele mijloacelor fixe in folderul fise_mijloace_fixe/ si SUMAR.html cu
+      metricile anului, inclusiv ultima serie si numar de factura emisa.
 
     Exportul se face pe un singur an ca sa nu blocam aplicatia procesand
     toate datele dintr-o data.
@@ -371,6 +309,13 @@ class SetariViewDownloadData(View):
             salveaza_xlsx(
                 jurnal_cumparari_dataframe(jurnal_cumparari),
                 f"Jurnal_Cumparaturi_{anul}.xlsx",
+            )
+
+        jurnal_vanzari = calculeaza_jurnal_vanzari(anul)
+        if jurnal_vanzari:
+            salveaza_xlsx(
+                jurnal_vanzari_dataframe(jurnal_vanzari),
+                f"Jurnal_Vanzari_{anul}.xlsx",
             )
 
         # --- SUMAR.html cu metricile anului ---

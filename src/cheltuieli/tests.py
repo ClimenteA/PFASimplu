@@ -1,8 +1,12 @@
 import datetime
+import tempfile
 from decimal import Decimal
 
+from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-from django.test import TestCase
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import TestCase, override_settings
+from django.urls import reverse
 
 from incasari.models import IncasariModel
 from utils.cursuri import to_ron
@@ -107,6 +111,19 @@ class AmortizareLimitataTest(TestCase):
         mf = self._mijloc_fix(este_sediu_social_neexclusiv=True)
         self.assertEqual(mf.amortizare_lunara, Decimal("1250"))
 
+    def test_cota_de_amortizare_rotunjita_la_doua_zecimale(self):
+        mf = CheltuialaModel.objects.create(
+            nume_cheltuiala="Echipament",
+            suma=D("36000"),
+            deductibila=Deductibilitate.DEDUCTIBILA_INTEGRAL_AMORTIZATA.value,
+            cod_de_clasificare="2.2.9.",
+            ani_amortizare=3,
+            data_punerii_in_functiune=datetime.date(2026, 1, 1),
+            data_inserarii=datetime.date(2026, 1, 1),
+        )
+        # 36.000 / 36 luni = 1.000 lei/luna -> 2,777...%, afisat 2,78%.
+        self.assertEqual(mf.cota_de_amortizare, Decimal("2.78"))
+
 
 class CotaTvaTest(TestCase):
     def _cheltuiala_externa(self):
@@ -133,3 +150,26 @@ class CotaTvaTest(TestCase):
             data_inserarii=datetime.date(2026, 1, 15),
         )
         self.assertIsNone(cheltuiala.tva_autolichidata)
+
+
+@override_settings(MEDIA_ROOT=tempfile.mkdtemp(prefix="pfasimplu_test_paginare_media_"))
+class PaginareTest(TestCase):
+    def test_lista_are_20_de_elemente_pe_pagina(self):
+        user = User.objects.create_user(username="paginare@test.ro", password="parola")
+        self.client.force_login(user)
+        for i in range(21):
+            CheltuialaModel.objects.create(
+                user=user,
+                nume_cheltuiala=f"Cheltuiala {i}",
+                suma=D("100"),
+                data_inserarii=ZIUA,
+                fisier=SimpleUploadedFile(f"bon{i}.pdf", b"%PDF-1.4 test"),
+            )
+
+        response = self.client.get(reverse("cheltuieli"))
+        page_items = response.context["page_items"]
+        self.assertEqual(len(list(page_items)), 20)
+        self.assertEqual(page_items.paginator.num_pages, 2)
+
+        response = self.client.get(reverse("cheltuieli"), {"page": 2})
+        self.assertEqual(len(list(response.context["page_items"])), 1)

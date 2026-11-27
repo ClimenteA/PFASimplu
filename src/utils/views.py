@@ -3,11 +3,12 @@ import json
 import os
 from datetime import datetime, timedelta
 from decimal import Decimal
+from urllib.parse import urlencode
 
 import pandas as pd
 from django.contrib import messages
 from django.core.paginator import Paginator
-from django.db.models import Model
+from django.db.models import FileField, Model, Q
 from django.forms import ModelForm
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
@@ -49,8 +50,83 @@ def handle_delete_id_query_param(
         )
 
 
+PARAMETRI_PASTRATI = (
+    "id",
+    "factura_id",
+    "extern",
+    "anul_extern",
+    "luna_extern",
+    "ue",
+    "anul_ue",
+    "luna_ue",
+)
+
+
+def get_cautare(request, coloane: dict[str, tuple[str, list[str]]]):
+    """Construieste cautarea intr-un tabel, pe coloanele definite de apelant.
+
+    Cheia din `coloane` este valoarea din select, iar valoarea este
+    (eticheta afisata, campuri ORM in care se cauta). Cand selectul nu are
+    nicio valoare, cautarea se face in toate campurile tuturor coloanelor.
+    Intoarce (query-ul de aplicat pe queryset, contextul pentru template).
+    """
+    cauta = (request.GET.get("cauta") or "").strip()
+    coloana = request.GET.get("coloana") or ""
+    if coloana not in coloane:
+        coloana = ""
+
+    campuri = (
+        coloane[coloana][1]
+        if coloana
+        else [
+            camp for _, campuri_coloana in coloane.values() for camp in campuri_coloana
+        ]
+    )
+
+    query = Q()
+    if cauta:
+        for camp in campuri:
+            if camp.startswith("bool:"):
+                # Coloanele boolean (ex. „UE") se cauta cu da/nu, nu cu text.
+                nume = camp.removeprefix("bool:")
+                valoare = cauta.lower()
+                if valoare in ("ue", "da", "1", "true", "yes"):
+                    query |= Q(**{nume: True})
+                elif valoare in ("non-ue", "non ue", "nu", "0", "false", "no"):
+                    query |= Q(**{nume: False}) | Q(**{f"{nume}__isnull": True})
+            else:
+                query |= Q(**{f"{camp}__icontains": cauta})
+
+    # Pastram filtrele deja active (editare, precompletare, filtrul TVA) la
+    # submiterea cautarii si la schimbarea paginii. `delete_id` nu e in lista
+    # ca sa nu se sterga inregistrari din greseala la paginare.
+    pastrati = {
+        cheie: request.GET[cheie]
+        for cheie in PARAMETRI_PASTRATI
+        if request.GET.get(cheie)
+    }
+    parametrii_url = dict(pastrati)
+    if cauta:
+        parametrii_url["cauta"] = cauta
+    if coloana:
+        parametrii_url["coloana"] = coloana
+
+    context = {
+        "cauta": cauta,
+        "coloana": coloana,
+        "coloane_cautare": [(cheie, date[0]) for cheie, date in coloane.items()],
+        "parametri_pastrati": list(pastrati.items()),
+        "query_cautare": urlencode(parametrii_url),
+    }
+    return query, context
+
+
 def get_page_items(
-    request, theForm: ModelForm, theModel: Model, order_by: str = "-data_inserarii"
+    request,
+    theForm: ModelForm,
+    theModel: Model,
+    order_by: str = "-data_inserarii",
+    cautare: Q | None = None,
 ):
 
     item_id = request.GET.get("id")
@@ -91,11 +167,16 @@ def get_page_items(
         incasate = theModel.objects.filter(data_incasarii__isnull=False).order_by(
             order_by
         )
+        if cautare is not None:
+            neincasate = neincasate.filter(cautare)
+            incasate = incasate.filter(cautare)
         results = list(itertools.chain(neincasate, incasate))
     else:
         results = theModel.objects.all().order_by(order_by)
+        if cautare is not None:
+            results = results.filter(cautare)
 
-    paginator = Paginator(results, 100)
+    paginator = Paginator(results, 20)
     page_items = paginator.get_page(page_number)
 
     return form, page_items
@@ -169,11 +250,17 @@ def download_model_csv_or_xlsx(
 
     data = list(theModel.objects.all().order_by(order_by).values())
 
+    campuri_fisier = {
+        field.attname for field in theModel._meta.fields if isinstance(field, FileField)
+    }
+
     # openpyxl nu accepta datetime cu timezone sau liste/dict-uri direct in
     # celule; le convertim la valori care pot fi scrise in Excel/CSV.
     for item in data:
         for key, value in item.items():
-            if isinstance(value, datetime) and value.tzinfo is not None:
+            if key in campuri_fisier and value:
+                item[key] = os.path.basename(value)
+            elif isinstance(value, datetime) and value.tzinfo is not None:
                 item[key] = value.replace(tzinfo=None)
             elif isinstance(value, (list, dict)):
                 item[key] = json.dumps(value, ensure_ascii=False)

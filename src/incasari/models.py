@@ -28,6 +28,7 @@ class SursaVenit(models.TextChoices):
 
 
 class IncasariModel(CommonIncasariCheltuieliModel):
+    nume_incasare = models.CharField(max_length=300, null=True, blank=True)
     sursa_venit = models.CharField(
         max_length=30, choices=SursaVenit, default=SursaVenit.ACTIVITATE_PRINCIPALA
     )

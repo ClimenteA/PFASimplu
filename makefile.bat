@@ -1,6 +1,6 @@
 @echo off
 REM Echivalentul pe Windows pentru comenzile din Makefile.
-REM Pentru utilizatori aplicatia ruleaza in Docker; install.bat face instalarea.
+REM Pentru utilizare zilnica descarca aplicatia desktop din GitHub Releases.
 REM `dev` ruleaza serverul cu uv/python, pe datele din src\ (ca Docker-ul).
 
 IF "%1"=="" (

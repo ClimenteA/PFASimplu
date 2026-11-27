@@ -1,8 +1,10 @@
 from django import forms
 from django.db import transaction
-from django.forms import DateInput, ModelForm, Textarea
+from django.forms import CheckboxInput, DateInput, ModelForm, Textarea
 
-from .models import FacturaModel
+from utils.tari import este_tara_ue
+
+from .models import NOTA_TAXARE_INVERSA_VIES, FacturaModel, nota_taxare_inversa_vies
 
 
 class FacturaForm(ModelForm):
@@ -13,10 +15,41 @@ class FacturaForm(ModelForm):
         fields = "__all__"
         exclude = ["user"]
         widgets = {
-            "nota": Textarea(attrs={"rows": "1"}),
+            "client_ue": CheckboxInput(attrs={"role": "switch"}),
+            "nota": Textarea(attrs={"rows": "3"}),
             "data_emitere": DateInput(format=("%m/%d/%Y"), attrs={"type": "date"}),
             "data_scadenta": DateInput(format=("%m/%d/%Y"), attrs={"type": "date"}),
         }
+
+    def clean(self):
+        cleaned = super().clean()
+        if cleaned.get("client_ue"):
+            # D390 VIES se completeaza doar pentru clienti UE: codul TVA trebuie
+            # sa aiba prefixul tarii (ex. ATU77164426). Un CIF roman (RO...) nu
+            # inseamna client UE, asa ca il respingem inainte de salvare.
+            cif = (cleaned.get("cif") or "").strip().upper()
+            if len(cif) <= 2 or not este_tara_ue(cif[:2]):
+                raise forms.ValidationError(
+                    {
+                        "cif": (
+                            "Pentru client UE VIES, completeaza codul TVA cu "
+                            "prefixul tarii UE (ex. ATU77164426). Clientii din "
+                            "Romania (RO...) nu se bifeaza ca 'Client UE VIES'."
+                        )
+                    }
+                )
+            # Completam nota doar daca e goala sau contine inca textul implicit
+            # (de exemplu la schimbarea limbii facturii), ca sa nu stergem o
+            # mentiune scrisa manual de utilizator.
+            nota = (cleaned.get("nota") or "").strip()
+            if not nota or nota in NOTA_TAXARE_INVERSA_VIES.values():
+                cleaned["nota"] = nota_taxare_inversa_vies(
+                    cleaned.get("tip_factura") or ""
+                )
+        elif (cleaned.get("nota") or "").strip() in NOTA_TAXARE_INVERSA_VIES.values():
+            # Clientul nu mai e VIES: stergem doar nota generata automat.
+            cleaned["nota"] = ""
+        return cleaned
 
     def clean_produse_sau_servicii(self):
         linii = self.cleaned_data["produse_sau_servicii"]

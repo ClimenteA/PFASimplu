@@ -80,6 +80,28 @@
     </div>
     {% endcomment %}
 
+    <form method="get" action="#cautare" id="cautare" class="mb-2" style="display: flex; gap: 1rem; justify-content: end;">
+        <label>
+            <small>Cauta</small>
+            <input type="text" name="cauta" value="{{ cauta }}" placeholder="Cauta in tabel..." aria-label="Cauta">
+        </label>
+        <label style="max-width: 350px;">
+            <small>Coloana</small>
+            <select name="coloana" aria-label="Coloana">
+                <option value="">Toate coloanele</option>
+                {% for cheie, eticheta in coloane_cautare %}
+                <option value="{{ cheie }}" {% if coloana == cheie %}selected{% endif %}>{{ eticheta }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        {% for nume, valoare in parametri_pastrati %}
+        <input type="hidden" name="{{ nume }}" value="{{ valoare }}">
+        {% endfor %}
+        <div style="display: flex; align-self: center; margin-top: 1.4rem; width: fit-content;">
+            <button type="submit" class="outline secondary">Cauta</button>
+        </div>
+    </form>
+
     <div class="overflow-auto mb-2">
         <table class="striped">
             <thead>
@@ -149,22 +171,22 @@
     <div class="pagination">
         <div role="group">
             {% if page_items.has_previous %}
-            <a href="?page={{ page_items.previous_page_number }}#tabel-inventar" class="outline secondary"
+            <a href="?page={{ page_items.previous_page_number }}{{ query_cautare }}#tabel-inventar" class="outline secondary"
                 role="button">
                 <i class="bi bi-chevron-left"></i>
             </a>
             {% else %}
-            <a href="?page=1#tabel-inventar" class="outline secondary" role="button" aria-disabled="true" disabled>
+            <a href="?page=1{{ query_cautare }}#tabel-inventar" class="outline secondary" role="button" aria-disabled="true" disabled>
                 <i class="bi bi-chevron-left"></i>
             </a>
             {% endif %}
 
             {% if page_items.has_next %}
-            <a href="?page={{ page_items.next_page_number }}#tabel-inventar" class="outline secondary" role="button">
+            <a href="?page={{ page_items.next_page_number }}{{ query_cautare }}#tabel-inventar" class="outline secondary" role="button">
                 <i class="bi bi-chevron-right"></i>
             </a>
             {% else %}
-            <a href="?page=1#tabel-inventar" class="outline secondary" role="button" aria-disabled="true" disabled>
+            <a href="?page=1{{ query_cautare }}#tabel-inventar" class="outline secondary" role="button" aria-disabled="true" disabled>
                 <i class="bi bi-chevron-right"></i>
             </a>
             {% endif %}

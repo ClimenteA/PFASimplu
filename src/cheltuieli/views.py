@@ -17,6 +17,7 @@ from utils.tva import (
 from utils.tva_documente import genereaza_pachet_tva
 from utils.views import (
     download_model_csv_or_xlsx,
+    get_cautare,
     get_page_items,
     handle_delete_id_query_param,
 )
@@ -24,6 +25,15 @@ from utils.views import (
 from .calcul import q_taxare_inversa
 from .forms import CheltuieliForm
 from .models import CheltuialaModel
+
+CAUTARE_COLOANE = {
+    "nume_cheltuiala": ("Nume", ["nume_cheltuiala"]),
+    "suma": ("Total", ["suma"]),
+    "valuta": ("Valuta", ["valuta"]),
+    "data_inserarii": ("Cheltuit la", ["data_inserarii"]),
+    "deductibila": ("Tip Deductibil", ["deductibila"]),
+    "actualizat_la": ("Data Modificare", ["actualizat_la"]),
+}
 
 
 class CheltuieliDescarcareView(View):
@@ -108,7 +118,10 @@ class CheltuieliView(View):
         if redirect_from_delete:
             return redirect_from_delete
 
-        form, page_items = get_page_items(request, CheltuieliForm, CheltuialaModel)
+        q_cautare, context_cautare = get_cautare(request, CAUTARE_COLOANE)
+        form, page_items = get_page_items(
+            request, CheltuieliForm, CheltuialaModel, cautare=q_cautare
+        )
 
         # Filtrul "Cheltuieli externe (TVA)": pe luni, facturile cu Origine
         # furnizor diferita de Romania, pentru care se depun D301/D390.
@@ -128,8 +141,10 @@ class CheltuieliView(View):
         luna_extern = int(luna_param) if luna_param else None
 
         if extern:
-            results = get_cheltuieli_taxare_inversa(anul_extern, luna_extern)
-            page_items = Paginator(results, 100).get_page(request.GET.get("page") or 1)
+            results = get_cheltuieli_taxare_inversa(anul_extern, luna_extern).filter(
+                q_cautare
+            )
+            page_items = Paginator(results, 20).get_page(request.GET.get("page") or 1)
 
         return render(
             request,
@@ -145,6 +160,7 @@ class CheltuieliView(View):
                 "anul_extern": anul_extern,
                 "luni_extern": luni_extern,
                 "luna_extern": luna_extern,
+                **context_cautare,
             },
         )
 
@@ -168,7 +184,10 @@ class CheltuieliView(View):
             ):
                 pass
             else:
-                _, page_items = get_page_items(request, CheltuieliForm, CheltuialaModel)
+                q_cautare, context_cautare = get_cautare(request, CAUTARE_COLOANE)
+                _, page_items = get_page_items(
+                    request, CheltuieliForm, CheltuialaModel, cautare=q_cautare
+                )
                 return render(
                     request,
                     "cheltuieli.html",
@@ -178,6 +197,7 @@ class CheltuieliView(View):
                         "item_id": request.GET.get("id"),
                         "tari_ue_json": json.dumps(TARI_UE_CHOICES),
                         "tari_non_ue_json": json.dumps(TARI_NON_UE_CHOICES),
+                        **context_cautare,
                     },
                 )
 

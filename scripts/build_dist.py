@@ -59,11 +59,6 @@ uv_version = "{UV_VERSION}"
 [tool.pycrucible.patterns]
 include = ["*.py", "**/*.py", "*.whl"]
 exclude = [".venv/**/*", "**/__pycache__/**", "**/*.pyc"]
-
-# Marker folosit de utils/actualizare.py pentru a gasi propriul executabil si
-# a sti ca rularea e standalone (in Docker/dev aceste variabile nu exista).
-[tool.pycrucible.env]
-PFASIMPLU_EXE_NAME = "{EXE_NAME}"
 """
 
 log = logging.getLogger("build_dist")
@@ -107,7 +102,7 @@ def prepare_launcher(version: str) -> None:
 
     (LAUNCHER_DIR / "launcher.py").write_text(LAUNCHER_PY, encoding="utf-8")
     (LAUNCHER_DIR / "pyproject.toml").write_text(
-        LAUNCHER_PYPROJECT.format(UV_VERSION=UV_VERSION, EXE_NAME=target_name(version)),
+        LAUNCHER_PYPROJECT.format(UV_VERSION=UV_VERSION),
         encoding="utf-8",
     )
 
