@@ -165,6 +165,77 @@ class NotaClientUEVIESTest(TestCase):
         self.assertEqual(form.save().cif, "RO12345678")
 
 
+class FacturaEroareValidareTest(TestCase):
+    """Dupa o eroare de validare, formularul isi pastreaza valorile completate."""
+
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="rerandare@test.ro", password="parola"
+        )
+        self.client.force_login(self.user)
+        SetariModel.objects.create(
+            user=self.user,
+            nume="TEST PFA",
+            localitate="RO-IS, jud. Iasi, Iasi",
+            adresa="Strada Test nr. 1",
+            nr_reg_com="F1",
+            cif="1234567",
+            email="test@test.ro",
+            caen_principal="6201",
+            cod_tva_intracomunitar="52937756",
+        )
+
+    def test_eroarea_pastreaza_campurile_si_liniile(self):
+        linii = json.dumps(
+            [
+                {
+                    "id": 1,
+                    "nume_produs_sau_serviciu": "Consultanta",
+                    "cod_unitate": "HUR",
+                    "numar_unitati": "1.00",
+                    "pret_pe_unitate": "100.00",
+                    "subtotal": "100.00",
+                }
+            ]
+        )
+        response = self.client.post(
+            "/facturi/",
+            {
+                "serie": "VAL",
+                "numar": 7,
+                "nume": "CLIENT DE TEST",
+                "cif": "12345678",  # fara prefix UE -> eroare de validare
+                "adresa": "STRADA TESTULUI 1",
+                "localitate": "RO-IS, jud. Iasi, Iasi",
+                "data_emitere": "2026-10-02",
+                "data_scadenta": "2026-11-01",
+                "tip_factura": "factura-germana",
+                "tip_tranzactie": "BANCAR",
+                "valuta": "USD",
+                "client_ue": "on",
+                "nota": "",
+                "produse_sau_servicii": linii,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("cif", response.context["facturi_form"].errors)
+        html = response.content.decode()
+        for valoare in (
+            "CLIENT DE TEST",
+            "12345678",
+            "VAL",
+            "2026-10-02",
+            "2026-11-01",
+            "RO-IS, jud. Iasi, Iasi",
+            "Consultanta",
+        ):
+            self.assertIn(valoare, html)
+        # Alpine isi initializeaza starea din valorile randate de Django.
+        self.assertIn("numeClient: 'CLIENT DE TEST'", html)
+        self.assertIn("moreFields: true", html)
+
+
 class FacturiCodTvaTest(TestCase):
     """Switchul si helperul Client UE VIES apar doar cu cod TVA intracomunitar."""
 

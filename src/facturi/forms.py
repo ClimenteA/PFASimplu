@@ -18,8 +18,10 @@ class FacturaForm(ModelForm):
             "cif": forms.TextInput(attrs={"aria-describedby": "cif-helper"}),
             "client_ue": CheckboxInput(attrs={"role": "switch"}),
             "nota": Textarea(attrs={"rows": "3"}),
-            "data_emitere": DateInput(format=("%m/%d/%Y"), attrs={"type": "date"}),
-            "data_scadenta": DateInput(format=("%m/%d/%Y"), attrs={"type": "date"}),
+            # type="date" accepta doar YYYY-MM-DD, inclusiv la rerandarea formularului
+            # dupa o eroare de validare (cand valoarea e un string din POST).
+            "data_emitere": DateInput(format=("%Y-%m-%d"), attrs={"type": "date"}),
+            "data_scadenta": DateInput(format=("%Y-%m-%d"), attrs={"type": "date"}),
         }
 
     def clean(self):

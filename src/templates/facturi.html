@@ -57,15 +57,8 @@
         }
     </script>
 
-    <article class="article-form mt-4 container" x-data="formHandler" x-init="$watch('collection', (currentCol) => {
-        // Sumele se aduna in centrii intregi, ca sa nu se acumuleze eroarea
-        // numerelor cu virgula mobila; conversia finala in lei se face o singura data.
-        let totalCenti = 0;
-        for (let i of currentCol) {
-            totalCenti += subtotalCenti(i);
-        }
-        $refs.total_de_plata_el.value = (totalCenti / 100).toFixed(2);
-    })">
+    <article class="article-form mt-4 container" x-data="formHandler"
+        x-init="$watch('collection', () => actualizeazaTotal()); $nextTick(() => actualizeazaTotal())">
 
         <form @submit.prevent="handleSubmit" id="factura-form" x-ref="factura_form_el" action="{% url 'facturi' %}"
             method="POST" autocomplete="off">
@@ -76,7 +69,8 @@
                 <label class="text-bold relative" for="id_nume">
                     Nume Client:
                     <input x-on:input="suggestName" x-model="numeClient" type="text" name="nume" maxlength="200"
-                        required="" id="id_nume" style="text-transform: uppercase;">
+                        required="" id="id_nume" style="text-transform: uppercase;"
+                        value="{{ facturi_form.nume.value|default:'' }}">
 
                     <ul @click.outside="suggestedNames = [];" x-cloak x-show="suggestedNames.length > 0;" class="suggestions">
                         <template x-for="i in suggestedNames">
@@ -157,7 +151,8 @@
                 });">
                     <label class="text-bold" for="alege-localitatea">Alege localitatea:</label>
                     <input name="localitate" x-ref="searchInputEl" id="alege-localitatea" autocomplete="__away"
-                        type="text" placeholder="Iasi...">
+                        type="text" placeholder="Iasi..."
+                        value="{% if facturi_form.is_bound %}{{ facturi_form.localitate.value|default:'' }}{% endif %}">
                 </div>
 
                 <label class="text-bold" for="{{ facturi_form.adresa.id_for_label }}">
@@ -199,17 +194,13 @@
 
                         <label for="{{ facturi_form.data_emitere.id_for_label }}">
                             {{ facturi_form.data_emitere.label }}:
-                            <input type="date" name="{{ facturi_form.data_emitere.name }}"
-                                id="{{ facturi_form.data_emitere.id_for_label }}"
-                                value="{{ facturi_form.data_emitere.value|date:'Y-m-d' }}">
+                            {{ facturi_form.data_emitere }}
                             {{ facturi_form.data_emitere.errors }}
                         </label>
 
                         <label for="{{ facturi_form.data_scadenta.id_for_label }}">
                             {{ facturi_form.data_scadenta.label }}:
-                            <input type="date" name="{{ facturi_form.data_scadenta.name }}"
-                                id="{{ facturi_form.data_scadenta.id_for_label }}"
-                                value="{{ facturi_form.data_scadenta.value|date:'Y-m-d' }}">
+                            {{ facturi_form.data_scadenta }}
                             {{ facturi_form.data_scadenta.errors }}
                         </label>
 
@@ -297,8 +288,9 @@
                 <label for="id_produse_sau_servicii" style="display: none;">
                     Produse sau servicii:
                     <textarea x-ref="prod_servicii_el" name="produse_sau_servicii" cols="40" rows="10" required=""
-                        id="id_produse_sau_servicii">[]</textarea>
-                    <input type="hidden" name="initial-produse_sau_servicii" value='[]'
+                        id="id_produse_sau_servicii">{{ facturi_form.produse_sau_servicii.value|default:'[]' }}</textarea>
+                    <input type="hidden" name="initial-produse_sau_servicii"
+                        value="{{ facturi_form.produse_sau_servicii.value|default:'[]' }}"
                         id="initial-id_produse_sau_servicii">
                 </label>
 
@@ -464,8 +456,16 @@
 <script>
 
     function formHandler(){
+        // La rerandarea dupa o eroare, liniile completate vin din textarea.
+        let linii = [];
+        try {
+            linii = JSON.parse(document.getElementById('id_produse_sau_servicii')?.value || '[]');
+        } catch (e) {
+            linii = [];
+        }
+        if (!Array.isArray(linii)) linii = [];
         return {
-            numeClient: '',
+            numeClient: '{{ facturi_form.nume.value|default:""|escapejs }}',
             suggestedNames: [], 
             suggestName: async function(){
                 let name = this.numeClient.trim();
@@ -529,8 +529,9 @@
                 document.getElementById('id_telefon').value = selected.telefon;
                 this.suggestedNames = [];
             },
-            moreFields: false,    
-            collection: [{
+            // Dupa o eroare de validare lasam sectiunea cu datele deschisa.
+            moreFields: {{ facturi_form.is_bound|yesno:"true,false" }},
+            collection: linii.length ? linii : [{
                 id: 1,
                 nume_produs_sau_serviciu: '', 
                 cod_unitate: 'HUR',
@@ -554,6 +555,15 @@
             updateTextarea: function() {
                 this.$refs.prod_servicii_el.value = JSON.stringify(this.collection, null, 2);
                 console.log(this.$refs.prod_servicii_el.value);
+            },
+            // Sumele se aduna in centrii intregi, ca sa nu se acumuleze eroarea
+            // numerelor cu virgula mobila; conversia finala in lei se face o singura data.
+            actualizeazaTotal: function() {
+                let totalCenti = 0;
+                for (let i of this.collection) {
+                    totalCenti += this.subtotalCenti(i);
+                }
+                this.$refs.total_de_plata_el.value = (totalCenti / 100).toFixed(2);
             },
             // Subtotalul unui rand, in centrii intregi (pretul se rotunjeste
             // la cent inainte de inmultire, ca in calculul cu Decimal de pe server).
@@ -626,12 +636,22 @@
         let valutaSelectEl = document.getElementById("id_valuta");
         let alegeLocalitateaEl = document.getElementById("alege-localitatea");
 
-        actualizeazaNotaVies();
         document
             .getElementById("id_client_ue")
             ?.addEventListener("change", actualizeazaNotaVies);
 
-        valutaSelectEl.disabled = true;
+        // Scadenta e intotdeauna la 30 de zile de la data emiterii (acelasi
+        // termen ca in model). UTC-ul evita decalajele la trecerea la ora de
+        // vara, cand timezone-ul local ar putea schimba ziua.
+        let dataEmitereEl = document.getElementById("id_data_emitere");
+        let dataScadentaEl = document.getElementById("id_data_scadenta");
+        dataEmitereEl.addEventListener("change", () => {
+            let data = new Date(dataEmitereEl.value + "T00:00:00Z");
+            if (dataEmitereEl.value && !isNaN(data)) {
+                data.setUTCDate(data.getUTCDate() + 30);
+                dataScadentaEl.value = data.toISOString().slice(0, 10);
+            }
+        });
 
         function switchValuta(val, text) {
             valutaSelectEl.value = val
@@ -643,24 +663,25 @@
             }
         }
 
-        tipFactSelectEl.addEventListener("change", (event) => {
-
+        function actualizeazaStareTipFactura(cuValutaInitiala = false) {
             actualizeazaNotaVies();
-
-            if (tipFactSelectEl.value == "e-factura") {
-                valutaSelectEl.disabled = true;
-            } else {
-                valutaSelectEl.disabled = false;
+            const eFactura = ["e-factura", "factura-romana"].includes(tipFactSelectEl.value);
+            valutaSelectEl.disabled = eFactura;
+            alegeLocalitateaEl.disabled = !eFactura;
+            if (cuValutaInitiala) {
+                if (eFactura) {
+                    switchValuta("RON", "🇷🇴 RON - Romania");
+                } else {
+                    switchValuta("EUR", "🇪🇺 EUR - European Union Zone");
+                }
             }
+        }
 
-            if (["e-factura", "factura-romana"].includes(tipFactSelectEl.value)) {
-                switchValuta("RON", "🇷🇴 RON - Romania");
-                alegeLocalitateaEl.disabled = false;
-            } else {
-                switchValuta("EUR", "🇪🇺 EUR - European Union Zone");
-                alegeLocalitateaEl.disabled = true;
-            }
-        });
+        tipFactSelectEl.addEventListener("change", () => actualizeazaStareTipFactura(true));
+        // Aplicam starea si la incarcare: dupa o eroare de validare tip_factura vine
+        // din POST, fara sa fi declansat evenimentul "change". Nu schimbam valuta
+        // aici, ca sa nu o pierdem pe cea completata de utilizator.
+        actualizeazaStareTipFactura();
 
     });
 </script>
