@@ -2,11 +2,64 @@ import os
 import re
 from zipfile import ZipFile
 
-from fpdf_table import Align, PDFTable
-
 from cheltuieli.models import CheltuialaModel
-from core.settings import get_extracts_path, get_font_path, get_media_path
+from core.settings import get_extracts_path, get_media_path
 from utils.decimale import format_suma
+from utils.pdf import LATIME_UTILA, DocumentPdf
+
+_COLOANE_DETALII = ((200, "left"), (LATIME_UTILA - 200, "left"))
+
+_COLOANE_MISCARI = (
+    ("Nr.inv", 38, "left"),
+    ("Doc", 55, "left"),
+    ("Operatiuni", 165.88, "left"),
+    ("Buc", 32, "right"),
+    ("Debit", 52, "right"),
+    ("Credit", 52, "right"),
+    ("Sold", 45, "right"),
+    ("C105", 42, "right"),
+)
+
+
+def scrie_fisa_mijloc_fix(context: dict, cale_pdf: str) -> str:
+    """Deseneaza fisa mijlocului fix si o scrie la `cale_pdf`."""
+
+    doc = DocumentPdf()
+    doc.scrie("FISA MIJLOCULUI FIX", aliniere="center", bold=True, marime=16)
+    doc.spatiu(14)
+
+    campuri = (
+        ("Nr. Inventar", context["nr_inventar"]),
+        ("Fel, serie, nr. data document provenienta", context["fel_document"]),
+        ("Valoare de inventar", context["valoare_inventar"]),
+        ("Amortizare lunara", context["amortizare_lunara"]),
+        ("Denumirea mijlocului fix", "Detaliate in factura/bon."),
+        ("Accesorii", "Detaliate in factura/bon."),
+        ("Grupa", context["grupa"]),
+        ("Codul de clasificare", context["cod_de_clasificare"]),
+        ("Anul darii in folosinta", context["anul_darii_in_folosinta"]),
+        ("Luna darii in folosinta", context["luna_darii_in_folosinta"]),
+        ("Anul amortizarii complete", context["anul_amortizarii_complete"]),
+        ("Luna amortizarii complete", context["luna_amortizarii_complete"]),
+        ("Durata normala de functionare", context["durata_normala_de_functionare"]),
+        ("Cota de amortizare", context["cota_de_amortizare"]),
+    )
+    doc.tabel(
+        [("", latime, aliniere) for latime, aliniere in _COLOANE_DETALII],
+        [[eticheta, str(valoare)] for eticheta, valoare in campuri],
+        antet=False,
+        umplere_coloana=0,
+    )
+
+    doc.spatiu(18)
+    doc.scrie("Miscari", bold=True, marime=11)
+    doc.spatiu(8)
+    doc.tabel(list(_COLOANE_MISCARI), [[""] * len(_COLOANE_MISCARI) for _ in range(10)])
+
+    subsol = (
+        f"Fisa mijlocului fix nr. {context['nr_inventar']} - {{pagina}} / {{total}}"
+    )
+    return doc.salveaza(cale_pdf, subsol=subsol)
 
 
 def create_fisa_mijloc_fix_pdf(db_id: int, nr_inventar: int, doar_pdf: bool = False):
@@ -27,65 +80,22 @@ def create_fisa_mijloc_fix_pdf(db_id: int, nr_inventar: int, doar_pdf: bool = Fa
     nume_sigur = re.sub(r"[^\w\-.]+", "_", inv.nume_cheltuiala).strip("_")[:80]
     nume_fisa = f"fisa_mijloc_fix_{fileid}_{nume_sigur}.pdf"
 
-    pdf = PDFTable()
-
-    pdf.add_fonts_custom(
-        font_name="arial",
-        font_extension="ttf",
-        font_dir=get_font_path(),
-        set_default=True,
-    )
-
-    # Date identificare factura
-    pdf.table_header(["FIŞA MIJLOCULUI FIX"], align=Align.L)
-    pdf.table_row([""])
-    pdf.table_row(["Nr. Inventar: ", str(nr_inventar)])
-    pdf.table_row(["Fel, serie, nr. data document provenienţă: ", fel_document])
-    pdf.table_row(["Valoare de inventar: ", format_suma(inv.suma_in_ron)])
-    pdf.table_row(["Amortizare lunară: ", format_suma(inv.amortizare_lunara)])
-    pdf.table_row(
-        [
-            "Denumirea mijlocului fix şi caracteristici tehnice: ",
-            "Detaliate in factura/bon.",
-        ]
-    )
-    pdf.table_row(["Accesorii: ", "Detaliate in factura/bon."])
-    pdf.table_row(["Grupa: ", inv.grupa], option="responsive")
-    pdf.table_row(["Codul de clasificare: ", inv.cod_de_clasificare])
-    pdf.table_row(["Anul dării în folosinţă: ", str(inv.anul_darii_in_folosinta)])
-    pdf.table_row(["Luna dării în folosinţă: ", str(inv.luna_darii_in_folosinta)])
-    pdf.table_row(["Anul amortizării complete: ", str(inv.anul_amortizarii_complete)])
-    pdf.table_row(["Luna amortizării complete: ", str(inv.luna_amortizarii_complete)])
-    pdf.table_row(
-        ["Durata normală de funcţionare: ", inv.durata_normala_de_functionare]
-    )
-    pdf.table_row(["Cota de amortizare: ", str(inv.cota_de_amortizare)])
-
-    pdf.table_row([""])
-
-    width_cols = pdf.table_cols(1, 3, 3.5, 0.5, 1, 1, 1, 1)
-    pdf.set_font(pdf.font, "B", pdf.text_normal_size)
-
-    mutari_header = [
-        "Nr.inventar (de la număr la număr)",
-        "Documentul (data, felul, numărul)",
-        "Operaţiunile care privesc mişcarea, creşterea sau diminuarea valorii mijlocului fix",
-        "Buc.",
-        "Debit",
-        "Credit",
-        "Sold",
-        'Soldul contului 105 "Rezerve din reevaluare"',
-    ]
-
-    pdf.table_row(mutari_header, width_cols, option="responsive")
-    pdf.set_font(pdf.font, "", pdf.text_normal_size)
-
-    empty_rows = [""] * len(mutari_header)
-    for _ in range(20):
-        pdf.table_row(empty_rows, width_cols)
-
+    context = {
+        "nr_inventar": fileid,
+        "fel_document": fel_document,
+        "valoare_inventar": format_suma(inv.suma_in_ron),
+        "amortizare_lunara": format_suma(inv.amortizare_lunara),
+        "grupa": inv.grupa,
+        "cod_de_clasificare": inv.cod_de_clasificare,
+        "anul_darii_in_folosinta": inv.anul_darii_in_folosinta,
+        "luna_darii_in_folosinta": inv.luna_darii_in_folosinta,
+        "anul_amortizarii_complete": inv.anul_amortizarii_complete,
+        "luna_amortizarii_complete": inv.luna_amortizarii_complete,
+        "durata_normala_de_functionare": inv.durata_normala_de_functionare,
+        "cota_de_amortizare": inv.cota_de_amortizare,
+    }
     save_pdf_path = os.path.join(get_media_path(), nume_fisa)
-    pdf.output(save_pdf_path)
+    scrie_fisa_mijloc_fix(context, save_pdf_path)
 
     if doar_pdf:
         return save_pdf_path

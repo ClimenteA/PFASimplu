@@ -4,10 +4,9 @@ import re
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from fpdf_table import Align, PDFTable
 from unidecode import unidecode
 
-from core.settings import get_font_path
+from facturi.pdf import scrie_factura_pdf
 from utils.decimale import D, format_suma, rotund2, suma
 from utils.files import get_save_path
 from utils.localitati import Localitati
@@ -387,100 +386,10 @@ pdf_template_mapper = {
 
 
 def creeaza_factura_pdf(data: dict, pdf_output_path: str):
+    """Genereaza factura PDF, desenata direct cu pdf_oxide."""
 
     data = pdf_template_mapper[data["tip_factura"]](data)
-
-    pdf = PDFTable()
-
-    pdf.add_fonts_custom(
-        font_name="arial",
-        font_extension="ttf",
-        font_dir=get_font_path(),
-        set_default=True,
-    )
-
-    # Date identificare factura
-    pdf.table_header([data["header_factura"]], align=Align.L)
-    pdf.table_row([""])
-
-    width_cols = pdf.table_cols(2, 2, 4, 4)
-    pdf.table_header(data["header_date_factura"], width_cols, align=Align.L)
-    pdf.table_row(
-        [data["serie"], data["numar"], data["data_emitere"], data["data_scadenta"]],
-        width_cols,
-    )
-    pdf.table_row([""])
-
-    # Date client/furnizor
-    pdf.table_header(data["header_date_client_furnizor"], align=Align.L)
-
-    contact_info = [
-        [data["nume_lang"] or "", data["nume_furnizor"] or "", data["nume_client"]],
-        [
-            data["nr_reg_com_lang"] or "",
-            data["nr_reg_com_furnizor"] or "",
-            data["nr_reg_com_client"] or "",
-        ],
-        [data["cif_lang"] or "", data["cif_furnizor"] or "", data["cif_client"] or ""],
-        [
-            data["adresa_lang"] or "",
-            data["adresa_furnizor"] or "",
-            data["adresa_client"] or "",
-        ],
-        [
-            data["email_lang"] or "",
-            data["email_furnizor"] or "",
-            data["email_client"] or "",
-        ],
-        [
-            data["telefon_lang"] or "",
-            data["telefon_furnizor"] or "",
-            data["telefon_client"] or "",
-        ],
-        [
-            data["iban_lang"] or "",
-            data["iban_furnizor"] or "",
-            data["iban_client"] or "",
-        ],
-    ]
-
-    for ci in contact_info:
-        pdf.table_row(ci, width_list=[30, 80, 80], option="responsive")
-
-    pdf.table_row([""])
-
-    # Produse sau servicii
-    width_cols = pdf.table_cols(1, 4, 1, 2, 2, 2)
-    pdf.set_font(pdf.font, "B", pdf.text_normal_size)
-    pdf.table_row(data["header_produse_servicii"], width_cols, option="responsive")
-    pdf.set_font(pdf.font, "", pdf.text_normal_size)
-
-    for ps in data["produse_sau_servicii"]:
-        psrow = [
-            ps["id"],
-            ps["nume_produs_sau_serviciu"],
-            ps["cod_unitate"],
-            format_suma(ps["numar_unitati"]),
-            format_suma(ps["pret_pe_unitate"]),
-            format_suma(ps["subtotal"]),
-        ]
-        pdf.table_row(psrow, width_cols, option="responsive")
-
-    # Total si nota
-    if data["nota"]:
-        pdf.table_row([f"Note/Obs.: {data['nota']}"])
-    else:
-        pdf.table_row([""])
-
-    total_text = (
-        f"{data['header_total_de_plata']} "
-        f"{format_suma(data['total_de_plata'])} {data['valuta']}"
-    )
-    pdf.table_header([total_text], align=Align.R)
-
-    pdf.output(pdf_output_path)
-
-    return pdf_output_path
+    return scrie_factura_pdf(data, pdf_output_path)
 
 
 def _data_scadenta_default():

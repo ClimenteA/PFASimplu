@@ -306,15 +306,6 @@ wheels = [
 ]
 
 [[package]]
-name = "defusedxml"
-version = "0.7.1"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/0f/d5/c66da9b79e5bdb124974bfe172b4daf3c984ebd9c2a06e2b8a4dc7331c72/defusedxml-0.7.1.tar.gz", hash = "sha256:1bb3032db185915b62d7c6209c5a8792be6a32ab2fedacc84e01b52c51aa3e69", size = 75520, upload-time = "2021-03-08T10:59:26.269Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/07/6c/aa3f2f849e01cb6a001cd8554a88d4c77c5c1a31c95bdf1cf9301e6d9ef4/defusedxml-0.7.1-py2.py3-none-any.whl", hash = "sha256:a352e7e428770286cc899e2542b6cdaedb2b4953ff269a210103ec58f6198a61", size = 25604, upload-time = "2021-03-08T10:59:24.45Z" },
-]
-
-[[package]]
 name = "diskcache"
 version = "5.6.3"
 source = { registry = "https://pypi.org/simple" }
@@ -453,31 +444,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/5f/19/69ccf8e483762f8d62778d82b090128f052c1804b35054276dc47985a67c/fonttools-4.69.1-cp315-cp315t-win_amd64.whl", hash = "sha256:922bb6d9c8113f8320d111c1e7d138ce80d32d7aeb290e766a9ff8c3bfb966c1", size = 3009060, upload-time = "2026-11-25T17:04:15.379Z" },
     { url = "https://files.pythonhosted.org/packages/4f/07/8c8da7e679df42213c77dad8c41d6f1ba7b605ad0e27ed88a8ab65aad7fb/fonttools-4.69.1-cp315-cp315t-win_arm64.whl", hash = "sha256:4724852d6b2e613782286f247153f0a77bcb06c2a291b129400de582f208cb4d", size = 2957194, upload-time = "2026-11-25T17:04:17.007Z" },
     { url = "https://files.pythonhosted.org/packages/43/ef/3575cacafe63d7d78b639e815bb3637cd0a66c6365efc5aed636a92cdb12/fonttools-4.69.1-py3-none-any.whl", hash = "sha256:20e9dfac71694d9eeae48bb53c877bdf43b914794d69a769940728a1929cc835", size = 1301769, upload-time = "2026-11-25T17:04:19.256Z" },
-]
-
-[[package]]
-name = "fpdf-table"
-version = "1.1.5"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "fpdf2" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/0c/3f/ab9d879862a200da7fd5c220f6d3f668c4d0d475eb6d660b4472f6c05d16/fpdf-table-1.1.5.tar.gz", hash = "sha256:a8ee2035007c32835858641cee63f7a0803e2fb495869bb31e9de789aaf3e99b", size = 11361, upload-time = "2022-07-24T15:44:01.078Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/48/22/03c688fd138d8c8c629898fc6071ccd27613fed1e8a2e2a0f9dd4b3b9fdd/fpdf_table-1.1.5-py3-none-any.whl", hash = "sha256:f74703de9acb6c07dcb1708a3efe4c9c65f2a5c6ee63b86a01fbf85d689ce054", size = 10858, upload-time = "2022-07-24T15:43:59.962Z" },
-]
-
-[[package]]
-name = "fpdf2"
-version = "2.5.4"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "defusedxml" },
-    { name = "pillow" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/e8/8e/0744ebab35f0ffa830e8038dabd432247e4fd8aedf869fc2a0e128e729f8/fpdf2-2.5.4.tar.gz", hash = "sha256:24b045c8bab16ce0b52769f4066385b5255dc6a01c474b0e41cb6d8bbfebe3ff", size = 132707, upload-time = "2022-05-05T14:40:03.086Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/97/01/1087a65f4c3b72dc0691da43189f9f2f8523eaf4f1fbf2578b4ca66dd38a/fpdf2-2.5.4-py2.py3-none-any.whl", hash = "sha256:0f5bb5059d6049ad6b6fa985120bd81ca2beecff60ec48735272e2ab4f1b39d7", size = 218734, upload-time = "2022-05-05T14:40:01.731Z" },
 ]
 
 [[package]]
@@ -893,6 +859,22 @@ wheels = [
 ]
 
 [[package]]
+name = "pdf-oxide"
+version = "0.3.78"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/99/52/202c81a0ff60e64309dd7fc4682029f88d3fb07c827f4eaf78b53a7552ee/pdf_oxide-0.3.78.tar.gz", hash = "sha256:18fb43c7b4e390400aab51f546a7b8c6ee471b5cbec88f4cf3dd74f6c43c49f2", size = 6930468, upload-time = "2026-09-08T17:24:28.544Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/7a/e0/955517da3f8249239573ecafd756f7c647984b6c2a7c67701333556cf3ce/pdf_oxide-0.3.78-cp38-abi3-macosx_10_12_x86_64.whl", hash = "sha256:a0c98d7753ec8593bd7e79ee41ad813b22a55fdd321cae85138e791802eac92b", size = 11084145, upload-time = "2026-09-08T17:24:11.702Z" },
+    { url = "https://files.pythonhosted.org/packages/9a/51/cf844ffab595c22d181f219e786d7c0f80e8d2bfbee8d15a0f1b0cc88406/pdf_oxide-0.3.78-cp38-abi3-macosx_11_0_arm64.whl", hash = "sha256:538a809d35d9dec07e2e7a7568352bcf4114a8fb66d12f7452c802b2304d6946", size = 10506402, upload-time = "2026-09-08T17:24:13.905Z" },
+    { url = "https://files.pythonhosted.org/packages/1c/e9/4774d28d8a0325809e3c4b1903d777c761b9058fa5dedd47c08caf1f5253/pdf_oxide-0.3.78-cp38-abi3-manylinux_2_28_aarch64.whl", hash = "sha256:dda4a7fb93f3b68a4b9bf52d0d314891d777c417f41993a0c2d8937325a59f2b", size = 10817714, upload-time = "2026-09-08T17:24:15.885Z" },
+    { url = "https://files.pythonhosted.org/packages/df/6c/6b5957c884fb73582851810b5f1e4660da1d414c692ab77c2e784aecd9e0/pdf_oxide-0.3.78-cp38-abi3-manylinux_2_28_x86_64.whl", hash = "sha256:0b7e03008ca441e9183ef8f3c5d895424aca8119d5a860a205e1d16649f4f6a8", size = 11462221, upload-time = "2026-09-08T17:24:17.869Z" },
+    { url = "https://files.pythonhosted.org/packages/91/68/f3b875b44c844970ca7bb727ea417d313a89c176b0d43733267102b871f7/pdf_oxide-0.3.78-cp38-abi3-musllinux_1_2_aarch64.whl", hash = "sha256:119c45cc16e1763440e438ab3e2d0a59ff406ed4c5bf6b78716bd2dfb2083b05", size = 11012429, upload-time = "2026-09-08T17:24:20.128Z" },
+    { url = "https://files.pythonhosted.org/packages/59/14/b0a37b598af5f57bea25e130e1f3c1bbac549ec6dd00960c14d951e865ea/pdf_oxide-0.3.78-cp38-abi3-musllinux_1_2_x86_64.whl", hash = "sha256:e290619267875256d310ea692f2a748ddb9575d3c35ade61db51f3aaade1ddac", size = 11703260, upload-time = "2026-09-08T17:24:21.946Z" },
+    { url = "https://files.pythonhosted.org/packages/95/61/700cb40f9806df302e085a2d3b1133c21a95a54f2375bad3a04c419223ca/pdf_oxide-0.3.78-cp38-abi3-win_amd64.whl", hash = "sha256:3c2800d15e60ce1d2ec5de5ff9a605c167e0c9964bb9f6143862d282ef6b46d0", size = 11612909, upload-time = "2026-09-08T17:24:24.031Z" },
+    { url = "https://files.pythonhosted.org/packages/06/cb/ebd9574ec3a984b347347dc0e9c370ae38ad26dfafcb99e2253c9823bb8b/pdf_oxide-0.3.78-cp38-abi3-win_arm64.whl", hash = "sha256:f05e894c5d984284f56694f03a9351ea18d8c1ea081b4445007dfaa5c11dce85", size = 10813605, upload-time = "2026-09-08T17:24:26.267Z" },
+]
+
+[[package]]
 name = "pfasimplu"
 version = "3.0.5"
 source = { editable = "." }
@@ -903,11 +885,10 @@ dependencies = [
     { name = "django-browser-reload" },
     { name = "django-cleanup" },
     { name = "flaskwebgui" },
-    { name = "fpdf-table" },
     { name = "matplotlib" },
     { name = "openpyxl" },
     { name = "pandas" },
-    { name = "pypdf" },
+    { name = "pdf-oxide" },
     { name = "requests" },
     { name = "requests-cache" },
     { name = "unidecode" },
@@ -931,11 +912,10 @@ requires-dist = [
     { name = "django-browser-reload", specifier = ">=1.13.0" },
     { name = "django-cleanup", specifier = ">=8.1.0" },
     { name = "flaskwebgui", specifier = ">=1.1.9" },
-    { name = "fpdf-table", specifier = ">=1.1.5" },
     { name = "matplotlib", specifier = ">=3.9.2" },
     { name = "openpyxl", specifier = ">=3.1.5" },
     { name = "pandas", specifier = ">=3.1.1" },
-    { name = "pypdf", specifier = ">=4.3.1" },
+    { name = "pdf-oxide", specifier = ">=0.3.78" },
     { name = "requests", specifier = ">=2.34.2" },
     { name = "requests-cache", specifier = ">=1.3.3" },
     { name = "unidecode", specifier = ">=1.3.8" },
@@ -1108,15 +1088,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/e4/11/b213bebff182584360cb8d17c72c1677fec5c5c228de439e63bcf8ab1c8f/pyparsing-3.3.3.tar.gz", hash = "sha256:928ae7e20211f3b6f3915a72f06a0cfd29ab9d24279dd6346b6b1a7146397d36", size = 1050487, upload-time = "2026-09-20T20:59:05.609Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/38/bb/d215ee7c73b61497b28a5503f9f53523f294fcc936762b7caf90e0c1c2b5/pyparsing-3.3.3-py3-none-any.whl", hash = "sha256:ece8c00a69cf01b45d0b1dedabb469c90d8caf996d4fda40f147627a122849a4", size = 126420, upload-time = "2026-09-20T20:59:04.025Z" },
-]
-
-[[package]]
-name = "pypdf"
-version = "7.1.1"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/96/5f/f41984a8150ec37c6ee50fa6fa1868d065337b65ba510a155848b2ce0b62/pypdf-7.1.1.tar.gz", hash = "sha256:2eff4e2fc5fb22a6d6711e6f1166cdc9ab5765d90cd0d77dfea3f4aa91a27b1d", size = 7221452, upload-time = "2026-11-18T11:51:08.608Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/5b/ef/11ed995bd10a1632f7fea3da38ae8d42bc3ccc5b9969fe04d8620c844408/pypdf-7.1.1-py3-none-any.whl", hash = "sha256:04c5680d4b4cfa04ab505b09393fc949860c34a4dad6565284d11a2f5c3ce8b1", size = 421026, upload-time = "2026-11-18T11:51:06.563Z" },
 ]
 
 [[package]]

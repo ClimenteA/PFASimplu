@@ -67,7 +67,7 @@ def asigura_date_iban_trezorerie() -> bool:
     if _get_trezorerii():
         return True
 
-    # Import local: scraper-ul trage requests/pypdf doar cand e nevoie.
+    # Import local: scraper-ul trage requests/pdf_oxide doar cand e nevoie.
     from utils.scrape_iban_trezorerie import salveaza_json, scrape
 
     try:

@@ -18,7 +18,6 @@ Rulare automata: la salvarea Setarilor, daca static/iban_trezorerie.json lipsest
 Rezultat: static/iban_trezorerie.json (date statice, verificate la build).
 """
 
-import io
 import json
 import logging
 import os
@@ -28,7 +27,7 @@ import time
 from logging.handlers import RotatingFileHandler
 
 import requests
-from pypdf import PdfReader
+from pdf_oxide import PdfDocument
 from unidecode import unidecode
 
 ANAF_CODURI_IBAN = (
@@ -99,10 +98,10 @@ def extrage_ibanuri_tva_din_pdf(pdf_bytes: bytes) -> dict[str, dict]:
     Numele trezoreriei se ia din antetul fiecarei pagini
     ("Trezorerie operativa Municipiul Iasi"). Un PDF poate acoperi mai multe
     trezorerii (ex. TREZ405 + TREZ406), fiecare pe paginile ei."""
-    reader = PdfReader(io.BytesIO(pdf_bytes))
+    doc = PdfDocument.from_bytes(pdf_bytes)
     rezultat = {}
-    for page in reader.pages:
-        text = page.extract_text() or ""
+    for pagina in range(doc.page_count()):
+        text = doc.extract_text(pagina) or ""
         # Antetul paginii: "...Trezorerie operativa Municipiul Iasi" sau
         # "Trezoreria operativa ..." / "Trezoreria judeteana ..."
         nume_match = re.search(
