@@ -22,6 +22,12 @@ COTA_TVA = 0.21
 # Codurile scurte stocate in DB pentru deductibilitate (etichetele afisate
 # sunt textul descriptiv din models.py).
 MIJLOC_FIX = "MIJLOC_FIX"
+MIJLOC_FIX_CODURI = {
+    MIJLOC_FIX,
+    "MIJLOC_FIX_SEDIU",
+    "MIJLOC_FIX_M1",
+    "MIJLOC_FIX_M1_EXCEPTIE",
+}
 DEDUCTIBIL_INTEGRAL = "INTEGRAL"
 OBIECT_INVENTAR = "INVENTAR"
 AUTO_UTILITATI_50 = "AUTO_50"
@@ -79,7 +85,7 @@ def completare_setari(
     caen_principal: str = "6201",
 ):
     """Completeaza formularul din pagina Setari, inclusiv conturile IBAN
-    multiple (widget Alpine) si sectiunea TVA intracomunitar (D301/D390)."""
+    multiple (widget Alpine) si campurile TVA intracomunitar (D301/D390)."""
     page.goto("/setari/")
 
     page.fill("#id_nume", nume)
@@ -97,8 +103,7 @@ def completare_setari(
     page.locator("select[aria-label='Valuta cont'] >> nth=1").select_option("EUR")
     page.fill("input[aria-label='IBAN'] >> nth=1", iban_eur)
 
-    # Sectiunea TVA intracomunitar (cod special art. 317 + IBAN trezorerie).
-    page.get_by_role("button", name="TVA intracomunitar (D301/D390)").click()
+    # Campurile TVA intracomunitar (cod special art. 317 + IBAN trezorerie).
     page.fill("#id_cod_tva_intracomunitar", cod_tva_intracomunitar)
     page.fill("#id_cont_iban_trezoreria", iban_trezorerie)
 
@@ -274,7 +279,7 @@ def adauga_cheltuiala(
     page.select_option("#id_tip_tranzactie", tip_tranzactie)
     page.fill("#id_data_inserarii", data_cheltuielii.isoformat())
 
-    if deductibila == MIJLOC_FIX:
+    if deductibila in MIJLOC_FIX_CODURI:
         page.fill("#id_cod_de_clasificare", cod_de_clasificare)
         if ani_amortizare:
             page.fill("#id_ani_amortizare", str(ani_amortizare))

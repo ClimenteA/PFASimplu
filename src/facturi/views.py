@@ -7,7 +7,7 @@ from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.views import View
 
-from setari.models import SetariModel
+from setari.models import SetariModel, are_cod_tva_intracomunitar
 from utils.localitati import lista_localitati
 from utils.views import (
     download_model_csv_or_xlsx,
@@ -87,6 +87,7 @@ class FacturiView(View):
                 "unitati_de_masura": unitati_de_masura,
                 "lista_localitati": lista_localitati,
                 "note_ue_vies_json": NOTE_UE_VIES_JSON,
+                "are_cod_tva": are_cod_tva_intracomunitar(),
                 "page_items": page_items,
                 **context_cautare,
             },
@@ -116,6 +117,7 @@ class FacturiView(View):
                     "unitati_de_masura": unitati_de_masura,
                     "lista_localitati": lista_localitati,
                     "note_ue_vies_json": NOTE_UE_VIES_JSON,
+                    "are_cod_tva": are_cod_tva_intracomunitar(),
                     "page_items": page_items,
                     **context_cautare,
                 },

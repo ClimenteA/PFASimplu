@@ -1,18 +1,128 @@
 """Teste pentru emitenta de pe factura (CIF vs. cod TVA intracomunitar)."""
 
 import json
+import os
+import tempfile
 
 from django.contrib.auth.models import User
-from django.test import TestCase
+from django.test import SimpleTestCase, TestCase
+from pdf_oxide import PdfDocument
 
 from facturi.forms import FacturaForm
 from facturi.generare import construieste_context
 from facturi.models import (
     NOTA_TAXARE_INVERSA_VIES,
     FacturaModel,
+    creeaza_factura_pdf,
     nota_taxare_inversa_vies,
 )
 from setari.models import SetariModel
+from utils.pdf import A4_LATIME, MARGINE
+
+
+class FacturaPdfTest(SimpleTestCase):
+    """Factura se deseneaza direct cu pdf_oxide."""
+
+    @staticmethod
+    def date_factura(**suprascrieri):
+        from facturi.models import pdf_template_mapper
+
+        data = {
+            "tip_factura": "factura-romana",
+            "valuta": "RON",
+            "show_iban_furnizor": True,
+            "serie": "PFT",
+            "numar": "1",
+            "serie_numar": "PFT-1",
+            "data_emitere": "2026-11-28",
+            "data_scadenta": "2026-12-28",
+            "nota": "Observații șăâîț",
+            "nume_furnizor": "FURNIZOR ȘĂÂÎȚ",
+            "nr_reg_com_furnizor": "F22/123/2020",
+            "cif_furnizor": "RO12345678",
+            "adresa_furnizor": "Str. Ștefan cel Mare, Iași",
+            "email_furnizor": "test@example.com",
+            "telefon_furnizor": "",
+            "iban_furnizor": "RO49AAAA1B31007593840000",
+            "nume_client": "CLIENT SRL",
+            "nr_reg_com_client": "J22/1/2020",
+            "cif_client": "RO98765432",
+            "adresa_client": "Str. Unirii, Cluj",
+            "email_client": "client@example.com",
+            "telefon_client": "",
+            "iban_client": "",
+            "total_de_plata": "200,00",
+            "produse_sau_servicii": [
+                {
+                    "nume_produs_sau_serviciu": "Dezvoltare aplicație",
+                    "cod_unitate": "HUR",
+                    "numar_unitati": "1",
+                    "pret_pe_unitate": "100,00",
+                    "subtotal": "100,00",
+                }
+            ],
+        }
+        data.update(suprascrieri)
+        return pdf_template_mapper[data["tip_factura"]](data)
+
+    def test_pdf_are_o_pagina_si_nu_contine_diacritice(self):
+        data = self.date_factura()
+
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "factura.pdf")
+            creeaza_factura_pdf(data, path)
+            doc = PdfDocument(path)
+            text = doc.extract_text(0)
+            media_box = doc.page_media_box(0)
+
+        self.assertEqual(doc.page_count(), 1)
+        self.assertIn("FACTURA", text)
+        self.assertIn("Total de plata: 200,00 RON", text)
+        self.assertFalse(any(c in text for c in "ăâîșțĂÂÎȘȚ"))
+
+        # Pagina generata de pdf_oxide este A4.
+        _x0, _y0, latime, inaltime = media_box
+        self.assertAlmostEqual(latime / inaltime, 210 / 297, places=3)
+
+    def test_factura_lunga_trece_pe_mai_multe_pagini(self):
+        produse = [
+            {
+                "nume_produs_sau_serviciu": f"Produs {numar}",
+                "cod_unitate": "HUR",
+                "numar_unitati": "1",
+                "pret_pe_unitate": "10,00",
+                "subtotal": "10,00",
+            }
+            for numar in range(1, 61)
+        ]
+        data = self.date_factura(produse_sau_servicii=produse)
+
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "factura.pdf")
+            creeaza_factura_pdf(data, path)
+            doc = PdfDocument(path)
+            text_ultima_pagina = doc.extract_text(int(doc.page_count()) - 1)
+
+        self.assertGreater(int(doc.page_count()), 1)
+        self.assertIn("Total de plata: 200,00 RON", text_ultima_pagina)
+
+    def test_liniile_lungi_nu_ies_din_pagina(self):
+        data = self.date_factura(
+            nota="Observații " + "foarte lungi " * 30,
+            nume_furnizor="FURNIZOR " + "CU DENUMIRE LUNGA " * 8,
+        )
+
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "factura.pdf")
+            creeaza_factura_pdf(data, path)
+            doc = PdfDocument(path)
+            cuvinte = doc.extract_words(0)
+
+        self.assertTrue(cuvinte)
+        self.assertLessEqual(
+            max(c.bbox[0] + c.bbox[2] for c in cuvinte),
+            A4_LATIME - MARGINE,
+        )
 
 
 class CifFurnizorFacturaTest(TestCase):
@@ -163,3 +273,121 @@ class NotaClientUEVIESTest(TestCase):
         form = FacturaForm(date)
         self.assertTrue(form.is_valid(), form.errors)
         self.assertEqual(form.save().cif, "RO12345678")
+
+
+class FacturaEroareValidareTest(TestCase):
+    """Dupa o eroare de validare, formularul isi pastreaza valorile completate."""
+
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="rerandare@test.ro", password="parola"
+        )
+        self.client.force_login(self.user)
+        SetariModel.objects.create(
+            user=self.user,
+            nume="TEST PFA",
+            localitate="RO-IS, jud. Iasi, Iasi",
+            adresa="Strada Test nr. 1",
+            nr_reg_com="F1",
+            cif="1234567",
+            email="test@test.ro",
+            caen_principal="6201",
+            cod_tva_intracomunitar="52937756",
+        )
+
+    def test_eroarea_pastreaza_campurile_si_liniile(self):
+        linii = json.dumps(
+            [
+                {
+                    "id": 1,
+                    "nume_produs_sau_serviciu": "Consultanta",
+                    "cod_unitate": "HUR",
+                    "numar_unitati": "1.00",
+                    "pret_pe_unitate": "100.00",
+                    "subtotal": "100.00",
+                }
+            ]
+        )
+        response = self.client.post(
+            "/facturi/",
+            {
+                "serie": "VAL",
+                "numar": 7,
+                "nume": "CLIENT DE TEST",
+                "cif": "12345678",  # fara prefix UE -> eroare de validare
+                "adresa": "STRADA TESTULUI 1",
+                "localitate": "RO-IS, jud. Iasi, Iasi",
+                "data_emitere": "2026-10-02",
+                "data_scadenta": "2026-11-01",
+                "tip_factura": "factura-germana",
+                "tip_tranzactie": "BANCAR",
+                "valuta": "USD",
+                "client_ue": "on",
+                "nota": "",
+                "produse_sau_servicii": linii,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("cif", response.context["facturi_form"].errors)
+        html = response.content.decode()
+        for valoare in (
+            "CLIENT DE TEST",
+            "12345678",
+            "VAL",
+            "2026-10-02",
+            "2026-11-01",
+            "RO-IS, jud. Iasi, Iasi",
+            "Consultanta",
+        ):
+            self.assertIn(valoare, html)
+        # Alpine isi initializeaza starea din valorile randate de Django.
+        self.assertIn("numeClient: 'CLIENT DE TEST'", html)
+        self.assertIn("moreFields: true", html)
+
+
+class FacturiCodTvaTest(TestCase):
+    """Switchul si helperul Client UE VIES apar doar cu cod TVA intracomunitar."""
+
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="facturi-cod-tva@test.ro", password="parola"
+        )
+        self.client.force_login(self.user)
+
+    def setari(self, cod_tva=""):
+        return SetariModel.objects.create(
+            user=self.user,
+            nume="TEST PFA",
+            localitate="RO-IS, jud. Iasi, Iasi",
+            adresa="Strada Test nr. 1",
+            nr_reg_com="F1",
+            cif="1234567",
+            email="test@test.ro",
+            caen_principal="6201",
+            cod_tva_intracomunitar=cod_tva,
+        )
+
+    def test_fara_cod_tva_ascunde_switchul_si_helperul(self):
+        self.setari()
+
+        response = self.client.get("/facturi/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.context["are_cod_tva"])
+        self.assertNotContains(response, 'id="id_client_ue"')
+        self.assertNotContains(response, "Client UE VIES")
+        self.assertNotContains(response, 'id="cif-helper"')
+        self.assertNotContains(response, "Pentru client UE VIES")
+
+    def test_cu_cod_tva_afiseaza_switchul_si_helperul(self):
+        self.setari("52937756")
+
+        response = self.client.get("/facturi/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context["are_cod_tva"])
+        self.assertContains(response, 'id="id_client_ue"')
+        self.assertContains(response, "Client UE VIES")
+        self.assertContains(response, 'id="cif-helper"')
+        self.assertContains(response, "Pentru client UE VIES")

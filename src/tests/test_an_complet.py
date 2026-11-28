@@ -606,7 +606,7 @@ def test_07_declaratii_tva_din_cheltuieli(page, db):
 
 def test_08_export_date_pe_an(page, db):
     """Exportul din Setari pe anul selectat: zip cu documente/, cheltuieli/,
-    incasari/, registrele xlsx, fisele mijloacelor fixe si SUMAR.html."""
+    incasari/, registrele xlsx, tabelele csv, fisele mijloacelor fixe si SUMAR.html."""
     import io
     import tempfile
     from zipfile import ZipFile
@@ -656,6 +656,37 @@ def test_08_export_date_pe_an(page, db):
         for registru in ("Registru_Jurnal", "Registru_Fiscal", "Registru_Inventar"):
             assert f"{registru}_{TEST_YEAR}.xlsx" in names
         assert f"Jurnal_Cumparaturi_{TEST_YEAR}.xlsx" in names
+
+        # Tabelele complete, in format csv, in root (ca pe paginile respective).
+        assert "incasari.csv" in names
+        assert "cheltuieli.csv" in names
+        df_incasari_csv = pd.read_csv(io.BytesIO(zf.read("incasari.csv")))
+        df_cheltuieli_csv = pd.read_csv(io.BytesIO(zf.read("cheltuieli.csv")))
+        assert (
+            len(df_incasari_csv)
+            == db.execute("SELECT COUNT(*) FROM incasari_incasarimodel").fetchone()[0]
+        )
+        assert (
+            len(df_cheltuieli_csv)
+            == db.execute("SELECT COUNT(*) FROM cheltuieli_cheltuialamodel").fetchone()[
+                0
+            ]
+        )
+        assert "nume_incasare" in df_incasari_csv.columns
+        assert "suma" in df_incasari_csv.columns
+        assert "nume_cheltuiala" in df_cheltuieli_csv.columns
+        assert "suma" in df_cheltuieli_csv.columns
+        # Fisierele sunt doar nume, fara prefixul user_<id>/ .
+        assert all(
+            "/" not in nume
+            for nume in df_incasari_csv["fisier"].dropna()
+            if isinstance(nume, str)
+        )
+        assert all(
+            "/" not in nume
+            for nume in df_cheltuieli_csv["fisier"].dropna()
+            if isinstance(nume, str)
+        )
 
         df_jurnal = pd.read_excel(
             io.BytesIO(zf.read(f"Registru_Jurnal_{TEST_YEAR}.xlsx"))

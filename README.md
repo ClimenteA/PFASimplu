@@ -208,11 +208,11 @@ Toate tabelele (Facturi, Incasari, Cheltuieli, Documente, Inventar) au un formul
 
 **1. Prima deschidere - completeaza Setari**
 
-Deschide aplicatia, autentifica-te (sau inregistreaza-te la prima folosire) si mergi intai in pagina `Setari`: numele PFA-ului, CIF, Nr.Reg.Com., telefon, email, adresa, localitatea (aleasa din sugestii), codul CAEN principal (si, optional, CAEN-uri secundare sub `Adauga CAEN-uri Secundare`) si conturile IBAN (unul per moneda: RON, EUR etc., cu butoane `+ Adauga cont IBAN` / 🗑 pentru stergere). Bifeaza separat `Scutit CAS`, `Scutit CASS` si `Scutit Impozit` doar daca ai statut special (pensionar, persoana cu handicap, profesie liberala cu casa de asigurari proprie etc.). Daca ai cod special de TVA intracomunitar (art. 317), deschide sectiunea `TVA intracomunitar (D301/D390)` si completeaza codul - IBAN-ul trezoreriei se completeaza automat la alegerea localitatii. Salveaza. Fara acest pas, facturile nu au datele emitentului corecte.
+Deschide aplicatia, autentifica-te (sau inregistreaza-te la prima folosire) si mergi intai in pagina `Setari`: numele PFA-ului, CIF, Nr.Reg.Com., telefon, email (la prima deschidere e preluat automat din contul folosit la logare, dar il poti schimba), adresa, localitatea (aleasa din sugestii), codul CAEN principal (si, optional, pana la 4 CAEN-uri secundare sub `Adauga CAEN-uri Secundare`) si conturile IBAN (unul per moneda: RON, EUR etc., cu butoane `+ Adauga cont IBAN` / 🗑 pentru stergere). Bifeaza separat `Scutit CAS`, `Scutit CASS` si `Scutit Impozit` doar daca ai statut special (pensionar, persoana cu handicap, profesie liberala cu casa de asigurari proprie etc.). Daca ai cod special de TVA intracomunitar (art. 317), completeaza campurile `Cod TVA intracomunitar (art. 317)` si `IBAN trezorerie pentru plata TVA`, afisate direct in formular - IBAN-ul trezoreriei se completeaza automat la alegerea localitatii. Salveaza. Fara acest pas, facturile nu au datele emitentului corecte.
 
 **2. Emite prima factura (pagina Facturi)**
 
-Completeaza clientul, seria si numarul (propuse automat: prima factura primeste seria `INV` si numarul `1`, apoi se continua seria existenta cu numarul urmator - poti schimba seria si numarul), articolele (denumire, UM, cantitate, pret), tipul facturii (e-factura pentru B2B in Romania, sau PDF in alta limba/valuta pentru extern), tipul tranzactiei (💳 `BANCAR` sau 💵 `NUMERAR`) si, daca facturezi catre o firma din alt stat UE, comutatorul `Client UE VIES` - campul `CIF/CUI/VAT` trebuie atunci sa contina codul TVA cu prefixul tarii (ex. `ATU77164426`), nu un CIF roman; aplicatia adauga automat in factura mentiunea de taxare inversa in limba formularului ales. La salvare aplicatia genereaza automat PDF-ul facturii (si XML-ul UBL pentru e-factura) si le salveaza cu un prefix-id de 8 caractere. Le descarci din coloanele XML/PDF ale tabelului.
+Completeaza clientul, seria si numarul (propuse automat: prima factura primeste seria `INV` si numarul `1`, apoi se continua seria existenta cu numarul urmator - poti schimba seria si numarul), articolele (denumire, UM, cantitate, pret), tipul facturii (e-factura pentru B2B in Romania, sau PDF in alta limba/valuta pentru extern), tipul tranzactiei (💳 `BANCAR` sau 💵 `NUMERAR`) si, daca facturezi catre o firma din alt stat UE, comutatorul `Client UE VIES` (afisat doar daca ai completat codul TVA intracomunitar in `Setari`) - campul `CIF/CUI/VAT` trebuie atunci sa contina codul TVA cu prefixul tarii (ex. `ATU77164426`), nu un CIF roman; aplicatia adauga automat in factura mentiunea de taxare inversa in limba formularului ales. La salvare aplicatia genereaza automat PDF-ul facturii (si XML-ul UBL pentru e-factura) si le salveaza cu un prefix-id de 8 caractere. Le descarci din coloanele XML/PDF ale tabelului.
 
 **3. Inregistreaza incasarea (pagina Incasari)**
 
@@ -220,7 +220,7 @@ Cand intra banii: din pagina `Facturi`, click pe 💳 in dreptul facturii - form
 
 **4. Inregistreaza cheltuielile (pagina Cheltuieli)**
 
-De fiecare data cand cumperi ceva pentru activitatea PFA-ului: urci factura/bonul, alegi deductibilitatea (integral, obiect de inventar, mijloc fix peste 5000 RON cu amortizare, sau una din limitele speciale: 50% pentru autovehicule/chirii/utilitati folosite si personal, 2% mese protocol, burse private max. 5%, sport/fitness max. 100 EUR/an, pensie pilon III / ocupationala / PEPP / ETF / asigurari medicale private max. 400 EUR/an, salarii, ajutoare pentru angajati etc.), completezi `Tip tranzactie` (bancar/numerar) si, pentru servicii din UE/non-UE, alegi `Origine furnizor` - TVA-ul prin taxare inversa se calculeaza singur. Pentru mijloace fixe poti bifa optiuni suplimentare care modifica amortizarea: sediu social folosit si in scop personal (50%), autoturism M1 (limita 1500 lei/luna) sau exceptie de la aceasta limita. Obiectele de inventar si mijloacele fixe apar automat in pagina [Inventar](#inventar) cu numar de inventar; pentru mijloacele fixe se genereaza fisa de mijloc fix (PDF), iar amortizarea lunara apare in Registrul fiscal.
+De fiecare data cand cumperi ceva pentru activitatea PFA-ului: urci factura/bonul, alegi deductibilitatea (integral, obiect de inventar, mijloc fix peste 5000 RON cu amortizare, sau una din limitele speciale: 50% pentru autovehicule/chirii/utilitati folosite si personal, 2% mese protocol, burse private max. 5%, sport/fitness max. 100 EUR/an, pensie pilon III / ocupationala / PEPP / ETF / asigurari medicale private max. 400 EUR/an, salarii, ajutoare pentru angajati etc.), completezi `Tip tranzactie` (bancar/numerar) si, pentru servicii din UE/non-UE, alegi `Origine furnizor` - TVA-ul prin taxare inversa se calculeaza singur. Pentru mijloace fixe alegi direct varianta din campul `Deductibila`: sediu social folosit si in scop personal (amortizare 50%), autoturism M1 (limita 1500 lei/luna) sau autoturism M1 cu exceptie (amortizare integrala). Obiectele de inventar si mijloacele fixe apar automat in pagina [Inventar](#inventar) cu numar de inventar; pentru mijloacele fixe se genereaza fisa de mijloc fix (PDF), iar amortizarea lunara apare in Registrul fiscal.
 
 **5. Arhiveaza relatia cu ANAF (pagina Documente)**
 
@@ -243,13 +243,13 @@ Oricand, dar musai inainte de a completa Declaratia Unica: cardurile cu totaluri
 
 ## Setari 
 
-In pagina `Setari` trebuie sa adaugi datele pfa-ului tau: nume, CIF, Nr.Reg.Com., telefon, email, adresa, localitatea (din sugestii), codul CAEN principal si, optional, pana la 5 CAEN-uri secundare (butonul `+ Adauga CAEN-uri Secundare`).
+In pagina `Setari` trebuie sa adaugi datele pfa-ului tau: nume, CIF, Nr.Reg.Com., telefon, email (preluat initial din contul de logare), adresa, localitatea (din sugestii), codul CAEN principal si, optional, pana la 4 CAEN-uri secundare (butonul `+ Adauga CAEN-uri Secundare`).
 Sunt trei casute separate pentru scutiri: `Scutit CAS`, `Scutit CASS`, `Scutit Impozit` - bifeaza-le doar daca ai statut special (pensionar, persoana cu handicap, profesie liberala cu casa de asigurari proprie etc.); aplicatia foloseste bifa respective la calculul taxelor din pagina Registre.
 Poti sterge toate datele.
 Aceasta pagina trebuie completata la prima deschidere a aplicatiei.
 Cam rar vei schimba datele din aceasta pagina.
 Poti adauga mai multe conturi IBAN (RON, EUR, USD etc.), cate unul pentru fiecare moneda, direct in formular (butonul `+ Adauga cont IBAN`, respectiv iconita 🗑 pentru fiecare rand). La emiterea unei facturi se foloseste automat contul IBAN in moneda facturii, iar daca nu exista un cont in acea moneda, se foloseste contul de RON.
-Sectiunea `TVA intracomunitar (D301/D390)` e colapsata initial si se deschide cu butonul cu acelasi nume (vezi mai jos).
+Campurile `Cod TVA intracomunitar (art. 317)` si `IBAN trezorerie pentru plata TVA` sunt afisate direct in formular, impreuna cu celelalte date ale PFA-ului (vezi mai jos).
 
 Cu butonul `Exporta datele din aplicatie` descarci un zip cu datele pentru **anul selectat**. Zip-ul contine:
 - `documente/`, `cheltuieli/`, `incasari/` - documentele justificative urcate in aplicatie pentru anul selectat;
@@ -258,7 +258,7 @@ Cu butonul `Exporta datele din aplicatie` descarci un zip cu datele pentru **anu
 - `SUMAR.html` - metricile anului, in acelasi stil ca aplicatia (se deschide in orice browser): total incasari/cheltuieli, venit net, taxe si impozite de platit (CAS, CASS, impozit), ultima serie si numar de factura emisa (in anul exportat si in aplicatie), medii lunare, cea mai mare incasare/cheltuiala, incasari pe surse, cheltuieli pe deductibilitate si tabelele de amortizare per mijloc fix pana la amortizarea completa.
 
 
-Daca ai **cod special de TVA intracomunitar (art. 317 Cod fiscal)** si cumperi servicii din UE/non-UE (ex. Google, Cloudflare, OpenAI), deschide sectiunea `TVA intracomunitar (D301/D390)` si completeaza:
+Daca ai **cod special de TVA intracomunitar (art. 317 Cod fiscal)** si cumperi servicii din UE/non-UE (ex. Google, Cloudflare, OpenAI), completeaza direct in formularul `Setari` urmatoarele campuri:
 - **Cod TVA intracomunitar** - codul special din certificatul de inregistrare in scopuri de TVA, fara prefixul RO. Este diferit de CIF-ul normal al PFA-ului: pentru facturi din UE se foloseste codul special, pentru non-UE codul normal (aplicatia alege automat codul corect);
 - **IBAN trezorerie pentru plata TVA** - se completeaza **automat cand selectezi localitatea** (campul `Alege localitatea`): aplicatia are tabelul IBAN-urilor extras din [sursele oficiale ANAF](https://www.anaf.ro/anaf/internet/ANAF/asistenta_contribuabili/plata_oblig_fiscale/coduri_iban) (202 trezorerii operative, inclusiv sectoarele Bucurestiului) si stie contul `20A100101 - TVA incasata pentru operatiuni interne` pentru localitatea ta. Linkul PDF-ului ANAF ramane afisat ca sa poti verifica. Daca tabelul `src/static/iban_trezorerie.json` lipseste, aplicatia il descarca automat de pe ANAF la prima salvare a Setarilor (necesita conexiune la internet; dureaza cateva minute). Daca localitatea nu are trezorerie operativa proprie (sate/comune), cauta IBAN-ul in lista ANAF pentru judetul tau si completeaza-l manual. TVA-ul din D301 NU se plateste in contul unic.
 
@@ -285,7 +285,7 @@ Poti schimba si valuta in care emiti factura (pentru e-factura si factura in rom
 
 Campul `Tip tranzactie` (💳 BANCAR / 💵 NUMERAR) se preia in incasarea generata din factura si apare in Registrul jurnal pe coloanele de incasari bancare, respectiv numerar.
 
-Comutatorul `Client UE VIES` se bifeaza doar pentru clienti persoane impozabile din alte state UE, care datoreaza ei TVA-ul prin taxare inversa. Campul `CIF/CUI/VAT` trebuie sa contina codul TVA complet cu prefixul tarii (ex. `ATU77164426`); un CIF roman (`RO...`) este respins. Aplicatia completeaza automat campul `Nota` cu mentiunea de taxare inversa in limba facturii alese si foloseste factura pentru D390 VIES (vezi [D390 VIES pentru clienti UE](#d390-vies-pentru-clienti-ue-vanzari)).
+Comutatorul `Client UE VIES` apare in formular doar daca ai completat codul TVA intracomunitar in `Setari` si se bifeaza doar pentru clienti persoane impozabile din alte state UE, care datoreaza ei TVA-ul prin taxare inversa. Campul `CIF/CUI/VAT` trebuie sa contina codul TVA complet cu prefixul tarii (ex. `ATU77164426`); un CIF roman (`RO...`) este respins. Aplicatia completeaza automat campul `Nota` cu mentiunea de taxare inversa in limba facturii alese si foloseste factura pentru D390 VIES (vezi [D390 VIES pentru clienti UE](#d390-vies-pentru-clienti-ue-vanzari)).
 
 Din coloanele XML si PDF poti descarca facturile generate. In dreapta sus a tabelului sunt 2 butoane pentru a descarca toate facturile in format CSV sau XLSX. In coloana Del. poti sterge o factura. Tabelul are si cautare pe coloane si paginare; coloanele arata CIF/CUI/VAT, numele clientului, totalul, valuta, tipul tranzactiei, seria/numarul, emailul, telefonul, scadenta si starea incasarii.
 
@@ -316,23 +316,43 @@ Filtrul `Incasari din UE (TVA)` de deasupra tabelului arata incasarile din factu
 
 Aici poti aduga documentele justificative (facturi, chitante) pentru cheltuielile pe care le-ai facut in scopul prestarii activitatii tale de PFA. Campul `Tip tranzactie` (💳 BANCAR / 💵 NUMERAR) determina coloana din Registrul jurnal in care se inscrie plata.
 
-Campul `Deductibila` contine atat cheltuielile integral deductibile (consumabile, plati servicii, achizitii bunuri sub 5000 RON, salarii), cat si pe cele limitate, ale caror limite se calculeaza automat:
+Campul `Deductibila` alege regula fiscala a cheltuielii. Optiunile sunt in ordinea din aplicatie, iar limitele se calculeaza automat: daca suma depaseste plafonul, vezi mesajul cu suma ramasa disponibila.
 
-- **Obiect de inventar (deductibil integral)** si **Mijloc fix peste 5000 RON (ded. integral cu amortizare)** - apar automat in [Inventar](#inventar);
-- **50%** pentru vehicule nefolosite exclusiv in activitate (art. 68 alin. 7 lit. k), inclusiv chirii/utilitati folosite si in scop personal;
-- **2% din baza de calcul** pentru mese protocol (cadouri sub 100 RON etc.);
-- **5% din baza de calcul** pentru burse private si **5% din totalul salariilor** pentru ajutoare acordate angajatilor;
-- **max. 100 EUR/an** pentru sport/sali de fitness;
-- **max. 400 EUR/an** pentru pensie pilon III, pensie ocupationala, PEPP, ETF si asigurari medicale private;
-- **max. 4000 EUR/an** pentru cotizatii voluntare la asociatii/organizatii si **max. 5% din brut** pentru contributii obligatorii.
+| Optiune in `Deductibila` | Cand o alegi si ce regula se aplica | Exemplu |
+|---|---|---|
+| `Deductibila integral` | Cheltuiala curenta efectuata in scopul activitatii si justificata prin document: se deduce toata suma in anul platii (art. 68 alin. 4 lit. a). | Toner 120 RON; abonament de contabilitate 200 RON/luna. |
+| `Obiect de inventar (deductibil integral)` | Bun care nu se consuma imediat, dar e sub pragul de mijloc fix de 5000 RON (art. 28 alin. 2 lit. b). Se deduce integral la achizitie si apare in [Inventar](#inventar). | Scaun de birou 800 RON; imprimanta 1.200 RON. |
+| `Mijloc fix peste 5000 RON (ded. integral cu amortizare)` | Regula generala pentru bunurile amortizabile: valoarea se recupereaza lunar prin amortizare, nu prin deducerea integrala a facturii (art. 28 alin. 1-2 si art. 68 alin. 4 lit. d). Se completeaza codul de clasificare, data punerii in functiune si anii de amortizare. | Laptop 6.000 RON, cod `2.2.9.`, 2 ani → 250 RON/luna. |
+| `Mijloc fix peste 5000 RON (sediu social amortizare 50%)` | Sediu social intr-o cladire de locuit, folosit si in scop personal: amortizarea se deduce in procent de 50% (art. 28 alin. 12 lit. i^1). Daca e folosit personal de asociati/actionari, amortizarea nu se deduce deloc. | Apartament de 40.000 RON folosit ca sediu si locuit → se deduce 50% din amortizarea lunara. |
+| `Mijloc fix peste 5000 RON (Autoturism M1 limita 1.500 lei/luna)` | Autoturism M1 (cel mult 9 scaune, inclusiv soferul) care nu e folosit exclusiv in activitate: amortizarea e deductibila cel mult 1.500 RON/luna (art. 28 alin. 14). | Masina 60.000 RON / 2 ani → 2.500 RON/luna calculat, dar se deduce 1.500 RON/luna. |
+| `Mijloc fix peste 5000 RON (Autoturism M1 cu exceptie art. 28 alin. 14, amortizare integrala)` | Autoturism M1 folosit **exclusiv** in una dintre situatiile de la art. 28 alin. 14 lit. a)-d): urgenta, paza/protectie, curierat; agenti de vanzari si achizitii (inclusiv test drive si demonstratii); transport de persoane cu plata (taximetrie); prestari cu plata (inchiriere, leasing operational, scoli de soferi). Fara plafon lunar. | Masina de curierat 60.000 RON / 2 ani → 2.500 RON/luna, integral. |
+| `Vehicule nefolosite exclusiv in activitate, 50% (art. 68 alin. 7 lit. k)` | Cheltuieli de functionare, intretinere si reparatii ale unui vehicul folosit si personal: se deduce 50% (art. 68 alin. 5 lit. j si Normele metodologice, pct. 7 alin. 7). **Nu se aplica amortizarii**, care are regula ei la art. 28. Pentru 100% e necesara foaia de parcurs. | Combustibil 1.000 RON → 500 RON dedusi; RCA 800 RON → 400 RON dedusi. |
+| `Burse private max. 5% din baza de calcul (art. 68 alin. 5 lit. a)` | Bursa privata platita conform legii, in limita a 5% din baza de calcul de la art. 68 alin. 6 (venitul brut minus celelalte cheltuieli deductibile, fara protocol si burse). | Bursa 2.000 RON; daca baza de calcul e 30.000 RON, se deduce 1.500 RON. |
+| `Sport, sali de fitness etc. max. 100 EUR pe an` | Abonament sportiv platit in scop personal la un furnizor cu CAEN 9311, 9312 sau 9313, cel mult 100 EUR/an (art. 68 alin. 5 lit. r). Plafonul se cumuleaza pe an. | Abonament sala 600 RON/an → se deduce 600 RON sau echivalentul a 100 EUR, daca e mai mic. |
+| `Pensie pilon III max. 400 EUR pe an` | Contributii la fonduri de pensii facultative, platite in scop personal, max. 400 EUR/an (art. 68 alin. 5 lit. g; pentru 2026 vezi si notele OUG 8/2026). | 2.000 RON/an → se deduce echivalentul a 400 EUR. |
+| `Pensie ocupationala max. 400 EUR pe an (din 2026)` | Contributii la scheme de pensii ocupationale, max. 400 EUR/an (art. 68 alin. 5 lit. g^1 si notele OUG 8/2026). | 1.500 RON/an → se verifica plafonul de 400 EUR. |
+| `Produs paneuropean de pensii (PEPP) max. 400 EUR pe an (din 1.03.2026)` | Contributii PEPP platite in scop personal, max. 400 EUR/an (art. 68 alin. 5 lit. g^2 si notele OUG 8/2026). | 1.000 RON platiti in aprilie 2026 → se verifica plafonul de 400 EUR. |
+| `ETF max. 400 EUR pe an (din 1.03.2026)` | Sume platite pentru actiuni/titluri ETF prin entitatile de la art. 96^1 alin. 1, max. 400 EUR/an, **fara costurile tranzactiei** (art. 68 alin. 5 lit. s si OUG 8/2026). Pastreaza documentul cu elementele cerute de lege. | 3.000 RON in ETF → se deduce min(3.000 RON, 400 EUR), fara comisionul de tranzactie. |
+| `Asigurari medicale private max. 400 EUR pe an` | Prime de asigurare voluntara de sanatate si servicii medicale prin abonament, platite in scop personal, max. 400 EUR/an (art. 68 alin. 5 lit. h). | Abonament medical privat 1.800 RON/an → se deduce echivalentul a 400 EUR. |
+| `Mese protocol max. 2% baza de calcul` | Cheltuieli de protocol, in limita a 2% din baza de calcul de la art. 68 alin. 6 (art. 68 alin. 5 lit. b). Cadourile de mica valoare (≤ 100 RON, exclusiv TVA) acordate in actiuni de protocol nu sunt livrari de bunuri (Normele metodologice, pct. 7 alin. 12 lit. a). | Cina cu clienti 1.000 RON; limita = 2% din baza de calcul. |
+| `Deductibila integral salarii` | Salarii si sume asimilate salariilor platite angajatilor, deductibile integral (art. 68 alin. 4 lit. c). Baza lor determina si plafonul de 5% pentru ajutoare. | Salariu brut 6.000 RON/luna. |
+| `Ajutoare diverse pt. angajati max. 5% din total salarii pe an` | Cheltuieli sociale pentru angajati, pana la 5% din valoarea anuala a cheltuielilor cu salariile (art. 68 alin. 5 lit. c). | Cadou angajat 500 RON, cand salariile anuale insumeaza 100.000 RON (limita 5.000 RON). |
+| `Contributii obligatorii asociatii, organizatii max. 5% din brut` | Contributii profesionale obligatorii datorate organizatiilor profesionale din care faci parte, max. 5% din venitul brut realizat (art. 68 alin. 5 lit. q). | Cotizatie obligatorie 1.000 RON, la un brut de 50.000 RON (limita 2.500 RON). |
+| `Cotizatii voluntare asociatii, organizatii max. 4000 EUR pe an` | Cotizatii voluntare la asociatii profesionale, max. 4.000 EUR/an (art. 68 alin. 5 lit. p). | Cotizatie 1.500 RON/an. |
 
-Pentru mijloacele fixe poti bifa `Sediu social folosit si in scop personal (amortizare 50%)`, `Autoturism M1 (limita 1.500 lei/luna)` sau `Exceptie de la limita de 1.500 lei/luna`. Unele cheltuieli au nevoie de documente justificative in plus pe langa bonul sau factura care justifica cheltuiala. Achizitiile care nu isi pierd valoarea in timp (terenuri, aur, case) nu sunt deductibile. Daca trebuie sa adaugi mai mult de un document poti crea un zip cu toate documentele necesare.
+Toate limitele in euro se transforma in lei la cursul mediu comunicat de BNR pentru anul platii (Normele metodologice, pct. 6). Plafoanele anuale se verifica la fiecare cheltuiala, in ordinea introducerii, separat pentru fiecare categorie.
+
+Eticheta `Vehicule nefolosite exclusiv in activitate, 50% (art. 68 alin. 7 lit. k)` pastreaza numerotarea mai veche: in textul consolidat 2026-10-25 regula cheltuielilor cu autoturismele e la art. 68 alin. (5) lit. j), cu trimitere la alin. (7) lit. k); detaliile (ce cheltuieli intra sub limita si foaia de parcurs) sunt in Normele metodologice, pct. 7 alin. (7).
+
+![cheltuieli - optiuni mijloc fix in campul Deductibila](readmepics/cheltuieli_mijloc_fix.png)
+
+Unele cheltuieli au nevoie de documente justificative in plus pe langa bonul sau factura care justifica cheltuiala. Achizitiile care nu isi pierd valoarea in timp (terenuri, aur, case) nu sunt deductibile. Daca trebuie sa adaugi mai mult de un document poti crea un zip cu toate documentele necesare.
 
 Tabelul arata suma in valuta, suma in RON, suma dedusa in RON, TVA-ul autolichidat (cu badge 🇪🇺 / 🌍), tipul tranzactiei, data cheltuielii, tipul deductibilitatii si data modificarii; are cautare pe coloane si paginare. Regulile de deductibilitate si limitele sunt explicate pe larg in [Ghidul PFA in sistem real](GHID_PFA_SISTEM_REAL.md).
 
 ![cheltuieli](readmepics/cheltuieli.png)
 
-Atunci cand ai de adaugat un obiect de inventar cu valoarea peste 5000 RON trebuie sa selectezi `Mijloc fix peste 5000 RON (ded. integral cu amortizare)`. In campul `Nume cheltuiala` apar sugestii cu denumirile folosite anterior; cautarea din tabel filtreaza si pe acest camp (ca si pe celelalte coloane).
+Atunci cand ai de adaugat un obiect de inventar cu valoarea peste 5000 RON trebuie sa selectezi una dintre variantele `Mijloc fix peste 5000 RON ...` din campul `Deductibila`. In campul `Nume cheltuiala` apar sugestii cu denumirile folosite anterior; cautarea din tabel filtreaza si pe acest camp (ca si pe celelalte coloane).
 
 Uite un exemplu pentru a amortiza o cheltuiala amortizabila cu un Laptop. 
 Cel mai apropiat de un laptop in tabel este valoarea `Calculatoare electronice` care are codul `2.2.9.` 
@@ -343,7 +363,7 @@ si o perioada de amortizare intre 2 si 4 ani.
 
 Odata introduse aceste date, aplicatia va calcula automat amortizarea acelui activ fix.
 
-![cheltuieli_amortizare](readmepics/cheltuieli_amortizare.png)
+![cheltuieli_amortizare](readmepics/cheltuieli_amortizare_nou.png)
 
 ### Servicii cumparate din UE / non-UE (taxare inversa)
 
@@ -465,7 +485,7 @@ In tab-ul **Jurnal Vanzari** gasesti facturile emise catre clienti `Client UE VI
 
 ## Actualizare aplicatie
 
-Versiunea pe care o rulezi apare in subsolul paginii `Setari` (ex. `PFASimplu V3.0.4`). Cand exista o versiune noua, langa ea apare `(disponibil V...)` impreuna cu un link catre [GitHub Releases](https://github.com/ClimenteA/PFASimplu/releases), de unde o poti descarca. Aplicatia nu descarca si nu instaleaza nimic automat.
+Versiunea pe care o rulezi apare in subsolul paginii `Setari` (ex. `PFASimplu V3.0.5`). Cand exista o versiune noua, langa ea apare `(disponibil V...)` impreuna cu un link catre [GitHub Releases](https://github.com/ClimenteA/PFASimplu/releases), de unde o poti descarca. Aplicatia nu descarca si nu instaleaza nimic automat.
 
 **Actualizare executabil standalone:** descarca arhiva `.zip` pentru sistemul tau de operare, dezarhiveaza-o si ruleaza executabilul nou. Executabilul vechi poate fi sters: baza de date, documentele si celelalte date raman in directorul de date al sistemului (`%LOCALAPPDATA%\PFASimplu`, `~/Library/Application Support/PFASimplu` sau `~/.local/share/pfasimplu`), deci nu sunt afectate. Ca masura de precautie, inainte de upgrade copiaza acest director (backup) si fa un export al datelor din `Setari` → `Exporta datele din aplicatie`. Arhiva este descarcata prin HTTPS, dar binarul nu este semnat (vezi sectiunea de distributie standalone). Pentru Docker sau rulare din sursa folosesti procedura de mai jos.
 

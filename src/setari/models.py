@@ -83,6 +83,12 @@ class SetariModel(UserOwnedModel):
         return None
 
 
+def are_cod_tva_intracomunitar() -> bool:
+    """Codul special de TVA intracomunitar (art. 317) e completat in Setari."""
+    setari = SetariModel.objects.first()
+    return bool(setari and setari.cod_tva_intracomunitar)
+
+
 class ContBancar(models.Model):
     """Cont bancar al PFA-ului, cu IBAN validat si unic per valuta."""
 

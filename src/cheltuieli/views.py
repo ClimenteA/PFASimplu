@@ -7,7 +7,7 @@ from django.shortcuts import HttpResponseRedirect, get_object_or_404, render
 from django.utils import timezone
 from django.views import View
 
-from setari.models import SetariModel
+from setari.models import SetariModel, are_cod_tva_intracomunitar
 from utils.tari import TARI_NON_UE_CHOICES, TARI_UE_CHOICES
 from utils.tva import (
     get_cheltuieli_taxare_inversa,
@@ -125,7 +125,8 @@ class CheltuieliView(View):
 
         # Filtrul "Cheltuieli externe (TVA)": pe luni, facturile cu Origine
         # furnizor diferita de Romania, pentru care se depun D301/D390.
-        extern = request.GET.get("extern") == "1"
+        are_cod_tva = are_cod_tva_intracomunitar()
+        extern = are_cod_tva and request.GET.get("extern") == "1"
         ani_externi = sorted(
             {
                 (c.data_facturii or c.data_inserarii).year
@@ -155,6 +156,7 @@ class CheltuieliView(View):
                 "item_id": request.GET.get("id"),
                 "tari_ue_json": json.dumps(TARI_UE_CHOICES),
                 "tari_non_ue_json": json.dumps(TARI_NON_UE_CHOICES),
+                "are_cod_tva": are_cod_tva,
                 "extern": extern,
                 "ani_externi": ani_externi,
                 "anul_extern": anul_extern,
@@ -197,6 +199,7 @@ class CheltuieliView(View):
                         "item_id": request.GET.get("id"),
                         "tari_ue_json": json.dumps(TARI_UE_CHOICES),
                         "tari_non_ue_json": json.dumps(TARI_NON_UE_CHOICES),
+                        "are_cod_tva": are_cod_tva_intracomunitar(),
                         **context_cautare,
                     },
                 )

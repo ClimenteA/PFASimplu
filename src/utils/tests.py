@@ -1,18 +1,67 @@
 import datetime
+import os
+import tempfile
 from decimal import Decimal
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.test import RequestFactory, SimpleTestCase, TestCase
 from django.urls import reverse
+from pdf_oxide import PdfDocument
 
 from documente.models import DocumenteModel, TipDocument
 from facturi.models import FacturaModel
 from utils.calcule import calculeaza_cass_trepte, calculeaza_taxe_si_impozite
 from utils.decimale import D, rotund2, suma
+from utils.mijloc_fix_pdf import scrie_fisa_mijloc_fix
 from utils.parametri import get_parametri
+from utils.pdf import _rupe
 from utils.views import download_model_csv_or_xlsx, get_cautare
 from utils.widgets import NumeFisierFileInput
+
+
+class FisaMijlocFixPdfTest(SimpleTestCase):
+    """Fisa mijlocului fix se deseneaza direct cu pdf_oxide."""
+
+    def test_pdf_are_o_pagina_si_nu_contine_diacritice(self):
+        context = {
+            "nr_inventar": 5,
+            "fel_document": "F1 factura 2026",
+            "valoare_inventar": "1000,00",
+            "amortizare_lunara": "50,00",
+            "grupa": "Grupa 1",
+            "cod_de_clasificare": "123",
+            "anul_darii_in_folosinta": 2026,
+            "luna_darii_in_folosinta": 3,
+            "anul_amortizarii_complete": 2028,
+            "luna_amortizarii_complete": 2,
+            "durata_normala_de_functionare": 3,
+            "cota_de_amortizare": 33,
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            path = scrie_fisa_mijloc_fix(context, os.path.join(tmp, "fisa.pdf"))
+            doc = PdfDocument(path)
+            text = doc.extract_text(0)
+
+        self.assertEqual(doc.page_count(), 1)
+        self.assertIn("FISA MIJLOCULUI FIX", text)
+        self.assertIn("Valoare de inventar", text)
+        self.assertIn("1000,00", text)
+        self.assertFalse(any(c in text for c in "ăâîșțĂÂÎȘȚ"))
+
+
+class RupereTextTest(SimpleTestCase):
+    """Textul lung se rupe in linii care incap in latimea data."""
+
+    def test_textul_lung_se_rupe_pe_linii(self):
+        linii = _rupe("text lung " * 20, 20, len)
+        self.assertGreater(len(linii), 2)
+        self.assertTrue(all(len(linie) <= 20 for linie in linii), linii)
+
+    def test_cuvantul_mai_lat_decat_randul_este_spart(self):
+        linii = _rupe("a" * 50, 10, len)
+        self.assertTrue(all(len(linie) <= 10 for linie in linii), linii)
+        self.assertEqual("".join(linii), "a" * 50)
 
 
 class RotunjiriTest(SimpleTestCase):

@@ -238,16 +238,9 @@ def download_csv_or_xlsx(request, df: pd.DataFrame, filename: str):
     return download_dataframe(request, df, filename)
 
 
-def download_model_csv_or_xlsx(
-    request, theModel: Model, filename: str, order_by: str = "-data_inserarii"
-):
-    """Exporta toate inregistrarile modelului intr-un singur CSV/XLSX,
-    fara paginare si fara zip."""
-    filetype = (request.GET.get("filetype") or "").lower()
-
-    if filetype not in ["csv", "xlsx"]:
-        return redirect("/registre/")
-
+def model_dataframe(theModel: Model, order_by: str = "-data_inserarii") -> pd.DataFrame:
+    """Construieste DataFrame-ul cu toate inregistrarile modelului, curatand
+    campurile care nu pot fi scrise direct in CSV/XLSX."""
     data = list(theModel.objects.all().order_by(order_by).values())
 
     campuri_fisier = {
@@ -265,5 +258,18 @@ def download_model_csv_or_xlsx(
             elif isinstance(value, (list, dict)):
                 item[key] = json.dumps(value, ensure_ascii=False)
 
-    df = pd.DataFrame(data)
+    return pd.DataFrame(data)
+
+
+def download_model_csv_or_xlsx(
+    request, theModel: Model, filename: str, order_by: str = "-data_inserarii"
+):
+    """Exporta toate inregistrarile modelului intr-un singur CSV/XLSX,
+    fara paginare si fara zip."""
+    filetype = (request.GET.get("filetype") or "").lower()
+
+    if filetype not in ["csv", "xlsx"]:
+        return redirect("/registre/")
+
+    df = model_dataframe(theModel, order_by)
     return download_dataframe(request, df, filename)

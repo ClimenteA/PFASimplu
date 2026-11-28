@@ -53,6 +53,23 @@ def test_client_ue_cu_cif_romanesc_nu_se_salveaza(page):
     )
     page.locator("dialog[open]").get_by_role("button", name="Close").click()
 
+    # Campurile completate inainte de submit raman in formular dupa eroare.
+    expect(page.locator("#id_nume")).to_have_value("CLIENT RO")
+    expect(page.locator("#id_cif")).to_have_value("RO12345678")
+    expect(page.locator("#id_serie")).to_have_value("VAL")
+    expect(page.locator("#id_numar")).to_have_value("1")
+    expect(page.locator("#id_adresa")).to_have_value("STR. TESTULUI NR. 1, BUCURESTI")
+    expect(page.locator("#id_data_emitere")).to_have_value(zi.isoformat())
+    expect(page.locator("#id_data_scadenta")).to_have_value(
+        (zi + datetime.timedelta(days=30)).isoformat()
+    )
+    expect(page.locator("#id_tip_factura")).to_have_value("factura-engleza")
+    expect(page.locator("#id_valuta")).to_have_value("EUR")
+    expect(
+        page.locator("form#factura-form article input[type='text']").first
+    ).to_have_value("Consultanta")
+    expect(page.locator("#id_total_de_plata")).to_have_value("100.00")
+
     # Factura respinsa nu ajunge in tabel (filtram dupa serie, pe toate paginile).
     page.locator("#cautare input[name='cauta']").fill("VAL")
     page.select_option("#cautare select[name='coloana']", "serie")

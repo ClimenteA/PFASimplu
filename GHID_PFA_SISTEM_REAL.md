@@ -1,8 +1,8 @@
 # Ghid de operare — PFA în sistem real (contabilitate în partidă simplă)
 
-> **Data verificării surselor:** 27.11.2026. Legislația fiscală se modifică anual; înainte de aplicare, verifică versiunea consolidată a actelor citate mai jos. Ghidul este un instrument de lucru, nu înlocuiește consultanța fiscală.
+> **Data verificării surselor:** 28.11.2026. Legislația fiscală se modifică anual; înainte de aplicare, verifică versiunea consolidată a actelor citate mai jos. Ghidul este un instrument de lucru, nu înlocuiește consultanța fiscală.
 >
-> **Surse:** text integral extras cu MCP-ul `chatcodfiscal` din Codul fiscal (`codul-fiscal`, v. 2026-10-25), Codul de procedură fiscală (`cod-procedura-fiscala`, v. 2026-08-08), Normele metodologice de aplicare a Codului fiscal (`norme-metodologice-de-aplicare-a-codului-fiscal`, v. 2026-03-31), Reglementările contabile privind contabilitatea în partidă simplă (`reglementari-contabile-pardida-simpla-anexa`, v. 2023-05-24), Ordinul ANAF 3.254/2017 (`registrul-de-evidenta-fiscala-pfa-ii-if`, v. 2026-11-07), OUG 120/2021 (`oug-factura-electronica-e-factura`, v. 2026-06-01), Directiva 2006/112/CE (`ue-directiva-2006-112-ce-a-consiliului-din-28-noiembrie-2006-privind-sistemul-comun`, v. 2000-01-01), Regulamentul de punere în aplicare (UE) nr. 282/2011 (`ue-regulamentul-de-punere-in-aplicare-tva-ue-nr-282-2011`, v. 2000-01-01), nomenclatorul/formularele financiar-contabile (`nomeclatorul-documentelor-financiar-contabile` și `modele-documente-financiar-contabile-anexa-3`, v. 2024-08-01). Linkurile PDF sunt cele returnate de MCP.
+> **Surse:** text integral extras cu MCP-ul `chatcodfiscal` din Codul fiscal (`codul-fiscal`, v. 2026-10-25), Codul de procedură fiscală (`cod-procedura-fiscala`, v. 2026-08-08), Normele metodologice de aplicare a Codului fiscal (`norme-metodologice-de-aplicare-a-codului-fiscal`, v. 2026-03-31), Reglementările contabile privind contabilitatea în partidă simplă (`reglementari-contabile-pardida-simpla-anexa`, v. 2023-05-24), Ordinul ANAF 3.254/2017 (`registrul-de-evidenta-fiscala-pfa-ii-if`, v. 2026-11-07), OUG 120/2021 (`oug-factura-electronica-e-factura`, v. 2026-06-01), Legea nr. 70/2015 (`lege-disciplina-financiara-plati-numerar`, v. 2026-01-01), Directiva 2006/112/CE (`ue-directiva-2006-112-ce-a-consiliului-din-28-noiembrie-2006-privind-sistemul-comun`, v. 2000-01-01), Regulamentul de punere în aplicare (UE) nr. 282/2011 (`ue-regulamentul-de-punere-in-aplicare-tva-ue-nr-282-2011`, v. 2000-01-01), nomenclatorul/formularele financiar-contabile (`nomeclatorul-documentelor-financiar-contabile` și `modele-documente-financiar-contabile-anexa-3`, v. 2024-08-01). Linkurile PDF sunt cele returnate de MCP.
 
 ## Cuprins
 
@@ -16,7 +16,9 @@
    - [6.1 Calculul taxelor și impozitelor: CAS, CASS, impozit pe venit](#61-calculul-taxelor-și-impozitelor-cas-cass-impozit-pe-venit)
 7. [Mijloace fixe și obiecte de inventar: fișă și scoatere din uz](#7-mijloace-fixe-și-obiecte-de-inventar-fișă-și-scoatere-din-uz)
 8. [Checklist operațional](#8-checklist-operațional)
-9. [Surse și formulare](#9-surse-și-formulare)
+9. [Profilul țintă: PFA în sistem real, sub plafon TVA, fără casă de marcat](#9-profilul-țintă-pfa-în-sistem-real-sub-plafon-tva-fără-casă-de-marcat)
+10. [Cheltuieli deductibile și metode legale de optimizare fiscală](#10-cheltuieli-deductibile-și-metode-legale-de-optimizare-fiscală)
+11. [Surse și formulare](#11-surse-și-formulare)
 
 ---
 
@@ -144,10 +146,19 @@ Instrucțiunile formularului 301 confirmă că decontul special se completează 
 | Cheltuieli sociale | până la 5% din valoarea anuală a cheltuielilor cu salariile |
 | Contribuții la fonduri de pensii facultative / ocupaționale / produse paneuropene de pensii personale | echivalentul a **400 euro anual** pentru fiecare persoană (pentru anul 2026 se aplică notele OUG 8/2026) |
 | Prime de asigurare voluntară de sănătate și servicii medicale prin abonament | echivalentul a **400 euro anual** pentru fiecare persoană |
+| Abonamente sportive în scop personal (furnizori cu CAEN 9311/9312/9313) | echivalentul a **100 euro anual** pentru fiecare persoană (art. 68 alin. (5) lit. r)) |
+| Sume pentru ETF-uri în scop personal, fără costurile tranzacției | echivalentul a **400 euro anual** pentru fiecare persoană (art. 68 alin. (5) lit. s); pentru sume plătite și decontate de la **1 martie 2026**, conform OUG 8/2026 |
+| Cotizații la asociații profesionale | **4.000 euro anual** (art. 68 alin. (5) lit. p)) |
+| Contribuții profesionale obligatorii | **5% din venitul brut realizat** (art. 68 alin. (5) lit. q)) |
+| Dobânzi la împrumuturi de la persoane fizice/juridice, altele decât instituțiile de credit | până la dobânda de referință BNR (împrumuturi în lei) / rata dobânzii de la art. 27 alin. (7) lit. b) (valută), cu contract scris (art. 68 alin. (5) lit. n)) |
+| Leasing operațional, respectiv financiar | chiria-rata, respectiv amortizarea și dobânzile, conform art. 68 alin. (5) lit. o) |
+| Scăzăminte, perisabilități, pierderi din manipulare/depozitare, bunuri cu termen depășit | potrivit legislației în materie (art. 68 alin. (5) lit. d)) |
 | Cheltuieli comune activitate + scop personal | **numai partea aferentă activității independente** (art. 68 alin. (5) lit. i)) |
 | Autoturisme | limitare conform art. 68 alin. (7) lit. k), la cel mult un autoturism per persoană |
 
 **Baza de calcul** pentru burse private și protocol = diferența dintre venitul brut și cheltuielile deductibile, **altele decât** cheltuielile cu bursele private și cheltuielile de protocol (Cod fiscal, art. 68 alin. (6)).
+
+> **Limitele în euro** se transformă în lei la **cursul mediu comunicat de BNR pentru anul în care s-a efectuat plata** (Norme metodologice, `norme-metodologice-de-aplicare-a-codului-fiscal`, v. 2026-03-31, secțiunea „Reguli generale de stabilire a venitului net anual … în sistem real”, pct. 6). Pentru anul 2026 se aplică și notele art. 10 din OUG nr. 8/2026 (pentru pensii ocupaționale și ETF, contribuțiile plătite de la 1 martie 2026).
 
 **Autovehicule 50%:** dacă vehiculele rutiere motorizate nu sunt utilizate exclusiv în scopul activității, dreptul de deducere se limitează la **50%** din cheltuielile legate de acestea (inclusiv impozite locale, asigurare obligatorie RCA, ITP, rovinietă etc.), cu excepția amortizării, care urmează regulile art. 28. Pentru deductibilitate integrală trebuie întocmită **foaia de parcurs** care să cuprindă cel puțin: categoria vehiculului, scopul și locul deplasării, kilometri parcurși, norma proprie de consum carburant pe kilometru (Norme metodologice, `norme-metodologice-de-aplicare-a-codului-fiscal`, v. 2026-03-31, pct. 7 alin. (7)).
 
@@ -386,7 +397,110 @@ Câmpurile modelului (Anexa nr. 3, `modele-documente-financiar-contabile-anexa-3
 
 ---
 
-## 9. Surse și formulare
+## 9. Profilul țintă: PFA în sistem real, sub plafon TVA, fără casă de marcat
+
+> **TL;DR:** Ești **neplătitor de TVA** (regim special de scutire, art. 310 din Codul fiscal): nu colectezi taxa, nu ai dreptul la deducerea ei în decont, nu o menționezi pe factură, iar TVA pe care o plătești efectiv intră în costul cheltuielii deductibile ([4.5.1](#451-tva-plătită-când-nu-se-deduce-ca-taxă-devine-cheltuială-deductibilă)). Nu ai casă de marcat: încasările și plățile în numerar se justifică prin **factură sau chitanță (cod 14-4-1)** și se înscriu **zilnic** în Registrul-jurnal de încasări și plăți (14-1-1/b). Optimizarea se face pe **baza de calcul a impozitului pe venit (10%) și pe CAS/CASS**, nu pe TVA.
+
+### 9.1 Particularitățile regimului de scutire
+
+| Element | Regulă pentru tine | Sursă |
+|---|---|---|
+| Plafon | Cifră de afaceri anuală ≤ **395.000 lei**; poți opta oricând pentru regimul normal | Cod fiscal, `codul-fiscal`, v. 2026-10-25, art. 310 alin. (1), (3) |
+| Facturare | Factura **fără taxa**; nu menționezi TVA pe factură sau pe alt document | Cod fiscal, art. 310 alin. (10) lit. b) |
+| Deducerea TVA | **Nu ai dreptul** la deducerea taxei aferente achizițiilor, în condițiile art. 297 și 299 | Cod fiscal, art. 310 alin. (10) lit. a) |
+| TVA plătită | Rămâne suportată de tine → intră în costul bunului/serviciului; deductibilă la impozitul pe venit dacă e legată de activitate și justificată | Cod fiscal, art. 68 alin. (4) lit. a); vezi [4.5.1](#451-tva-plătită-când-nu-se-deduce-ca-taxă-devine-cheltuială-deductibilă) |
+| Deconturi | **Nu depui D300**; D301 numai când datorezi taxa pentru servicii cu locul în România / achiziții intracomunitare; D390 numai pentru operațiunile intracomunitare | Cod fiscal, art. 310 alin. (10), art. 323, 324, 325; vezi secțiunea 6 |
+| Depășirea plafonului | Te înregistrezi conform art. 316 cel târziu la data depășirii; regimul normal se aplică începând cu tranzacția care depășește plafonul | Cod fiscal, art. 310 alin. (6) |
+
+> **Atenție:** regimul de scutire **nu** te scutește de contabilitatea în partidă simplă, de Registrul de evidență fiscală sau de Declarația unică. Scutirea privește **doar TVA**.
+
+### 9.2 Documente când nu ai casă de marcat
+
+| Document | Rol | Sursă |
+|---|---|---|
+| **Factura** | Document justificativ pentru livrări/prestații; se emite conform Codului fiscal, **fără mențiunea taxei** (art. 310 alin. (10) lit. b)) | Nomenclatorul documentelor financiar-contabile, `nomeclatorul-documentelor-financiar-contabile`, v. 2024-08-01 — poziția „Factura”, cu nota „se întocmește și se utilizează în conformitate cu prevederile Codului fiscal” |
+| **Chitanța (cod 14-4-1)** / chitanța pentru operațiuni în valută (14-4-1/a) | Dovada încasării/plății în numerar | Nomenclatorul documentelor financiar-contabile, v. 2024-08-01 |
+| **Registrul-jurnal de încasări și plăți (14-1-1/b)** | Înregistrare cronologică a tuturor sumelor, în numerar și prin bancă; totalizare lunară; se arhivează împreună cu documentele justificative | Reglementări contabile, `reglementari-contabile-pardida-simpla-anexa`, v. 2023-05-24, pct. 11-12; vezi [5.2](#52-registrul-jurnal-de-încasări-și-plăți-cod-14-1-1b) |
+| **Dovada plății** (ordin de plată, chitanță, bon) | Condiția de la art. 68 alin. (4) lit. b): cheltuiala e deductibilă în anul în care a fost **plătită** | Cod fiscal, `codul-fiscal`, v. 2026-10-25, art. 68 alin. (4) lit. b) |
+| **Registrul de evidență fiscală** | Completare anuală, pe surse; din datele lui se alimentează Declarația unică | Ordin ANAF 3.254/2017, `registrul-de-evidenta-fiscala-pfa-ii-if`, v. 2026-11-07, art. 1-5; vezi [5.1](#51-registrul-de-evidență-fiscală) |
+
+> **Plăți în numerar:** PFA este inclusă **expres** în categoria persoanelor vizate de Legea nr. 70/2015 (art. 1 alin. (1)), deci încasările/plățile în numerar către/de la **persoane fizice**, pentru livrări de bunuri sau prestări de servicii, se încadrează în **plafonul zilnic de 10.000 lei per persoană**; fragmentarea tranzacțiilor peste plafon este interzisă (Legea nr. 70/2015, `lege-disciplina-financiara-plati-numerar`, v. 2026-01-01, art. 4 alin. (1)-(2)). Plafoanele **nu** se aplică pentru depunerea/retragerea de numerar în/din conturi, plata impozitelor, taxelor și contribuțiilor ori cheltuielile de deplasare în interes de serviciu (art. 5). Plafonul de 50.000 lei/tranzacție de la art. 10 vizează tranzacțiile între persoane fizice **neautorizate** — regim diferit de al tău.
+
+> **Verifică separat:** obligațiile privind aparatele de marcat electronice fiscale pentru tipul tău concret de activitate (în special vânzări către populație) nu sunt acoperite de actele citate aici; analizează-le distinct.
+
+### 9.3 Checklist „drept la deducere” înainte de a trece o cheltuială în registru
+
+- [ ] **Scop:** efectuată în cadrul activității independente (art. 68 alin. (4) lit. a));
+- [ ] **Document:** factură/chitanță cu elementele obligatorii de la pct. 4 din Reglementările contabile (vezi [4.1](#41-reguli-generale));
+- [ ] **Plată:** în anul curent, cu dovada plății (art. 68 alin. (4) lit. b));
+- [ ] **Limită:** încadrare în limitele art. 68 alin. (5) / (7) (vezi [4.5](#45-deductibilitate-totală-limitată-și-nedeductibilitate) și [10.1](#101-harta-deductibilității));
+- [ ] **TVA:** dacă nu ai dedus taxa (regim de scutire), o incluzi în cost; dacă ai dedus-o în D300, nu o mai treci pe cheltuieli (Ordin 3.254/2017, art. 5 alin. (6));
+- [ ] **Uz mixt:** dacă bunul/serviciul servește și scopului personal, deducezi **numai partea aferentă activității** (art. 68 alin. (5) lit. i)).
+
+---
+
+## 10. Cheltuieli deductibile și metode legale de optimizare fiscală
+
+> **TL;DR:** Optimizarea legală înseamnă să folosești **toate** deducerile permise de art. 68 din Codul fiscal și să păstrezi documentele care le dovedesc. Nu înseamnă să transformi cheltuieli personale în cheltuieli de afaceri, să deduci fără documente sau să menționezi TVA pe factură când ești scutit.
+
+### 10.1 Harta deductibilității
+
+| Categorie | Ce intră | Temei |
+|---|---|---|
+| **Total deductibile** | Cheltuieli efectuate în scopul activității, justificate prin documente și plătite în anul curent; salarii și asimilate, prime de asigurare pentru activele afacerii/garanții bancare/leasing/risc profesional, deplasări proprii (cazare + transport), contribuții la sisteme proprii de asigurări sociale, cheltuieli reglementate prin acte normative | Cod fiscal, `codul-fiscal`, v. 2026-10-25, art. 68 alin. (4) lit. a)-k); Norme metodologice, `norme-metodologice-de-aplicare-a-codului-fiscal`, v. 2026-03-31, secțiunea „Reguli generale de stabilire a venitului net anual … în sistem real”, pct. 5 |
+| **Deductibile limitat** | Burse private 5%, protocol 2%, cheltuieli sociale 5% din salarii, pensii facultative/ocupaționale/PEPP câte 400 euro, asigurări de sănătate/abonamente medicale 400 euro, abonamente sportive 100 euro, ETF 400 euro, cotizații profesionale 4.000 euro, contribuții profesionale obligatorii 5% din venitul brut, dobânzi (până la nivelul BNR), leasing, scăzăminte/perisabilități, uz mixt (doar partea de activitate), autoturisme 50% fără foaie de parcurs | Cod fiscal, art. 68 alin. (5) lit. a)-s), alin. (7) lit. k); tabelul de la [4.5](#45-deductibilitate-totală-limitată-și-nedeductibilitate) |
+| **Nedeductibile** | Uz personal/al familiei, venituri neimpozabile, impozitul pe venit, donații, sponsorizare/mecenat, amenzi și majorări de întârziere, rate de credit, cheltuieli de achiziție/fabricare a bunurilor amortizabile (se deduc prin amortizare), lipsuri neasigurate, fapte de corupție | Cod fiscal, art. 68 alin. (7) lit. a)-l), k^1), k^3), k^4); Ordin ANAF 3.254/2017, art. 5 alin. (4) lit. b) |
+
+> **Notă privind CAS/CASS:** contribuțiile sociale obligatorii datorate de PFA **nu** se trec la cheltuieli deductibile în venitul net — se deduc separat la calculul venitului net impozabil (Cod fiscal, art. 118) și **nu** se înscriu în Registrul de evidență fiscală (Ordin 3.254/2017, art. 5 alin. (5)); vezi [6.1](#61-calculul-taxelor-și-impozitelor-cas-cass-impozit-pe-venit).
+
+> **Cursul pentru limitele în euro:** echivalentul în lei se determină la **cursul mediu comunicat de BNR pentru anul în care s-a efectuat plata** (Norme metodologice, v. 2026-03-31, secțiunea „Reguli generale … în sistem real”, pct. 6). Notele art. 10 din OUG nr. 8/2026 stabilesc, pentru anul 2026, aplicarea limitei de 400 euro pentru pensiile facultative și, pentru contribuțiile plătite de la **1 martie 2026**, a limitelor pentru pensii ocupaționale/PEPP și ETF.
+
+### 10.2 Metode de optimizare legală
+
+| # | Metodă | Ce faci concret | Temei |
+|---|---|---|---|
+| 1 | **Documentează totul** | Fiecare cheltuială: factură/chitanță + dovada plății + înregistrare în Registrul-jurnal + (anual) în Registrul de evidență fiscală. Fără document, cheltuiala nu e deductibilă. | Cod fiscal, art. 68 alin. (4) lit. a)-b); Reglementări contabile, v. 2023-05-24, pct. 4; Ordin 3.254/2017, art. 5 |
+| 2 | **Amortizează mijloacele fixe** | Nu treci întreaga valoare pe cheltuieli la achiziție: deschide Fișa mijlocului fix și deduce anual cota de amortizare conform duratei normale de funcționare din Catalogul mijloacelor fixe. | Cod fiscal, art. 68 alin. (4) lit. d), art. 28; HOTĂRÂREA nr. 2139/2004 (`catalog-mijloace-fixe`), v. 2022-01-01; vezi [5.4](#54-fișa-mijlocului-fix-cod-14-2-2) |
+| 3 | **Foaia de parcurs: 100% în loc de 50%** | Pentru autoturismul folosit și în scop personal, întocmește foaia de parcurs cu: categoria vehiculului, scopul și locul deplasării, km parcurși, norma proprie de consum carburant/km. Altfel se deduce doar 50% din cheltuielile direct atribuibile (impozit local, RCA, ITP, rovinietă, reparații, combustibil), cu excepția amortizării. | Cod fiscal, art. 68 alin. (7) lit. k); Norme metodologice, v. 2026-03-31, secțiunea „Reguli generale … în sistem real”, pct. 7; vezi [4.5](#45-deductibilitate-totală-limitată-și-nedeductibilitate) |
+| 4 | **TVA plătită fără drept de deducere → cost** | Fiind sub scutire, TVA facturată de furnizori rămâne suportată; o incluzi în costul bunului/serviciului (și în valoarea de intrare a mijlocului fix), nu o pierzi fiscal. | Cod fiscal, art. 68 alin. (4) lit. a), art. 310 alin. (10) lit. a); Reglementări contabile, pct. 16; vezi [4.5.1](#451-tva-plătită-când-nu-se-deduce-ca-taxă-devine-cheltuială-deductibilă) |
+| 5 | **Protocol, dar în limita de 2%** | Planifică protocolul astfel încât să nu depășești 2% din baza de calcul (venit brut minus cheltuieli deductibile, exclusiv bursele private și protocolul); păstrează dovada participanților și a scopului. Cadourile ≤ 100 lei, exclusiv TVA, nu sunt livrări de bunuri. | Cod fiscal, art. 68 alin. (5) lit. b), alin. (6); Norme metodologice, pct. 7 alin. (12) lit. a); vezi [4.6](#46-documente-justificative-pentru-cheltuielile-de-protocol) |
+| 6 | **Asigurare voluntară de sănătate / abonament medical** | Plătește prime/abonamente în limita a **400 euro/an** pentru fiecare persoană — scopul personal este permis expres aici. | Cod fiscal, art. 68 alin. (5) lit. h) |
+| 7 | **Pensie facultativă / ocupațională / PEPP** | Contribuții în limita a **400 euro/an pentru fiecare persoană**, indiferent dacă activitatea e individuală sau în asociere. Verifică data de aplicare din notele OUG 8/2026 (PEPP și ocupaționale: contribuții din 1 martie 2026). | Cod fiscal, art. 68 alin. (5) lit. g), g^1), g^2) |
+| 8 | **Abonament sportiv 100 euro + ETF 400 euro** | Din 2026 poți deduce abonamente sportive (CAEN 9311/9312/9313) până la 100 euro/an și sume pentru ETF-uri până la 400 euro/an, pe bază de documente justificative (ETF: plătite și decontate de la 1 martie 2026). | Cod fiscal, art. 68 alin. (5) lit. r), s); OUG nr. 8/2026, art. 10 |
+| 9 | **Asociații profesionale** | Cotizații până la **4.000 euro/an**, respectiv contribuții profesionale obligatorii până la **5% din venitul brut realizat**. | Cod fiscal, art. 68 alin. (5) lit. p), q), alin. (4) lit. i) |
+| 10 | **Deplasări proprii** | Cazarea și transportul în țară și în străinătate, în scopul activității, sunt deductibile și când tu însuți desfășori activitatea (nu numai pentru salariați). Păstrează facturile și dovada scopului. | Cod fiscal, art. 68 alin. (4) lit. h) |
+| 11 | **Spații: întreținere chiar dacă factura e pe proprietar** | Cheltuielile de funcționare, întreținere și reparare a spațiilor folosite în afaceri se deduc **chiar dacă documentele sunt emise pe numele proprietarului**, nu pe al tău. | Norme metodologice, v. 2026-03-31, secțiunea „Reguli generale … în sistem real”, pct. 5 |
+| 12 | **Publicitate și reclamă** | Cheltuielile de reclamă/publicitate pentru popularizarea activității, inclusiv mostre și materiale promoționale, sunt cheltuieli în scopul activității. | Cod fiscal, art. 68 alin. (4) lit. j); Norme metodologice, secțiunea „Cheltuieli”, pct. 13 lit. a) |
+| 13 | **Dobânzi și leasing** | Dobânzi la împrumuturi de la persoane fizice/juridice (cu contract), în limita dobânzii de referință BNR; chiria-rata la leasing operațional sau amortizarea și dobânzile la leasing financiar. | Cod fiscal, art. 68 alin. (5) lit. n), o) |
+| 14 | **Reportează pierderile fiscale** | Pierderea se reportează pe **cel mult 70%** din venitul net, pe **5 ani fiscali consecutivi**, pe aceeași sursă — amână impozitul în anii cu profit. | Cod fiscal, art. 118 alin. (2) lit. a), alin. (4)-(5); vezi [6.1](#61-calculul-taxelor-și-impozitelor-cas-cass-impozit-pe-venit) |
+| 15 | **Plată anticipată / bonificație** | Verifică anual legea bugetului: art. 121 alin. (1) permite bonificație de **până la 10%** din impozit; pentru veniturile anului 2025 s-a acordat 3%, cu plată și depunere până la 15 aprilie 2026. | Cod fiscal, art. 121 alin. (1); OUG nr. 8/2026, art. 8; vezi [6.1](#61-calculul-taxelor-și-impozitelor-cas-cass-impozit-pe-venit) |
+| 16 | **Evită cheltuielile care nu se deduc** | Donațiile, sponsorizarea/mecenatul, amenzile, majorările de întârziere, ratele de credit și bunurile pentru uz personal **nu** reduc baza de impozitare; nu le trece în Registrul de evidență fiscală. | Cod fiscal, art. 68 alin. (7) lit. a), c), e), f), g); Ordin 3.254/2017, art. 5 alin. (4) lit. b) |
+
+### 10.3 Exemplu numeric: efectul unei cheltuieli deductibile
+
+Presupuneri: venit brut 100.000,00 lei, cheltuieli deductibile curente 60.000,00 lei, **fără** CAS datorat, **fără** pierderi reportate, **fără** bonificație, singurul venit e PFA, iar baza CASS rămâne peste 6 × S.
+
+| Situație | VN | CASS (10%) | Venit net impozabil | Impozit (10%) | Total de plată |
+|---|---|---|---|---|---|
+| Înainte | 40.000,00 | 4.000,00 | 36.000,00 | 3.600,00 | 7.600,00 |
+| După o cheltuială nouă de 5.000,00 lei | 35.000,00 | 3.500,00 | 31.500,00 | 3.150,00 | 6.650,00 |
+| **Economie** | −5.000,00 | **−500,00** | −4.500,00 | **−450,00** | **−950,00** |
+
+Explicație: cheltuiala reduce VN cu 5.000,00 lei; CASS scade cu 500,00 lei, iar venitul net impozabil scade cu doar 4.500,00 lei (5.000 − 500, pentru că se micșorează și CASS deductibilă), deci impozitul scade cu 450,00 lei. Efectul net e **950,00 lei**, nu 1.000,00 lei. Temei: Cod fiscal, art. 68 alin. (1), art. 118 alin. (2) lit. b), art. 170 alin. (1), art. 174 alin. (1), art. 123 alin. (1).
+
+> **Atenție:** exemplul e ilustrativ. Dacă baza CASS ar scădea sub **6 × S**, se datorează diferența până la nivelul a 6 × S (art. 174 alin. (6)), iar acea diferență **nu** se deduce (art. 118 alin. (2) lit. b)). Verifică și plafonul CAS (12/24 × S) în fiecare an.
+
+### 10.4 Ce nu este „optimizare”
+
+- Transformarea unei cheltuieli personale în cheltuială de afaceri (art. 68 alin. (7) lit. a)) — **nedeductibilă**;
+- Deducerea fără document justificativ sau fără dovada plății (art. 68 alin. (4) lit. a)-b));
+- Menționarea TVA pe factură în regim de scutire (art. 310 alin. (10) lit. b));
+- Fragmentarea plăților în numerar peste plafonul zilnic de 10.000 lei (Legea nr. 70/2015, art. 4 alin. (2));
+- Deducerea sponsorizării/donațiilor — art. 68 alin. (7) lit. e) și k^3) le exclude **explicit**.
+
+---
+
+## 11. Surse și formulare
 
 **Acte normative (cu versiunea consolidată extrasă din MCP):**
 
@@ -397,6 +511,7 @@ Câmpurile modelului (Anexa nr. 3, `modele-documente-financiar-contabile-anexa-3
 - Reglementările contabile privind contabilitatea în partidă simplă (`reglementari-contabile-pardida-simpla-anexa`), versiunea 2023-05-24 — norme generale pct. 1-20 (inclusiv pct. 16 privind valoarea de intrare/cost de achiziție), „Dispoziții generale”, „Arhivarea și păstrarea…”, cap. V.
 - OUG NR. 44/2008 (`pfa-ii-if-desfasurare-activitati-economice`), versiunea 2022-11-26 — art. 15.
 - OUG NR. 120/2021 (`oug-factura-electronica-e-factura`), versiunea 2026-06-01 — art. 5, 9^1 și notele OUG 6/2026 / OUG 89/2025.
+- LEGEA NR. 70/2015 (`lege-disciplina-financiara-plati-numerar`), versiunea 2026-01-01 — art. 1, 4, 5, 10 (plafoane pentru încasări și plăți în numerar; PFA e inclusă la art. 1 alin. (1)).
 - Directiva 2006/112/CE (`ue-directiva-2006-112-ce-a-consiliului-din-28-noiembrie-2006-privind-sistemul-comun`), versiunea 2000-01-01 — art. 44, 45, 244.
 - Regulamentul de punere în aplicare TVA UE nr.282.2011 (`ue-regulamentul-de-punere-in-aplicare-tva-ue-nr-282-2011`), versiunea 2000-01-01 — art. 18, secțiunea ▼B.
 - Nomenclatorul documentelor financiar-contabile (`nomeclatorul-documentelor-financiar-contabile`) și Anexa nr. 3 privind modelele (`modele-documente-financiar-contabile-anexa-3`), versiunea 2024-08-01.
@@ -411,4 +526,4 @@ Câmpurile modelului (Anexa nr. 3, `modele-documente-financiar-contabile-anexa-3
 - [D700](https://mcp.chatcodfiscal.ro/pdfs/declaratie-700/D700_XML_0126_110326.pdf) · [D020](https://mcp.chatcodfiscal.ro/pdfs/declaratie-d-020-opanaf-15-2026/D_020_OPANAF_15_2026.pdf)
 - [Decizie înregistrare TVA art. 317](https://mcp.chatcodfiscal.ro/pdfs/declaratie-a2-opanaf-1888-2019/A2_OPANAF_1888_2019.pdf) · [D307](https://mcp.chatcodfiscal.ro/pdfs/declaratie-307-opanaf-779-2024/307_OPANAF_779_2024.pdf)
 
-> **Subiecte pe care sursa verificată nu le acoperă explicit** (tratează-le separat, cu consultant): donarea unui mijloc fix uzat de către PFA și efectele sale fiscale; detaliile regimului TVA la import pentru PFA în sistem real; o listă exhaustivă a documentelor „de control” dincolo de registrele și documentele justificative prevăzute de actele citate; fiecare caz concret de ajustare a taxei pentru bunuri de capital.
+> **Subiecte pe care sursa verificată nu le acoperă explicit** (tratează-le separat, cu consultant): donarea unui mijloc fix uzat de către PFA și efectele sale fiscale; detaliile regimului TVA la import pentru PFA în sistem real; o listă exhaustivă a documentelor „de control” dincolo de registrele și documentele justificative prevăzute de actele citate; fiecare caz concret de ajustare a taxei pentru bunuri de capital; obligațiile privind aparatele de marcat electronice fiscale (OUG 28/1999) pentru activitatea concretă desfășurată.

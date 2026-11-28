@@ -52,7 +52,7 @@ from utils.trezorerie import (
 )
 from utils.tva import calculeaza_jurnal_cumparari, calculeaza_jurnal_vanzari
 from utils.valuta import Valuta
-from utils.views import pregateste_df_export
+from utils.views import model_dataframe, pregateste_df_export
 
 from .forms import SetariForm
 from .models import SetariModel
@@ -143,7 +143,12 @@ class SetariIbanTrezorerieView(View):
 class SetariView(View):
     def get(self, request):
         result = SetariModel.objects.first()
-        form = SetariForm(instance=result)
+        # Emailul de la logare e folosit doar cat timp campul e gol; dupa ce
+        # utilizatorul il actualizeaza, valoarea salvata are prioritate.
+        initial = {}
+        if not result or not result.email:
+            initial["email"] = request.user.email
+        form = SetariForm(instance=result, initial=initial)
         return render(
             request,
             template_name="setari.html",
@@ -193,6 +198,25 @@ class SetariView(View):
         return redirect("/setari/")
 
 
+def salveaza_tabele_csv(extracts_path):
+    """Scrie tabelele incasari si cheltuieli ca fisiere .csv in folderul dat.
+
+    Contin toate inregistrarile, ca si descarcarile de pe paginile respective,
+    si folosesc acelasi format (sumele cu maxim 2 zecimale, fara zerouri inutile).
+    """
+    fisiere = []
+    for model, nume in (
+        (IncasariModel, "incasari.csv"),
+        (CheltuialaModel, "cheltuieli.csv"),
+    ):
+        fp = os.path.join(extracts_path, nume)
+        pregateste_df_export(model_dataframe(model), pentru_csv=True).to_csv(
+            fp, index=False
+        )
+        fisiere.append(fp)
+    return fisiere
+
+
 class SetariViewDownloadData(View):
     """Exportul datelor pentru un an selectat de utilizator.
 
@@ -202,6 +226,7 @@ class SetariViewDownloadData(View):
     - incasari/   -> documentele justificative ale incasarilor din anul selectat;
     - in root: registrele anului in format .xlsx (Registrul Jurnal, Registrul
       Inventar, Registrul Fiscal, Jurnalul de cumparari si Jurnalul de vanzari),
+      tabelele incasari.csv si cheltuieli.csv cu toate inregistrarile,
       fisele mijloacelor fixe in folderul fise_mijloace_fixe/ si SUMAR.html cu
       metricile anului, inclusiv ultima serie si numar de factura emisa.
 
@@ -333,6 +358,9 @@ class SetariViewDownloadData(View):
         with open(sumar_fp, "w", encoding="utf-8") as f:
             f.write(sumar)
 
+        # --- Tabelele incasari/cheltuieli in format CSV ---
+        fisiere_csv = salveaza_tabele_csv(extracts_path)
+
         # --- Zip-ul final ---
         zip_filename = os.path.join(get_extracts_path(), f"export_date_{anul}.zip")
         with zipfile.ZipFile(zip_filename, "w", zipfile.ZIP_DEFLATED) as zipf:
@@ -354,6 +382,8 @@ class SetariViewDownloadData(View):
                     adauga_fisier_in_zip(zipf, factura.fisier_efactura_xml, "incasari")
 
             for fp in fisiere_registre:
+                zipf.write(fp, os.path.basename(fp))
+            for fp in fisiere_csv:
                 zipf.write(fp, os.path.basename(fp))
             for fp in fise_mijloace_fixe:
                 zipf.write(fp, f"fise_mijloace_fixe/{os.path.basename(fp)}")

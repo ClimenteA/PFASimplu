@@ -504,6 +504,14 @@ let CODURI_CLASIFICARE = [
 
 // code
 
+// Toate variantele de mijloc fix peste prag afiseaza campurile de amortizare.
+const MIJLOC_FIX_CODURI = [
+  "MIJLOC_FIX",
+  "MIJLOC_FIX_SEDIU",
+  "MIJLOC_FIX_M1",
+  "MIJLOC_FIX_M1_EXCEPTIE",
+];
+
 let select_deductibila_el = document.getElementById("id_deductibila");
 let amortizare_el = document.getElementById("amortizare");
 let lista_cod_clasif_el = document.getElementById(
@@ -547,12 +555,7 @@ function filtreazaCodClasificare(event) {
 }
 
 function hideShowExtraFieldsForMijlocFix() {
-  // Codul stocat e "MIJLOC_FIX"; eticheta afisata contine "cu amortizare".
-  const optiune = select_deductibila_el.options[select_deductibila_el.selectedIndex];
-  if (
-    select_deductibila_el.value === "MIJLOC_FIX" ||
-    (optiune && optiune.text.includes("cu amortizare"))
-  ) {
+  if (MIJLOC_FIX_CODURI.includes(select_deductibila_el.value)) {
     amortizare_el.style.display = "grid";
     display_coduri_clasif_el.style.display = "block";
     cod_cheltuiala_el.addEventListener("input", filtreazaCodClasificare);

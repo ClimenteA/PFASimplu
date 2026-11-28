@@ -8,8 +8,7 @@ se mai foloseste `mentiuni` ca sursa de date pentru rapoarte.
 import datetime
 import re
 
-import xmltodict
-from pypdf import PdfReader
+from pdf_oxide import PdfDocument
 
 from utils.decimale import D, rotund2
 
@@ -38,8 +37,8 @@ def parseaza_document(pdf_path: str) -> dict | None:
 
 def recipisa_parser(pdf_path: str):
     """Recipisa ANAF pentru D301/D390."""
-    reader = PdfReader(pdf_path)
-    pdf_text = reader.pages[0].extract_text() or ""
+    doc = PdfDocument(pdf_path)
+    pdf_text = doc.extract_text(0) or ""
 
     tip_match = re.search(r"declara[ţt]ie\s+tip\s+(D301|D390)", pdf_text, re.IGNORECASE)
     if not tip_match:
@@ -87,22 +86,8 @@ def recipisa_parser(pdf_path: str):
 
 
 def pdf_parser(pdf_path: str):
-    reader = PdfReader(pdf_path)
-    page = reader.pages[0]
-    pdf_text = page.extract_text() or ""
-
-    # D212 cu fisier XML atasat
-    xml = None
-    for content_list in reader.attachments.values():
-        for content in content_list:
-            xml = content.decode("utf-8")
-            break
-    if xml:
-        d212_dict = xmltodict.parse(xml)
-        return {
-            "tip_document": TipDocument.DECLARATIE_UNICA_212.value,
-            "data_document": _data(int(d212_dict["d212"]["@an_r"])),
-        }
+    doc = PdfDocument(pdf_path)
+    pdf_text = doc.extract_text(0) or ""
 
     # D212 dovada incarcare
     if "D212" in pdf_text or "declaratie unica" in pdf_text:
@@ -114,6 +99,16 @@ def pdf_parser(pdf_path: str):
             return {
                 "tip_document": TipDocument.DECLARATIE_UNICA_212_DOVADA_INCARCARE.value,
                 "data_document": data,
+            }
+
+    # Declaratia D212 (cu XML atasat): pdf_oxide nu expune atasamentele in
+    # Python, deci anul declaratiei se citeste din textul paginii.
+    if "D212" in pdf_text or "declaratie unica" in pdf_text:
+        an_match = re.search(r"[Aa]nul?\s+(\d{4})", pdf_text)
+        if an_match:
+            return {
+                "tip_document": TipDocument.DECLARATIE_UNICA_212.value,
+                "data_document": _data(int(an_match.group(1))),
             }
 
     # Dovada plata taxe si impozite (ghiseul.ro)

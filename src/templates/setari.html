@@ -20,9 +20,9 @@
         Butonul "Exporta datele din aplicatie" va crea un zip in folderul Descarcari (Downloads)
         cu datele pentru anul selectat: documentele justificative (in folderele documente,
         cheltuieli, incasari), registrele anului in format xlsx (Registrul Jurnal, Registrul
-        Inventar, Registrul Fiscal, Jurnalul de cumparari si Jurnalul de vanzari), fisele
-        mijloacelor fixe si un fisier SUMAR.html cu metricile anului (incasari, cheltuieli,
-        taxe, medii lunare etc.).
+        Inventar, Registrul Fiscal, Jurnalul de cumparari si Jurnalul de vanzari), tabelele
+        incasari.csv si cheltuieli.csv cu toate inregistrarile, fisele mijloacelor fixe si un
+        fisier SUMAR.html cu metricile anului (incasari, cheltuieli, taxe, medii lunare etc.).
 
         Butonul "Sterge toate datele" va sterge toate datele din aplicatie.
         <strong>Atentie!</strong> odata ce ai apasat pe butonul "Sterge toate datele"
@@ -81,9 +81,9 @@
                         }
                         if (infoEl) {
                             if (data.iban) {
-                                infoEl.innerHTML = `✅ <strong>${data.nume_trezorerie}</strong> — IBAN completat automat din <a href='${data.sursa}' target='_blank'>lista oficiala ANAF</a> (randul ${data.cod_bugetar}). Verifica inainte de plata.`;
+                                infoEl.innerHTML = `IBAN completat automat din <a href='${data.sursa}' target='_blank'>lista oficiala ANAF</a>`;
                             } else {
-                                infoEl.innerHTML = `⚠️ Localitatea nu are trezorerie operativa proprie in lista ANAF. Cauta IBAN-ul in <a href='${data.sursa}' target='_blank'>lista ANAF pentru judetul tau</a> (randul ${data.cod_bugetar}) si completeaza-l manual.`;
+                                infoEl.innerHTML = `Completeaza manual IBAN-ul din <a href='${data.sursa}' target='_blank'>lista oficiala ANAF</a>`;
                             }
                         }
                     } catch (e) { /* retea indisponibila - nu blocam formularul */ }
@@ -102,7 +102,6 @@
                     <span>Alege localitatea:</span> 
                     <input name="localitate" {% if setari_form.localitate.value %} value="{{ setari_form.localitate.value }}" {% endif %} x-ref="searchInputEl" autocomplete="__away" type="text" placeholder="Iasi...">
                     {{ setari_form.localitate.errors }}
-                    <small>La selectarea localitatii, IBAN-ul trezoreriei pentru plata TVA se completeaza automat (din sursele ANAF).</small>
                 </label>
             </div>
 
@@ -111,6 +110,30 @@
                 {{ setari_form.adresa }}
                 {{ setari_form.adresa.errors }}
             </label>
+        </div>
+
+        <div x-init="
+            const ibanInput = document.getElementById('{{ setari_form.cont_iban_trezoreria.id_for_label }}');
+            if (ibanInput && ibanInput.value) ibanInput.dataset.auto = 'true';
+        ">
+
+            <div class="grid">
+                <label for="{{ setari_form.cod_tva_intracomunitar.id_for_label }}">
+                    {{ setari_form.cod_tva_intracomunitar.label }}:
+                    {{ setari_form.cod_tva_intracomunitar }}
+                    {{ setari_form.cod_tva_intracomunitar.errors }}
+                    <small>Fara prefixul RO, doar numarul.</small>
+                </label>
+
+                <label for="{{ setari_form.cont_iban_trezoreria.id_for_label }}">
+                    {{ setari_form.cont_iban_trezoreria.label }}:
+                    {{ setari_form.cont_iban_trezoreria }}
+                    {{ setari_form.cont_iban_trezoreria.errors }}
+                    <small id="info-iban-trezorerie">
+                        IBAN-ul va fi completat automat din <a href="{{ link_iban_trezorerie }}" target="_blank">lista oficiala ANAF</a>
+                    </small>
+                </label>
+            </div>
         </div>
 
         <div class="grid">
@@ -190,12 +213,6 @@
                     {{ setari_form.caen_secondar_4 }}
                     {{ setari_form.caen_secondar_4.errors }}
                 </label>
-
-                <label for="{{ setari_form.caen_secondar_5.id_for_label }}">
-                    CAEN 5:
-                    {{ setari_form.caen_secondar_5 }}
-                    {{ setari_form.caen_secondar_5.errors }}
-                </label>
             </div>
 
         </div>
@@ -218,11 +235,6 @@
         }" data-conturi="{{ setari_form.conturi_iban.value|default:'[]' }}">
             <label>
                 Conturi IBAN:
-                <small>
-                    Poti adauga cate un cont IBAN pentru fiecare moneda (RON, EUR, USD etc.).
-                    La emiterea facturii se foloseste contul in moneda facturii,
-                    iar daca nu exista, contul de RON.
-                </small>
             </label>
 
             {{ setari_form.conturi_iban.errors }}
@@ -248,49 +260,6 @@
             <button type="button" class="outline secondary" @click="adaugaCont()">
                 <i class="bi bi-plus-lg"></i> Adauga cont IBAN
             </button>
-        </div>
-
-        <div class="mt-2" x-data="{ showTva: {% if setari_form.cod_tva_intracomunitar.value or setari_form.cont_iban_trezoreria.value %}true{% else %}false{% endif %} }" x-init="
-            const ibanInput = document.getElementById('{{ setari_form.cont_iban_trezoreria.id_for_label }}');
-            if (ibanInput && ibanInput.value) ibanInput.dataset.auto = 'true';
-        ">
-            <button @click="showTva = !showTva" type="button" class="outline secondary">
-                <i :class="showTva ? 'bi bi-dash-lg': 'bi bi-plus-lg'"></i> TVA intracomunitar (D301/D390)
-            </button>
-
-            <div x-show="showTva" class="mt-2">
-                <p style="font-size: 14px;">
-                    Completeaza doar daca ai <strong>cod special de TVA intracomunitar (art. 317 Cod fiscal)</strong>
-                    si cumperi servicii din UE/non-UE (ex. Google, Cloudflare, OpenAI).
-                    Cu aceste date aplicatia calculeaza automat TVA-ul datorat (taxare inversa, cota standard de 21%),
-                    iar declaratiile D301/D390 si jurnalul de cumparari se descarca din filtrul
-                    „Cheltuieli externe (TVA)" din pagina Cheltuieli.
-                    Codul special este <strong>diferit</strong> de CIF-ul normal al PFA-ului:
-                    pentru facturi din UE se foloseste codul special, pentru non-UE codul normal.
-                </p>
-
-                <div class="grid">
-                    <label for="{{ setari_form.cod_tva_intracomunitar.id_for_label }}">
-                        {{ setari_form.cod_tva_intracomunitar.label }}:
-                        {{ setari_form.cod_tva_intracomunitar }}
-                        {{ setari_form.cod_tva_intracomunitar.errors }}
-                        <small>Codul din certificatul de inregistrare in scopuri de TVA (art. 317), fara prefixul RO.</small>
-                    </label>
-
-                    <label for="{{ setari_form.cont_iban_trezoreria.id_for_label }}">
-                        {{ setari_form.cont_iban_trezoreria.label }}:
-                        {{ setari_form.cont_iban_trezoreria }}
-                        {{ setari_form.cont_iban_trezoreria.errors }}
-                        <small id="info-iban-trezorerie">
-                            Se completeaza automat la selectarea localitatii (din
-                            <a href="{{ link_iban_trezorerie }}" target="_blank">lista oficiala ANAF</a>,
-                            randul <strong>{{ cod_bugetar_tva }} - TVA incasata pentru operatiuni interne</strong>).
-                            Daca localitatea nu are trezorerie operativa proprie, cauta IBAN-ul in lista ANAF
-                            si completeaza-l manual. NU folosi contul unic.
-                        </small>
-                    </label>
-                </div>
-            </div>
         </div>
 
         <div class="mt-2">
@@ -320,7 +289,7 @@
                 type="submit">
             </button>
         </div>
-        <small class="pico-color-slate-500">Zip-ul contine documentele, registrele (xlsx) si SUMAR.html pentru anul selectat.</small>
+        <small class="pico-color-slate-500" style="text-align: right; margin-top: 0.1rem;">Zip-ul contine documentele, registrele (xlsx), tabelele incasari.csv si cheltuieli.csv si SUMAR.html pentru anul selectat.</small>
     </form>
 
     <form x-data="{deleting: false}" action="{% url 'setari-drop-data' %}" method="post" class="mt-4">

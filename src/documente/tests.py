@@ -78,20 +78,18 @@ def mock_get_bnr_rates(dateValue):
 def pdf_recipisa_d301() -> bytes:
     """Recipisa D301 sintetica pentru teste (PDF-urile reale sunt in stocare/,
     exclusa din git prin .gitignore, deci nu e disponibila intr-un checkout curat)."""
-    from fpdf import FPDF
+    from pdf_oxide import Pdf
 
-    pdf = FPDF()
-    pdf.add_page()
-    pdf.set_font("Helvetica", size=12)
-    for linie in (
-        "Declaratie tip D301",
-        "perioada de raportare 10 2026",
-        "CIF: 52937756",
-        "Index incarcare: 1296415962 din 13.10.2026",
-        "Nu exista erori de validare",
-    ):
-        pdf.cell(0, 9, linie, new_x="LMARGIN", new_y="NEXT")
-    return bytes(pdf.output())
+    continut = "\n".join(
+        (
+            "Declaratie tip D301",
+            "perioada de raportare 10 2026",
+            "CIF: 52937756",
+            "Index incarcare: 1296415962 din 13.10.2026",
+            "Nu exista erori de validare",
+        )
+    )
+    return Pdf.from_markdown(continut).to_bytes()
 
 
 def creeaza_setari(**kwargs):
@@ -551,18 +549,10 @@ Nu există erori de validare.
 """
 
     def _creeaza_pdf_cu_text(self, text):
-        from fpdf import FPDF
+        from pdf_oxide import Pdf
 
-        from core.settings import get_font_path
-
-        pdf = FPDF()
-        pdf.add_font("arial", "", os.path.join(get_font_path(), "arial.ttf"))
-        pdf.add_page()
-        pdf.set_font("arial", size=10)
-        for line in text.split("\n"):
-            pdf.cell(0, 6, line, new_x="LMARGIN", new_y="NEXT")
         path = os.path.join(tempfile.mkdtemp(), "recipisa.pdf")
-        pdf.output(path)
+        Pdf.from_markdown(text).save(path)
         return path
 
     def test_recipisa_d301(self):
