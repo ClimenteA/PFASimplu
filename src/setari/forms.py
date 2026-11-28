@@ -15,7 +15,6 @@ class SetariForm(ModelForm):
     caen_secondar_2 = forms.CharField(required=False, max_length=4)
     caen_secondar_3 = forms.CharField(required=False, max_length=4)
     caen_secondar_4 = forms.CharField(required=False, max_length=4)
-    caen_secondar_5 = forms.CharField(required=False, max_length=4)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -96,7 +95,7 @@ class SetariForm(ModelForm):
         conturi = self.cleaned_data.get("conturi_iban") or []
         caen = [
             self.cleaned_data.get(f"caen_secondar_{i}")
-            for i in range(1, 6)
+            for i in range(1, 5)
             if self.cleaned_data.get(f"caen_secondar_{i}")
         ]
         with transaction.atomic():

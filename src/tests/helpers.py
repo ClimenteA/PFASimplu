@@ -85,7 +85,7 @@ def completare_setari(
     caen_principal: str = "6201",
 ):
     """Completeaza formularul din pagina Setari, inclusiv conturile IBAN
-    multiple (widget Alpine) si sectiunea TVA intracomunitar (D301/D390)."""
+    multiple (widget Alpine) si campurile TVA intracomunitar (D301/D390)."""
     page.goto("/setari/")
 
     page.fill("#id_nume", nume)
@@ -103,8 +103,7 @@ def completare_setari(
     page.locator("select[aria-label='Valuta cont'] >> nth=1").select_option("EUR")
     page.fill("input[aria-label='IBAN'] >> nth=1", iban_eur)
 
-    # Sectiunea TVA intracomunitar (cod special art. 317 + IBAN trezorerie).
-    page.get_by_role("button", name="TVA intracomunitar (D301/D390)").click()
+    # Campurile TVA intracomunitar (cod special art. 317 + IBAN trezorerie).
     page.fill("#id_cod_tva_intracomunitar", cod_tva_intracomunitar)
     page.fill("#id_cont_iban_trezoreria", iban_trezorerie)
 

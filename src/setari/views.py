@@ -143,7 +143,12 @@ class SetariIbanTrezorerieView(View):
 class SetariView(View):
     def get(self, request):
         result = SetariModel.objects.first()
-        form = SetariForm(instance=result)
+        # Emailul de la logare e folosit doar cat timp campul e gol; dupa ce
+        # utilizatorul il actualizeaza, valoarea salvata are prioritate.
+        initial = {}
+        if not result or not result.email:
+            initial["email"] = request.user.email
+        form = SetariForm(instance=result, initial=initial)
         return render(
             request,
             template_name="setari.html",

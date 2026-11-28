@@ -208,11 +208,11 @@ Toate tabelele (Facturi, Incasari, Cheltuieli, Documente, Inventar) au un formul
 
 **1. Prima deschidere - completeaza Setari**
 
-Deschide aplicatia, autentifica-te (sau inregistreaza-te la prima folosire) si mergi intai in pagina `Setari`: numele PFA-ului, CIF, Nr.Reg.Com., telefon, email, adresa, localitatea (aleasa din sugestii), codul CAEN principal (si, optional, CAEN-uri secundare sub `Adauga CAEN-uri Secundare`) si conturile IBAN (unul per moneda: RON, EUR etc., cu butoane `+ Adauga cont IBAN` / 🗑 pentru stergere). Bifeaza separat `Scutit CAS`, `Scutit CASS` si `Scutit Impozit` doar daca ai statut special (pensionar, persoana cu handicap, profesie liberala cu casa de asigurari proprie etc.). Daca ai cod special de TVA intracomunitar (art. 317), deschide sectiunea `TVA intracomunitar (D301/D390)` si completeaza codul - IBAN-ul trezoreriei se completeaza automat la alegerea localitatii. Salveaza. Fara acest pas, facturile nu au datele emitentului corecte.
+Deschide aplicatia, autentifica-te (sau inregistreaza-te la prima folosire) si mergi intai in pagina `Setari`: numele PFA-ului, CIF, Nr.Reg.Com., telefon, email (la prima deschidere e preluat automat din contul folosit la logare, dar il poti schimba), adresa, localitatea (aleasa din sugestii), codul CAEN principal (si, optional, pana la 4 CAEN-uri secundare sub `Adauga CAEN-uri Secundare`) si conturile IBAN (unul per moneda: RON, EUR etc., cu butoane `+ Adauga cont IBAN` / 🗑 pentru stergere). Bifeaza separat `Scutit CAS`, `Scutit CASS` si `Scutit Impozit` doar daca ai statut special (pensionar, persoana cu handicap, profesie liberala cu casa de asigurari proprie etc.). Daca ai cod special de TVA intracomunitar (art. 317), completeaza campurile `Cod TVA intracomunitar (art. 317)` si `IBAN trezorerie pentru plata TVA`, afisate direct in formular - IBAN-ul trezoreriei se completeaza automat la alegerea localitatii. Salveaza. Fara acest pas, facturile nu au datele emitentului corecte.
 
 **2. Emite prima factura (pagina Facturi)**
 
-Completeaza clientul, seria si numarul (propuse automat: prima factura primeste seria `INV` si numarul `1`, apoi se continua seria existenta cu numarul urmator - poti schimba seria si numarul), articolele (denumire, UM, cantitate, pret), tipul facturii (e-factura pentru B2B in Romania, sau PDF in alta limba/valuta pentru extern), tipul tranzactiei (💳 `BANCAR` sau 💵 `NUMERAR`) si, daca facturezi catre o firma din alt stat UE, comutatorul `Client UE VIES` - campul `CIF/CUI/VAT` trebuie atunci sa contina codul TVA cu prefixul tarii (ex. `ATU77164426`), nu un CIF roman; aplicatia adauga automat in factura mentiunea de taxare inversa in limba formularului ales. La salvare aplicatia genereaza automat PDF-ul facturii (si XML-ul UBL pentru e-factura) si le salveaza cu un prefix-id de 8 caractere. Le descarci din coloanele XML/PDF ale tabelului.
+Completeaza clientul, seria si numarul (propuse automat: prima factura primeste seria `INV` si numarul `1`, apoi se continua seria existenta cu numarul urmator - poti schimba seria si numarul), articolele (denumire, UM, cantitate, pret), tipul facturii (e-factura pentru B2B in Romania, sau PDF in alta limba/valuta pentru extern), tipul tranzactiei (💳 `BANCAR` sau 💵 `NUMERAR`) si, daca facturezi catre o firma din alt stat UE, comutatorul `Client UE VIES` (afisat doar daca ai completat codul TVA intracomunitar in `Setari`) - campul `CIF/CUI/VAT` trebuie atunci sa contina codul TVA cu prefixul tarii (ex. `ATU77164426`), nu un CIF roman; aplicatia adauga automat in factura mentiunea de taxare inversa in limba formularului ales. La salvare aplicatia genereaza automat PDF-ul facturii (si XML-ul UBL pentru e-factura) si le salveaza cu un prefix-id de 8 caractere. Le descarci din coloanele XML/PDF ale tabelului.
 
 **3. Inregistreaza incasarea (pagina Incasari)**
 
@@ -243,13 +243,13 @@ Oricand, dar musai inainte de a completa Declaratia Unica: cardurile cu totaluri
 
 ## Setari 
 
-In pagina `Setari` trebuie sa adaugi datele pfa-ului tau: nume, CIF, Nr.Reg.Com., telefon, email, adresa, localitatea (din sugestii), codul CAEN principal si, optional, pana la 5 CAEN-uri secundare (butonul `+ Adauga CAEN-uri Secundare`).
+In pagina `Setari` trebuie sa adaugi datele pfa-ului tau: nume, CIF, Nr.Reg.Com., telefon, email (preluat initial din contul de logare), adresa, localitatea (din sugestii), codul CAEN principal si, optional, pana la 4 CAEN-uri secundare (butonul `+ Adauga CAEN-uri Secundare`).
 Sunt trei casute separate pentru scutiri: `Scutit CAS`, `Scutit CASS`, `Scutit Impozit` - bifeaza-le doar daca ai statut special (pensionar, persoana cu handicap, profesie liberala cu casa de asigurari proprie etc.); aplicatia foloseste bifa respective la calculul taxelor din pagina Registre.
 Poti sterge toate datele.
 Aceasta pagina trebuie completata la prima deschidere a aplicatiei.
 Cam rar vei schimba datele din aceasta pagina.
 Poti adauga mai multe conturi IBAN (RON, EUR, USD etc.), cate unul pentru fiecare moneda, direct in formular (butonul `+ Adauga cont IBAN`, respectiv iconita 🗑 pentru fiecare rand). La emiterea unei facturi se foloseste automat contul IBAN in moneda facturii, iar daca nu exista un cont in acea moneda, se foloseste contul de RON.
-Sectiunea `TVA intracomunitar (D301/D390)` e colapsata initial si se deschide cu butonul cu acelasi nume (vezi mai jos).
+Campurile `Cod TVA intracomunitar (art. 317)` si `IBAN trezorerie pentru plata TVA` sunt afisate direct in formular, impreuna cu celelalte date ale PFA-ului (vezi mai jos).
 
 Cu butonul `Exporta datele din aplicatie` descarci un zip cu datele pentru **anul selectat**. Zip-ul contine:
 - `documente/`, `cheltuieli/`, `incasari/` - documentele justificative urcate in aplicatie pentru anul selectat;
@@ -258,7 +258,7 @@ Cu butonul `Exporta datele din aplicatie` descarci un zip cu datele pentru **anu
 - `SUMAR.html` - metricile anului, in acelasi stil ca aplicatia (se deschide in orice browser): total incasari/cheltuieli, venit net, taxe si impozite de platit (CAS, CASS, impozit), ultima serie si numar de factura emisa (in anul exportat si in aplicatie), medii lunare, cea mai mare incasare/cheltuiala, incasari pe surse, cheltuieli pe deductibilitate si tabelele de amortizare per mijloc fix pana la amortizarea completa.
 
 
-Daca ai **cod special de TVA intracomunitar (art. 317 Cod fiscal)** si cumperi servicii din UE/non-UE (ex. Google, Cloudflare, OpenAI), deschide sectiunea `TVA intracomunitar (D301/D390)` si completeaza:
+Daca ai **cod special de TVA intracomunitar (art. 317 Cod fiscal)** si cumperi servicii din UE/non-UE (ex. Google, Cloudflare, OpenAI), completeaza direct in formularul `Setari` urmatoarele campuri:
 - **Cod TVA intracomunitar** - codul special din certificatul de inregistrare in scopuri de TVA, fara prefixul RO. Este diferit de CIF-ul normal al PFA-ului: pentru facturi din UE se foloseste codul special, pentru non-UE codul normal (aplicatia alege automat codul corect);
 - **IBAN trezorerie pentru plata TVA** - se completeaza **automat cand selectezi localitatea** (campul `Alege localitatea`): aplicatia are tabelul IBAN-urilor extras din [sursele oficiale ANAF](https://www.anaf.ro/anaf/internet/ANAF/asistenta_contribuabili/plata_oblig_fiscale/coduri_iban) (202 trezorerii operative, inclusiv sectoarele Bucurestiului) si stie contul `20A100101 - TVA incasata pentru operatiuni interne` pentru localitatea ta. Linkul PDF-ului ANAF ramane afisat ca sa poti verifica. Daca tabelul `src/static/iban_trezorerie.json` lipseste, aplicatia il descarca automat de pe ANAF la prima salvare a Setarilor (necesita conexiune la internet; dureaza cateva minute). Daca localitatea nu are trezorerie operativa proprie (sate/comune), cauta IBAN-ul in lista ANAF pentru judetul tau si completeaza-l manual. TVA-ul din D301 NU se plateste in contul unic.
 
@@ -285,7 +285,7 @@ Poti schimba si valuta in care emiti factura (pentru e-factura si factura in rom
 
 Campul `Tip tranzactie` (💳 BANCAR / 💵 NUMERAR) se preia in incasarea generata din factura si apare in Registrul jurnal pe coloanele de incasari bancare, respectiv numerar.
 
-Comutatorul `Client UE VIES` se bifeaza doar pentru clienti persoane impozabile din alte state UE, care datoreaza ei TVA-ul prin taxare inversa. Campul `CIF/CUI/VAT` trebuie sa contina codul TVA complet cu prefixul tarii (ex. `ATU77164426`); un CIF roman (`RO...`) este respins. Aplicatia completeaza automat campul `Nota` cu mentiunea de taxare inversa in limba facturii alese si foloseste factura pentru D390 VIES (vezi [D390 VIES pentru clienti UE](#d390-vies-pentru-clienti-ue-vanzari)).
+Comutatorul `Client UE VIES` apare in formular doar daca ai completat codul TVA intracomunitar in `Setari` si se bifeaza doar pentru clienti persoane impozabile din alte state UE, care datoreaza ei TVA-ul prin taxare inversa. Campul `CIF/CUI/VAT` trebuie sa contina codul TVA complet cu prefixul tarii (ex. `ATU77164426`); un CIF roman (`RO...`) este respins. Aplicatia completeaza automat campul `Nota` cu mentiunea de taxare inversa in limba facturii alese si foloseste factura pentru D390 VIES (vezi [D390 VIES pentru clienti UE](#d390-vies-pentru-clienti-ue-vanzari)).
 
 Din coloanele XML si PDF poti descarca facturile generate. In dreapta sus a tabelului sunt 2 butoane pentru a descarca toate facturile in format CSV sau XLSX. In coloana Del. poti sterge o factura. Tabelul are si cautare pe coloane si paginare; coloanele arata CIF/CUI/VAT, numele clientului, totalul, valuta, tipul tranzactiei, seria/numarul, emailul, telefonul, scadenta si starea incasarii.
 
@@ -485,7 +485,7 @@ In tab-ul **Jurnal Vanzari** gasesti facturile emise catre clienti `Client UE VI
 
 ## Actualizare aplicatie
 
-Versiunea pe care o rulezi apare in subsolul paginii `Setari` (ex. `PFASimplu V3.0.4`). Cand exista o versiune noua, langa ea apare `(disponibil V...)` impreuna cu un link catre [GitHub Releases](https://github.com/ClimenteA/PFASimplu/releases), de unde o poti descarca. Aplicatia nu descarca si nu instaleaza nimic automat.
+Versiunea pe care o rulezi apare in subsolul paginii `Setari` (ex. `PFASimplu V3.0.5`). Cand exista o versiune noua, langa ea apare `(disponibil V...)` impreuna cu un link catre [GitHub Releases](https://github.com/ClimenteA/PFASimplu/releases), de unde o poti descarca. Aplicatia nu descarca si nu instaleaza nimic automat.
 
 **Actualizare executabil standalone:** descarca arhiva `.zip` pentru sistemul tau de operare, dezarhiveaza-o si ruleaza executabilul nou. Executabilul vechi poate fi sters: baza de date, documentele si celelalte date raman in directorul de date al sistemului (`%LOCALAPPDATA%\PFASimplu`, `~/Library/Application Support/PFASimplu` sau `~/.local/share/pfasimplu`), deci nu sunt afectate. Ca masura de precautie, inainte de upgrade copiaza acest director (backup) si fa un export al datelor din `Setari` → `Exporta datele din aplicatie`. Arhiva este descarcata prin HTTPS, dar binarul nu este semnat (vezi sectiunea de distributie standalone). Pentru Docker sau rulare din sursa folosesti procedura de mai jos.
 
