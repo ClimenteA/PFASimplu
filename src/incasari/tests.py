@@ -1,10 +1,13 @@
 import datetime
+import tempfile
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
-from django.test import RequestFactory, TestCase
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import RequestFactory, TestCase, override_settings
 
 from facturi.models import FacturaModel
+from setari.models import SetariModel
 from utils.decimale import D
 from utils.valuta import TipTranzactie
 from utils.views import get_cautare
@@ -97,3 +100,73 @@ class IncasareDinFacturaTest(TestCase):
         rezultate = list(IncasariModel.objects.filter(query))
         self.assertEqual(len(rezultate), 1)
         self.assertEqual(rezultate[0].nume_incasare, "Client Alfa")
+
+
+@override_settings(MEDIA_ROOT=tempfile.mkdtemp(prefix="pfasimplu_test_cod_tva_media_"))
+class IncasariCodTvaTest(TestCase):
+    """Filtrul si coloana VIES se afiseaza doar cu cod TVA intracomunitar."""
+
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(
+            username="incasari-cod-tva@test.ro", password="parola"
+        )
+        self.client.force_login(self.user)
+
+    def setari(self, cod_tva=""):
+        return SetariModel.objects.create(
+            user=self.user,
+            nume="TEST PFA",
+            localitate="RO-IS, jud. Iasi, Iasi",
+            adresa="Strada Test nr. 1",
+            nr_reg_com="F1",
+            cif="1234567",
+            email="test@test.ro",
+            caen_principal="6201",
+            cod_tva_intracomunitar=cod_tva,
+        )
+
+    def test_fara_cod_tva_ascunde_filtrul_si_coloana_vies(self):
+        self.setari()
+
+        response = self.client.get("/incasari/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.context["are_cod_tva"])
+        self.assertNotIn(("ue", "VIES"), response.context["coloane_cautare"])
+        self.assertNotContains(response, 'id="filtru-incasari-ue"')
+        self.assertNotContains(response, "<th>VIES</th>")
+
+    def test_cu_cod_tva_afiseaza_filtrul_si_coloana_vies(self):
+        self.setari("52937756")
+
+        response = self.client.get("/incasari/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context["are_cod_tva"])
+        self.assertIn(("ue", "VIES"), response.context["coloane_cautare"])
+        self.assertContains(response, 'id="filtru-incasari-ue"')
+        self.assertContains(response, "<th>VIES</th>")
+
+    def test_fara_cod_tva_filtrul_ue_din_url_e_ignorat(self):
+        self.setari()
+        factura = FacturaModel.objects.create(
+            user=self.user,
+            serie="INV",
+            numar=1,
+            nume="Client UE",
+            cif="DE123",
+            adresa="Strada Test nr. 1",
+            client_ue=True,
+        )
+        IncasariModel.objects.create(
+            user=self.user,
+            factura=factura,
+            suma=D("100"),
+            nume_incasare="Client UE",
+            fisier=SimpleUploadedFile("incasare.pdf", b"%PDF-1.4 test"),
+        )
+
+        response = self.client.get("/incasari/", {"ue": "1"})
+
+        self.assertFalse(response.context["ue"])
+        self.assertEqual(len(response.context["page_items"].object_list), 1)

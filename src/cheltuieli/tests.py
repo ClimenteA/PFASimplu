@@ -9,6 +9,7 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from incasari.models import IncasariModel
+from setari.models import SetariModel
 from utils.cursuri import to_ron
 from utils.decimale import D
 
@@ -87,11 +88,15 @@ class AmortizareLimitataTest(TestCase):
     def setUp(self):
         _CACHE.clear()
 
-    def _mijloc_fix(self, **extra):
+    def _mijloc_fix(
+        self,
+        deductibila=Deductibilitate.DEDUCTIBILA_INTEGRAL_AMORTIZATA.value,
+        **extra,
+    ):
         return CheltuialaModel.objects.create(
             nume_cheltuiala="Echipament",
             suma=D("60000"),
-            deductibila=Deductibilitate.DEDUCTIBILA_INTEGRAL_AMORTIZATA.value,
+            deductibila=deductibila,
             cod_de_clasificare="2.2.9.",
             ani_amortizare=2,
             data_punerii_in_functiune=datetime.date(2026, 1, 1),
@@ -99,16 +104,24 @@ class AmortizareLimitataTest(TestCase):
             **extra,
         )
 
+    def test_mijloc_fix_fara_optiune_se_amortizeaza_integral(self):
+        mf = self._mijloc_fix()
+        self.assertEqual(mf.amortizare_lunara, Decimal("2500"))
+
     def test_autoturism_m1_limitat_la_1500_lunar(self):
-        mf = self._mijloc_fix(este_autoturism_m1=True)
+        mf = self._mijloc_fix(Deductibilitate.DEDUCTIBILA_INTEGRAL_AMORTIZATA_M1.value)
         self.assertEqual(mf.amortizare_lunara, Decimal("1500"))
 
     def test_autoturism_m1_cu_exceptie(self):
-        mf = self._mijloc_fix(este_autoturism_m1=True, exceptie_1500=True)
+        mf = self._mijloc_fix(
+            Deductibilitate.DEDUCTIBILA_INTEGRAL_AMORTIZATA_M1_EXCEPTIE.value
+        )
         self.assertEqual(mf.amortizare_lunara, Decimal("2500"))
 
     def test_sediu_social_neexclusiv_se_amortizeaza_50_suta(self):
-        mf = self._mijloc_fix(este_sediu_social_neexclusiv=True)
+        mf = self._mijloc_fix(
+            Deductibilitate.DEDUCTIBILA_INTEGRAL_AMORTIZATA_SEDIU.value
+        )
         self.assertEqual(mf.amortizare_lunara, Decimal("1250"))
 
     def test_cota_de_amortizare_rotunjita_la_doua_zecimale(self):
@@ -173,3 +186,94 @@ class PaginareTest(TestCase):
 
         response = self.client.get(reverse("cheltuieli"), {"page": 2})
         self.assertEqual(len(list(response.context["page_items"])), 1)
+
+
+@override_settings(MEDIA_ROOT=tempfile.mkdtemp(prefix="pfasimplu_test_cod_tva_media_"))
+class CheltuieliCodTvaTest(TestCase):
+    """Filtrul si coloana TVA se afiseaza doar cu cod TVA intracomunitar."""
+
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="cheltuieli-cod-tva@test.ro", password="parola"
+        )
+        self.client.force_login(self.user)
+
+    def setari(self, cod_tva=""):
+        return SetariModel.objects.create(
+            user=self.user,
+            nume="TEST PFA",
+            localitate="RO-IS, jud. Iasi, Iasi",
+            adresa="Strada Test nr. 1",
+            nr_reg_com="F1",
+            cif="1234567",
+            email="test@test.ro",
+            caen_principal="6201",
+            cod_tva_intracomunitar=cod_tva,
+        )
+
+    def test_fara_cod_tva_ascunde_filtrul_si_coloana_tva(self):
+        self.setari()
+
+        response = self.client.get(reverse("cheltuieli"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.context["are_cod_tva"])
+        self.assertNotContains(response, 'id="filtru-tva"')
+        self.assertNotContains(response, "<th>TVA</th>")
+
+    def test_cu_cod_tva_afiseaza_filtrul_si_coloana_tva(self):
+        self.setari("52937756")
+
+        response = self.client.get(reverse("cheltuieli"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context["are_cod_tva"])
+        self.assertContains(response, 'id="filtru-tva"')
+        self.assertContains(response, "<th>TVA</th>")
+
+    def test_fara_cod_tva_filtrul_extern_din_url_e_ignorat(self):
+        self.setari()
+        CheltuialaModel.objects.create(
+            user=self.user,
+            nume_cheltuiala="Serviciu extern",
+            suma=D("100"),
+            data_inserarii=ZIUA,
+            data_facturii=ZIUA,
+            furnizor_denumire="FURNIZOR GMBH",
+            furnizor_cod_fiscal="DE123456789",
+            furnizor_tara="DE",
+            numar_factura="EXT-1",
+            fisier=SimpleUploadedFile("cheltuiala.pdf", b"%PDF-1.4 test"),
+        )
+
+        response = self.client.get(reverse("cheltuieli"), {"extern": "1"})
+
+        self.assertFalse(response.context["extern"])
+        self.assertEqual(len(response.context["page_items"].object_list), 1)
+
+
+@override_settings(MEDIA_ROOT=tempfile.mkdtemp(prefix="pfasimplu_test_optiuni_media_"))
+class OptiuniMijlocFixInFormTest(TestCase):
+    """Optiunile speciale sunt in `Deductibila`, fara checkboxuri separate."""
+
+    def setUp(self):
+        user = User.objects.create_user(username="optiuni@test.ro", password="parola")
+        self.client.force_login(user)
+
+    def test_formularul_are_variantele_de_mijloc_fix(self):
+        response = self.client.get(reverse("cheltuieli"))
+
+        self.assertEqual(response.status_code, 200)
+        for eticheta in (
+            "Mijloc fix peste 5000 RON (ded. integral cu amortizare)",
+            "Mijloc fix peste 5000 RON (sediu social amortizare 50%)",
+            "Mijloc fix peste 5000 RON (Autoturism M1 limita 1.500 lei/luna)",
+            "Mijloc fix peste 5000 RON (Autoturism M1 cu exceptie art. 28 alin. 14, amortizare integrala)",
+        ):
+            self.assertContains(response, eticheta)
+        for camp in (
+            "este_sediu_social_neexclusiv",
+            "este_autoturism_m1",
+            "exceptie_1500",
+        ):
+            self.assertNotContains(response, f"id_{camp}")

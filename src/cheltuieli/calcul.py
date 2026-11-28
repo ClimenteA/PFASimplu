@@ -23,7 +23,12 @@ from utils.tari import (
 )
 
 from .catalog import CODURI_CLASIFICARE
-from .models import CheltuialaModel, Deductibilitate, TipAchizitie
+from .models import (
+    MIJLOC_FIX_CODURI,
+    CheltuialaModel,
+    Deductibilitate,
+    TipAchizitie,
+)
 
 UE_CODES = [cod for cod, _ in TARI_UE_CHOICES]
 NON_UE_CODES = [cod for cod, _ in TARI_NON_UE_CHOICES]
@@ -42,7 +47,7 @@ def q_taxare_inversa():
 
 
 def q_mijloc_fix():
-    return Q(deductibila=Deductibilitate.DEDUCTIBILA_INTEGRAL_AMORTIZATA)
+    return Q(deductibila__in=MIJLOC_FIX_CODURI)
 
 
 def q_obiect_inventar():
@@ -127,7 +132,7 @@ def tva_autolichidata(c):
 
 def clasificare(c):
     """Intoarce inregistrarea din catalog pentru un mijloc fix."""
-    if c.deductibila != Deductibilitate.DEDUCTIBILA_INTEGRAL_AMORTIZATA.value:
+    if c.deductibila not in MIJLOC_FIX_CODURI:
         return None
     if not c.data_punerii_in_functiune:
         raise ValidationError(
@@ -159,7 +164,7 @@ def durata_normala_de_functionare(c):
 
 
 def ani_amortizare(c):
-    if c.deductibila != Deductibilitate.DEDUCTIBILA_INTEGRAL_AMORTIZATA.value:
+    if c.deductibila not in MIJLOC_FIX_CODURI:
         return None
     if c.ani_amortizare:
         return int(c.ani_amortizare)
@@ -191,12 +196,13 @@ def amortizare_lunara(c):
 
     # Sediu social folosit si in scop personal: amortizare deductibila 50%
     # (art. 28 alin. 12 lit. i^1 din Codul fiscal).
-    if c.este_sediu_social_neexclusiv:
+    if c.deductibila == Deductibilitate.DEDUCTIBILA_INTEGRAL_AMORTIZATA_SEDIU.value:
         lunar = D(lunar * D(str(procente["sediu_social"])))
 
-    # Autoturisme M1: limita lunara de 1.500 lei, cu exceptiile de la
-    # art. 28 alin. (14) lit. a)-d) (art. 28 alin. 14).
-    if c.este_autoturism_m1 and not c.exceptie_1500:
+    # Autoturisme M1: limita lunara de 1.500 lei (art. 28 alin. 14).
+    # Optiunea cu exceptie (art. 28 alin. 14 lit. a)-d)) pastreaza amortizarea
+    # integrala, deci nu se plafoneaza.
+    if c.deductibila == Deductibilitate.DEDUCTIBILA_INTEGRAL_AMORTIZATA_M1.value:
         lunar = min(lunar, D(parametri["amortizare_auto_m1_lunar"]))
 
     return lunar
@@ -233,7 +239,7 @@ def obiect_de_inventar(c):
 
 
 def mijloc_fix(c):
-    return c.deductibila == Deductibilitate.DEDUCTIBILA_INTEGRAL_AMORTIZATA.value
+    return c.deductibila in MIJLOC_FIX_CODURI
 
 
 def scos_din_uz(c):
@@ -381,11 +387,10 @@ def calculeaza_deduceri_anului(an: int, candidat=None):
         base = D(suma_in_ron(c))
         tva = D(tva_autolichidata(c) or 0)
 
-        if cod in (
+        if cod in MIJLOC_FIX_CODURI or cod in (
             Deductibilitate.DEDUCTIBILA_INTEGRAL.value,
             Deductibilitate.DEDUCTIBILA_INTEGRAL_SALARII.value,
             Deductibilitate.DEDUCTIBILA_INTEGRAL_INVENTAR.value,
-            Deductibilitate.DEDUCTIBILA_INTEGRAL_AMORTIZATA.value,
         ):
             deducere = D(base + tva)
             if cod == Deductibilitate.DEDUCTIBILA_INTEGRAL_SALARII.value:
@@ -489,7 +494,7 @@ def valideaza(c):
                 _("Pentru servicii din UE/non-UE trebuie completat numarul facturii.")
             )
 
-    if c.deductibila == Deductibilitate.DEDUCTIBILA_INTEGRAL_AMORTIZATA.value:
+    if c.deductibila in MIJLOC_FIX_CODURI:
         clasificare(c)
         if not c.data_punerii_in_functiune:
             raise ValidationError(

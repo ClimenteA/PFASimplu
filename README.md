@@ -220,7 +220,7 @@ Cand intra banii: din pagina `Facturi`, click pe 💳 in dreptul facturii - form
 
 **4. Inregistreaza cheltuielile (pagina Cheltuieli)**
 
-De fiecare data cand cumperi ceva pentru activitatea PFA-ului: urci factura/bonul, alegi deductibilitatea (integral, obiect de inventar, mijloc fix peste 5000 RON cu amortizare, sau una din limitele speciale: 50% pentru autovehicule/chirii/utilitati folosite si personal, 2% mese protocol, burse private max. 5%, sport/fitness max. 100 EUR/an, pensie pilon III / ocupationala / PEPP / ETF / asigurari medicale private max. 400 EUR/an, salarii, ajutoare pentru angajati etc.), completezi `Tip tranzactie` (bancar/numerar) si, pentru servicii din UE/non-UE, alegi `Origine furnizor` - TVA-ul prin taxare inversa se calculeaza singur. Pentru mijloace fixe poti bifa optiuni suplimentare care modifica amortizarea: sediu social folosit si in scop personal (50%), autoturism M1 (limita 1500 lei/luna) sau exceptie de la aceasta limita. Obiectele de inventar si mijloacele fixe apar automat in pagina [Inventar](#inventar) cu numar de inventar; pentru mijloacele fixe se genereaza fisa de mijloc fix (PDF), iar amortizarea lunara apare in Registrul fiscal.
+De fiecare data cand cumperi ceva pentru activitatea PFA-ului: urci factura/bonul, alegi deductibilitatea (integral, obiect de inventar, mijloc fix peste 5000 RON cu amortizare, sau una din limitele speciale: 50% pentru autovehicule/chirii/utilitati folosite si personal, 2% mese protocol, burse private max. 5%, sport/fitness max. 100 EUR/an, pensie pilon III / ocupationala / PEPP / ETF / asigurari medicale private max. 400 EUR/an, salarii, ajutoare pentru angajati etc.), completezi `Tip tranzactie` (bancar/numerar) si, pentru servicii din UE/non-UE, alegi `Origine furnizor` - TVA-ul prin taxare inversa se calculeaza singur. Pentru mijloace fixe alegi direct varianta din campul `Deductibila`: sediu social folosit si in scop personal (amortizare 50%), autoturism M1 (limita 1500 lei/luna) sau autoturism M1 cu exceptie (amortizare integrala). Obiectele de inventar si mijloacele fixe apar automat in pagina [Inventar](#inventar) cu numar de inventar; pentru mijloacele fixe se genereaza fisa de mijloc fix (PDF), iar amortizarea lunara apare in Registrul fiscal.
 
 **5. Arhiveaza relatia cu ANAF (pagina Documente)**
 
@@ -316,23 +316,43 @@ Filtrul `Incasari din UE (TVA)` de deasupra tabelului arata incasarile din factu
 
 Aici poti aduga documentele justificative (facturi, chitante) pentru cheltuielile pe care le-ai facut in scopul prestarii activitatii tale de PFA. Campul `Tip tranzactie` (💳 BANCAR / 💵 NUMERAR) determina coloana din Registrul jurnal in care se inscrie plata.
 
-Campul `Deductibila` contine atat cheltuielile integral deductibile (consumabile, plati servicii, achizitii bunuri sub 5000 RON, salarii), cat si pe cele limitate, ale caror limite se calculeaza automat:
+Campul `Deductibila` alege regula fiscala a cheltuielii. Optiunile sunt in ordinea din aplicatie, iar limitele se calculeaza automat: daca suma depaseste plafonul, vezi mesajul cu suma ramasa disponibila.
 
-- **Obiect de inventar (deductibil integral)** si **Mijloc fix peste 5000 RON (ded. integral cu amortizare)** - apar automat in [Inventar](#inventar);
-- **50%** pentru vehicule nefolosite exclusiv in activitate (art. 68 alin. 7 lit. k), inclusiv chirii/utilitati folosite si in scop personal;
-- **2% din baza de calcul** pentru mese protocol (cadouri sub 100 RON etc.);
-- **5% din baza de calcul** pentru burse private si **5% din totalul salariilor** pentru ajutoare acordate angajatilor;
-- **max. 100 EUR/an** pentru sport/sali de fitness;
-- **max. 400 EUR/an** pentru pensie pilon III, pensie ocupationala, PEPP, ETF si asigurari medicale private;
-- **max. 4000 EUR/an** pentru cotizatii voluntare la asociatii/organizatii si **max. 5% din brut** pentru contributii obligatorii.
+| Optiune in `Deductibila` | Cand o alegi si ce regula se aplica | Exemplu |
+|---|---|---|
+| `Deductibila integral` | Cheltuiala curenta efectuata in scopul activitatii si justificata prin document: se deduce toata suma in anul platii (art. 68 alin. 4 lit. a). | Toner 120 RON; abonament de contabilitate 200 RON/luna. |
+| `Obiect de inventar (deductibil integral)` | Bun care nu se consuma imediat, dar e sub pragul de mijloc fix de 5000 RON (art. 28 alin. 2 lit. b). Se deduce integral la achizitie si apare in [Inventar](#inventar). | Scaun de birou 800 RON; imprimanta 1.200 RON. |
+| `Mijloc fix peste 5000 RON (ded. integral cu amortizare)` | Regula generala pentru bunurile amortizabile: valoarea se recupereaza lunar prin amortizare, nu prin deducerea integrala a facturii (art. 28 alin. 1-2 si art. 68 alin. 4 lit. d). Se completeaza codul de clasificare, data punerii in functiune si anii de amortizare. | Laptop 6.000 RON, cod `2.2.9.`, 2 ani → 250 RON/luna. |
+| `Mijloc fix peste 5000 RON (sediu social amortizare 50%)` | Sediu social intr-o cladire de locuit, folosit si in scop personal: amortizarea se deduce in procent de 50% (art. 28 alin. 12 lit. i^1). Daca e folosit personal de asociati/actionari, amortizarea nu se deduce deloc. | Apartament de 40.000 RON folosit ca sediu si locuit → se deduce 50% din amortizarea lunara. |
+| `Mijloc fix peste 5000 RON (Autoturism M1 limita 1.500 lei/luna)` | Autoturism M1 (cel mult 9 scaune, inclusiv soferul) care nu e folosit exclusiv in activitate: amortizarea e deductibila cel mult 1.500 RON/luna (art. 28 alin. 14). | Masina 60.000 RON / 2 ani → 2.500 RON/luna calculat, dar se deduce 1.500 RON/luna. |
+| `Mijloc fix peste 5000 RON (Autoturism M1 cu exceptie art. 28 alin. 14, amortizare integrala)` | Autoturism M1 folosit **exclusiv** in una dintre situatiile de la art. 28 alin. 14 lit. a)-d): urgenta, paza/protectie, curierat; agenti de vanzari si achizitii (inclusiv test drive si demonstratii); transport de persoane cu plata (taximetrie); prestari cu plata (inchiriere, leasing operational, scoli de soferi). Fara plafon lunar. | Masina de curierat 60.000 RON / 2 ani → 2.500 RON/luna, integral. |
+| `Vehicule nefolosite exclusiv in activitate, 50% (art. 68 alin. 7 lit. k)` | Cheltuieli de functionare, intretinere si reparatii ale unui vehicul folosit si personal: se deduce 50% (art. 68 alin. 5 lit. j si Normele metodologice, pct. 7 alin. 7). **Nu se aplica amortizarii**, care are regula ei la art. 28. Pentru 100% e necesara foaia de parcurs. | Combustibil 1.000 RON → 500 RON dedusi; RCA 800 RON → 400 RON dedusi. |
+| `Burse private max. 5% din baza de calcul (art. 68 alin. 5 lit. a)` | Bursa privata platita conform legii, in limita a 5% din baza de calcul de la art. 68 alin. 6 (venitul brut minus celelalte cheltuieli deductibile, fara protocol si burse). | Bursa 2.000 RON; daca baza de calcul e 30.000 RON, se deduce 1.500 RON. |
+| `Sport, sali de fitness etc. max. 100 EUR pe an` | Abonament sportiv platit in scop personal la un furnizor cu CAEN 9311, 9312 sau 9313, cel mult 100 EUR/an (art. 68 alin. 5 lit. r). Plafonul se cumuleaza pe an. | Abonament sala 600 RON/an → se deduce 600 RON sau echivalentul a 100 EUR, daca e mai mic. |
+| `Pensie pilon III max. 400 EUR pe an` | Contributii la fonduri de pensii facultative, platite in scop personal, max. 400 EUR/an (art. 68 alin. 5 lit. g; pentru 2026 vezi si notele OUG 8/2026). | 2.000 RON/an → se deduce echivalentul a 400 EUR. |
+| `Pensie ocupationala max. 400 EUR pe an (din 2026)` | Contributii la scheme de pensii ocupationale, max. 400 EUR/an (art. 68 alin. 5 lit. g^1 si notele OUG 8/2026). | 1.500 RON/an → se verifica plafonul de 400 EUR. |
+| `Produs paneuropean de pensii (PEPP) max. 400 EUR pe an (din 1.03.2026)` | Contributii PEPP platite in scop personal, max. 400 EUR/an (art. 68 alin. 5 lit. g^2 si notele OUG 8/2026). | 1.000 RON platiti in aprilie 2026 → se verifica plafonul de 400 EUR. |
+| `ETF max. 400 EUR pe an (din 1.03.2026)` | Sume platite pentru actiuni/titluri ETF prin entitatile de la art. 96^1 alin. 1, max. 400 EUR/an, **fara costurile tranzactiei** (art. 68 alin. 5 lit. s si OUG 8/2026). Pastreaza documentul cu elementele cerute de lege. | 3.000 RON in ETF → se deduce min(3.000 RON, 400 EUR), fara comisionul de tranzactie. |
+| `Asigurari medicale private max. 400 EUR pe an` | Prime de asigurare voluntara de sanatate si servicii medicale prin abonament, platite in scop personal, max. 400 EUR/an (art. 68 alin. 5 lit. h). | Abonament medical privat 1.800 RON/an → se deduce echivalentul a 400 EUR. |
+| `Mese protocol max. 2% baza de calcul` | Cheltuieli de protocol, in limita a 2% din baza de calcul de la art. 68 alin. 6 (art. 68 alin. 5 lit. b). Cadourile de mica valoare (≤ 100 RON, exclusiv TVA) acordate in actiuni de protocol nu sunt livrari de bunuri (Normele metodologice, pct. 7 alin. 12 lit. a). | Cina cu clienti 1.000 RON; limita = 2% din baza de calcul. |
+| `Deductibila integral salarii` | Salarii si sume asimilate salariilor platite angajatilor, deductibile integral (art. 68 alin. 4 lit. c). Baza lor determina si plafonul de 5% pentru ajutoare. | Salariu brut 6.000 RON/luna. |
+| `Ajutoare diverse pt. angajati max. 5% din total salarii pe an` | Cheltuieli sociale pentru angajati, pana la 5% din valoarea anuala a cheltuielilor cu salariile (art. 68 alin. 5 lit. c). | Cadou angajat 500 RON, cand salariile anuale insumeaza 100.000 RON (limita 5.000 RON). |
+| `Contributii obligatorii asociatii, organizatii max. 5% din brut` | Contributii profesionale obligatorii datorate organizatiilor profesionale din care faci parte, max. 5% din venitul brut realizat (art. 68 alin. 5 lit. q). | Cotizatie obligatorie 1.000 RON, la un brut de 50.000 RON (limita 2.500 RON). |
+| `Cotizatii voluntare asociatii, organizatii max. 4000 EUR pe an` | Cotizatii voluntare la asociatii profesionale, max. 4.000 EUR/an (art. 68 alin. 5 lit. p). | Cotizatie 1.500 RON/an. |
 
-Pentru mijloacele fixe poti bifa `Sediu social folosit si in scop personal (amortizare 50%)`, `Autoturism M1 (limita 1.500 lei/luna)` sau `Exceptie de la limita de 1.500 lei/luna`. Unele cheltuieli au nevoie de documente justificative in plus pe langa bonul sau factura care justifica cheltuiala. Achizitiile care nu isi pierd valoarea in timp (terenuri, aur, case) nu sunt deductibile. Daca trebuie sa adaugi mai mult de un document poti crea un zip cu toate documentele necesare.
+Toate limitele in euro se transforma in lei la cursul mediu comunicat de BNR pentru anul platii (Normele metodologice, pct. 6). Plafoanele anuale se verifica la fiecare cheltuiala, in ordinea introducerii, separat pentru fiecare categorie.
+
+Eticheta `Vehicule nefolosite exclusiv in activitate, 50% (art. 68 alin. 7 lit. k)` pastreaza numerotarea mai veche: in textul consolidat 2026-10-25 regula cheltuielilor cu autoturismele e la art. 68 alin. (5) lit. j), cu trimitere la alin. (7) lit. k); detaliile (ce cheltuieli intra sub limita si foaia de parcurs) sunt in Normele metodologice, pct. 7 alin. (7).
+
+![cheltuieli - optiuni mijloc fix in campul Deductibila](readmepics/cheltuieli_mijloc_fix.png)
+
+Unele cheltuieli au nevoie de documente justificative in plus pe langa bonul sau factura care justifica cheltuiala. Achizitiile care nu isi pierd valoarea in timp (terenuri, aur, case) nu sunt deductibile. Daca trebuie sa adaugi mai mult de un document poti crea un zip cu toate documentele necesare.
 
 Tabelul arata suma in valuta, suma in RON, suma dedusa in RON, TVA-ul autolichidat (cu badge 🇪🇺 / 🌍), tipul tranzactiei, data cheltuielii, tipul deductibilitatii si data modificarii; are cautare pe coloane si paginare. Regulile de deductibilitate si limitele sunt explicate pe larg in [Ghidul PFA in sistem real](GHID_PFA_SISTEM_REAL.md).
 
 ![cheltuieli](readmepics/cheltuieli.png)
 
-Atunci cand ai de adaugat un obiect de inventar cu valoarea peste 5000 RON trebuie sa selectezi `Mijloc fix peste 5000 RON (ded. integral cu amortizare)`. In campul `Nume cheltuiala` apar sugestii cu denumirile folosite anterior; cautarea din tabel filtreaza si pe acest camp (ca si pe celelalte coloane).
+Atunci cand ai de adaugat un obiect de inventar cu valoarea peste 5000 RON trebuie sa selectezi una dintre variantele `Mijloc fix peste 5000 RON ...` din campul `Deductibila`. In campul `Nume cheltuiala` apar sugestii cu denumirile folosite anterior; cautarea din tabel filtreaza si pe acest camp (ca si pe celelalte coloane).
 
 Uite un exemplu pentru a amortiza o cheltuiala amortizabila cu un Laptop. 
 Cel mai apropiat de un laptop in tabel este valoarea `Calculatoare electronice` care are codul `2.2.9.` 
@@ -343,7 +363,7 @@ si o perioada de amortizare intre 2 si 4 ani.
 
 Odata introduse aceste date, aplicatia va calcula automat amortizarea acelui activ fix.
 
-![cheltuieli_amortizare](readmepics/cheltuieli_amortizare.png)
+![cheltuieli_amortizare](readmepics/cheltuieli_amortizare_nou.png)
 
 ### Servicii cumparate din UE / non-UE (taxare inversa)
 

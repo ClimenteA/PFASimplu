@@ -22,6 +22,12 @@ COTA_TVA = 0.21
 # Codurile scurte stocate in DB pentru deductibilitate (etichetele afisate
 # sunt textul descriptiv din models.py).
 MIJLOC_FIX = "MIJLOC_FIX"
+MIJLOC_FIX_CODURI = {
+    MIJLOC_FIX,
+    "MIJLOC_FIX_SEDIU",
+    "MIJLOC_FIX_M1",
+    "MIJLOC_FIX_M1_EXCEPTIE",
+}
 DEDUCTIBIL_INTEGRAL = "INTEGRAL"
 OBIECT_INVENTAR = "INVENTAR"
 AUTO_UTILITATI_50 = "AUTO_50"
@@ -274,7 +280,7 @@ def adauga_cheltuiala(
     page.select_option("#id_tip_tranzactie", tip_tranzactie)
     page.fill("#id_data_inserarii", data_cheltuielii.isoformat())
 
-    if deductibila == MIJLOC_FIX:
+    if deductibila in MIJLOC_FIX_CODURI:
         page.fill("#id_cod_de_clasificare", cod_de_clasificare)
         if ani_amortizare:
             page.fill("#id_ani_amortizare", str(ani_amortizare))

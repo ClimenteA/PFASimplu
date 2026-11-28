@@ -163,3 +163,50 @@ class NotaClientUEVIESTest(TestCase):
         form = FacturaForm(date)
         self.assertTrue(form.is_valid(), form.errors)
         self.assertEqual(form.save().cif, "RO12345678")
+
+
+class FacturiCodTvaTest(TestCase):
+    """Switchul si helperul Client UE VIES apar doar cu cod TVA intracomunitar."""
+
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="facturi-cod-tva@test.ro", password="parola"
+        )
+        self.client.force_login(self.user)
+
+    def setari(self, cod_tva=""):
+        return SetariModel.objects.create(
+            user=self.user,
+            nume="TEST PFA",
+            localitate="RO-IS, jud. Iasi, Iasi",
+            adresa="Strada Test nr. 1",
+            nr_reg_com="F1",
+            cif="1234567",
+            email="test@test.ro",
+            caen_principal="6201",
+            cod_tva_intracomunitar=cod_tva,
+        )
+
+    def test_fara_cod_tva_ascunde_switchul_si_helperul(self):
+        self.setari()
+
+        response = self.client.get("/facturi/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.context["are_cod_tva"])
+        self.assertNotContains(response, 'id="id_client_ue"')
+        self.assertNotContains(response, "Client UE VIES")
+        self.assertNotContains(response, 'id="cif-helper"')
+        self.assertNotContains(response, "Pentru client UE VIES")
+
+    def test_cu_cod_tva_afiseaza_switchul_si_helperul(self):
+        self.setari("52937756")
+
+        response = self.client.get("/facturi/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context["are_cod_tva"])
+        self.assertContains(response, 'id="id_client_ue"')
+        self.assertContains(response, "Client UE VIES")
+        self.assertContains(response, 'id="cif-helper"')
+        self.assertContains(response, "Pentru client UE VIES")

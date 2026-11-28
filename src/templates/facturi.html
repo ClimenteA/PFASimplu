@@ -87,23 +87,27 @@
                     {{ facturi_form.nume.errors }}
                 </label>
 
+                {% if are_cod_tva %}
                 <div class="client-ue-switch">
                     <label for="{{ facturi_form.client_ue.id_for_label }}">
                         {{ facturi_form.client_ue }}
                         <span class="text-bold">Client UE VIES</span>
                     </label>
                 </div>
+                {% endif %}
 
             </div>
 
 
             <div class="grid">
 
-                <label class="text-bold" for="{{ facturi_form.cif.id_for_label }}">
-                    CIF/CUI/VAT:
+                <label for="{{ facturi_form.cif.id_for_label }}">
+                    <span class="text-bold">CIF/CUI/VAT:</span>
                     {{ facturi_form.cif }}
                     {{ facturi_form.cif.errors }}
-                    <small>Pentru client UE VIES: codul TVA complet cu prefixul tarii (ex. ATU77164426). Clientii din Romania nu se bifeaza ca UE.</small>
+                    {% if are_cod_tva %}
+                    <small id="cif-helper">Pentru client UE VIES: codul TVA complet cu prefixul tarii (ex. ATU77164426).</small>
+                    {% endif %}
                 </label>
 
                 <label class="text-bold" for="{{ facturi_form.serie.id_for_label }}">
@@ -518,7 +522,8 @@
                 document.getElementById('id_cif').value = selected.cif;
                 document.getElementById('id_nr_reg_com').value = selected.nr_reg_com;
                 document.getElementById('id_adresa').value = selected.adresa;
-                document.getElementById('id_client_ue').checked = !!selected.client_ue;
+                const switchulClientUe = document.getElementById('id_client_ue');
+                if (switchulClientUe) switchulClientUe.checked = !!selected.client_ue;
                 actualizeazaNotaVies();
                 document.getElementById('id_email').value = selected.email;
                 document.getElementById('id_telefon').value = selected.telefon;
@@ -624,7 +629,7 @@
         actualizeazaNotaVies();
         document
             .getElementById("id_client_ue")
-            .addEventListener("change", actualizeazaNotaVies);
+            ?.addEventListener("change", actualizeazaNotaVies);
 
         valutaSelectEl.disabled = true;
 

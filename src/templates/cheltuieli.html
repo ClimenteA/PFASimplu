@@ -7,7 +7,7 @@
 
 {% block body %}
 
-<script defer src="{% static 'coduri_classificare.js' %}"></script>
+<script defer src="{% static 'coduri_classificare.js' %}?v=2"></script>
 <script>
     // Lista tarilor pentru "Tara furnizor", filtrata dupa originea furnizorului.
     // Tarile UE urmeaza lista oficiala: https://european-union.europa.eu/node/288/rss_ro
@@ -36,8 +36,11 @@
 
         Pentru <strong>servicii cumparate din UE sau din afara UE</strong> (ex. Google, Cloudflare, OpenAI)
         alege originea furnizorului mai jos: aplicatia calculeaza automat TVA-ul datorat prin taxare inversa (cota standard de 21%)
-        si il adauga la cheltuiala deductibila. Declaratiile D301/D390 se descarca din filtrul
+        si il adauga la cheltuiala deductibila.
+        {% if are_cod_tva %}
+        Declaratiile D301/D390 se descarca din filtrul
         „Cheltuieli externe (TVA)" de deasupra tabelului, pe luna selectata.
+        {% endif %}
 
     </p>
 </hgroup>
@@ -120,24 +123,6 @@
                             id="{{ cheltuieli_form.data_punerii_in_functiune.id_for_label }}"
                             value="{{ cheltuieli_form.data_punerii_in_functiune.value|date:'Y-m-d' }}">
                         {{ cheltuieli_form.data_punerii_in_functiune.errors }}
-                    </label>
-
-                    <label for="{{ cheltuieli_form.este_sediu_social_neexclusiv.id_for_label }}">
-                        {{ cheltuieli_form.este_sediu_social_neexclusiv }}
-                        {{ cheltuieli_form.este_sediu_social_neexclusiv.label }}
-                        {{ cheltuieli_form.este_sediu_social_neexclusiv.errors }}
-                    </label>
-
-                    <label for="{{ cheltuieli_form.este_autoturism_m1.id_for_label }}">
-                        {{ cheltuieli_form.este_autoturism_m1 }}
-                        {{ cheltuieli_form.este_autoturism_m1.label }}
-                        {{ cheltuieli_form.este_autoturism_m1.errors }}
-                    </label>
-
-                    <label for="{{ cheltuieli_form.exceptie_1500.id_for_label }}">
-                        {{ cheltuieli_form.exceptie_1500 }}
-                        {{ cheltuieli_form.exceptie_1500.label }}
-                        {{ cheltuieli_form.exceptie_1500.errors }}
                     </label>
 
                 </div>
@@ -280,6 +265,7 @@
 
 <div id="tabel-cheltuieli" class="mt-4">
 
+    {% if are_cod_tva %}
     <article id="filtru-tva" class="container mb-2" style="padding: 2rem;">
         <div class="grid">
             <label style="margin: 0;">
@@ -324,6 +310,7 @@
         </div>
         {% endif %}
     </article>
+    {% endif %}
 
     <form method="get" action="#cautare" id="cautare" class="mb-2" style="display: flex; gap: 1rem; justify-content: end;">
         <label>
@@ -357,7 +344,7 @@
                     <th>Valuta</th>
                     <th>In RON</th>
                     <th>Dedus RON</th>
-                    <th>TVA</th>
+                    {% if are_cod_tva %}<th>TVA</th>{% endif %}
                     <th>Tranz.</th>
                     <th>Cheltuit la</th>
                     <th>Tip Deductibil</th>
@@ -381,6 +368,7 @@
                     </td>
                     <td>{{ item.suma_in_ron|suma2 }}</td>
                     <td>{{ item.deducere_in_ron|suma2 }}</td>
+                    {% if are_cod_tva %}
                     <td>
                         {% if item.este_taxare_inversa %}
                         <span data-tooltip="{% if item.este_ue %}Servicii UE: D301 + D390{% else %}Servicii non-UE: doar D301{% endif %}">
@@ -391,6 +379,7 @@
                         -
                         {% endif %}
                     </td>
+                    {% endif %}
                     <td>
                         {% if item.tip_tranzactie == 'BANCAR' %}
                         💳

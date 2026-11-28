@@ -20,9 +20,9 @@
         Butonul "Exporta datele din aplicatie" va crea un zip in folderul Descarcari (Downloads)
         cu datele pentru anul selectat: documentele justificative (in folderele documente,
         cheltuieli, incasari), registrele anului in format xlsx (Registrul Jurnal, Registrul
-        Inventar, Registrul Fiscal, Jurnalul de cumparari si Jurnalul de vanzari), fisele
-        mijloacelor fixe si un fisier SUMAR.html cu metricile anului (incasari, cheltuieli,
-        taxe, medii lunare etc.).
+        Inventar, Registrul Fiscal, Jurnalul de cumparari si Jurnalul de vanzari), tabelele
+        incasari.csv si cheltuieli.csv cu toate inregistrarile, fisele mijloacelor fixe si un
+        fisier SUMAR.html cu metricile anului (incasari, cheltuieli, taxe, medii lunare etc.).
 
         Butonul "Sterge toate datele" va sterge toate datele din aplicatie.
         <strong>Atentie!</strong> odata ce ai apasat pe butonul "Sterge toate datele"
@@ -320,7 +320,7 @@
                 type="submit">
             </button>
         </div>
-        <small class="pico-color-slate-500">Zip-ul contine documentele, registrele (xlsx) si SUMAR.html pentru anul selectat.</small>
+        <small class="pico-color-slate-500">Zip-ul contine documentele, registrele (xlsx), tabelele incasari.csv si cheltuieli.csv si SUMAR.html pentru anul selectat.</small>
     </form>
 
     <form x-data="{deleting: false}" action="{% url 'setari-drop-data' %}" method="post" class="mt-4">

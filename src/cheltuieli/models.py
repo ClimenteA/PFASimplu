@@ -25,6 +25,23 @@ class Deductibilitate(models.TextChoices):
         "MIJLOC_FIX",
         _("Mijloc fix peste 5000 RON (ded. integral cu amortizare)"),
     )
+    DEDUCTIBILA_INTEGRAL_AMORTIZATA_SEDIU = (
+        "MIJLOC_FIX_SEDIU",
+        _("Mijloc fix peste 5000 RON (sediu social amortizare 50%)"),
+    )
+    DEDUCTIBILA_INTEGRAL_AMORTIZATA_M1 = (
+        "MIJLOC_FIX_M1",
+        _("Mijloc fix peste 5000 RON (Autoturism M1 limita 1.500 lei/luna)"),
+    )
+    # Art. 28 alin. (14) lit. a)-d): M1 folosit exclusiv in acele scopuri
+    # (urgenta/paza/curierat, vanzari, taximetrie, inchiriere/scoala soferi)
+    # nu are plafonul de 1.500 lei/luna, deci amortizarea e integrala.
+    DEDUCTIBILA_INTEGRAL_AMORTIZATA_M1_EXCEPTIE = (
+        "MIJLOC_FIX_M1_EXCEPTIE",
+        _(
+            "Mijloc fix peste 5000 RON (Autoturism M1 cu exceptie art. 28 alin. 14, amortizare integrala)"
+        ),
+    )
     DEDUCTIBILA_PARTIAL_AUTO_CASA_UTILITATI = (
         "AUTO_50",
         _("Vehicule nefolosite exclusiv in activitate, 50% (art. 68 alin. 7 lit. k)"),
@@ -71,6 +88,18 @@ class Deductibilitate(models.TextChoices):
         "COTIZATII",
         _("Cotizatii voluntare asociatii, organizatii max. 4000 EUR pe an"),
     )
+
+
+# Toate variantele de mijloc fix peste prag se amortizeaza. Tratamentul
+# special (sediu social / M1 / exceptie M1) e acum o optiune in `deductibila`.
+MIJLOC_FIX_CODURI = frozenset(
+    {
+        Deductibilitate.DEDUCTIBILA_INTEGRAL_AMORTIZATA.value,
+        Deductibilitate.DEDUCTIBILA_INTEGRAL_AMORTIZATA_SEDIU.value,
+        Deductibilitate.DEDUCTIBILA_INTEGRAL_AMORTIZATA_M1.value,
+        Deductibilitate.DEDUCTIBILA_INTEGRAL_AMORTIZATA_M1_EXCEPTIE.value,
+    }
+)
 
 
 class ModalitateIesireDinUz(models.TextChoices):
@@ -125,18 +154,6 @@ class CheltuialaModel(CommonIncasariCheltuieliModel):
     # Doar suprascrierea optionala a duratei din catalog; altfel se deriva.
     ani_amortizare = models.IntegerField(null=True, blank=True)
     data_punerii_in_functiune = models.DateField(null=True, blank=True)
-    este_sediu_social_neexclusiv = models.BooleanField(
-        default=False,
-        verbose_name=_("Sediu social folosit si in scop personal (amortizare 50%)"),
-    )
-    este_autoturism_m1 = models.BooleanField(
-        default=False,
-        verbose_name=_("Autoturism M1 (limita 1.500 lei/luna)"),
-    )
-    exceptie_1500 = models.BooleanField(
-        default=False,
-        verbose_name=_("Exceptie de la limita de 1.500 lei/luna (art. 28 alin. 14)"),
-    )
 
     # Iesirea din uz a unui obiect de inventar / mijloc fix
     modalitate_iesire_din_uz = models.CharField(

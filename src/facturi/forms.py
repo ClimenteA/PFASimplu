@@ -15,6 +15,7 @@ class FacturaForm(ModelForm):
         fields = "__all__"
         exclude = ["user"]
         widgets = {
+            "cif": forms.TextInput(attrs={"aria-describedby": "cif-helper"}),
             "client_ue": CheckboxInput(attrs={"role": "switch"}),
             "nota": Textarea(attrs={"rows": "3"}),
             "data_emitere": DateInput(format=("%m/%d/%Y"), attrs={"type": "date"}),

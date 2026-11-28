@@ -9,7 +9,7 @@ from django.utils import timezone
 from django.views import View
 
 from facturi.models import FacturaModel
-from setari.models import SetariModel
+from setari.models import SetariModel, are_cod_tva_intracomunitar
 from utils.tva import get_luni_cu_facturi_ue
 from utils.tva_documente import genereaza_pachet_d390_incasari
 from utils.views import (
@@ -35,10 +35,17 @@ CAUTARE_COLOANE = {
 }
 
 
-def _context_ue(request) -> dict:
+def _coloane_cautare(are_cod_tva: bool) -> dict:
+    """Coloana VIES e cautabila doar cand exista cod TVA intracomunitar."""
+    if are_cod_tva:
+        return CAUTARE_COLOANE
+    return {k: v for k, v in CAUTARE_COLOANE.items() if k != "ue"}
+
+
+def _context_ue(request, are_cod_tva: bool) -> dict:
     """Contextul filtrului „Incasari din UE (TVA)": incasarile din facturile
     emise catre clienti UE, grupate pe luna de raportare (data emiterii)."""
-    ue = request.GET.get("ue") == "1"
+    ue = are_cod_tva and request.GET.get("ue") == "1"
     ani_ue = sorted(
         set(
             FacturaModel.objects.filter(client_ue=True).values_list(
@@ -123,14 +130,15 @@ class IncasariView(View):
         if redirect_from_delete:
             return redirect_from_delete
 
-        q_cautare, context_cautare = get_cautare(request, CAUTARE_COLOANE)
+        are_cod_tva = are_cod_tva_intracomunitar()
+        q_cautare, context_cautare = get_cautare(request, _coloane_cautare(are_cod_tva))
         form, page_items = get_page_items(
             request, IncasariForm, IncasariModel, cautare=q_cautare
         )
 
         # Filtrul „Incasari din UE (TVA)" inlocuieste tabelul de mai jos cu
         # incasarile din facturile cu Client UE, la fel ca la Cheltuieli.
-        context_ue = _context_ue(request)
+        context_ue = _context_ue(request, are_cod_tva)
         if context_ue["ue"]:
             page_items = Paginator(
                 context_ue["ue_results"]
@@ -177,6 +185,7 @@ class IncasariView(View):
                 "factura_id": factura_id,
                 "fisier_factura": fisier_factura,
                 "nume_fisier_factura": nume_fisier_factura,
+                "are_cod_tva": are_cod_tva,
                 **context_ue,
                 **context_cautare,
             },
@@ -225,11 +234,14 @@ class IncasariView(View):
             ):
                 pass
             else:
-                q_cautare, context_cautare = get_cautare(request, CAUTARE_COLOANE)
+                are_cod_tva = are_cod_tva_intracomunitar()
+                q_cautare, context_cautare = get_cautare(
+                    request, _coloane_cautare(are_cod_tva)
+                )
                 _, page_items = get_page_items(
                     request, IncasariForm, IncasariModel, cautare=q_cautare
                 )
-                context_ue = _context_ue(request)
+                context_ue = _context_ue(request, are_cod_tva)
                 if context_ue["ue"]:
                     page_items = Paginator(
                         context_ue["ue_results"]
@@ -253,7 +265,8 @@ class IncasariView(View):
                             if factura and factura.fisier_factura_pdf
                             else None
                         ),
-                        **_context_ue(request),
+                        "are_cod_tva": are_cod_tva,
+                        **context_ue,
                         **context_cautare,
                     },
                 )

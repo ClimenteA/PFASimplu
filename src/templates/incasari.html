@@ -18,9 +18,11 @@
         modifica mai tarziu).
         Sumele incasate in alta valuta (EUR,USD etc) - sumele sunt convertite in RON in functie de 'Data
         incasare'.
+        {% if are_cod_tva %}
         Pentru facturile emise catre clienti UE (bifa „Client UE VIES" in pagina Facturi) se depune doar
         D390, pe codul TVA intracomunitar din Setari. Selecteaza luna in filtrul
         „Incasari din UE (TVA)" de mai jos si descarca declaratia completata.
+        {% endif %}
     </p>
 </hgroup>
 
@@ -131,6 +133,7 @@
 </article>
 
 
+{% if are_cod_tva %}
 <article id="filtru-incasari-ue" class="container mb-2 mt-4" style="padding: 2rem;">
 
     <div class="grid">
@@ -180,6 +183,7 @@
     </div>
     {% endif %}
 </article>
+{% endif %}
 
 
 <div id="tabel-incasari" class="mt-4">
@@ -213,7 +217,7 @@
                 <tr>
                     <th>Mod.</th>
                     <th>Nume</th>
-                    <th>VIES</th>
+                    {% if are_cod_tva %}<th>VIES</th>{% endif %}
                     <th>Primit</th>
                     <th>Valuta</th>
                     <th>In RON</th>
@@ -234,9 +238,11 @@
                         </a>
                     </td>
                     <td>{{ item.nume_incasare|default:"N/A" }}</td>
+                    {% if are_cod_tva %}
                     <td data-tooltip="{% if item.factura.client_ue %}Client UE VIES - factura pe cod TVA intracomunitar (D390){% else %}Client non-UE{% endif %}">
                         {% if item.factura.client_ue %}Da{% else %}Nu{% endif %}
                     </td>
+                    {% endif %}
                     <td>{{ item.suma|suma2 }}</td>
                     <td>
                         {{ item.valuta }}
